@@ -37,7 +37,7 @@ describe('deepl stub', () => {
     const out = await DeepLTranslator.translateMany(texts, ctxs, {
       sourceLocale: 'en',
       targetLocale: 'fr',
-      apiConfig: { key: 'DEEPL', free: true }
+      apiConfig: { key: 'DEEPL', free: true, endpoint: 'https://api-free.deepl.com' }
     })
     // Upper-cased echo
     expect(out).toEqual(['SAVE', 'OPEN', 'CANCEL', 'TITLE'])
@@ -49,7 +49,7 @@ describe('deepl stub', () => {
 })
 
 // Disabled to avoid using up free tier
-describe.skip('deepl api', () => {
+describe('deepl api', () => {
 
   const apiConfig = {
     key: getEnv('DEEPL_TRANSLATION_KEY'),

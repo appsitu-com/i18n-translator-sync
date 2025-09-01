@@ -33,7 +33,7 @@ describe('azure', () => {
     const out = await AzureTranslator.translateMany(['x', 'y', 'z'], [null, null, null], {
       sourceLocale: 'en-GB',
       targetLocale: 'fr-FR',
-      apiConfig: { key: 'AZ', region: 'westeurope', batchSize: 2 }
+      apiConfig: { key: 'AZ', region: 'westeurope', batchSize: 2, endpoint: 'https://api.cognitive.microsofttranslator.com' }
     })
     expect(out).toEqual(['X', 'Y', 'Z'])
   })

@@ -33,7 +33,7 @@ describe('google stub', () => {
     const out = await GoogleTranslator.translateMany(['a', 'b'], [null, null], {
       sourceLocale: 'en',
       targetLocale: 'fr-FR',
-      apiConfig: { key: 'TEST' }
+      apiConfig: { key: 'TEST', endpoint: 'https://translation.googleapis.com' }
     })
     expect(out).toEqual(['A', 'B'])
   })
