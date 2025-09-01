@@ -1,0 +1,120 @@
+{
+  "name": "i18n-translator-vscode",
+  "displayName": "i18n Translator",
+  "publisher": "your-publisher",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "activationEvents": [
+    "onCommand:translator.start",
+    "onCommand:translator.stop",
+    "onCommand:translator.restart"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "translator.start",
+        "title": "Translator: Start"
+      },
+      {
+        "command": "translator.stop",
+        "title": "Translator: Stop"
+      },
+      {
+        "command": "translator.restart",
+        "title": "Translator: Restart"
+      }
+    ],
+    "configuration": {
+      "title": "Markdown & JSON Translator",
+      "properties": {
+        "translator.sourceLocale": {
+          "type": "string",
+          "default": "en"
+        },
+        "translator.targetLocales": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "fr-FR"
+          ]
+        },
+        "translator.enableBackTranslation": {
+          "type": "boolean",
+          "default": true
+        },
+        "translator.defaultMarkdownEngine": {
+          "type": "string",
+          "enum": [
+            "azure",
+            "google",
+            "deepl",
+            "copy"
+          ],
+          "default": "azure"
+        },
+        "translator.defaultJsonEngine": {
+          "type": "string",
+          "enum": [
+            "azure",
+            "google",
+            "deepl",
+            "copy"
+          ],
+          "default": "google"
+        },
+        "translator.engineOverrides": {
+          "type": "object",
+          "default": {
+            "deepl": "en-GB,fr-FR,fr,fr-CA,de-DE,de",
+            "copy": "en-US"
+          }
+        },
+        "translator.azure": {
+          "type": "object",
+          "default": {
+            "key": "env:AZURE_TRANSLATOR_KEY",
+            "region": "env:AZURE_REGION"
+          }
+        },
+        "translator.google": {
+          "type": "object",
+          "default": {
+            "key": "env:GOOGLE_TRANSLATE_KEY"
+          }
+        },
+        "translator.deepl": {
+          "type": "object",
+          "default": {
+            "key": "env:DEEPL_TRANSLATE_KEY",
+            "free": true
+          }
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "vscode:prepublish": "npm run build",
+    "package": "vsce package",
+    "test:cov": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.3.0",
+    "@types/vscode": "^1.103.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "dotenv": "^17.2.1"
+  }
+}
