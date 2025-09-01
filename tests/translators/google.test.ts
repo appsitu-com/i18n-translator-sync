@@ -39,7 +39,7 @@ describe('google stub', () => {
   })
 })
 
-describe('google API', () => {
+describe('google api', () => {
   const apiConfig = {
     key: getEnv('GOOGLE_TRANSLATION_KEY'),
     endpoint: getEnv('GOOGLE_TRANSLATION_URL')
