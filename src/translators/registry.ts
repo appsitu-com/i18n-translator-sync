@@ -1,0 +1,28 @@
+import type { Translator } from './types'
+
+const REGISTRY = new Map<string, Translator>()
+
+export function registerTranslator(t: Translator) {
+  REGISTRY.set(t.name, t)
+}
+
+export function getTranslator(name: string): Translator {
+  const t = REGISTRY.get(name)
+  if (!t) throw new Error(`Translator not registered: ${name}`)
+  return t
+}
+
+export function deregisterTranslator(name: string) {
+  REGISTRY.delete(name)
+}
+
+export function pickEngine(params: {
+  source: string
+  target: string
+  defaults: { md: string; json: string }
+  overrides: Record<string, string>
+  isMarkdown: boolean
+}): string {
+  const key = `${params.source}:${params.target}`
+  return params.overrides[key] ?? (params.isMarkdown ? params.defaults.md : params.defaults.json)
+}
