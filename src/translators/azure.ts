@@ -1,6 +1,7 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 import { randomUUID } from 'crypto'
+import { withRetry } from '../util/retry'
 
 const langMap: Record<string, string> = {
   'zh-CN': 'zh-Hans',
@@ -42,6 +43,7 @@ export const AzureTranslator: Translator = {
     const category = opts.apiConfig.azureModel ? `custom:${opts.apiConfig.azureModel}` : undefined
     // const textType = (opts.apiConfig.textType as string | undefined) ?? 'plain'
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
+    const retry = opts.apiConfig.retry
 
     if (!key) throw new Error(`Azure Translator: missing 'key'`)
     if (!region) throw new Error(`Azure Translator: missing 'region'`)
@@ -69,7 +71,8 @@ export const AzureTranslator: Translator = {
       if (category) url.searchParams.set('category', category)
 
       const body = slice.map((s) => ({ Text: s }))
-      const json = await postJson<any[]>(url.toString(), body, headers, timeout)
+      const json = await withRetry(retry, () => postJson<any[]>(url.toString(), body, headers, timeout))
+
       // Response is array of results, each with translations[0].text
       let k = 0
       for (const item of json) {

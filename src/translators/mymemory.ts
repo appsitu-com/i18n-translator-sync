@@ -1,4 +1,4 @@
-import type { Translator, BulkTranslateOpts, TranslatorApiConfig, MyMemoryConfig } from './types'
+import type { Translator, BulkTranslateOpts, TranslatorApiConfig } from './types'
 import { withRetry } from '../util/retry'
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
@@ -11,7 +11,7 @@ async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Respons
   }
 }
 
-// FIXME: Fix LOCALE_MAP values for MyMemory.translated.net
+// FIXME: Fix LOCALE_MAP values for mymemory.translated.net
 const LOCALE_MAP: Record<string, string> = {
   // Chinese
   zh: 'zh-CN',
@@ -58,14 +58,16 @@ export class MyMemoryTranslator implements Translator {
   }
 
   async translateMany(texts: string[], _contexts: string[], opts: BulkTranslateOpts) {
-    const cfg = opts.apiConfig as MyMemoryConfig
+    const cfg = opts.apiConfig
     const endpoint = (cfg.endpoint ?? 'https://api.mymemory.translated.net/get').replace(/\/+$/, '')
     const email = cfg.email
     const key = cfg.key
 
-    const throttleMs = cfg.throttleMs ?? 100
     const timeoutMs = cfg.timeoutMs ?? 15000
-    const maxRetries = cfg.maxRetries ?? 2
+    const maxRetries = cfg.retry?.maxRetries ?? 2
+    const delayMs = cfg.retry?.delayMs ?? 100
+    const backoffFactor = cfg.retry?.backoffFactor ?? 2
+    const retry = { maxRetries, delayMs, backoffFactor }
 
     const from = this.normalizeLocale(opts.sourceLocale)
     const to = this.normalizeLocale(opts.targetLocale)
@@ -75,12 +77,12 @@ export class MyMemoryTranslator implements Translator {
     for (let i = 0; i < texts.length; i++) {
       const q = texts[i] ?? ''
 
-      if (i > 0 && throttleMs > 0) {
-        await new Promise((r) => setTimeout(r, throttleMs))
+      if (i > 0 && delayMs > 0) {
+        await new Promise((r) => setTimeout(r, delayMs))
       }
 
       out[i] = await withRetry(
-        { maxRetries, delayMs: throttleMs, backoffFactor: 2 },
+        retry,
         async () => {
           const url = new URL(endpoint)
           url.searchParams.set('q', q)

@@ -1,44 +1,31 @@
+import { RetryOptions } from "../util/retry"
 
-interface TranslatorConfigBase {
+export interface TranslatorApiConfig {
   key: string
   endpoint: string
   timeoutMs?: number
-}
+  retry?: RetryOptions
 
-export interface AzureConfig extends TranslatorConfigBase {
-  engine: 'azure'
+  // engine: 'azure'
   region: string
   // textType?: string; // I think it will autodetect HTML vs plain text when unspecified
   category?: string
   batchSize?: number
   azureModel?: string
-}
 
-export interface GoogleConfig extends TranslatorConfigBase {
-  engine: 'google'
+  // engine: 'google'
   googleModel?: string
-}
 
-export interface DeepLConfig extends TranslatorConfigBase {
-  engine: 'deepl'
+  // engine: 'deepl'
   free?: boolean
   formality?: string
   deeplModel?: string
-}
 
-export interface MyMemoryConfig extends TranslatorConfigBase {
-  engine: 'mymemory'
+  // engine: 'mymemory'
   email?: string
-  throttleMs?: number
-  maxRetries?: number
 }
 
-interface CopyConfig {
-  engine: 'copy'
-}
-
-export type TranslatorApiConfig = AzureConfig | GoogleConfig | DeepLConfig | MyMemoryConfig| CopyConfig
-export type TranslatorEngine = TranslatorApiConfig['engine']
+export type TranslatorEngine = 'azure' | 'google' | 'deepl' | 'mymemory' | 'copy'
 
 export interface BulkTranslateOpts {
   sourceLocale: string

@@ -1,5 +1,6 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
+import { RetryOptions, withRetry } from '../util/retry'
 
 const langMap: Record<string, string> = {
   'zh-CN': 'zh-CN',
@@ -12,7 +13,7 @@ const langMap: Record<string, string> = {
   'ms-Arab': 'ms-Arab',
   'mni-Mtei': 'mni-Mtei',
   'pt-PT': 'pt-PT',
-  'pt': 'pt-BR',
+  pt: 'pt-BR',
   'pt-BR': 'pt-BR',
   'pa-Arab': 'pa-Arab'
 }
@@ -35,9 +36,11 @@ export const GoogleTranslator: Translator = {
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
     const key = opts.apiConfig.key as string
-    const endpoint = (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') || 'https://translation.googleapis.com'
+    const endpoint =
+      (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') || 'https://translation.googleapis.com'
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
     const model = opts.apiConfig.googleModel as string | undefined // optional
+    const retry = opts.apiConfig.retry
 
     if (!key) throw new Error(`Google Translate: missing 'key'`)
 
@@ -50,7 +53,8 @@ export const GoogleTranslator: Translator = {
     }
     if (model) body.model = model
 
-    const json = await postJson<any>(url, body, {}, timeout)
+    const json = await withRetry(retry, () => postJson<any>(url, body, {}, timeout))
+
     const list = json?.data?.translations ?? []
     // Google may return HTML-escaped content; allow as-is, caller can decode if necessary
     return list.map((t: any, idx: number) => t?.translatedText ?? texts[idx])

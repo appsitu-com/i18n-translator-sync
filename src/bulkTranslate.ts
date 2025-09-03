@@ -10,7 +10,6 @@ export async function bulkTranslateWithEngine(
   cache: TranslationCache
 ): Promise<string[]> {
   if (!texts.length) return []
-  if (engineName === 'copy') return texts.slice()
 
   const engine = getTranslator(engineName)
   const srcNorm = engine.normalizeLocale(opts.source)

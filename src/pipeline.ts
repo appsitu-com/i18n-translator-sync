@@ -67,24 +67,26 @@ export async function processFileForLocales(
 
   const overrides: Record<string, string> = Object.fromEntries(
     Object.entries(overrideCfg).flatMap(([engine, locales]) =>
-      locales.split(',').map(locale => locale.trim()).map((locale) =>
-        locale.match(/:/)
-          ? [locale, engine] // locale is actually fromLocale:toLocale
-          : [
-              [`en:${locale}`, engine],
-              [`${locale}:en`, engine]
-            ]
-      )
+      locales
+        .split(',')
+        .map((locale) => locale.trim())
+        .map((locale) =>
+          locale.match(/:/)
+            ? [locale, engine] // locale is actually fromLocale:toLocale
+            : [
+                [`en:${locale}`, engine],
+                [`${locale}:en`, engine]
+              ]
+        )
     )
   )
 
   const rawCfgFor = (engine: TranslatorEngine) => settings.get(engine)
   const cfgFor = (engine: TranslatorEngine) => {
-    if (engine === 'copy') return { engine: 'copy' } satisfies TranslatorApiConfig
     const cfg = rawCfgFor(engine)
     if (!cfg) throw new Error(`Missing configuration for translation engine '${engine}'`)
     // TODO: Verify resolved type
-    return { engine, ...resolveEnvDeep(cfg) } as TranslatorApiConfig // may throw MissingEnvVarError
+    return resolveEnvDeep(cfg) as TranslatorApiConfig // may throw MissingEnvVarError
   }
 
   let contexts: (string | null)[] = new Array(extraction.segments.length).fill(null)
@@ -111,7 +113,8 @@ export async function processFileForLocales(
   }
 
   for (const targetLocale of params.locales) {
-    // source => target translation
+
+    // source => target Forward translation
     const engineName = pickEngine({
       source: params.sourceLocale,
       target: targetLocale,
@@ -120,19 +123,19 @@ export async function processFileForLocales(
       isMarkdown
     })
 
-    const apiConfig = cfgFor(engineName)
-
-    const fwd = await bulkTranslateWithEngine(
-      extraction.segments,
-      contexts,
-      engineName,
-      { source: params.sourceLocale, target: targetLocale, apiConfig },
-      cache
-    )
-
+    const fwd =
+      engineName == 'copy'
+        ? extraction.segments.slice()
+        : await bulkTranslateWithEngine(
+            extraction.segments,
+            contexts,
+            engineName,
+            { source: params.sourceLocale, target: targetLocale, apiConfig: cfgFor(engineName) },
+            cache
+          )
     await writeText(outUri(ws, targetLocale, rel), extraction.rebuild(fwd))
 
-    // target => source translation
+    // target => source Back translation
     if (params.enableBackTranslation) {
       const backEngine = pickEngine({
         source: targetLocale,
@@ -142,15 +145,20 @@ export async function processFileForLocales(
         isMarkdown
       })
 
-      const backCfg = cfgFor(backEngine)
-
-      const back = await bulkTranslateWithEngine(
-        fwd,
-        contexts,
-        backEngine,
-        { source: targetLocale, target: params.sourceLocale, apiConfig: backCfg },
-        cache
-      )
+      const back =
+        engineName == 'copy'
+          ? fwd.slice()
+          : await bulkTranslateWithEngine(
+              fwd,
+              contexts,
+              backEngine,
+              {
+                source: targetLocale,
+                target: params.sourceLocale,
+                apiConfig: cfgFor(backEngine)
+              },
+              cache
+            )
 
       await writeText(backOutUri(ws, targetLocale, rel), extraction.rebuild(back))
     }
