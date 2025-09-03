@@ -30,24 +30,90 @@ function restore(text: string, slots: string[]) {
 }
 
 export function extractMarkdownOrMDX(input: string): Extraction {
-  const fences = protect(input, FENCE)
-  const inl = protect(fences.masked, INLINE)
-  const links = protect(inl.masked, LINK)
-  const parts = links.masked.split(/\n{2,}/)
-  const segments = parts.map((s) => s.trim()).filter(Boolean)
+  const fences = protect(input, FENCE);
+  const inl = protect(fences.masked, INLINE);
+  // Extract link descriptions for translation, preserve URLs
+  let linkSegments: { full: string, desc: string, url: string, idx: number }[] = [];
+  let linkIdx = 0;
+  const linkReplaced = inl.masked.replace(LINK, (m) => {
+    const match = m.match(/^\[([^\]]+)\]\(([^\)]+)\)$/);
+    if (match) {
+      linkSegments.push({ full: m, desc: match[1], url: match[2], idx: linkIdx });
+      return `LINK${linkIdx++}`;
+    }
+    return m;
+  });
+
+  // Split into paragraphs
+  const parts = linkReplaced.split(/\n{2,}/);
+  let segments: string[] = [];
+  let linkMap = new Map<number, { desc: string, url: string }>();
+  linkSegments.forEach(l => linkMap.set(l.idx, { desc: l.desc, url: l.url }));
+
+  // Extract segments: paragraphs and link descriptions
+  parts.forEach((s) => {
+    let trimmed = s.trim();
+    if (!trimmed) return;
+    // Extract link placeholders
+    const linkPlaceholderRe = /\u001bLINK(\d+)\u001b/g;
+    let lastIdx = 0;
+    let match;
+    let found = false;
+    while ((match = linkPlaceholderRe.exec(trimmed)) !== null) {
+      found = true;
+      // Add text before link as segment
+      if (match.index > lastIdx) {
+        const before = trimmed.slice(lastIdx, match.index).trim();
+        if (before) segments.push(before);
+      }
+      // Add link description as segment
+      const linkNum = Number(match[1]);
+      segments.push(linkMap.get(linkNum)?.desc ?? '');
+      lastIdx = match.index + match[0].length;
+    }
+    // Add remaining text after last link
+    if (found && lastIdx < trimmed.length) {
+      const after = trimmed.slice(lastIdx).trim();
+      if (after) segments.push(after);
+    }
+    if (!found) segments.push(trimmed);
+  });
+
   const rebuild = (translated: string[]) => {
-    let t = 0
-    const rebuilt = links.masked
-      .split(/\n{2,}/)
-      .map((chunk) => {
-        const trimmed = chunk.trim()
-        if (!trimmed) return chunk
-        return chunk.replace(trimmed, () => translated[t++] ?? trimmed)
-      })
-      .join('\n\n')
-    return restore(restore(restore(rebuilt, links.slots), inl.slots), fences.slots)
-  }
-  return { kind: 'markdown', segments, rebuild }
+    let t = 0;
+    // Rebuild paragraphs with translated segments and original URLs
+    const rebuiltParts = parts.map((chunk) => {
+      let rebuilt = '';
+      let lastIdx = 0;
+      const linkPlaceholderRe = /\u001bLINK(\d+)\u001b/g;
+      let match;
+      let found = false;
+      while ((match = linkPlaceholderRe.exec(chunk)) !== null) {
+        found = true;
+        // Add text before link
+        if (match.index > lastIdx) {
+          const before = chunk.slice(lastIdx, match.index);
+          if (before.trim()) rebuilt += translated[t++] ?? before;
+          else rebuilt += before;
+        }
+        // Add translated link description with original URL
+        const linkNum = Number(match[1]);
+        rebuilt += `[${translated[t++] ?? linkMap.get(linkNum)?.desc ?? ''}](${linkMap.get(linkNum)?.url ?? ''})`;
+        lastIdx = match.index + match[0].length;
+      }
+      // Add remaining text after last link
+      if (found && lastIdx < chunk.length) {
+        const after = chunk.slice(lastIdx);
+        if (after.trim()) rebuilt += translated[t++] ?? after;
+        else rebuilt += after;
+      }
+      if (!found) rebuilt = translated[t++] ?? chunk;
+      return rebuilt;
+    });
+    // Restore inline code and code fences
+    return restore(restore(rebuiltParts.join('\n\n'), inl.slots), fences.slots);
+  };
+  return { kind: 'markdown', segments, rebuild };
 }
 
 export function jsonPathToString(p: (string | number)[]): string {
@@ -69,14 +135,24 @@ export function extractJSON_valuesOnly(input: string): Extraction {
   const segments: string[] = []
 
   const walk = (node: any, path: any[]) => {
-    if (Array.isArray(node)) node.forEach((v, i) => walk(v, [...path, i]))
-    else if (node && typeof node === 'object') {
+    if (Array.isArray(node)) {
+      node.forEach((v, i) => {
+        if (typeof v === 'string') {
+          paths.push([...path, i])
+          segments.push(v)
+        } else {
+          walk(v, [...path, i])
+        }
+      })
+    } else if (node && typeof node === 'object') {
       for (const k of Object.keys(node)) {
         const v = node[k]
         if (typeof v === 'string') {
           paths.push([...path, k])
           segments.push(v)
-        } else walk(v, [...path, k])
+        } else {
+          walk(v, [...path, k])
+        }
       }
     }
   }
@@ -88,8 +164,12 @@ export function extractJSON_valuesOnly(input: string): Extraction {
     let i = 0
     const clone = structuredClone(obj)
     const assign = (node: any, path: any[]) => {
-      if (Array.isArray(node)) node.forEach((v, idx) => assign(v, [...path, idx]))
-      else if (node && typeof node === 'object') {
+      if (Array.isArray(node)) {
+        node.forEach((v, idx) => {
+          if (typeof v === 'string') node[idx] = translated[i++] ?? v
+          else assign(v, [...path, idx])
+        })
+      } else if (node && typeof node === 'object') {
         for (const k of Object.keys(node)) {
           if (typeof node[k] === 'string') node[k] = translated[i++] ?? node[k]
           else assign(node[k], [...path, k])
