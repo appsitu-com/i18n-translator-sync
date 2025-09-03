@@ -25,6 +25,14 @@
       {
         "command": "translator.restart",
         "title": "Translator: Restart"
+      },
+      {
+        "command": "translator.push",
+        "title": "Translator: Push translations to MateCat"
+      },
+      {
+        "command": "translator.pull",
+        "title": "Translator: Pull translations from MateCat"
       }
     ],
     "configuration": {
@@ -93,6 +101,16 @@
             "key": "env:DEEPL_TRANSLATE_KEY",
             "free": true
           }
+        },
+        "translator.matecat": {
+          "type": "object",
+          "default": {
+            "pushUrl": "env:MATECAT_PUSH_URL",
+            "pullUrl": "env:MATECAT_PULL_URL",
+            "apiKey": "env:MATECAT_API_KEY",
+            "projectId": "env:MATECAT_PROJECT_ID"
+          },
+          "description": "MateCat API configuration. pushUrl/pullUrl may include {projectId} template."
         }
       }
     }

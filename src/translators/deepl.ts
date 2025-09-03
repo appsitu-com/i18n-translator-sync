@@ -1,7 +1,7 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 
-const langMap: Record<string, string> = {
+const LOCALE_MAP: Record<string, string> = {
   // English
   en: 'EN', // generic EN
   'en-US': 'EN-US',
@@ -47,6 +47,7 @@ function normalizeForDeepL(locale: string): string {
 
 export const DeepLTranslator: Translator = {
   name: 'deepl',
+
   normalizeLocale(locale: string) {
     return normalizeForDeepL(locale)
   },

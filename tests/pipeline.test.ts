@@ -20,7 +20,7 @@ vi.mock('../src/cache.sqlite', async () => {
 
 beforeEach(() => {
   // workspace root and config
-  ;(workspace.getConfiguration as any).mockReturnValue({
+  (workspace.getConfiguration as any).mockReturnValue({
     get: (k: string, d: any) => {
       const m: any = {
         sourceLocale: 'en',
@@ -34,10 +34,10 @@ beforeEach(() => {
     }
   })
   // mock FS read/write
-  ;(workspace.fs.readFile as any).mockReset()
-  ;(workspace.fs.writeFile as any).mockReset()
-  ;(workspace.fs.createDirectory as any).mockResolvedValue(void 0)
-  ;(workspace.fs.readDirectory as any).mockResolvedValue([])
+  (workspace.fs.readFile as any).mockReset()
+  (workspace.fs.writeFile as any).mockReset()
+  (workspace.fs.createDirectory as any).mockResolvedValue(void 0)
+  (workspace.fs.readDirectory as any).mockResolvedValue([])
 })
 
 it('processFileForLocales writes forward and back files', async () => {

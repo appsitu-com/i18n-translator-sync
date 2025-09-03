@@ -1,4 +1,4 @@
-import type { Translator } from './types'
+import type { Translator, TranslatorEngine } from './types'
 
 const REGISTRY = new Map<string, Translator>()
 
@@ -22,7 +22,7 @@ export function pickEngine(params: {
   defaults: { md: string; json: string }
   overrides: Record<string, string>
   isMarkdown: boolean
-}): string {
+}): TranslatorEngine {
   const key = `${params.source}:${params.target}`
-  return params.overrides[key] ?? (params.isMarkdown ? params.defaults.md : params.defaults.json)
+  return (params.overrides[key] ?? (params.isMarkdown ? params.defaults.md : params.defaults.json)) as TranslatorEngine
 }

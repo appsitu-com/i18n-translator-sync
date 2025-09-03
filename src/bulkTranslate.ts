@@ -1,12 +1,12 @@
 import { getTranslator } from './translators/registry'
 import type { TranslationCache } from './cache.sqlite'
-import { TranslationApiConfig } from './translators/types'
+import { TranslatorApiConfig } from './translators/types'
 
 export async function bulkTranslateWithEngine(
   texts: string[],
   contexts: (string | null | undefined)[],
   engineName: string,
-  opts: { source: string; target: string; apiConfig: TranslationApiConfig },
+  opts: { source: string; target: string; apiConfig: TranslatorApiConfig },
   cache: TranslationCache
 ): Promise<string[]> {
   if (!texts.length) return []

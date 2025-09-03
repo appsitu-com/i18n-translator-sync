@@ -6,13 +6,13 @@ import { loadContextCsvForJson } from './contextCsv'
 import { bulkTranslateWithEngine } from './bulkTranslate'
 import { pickEngine } from './translators/registry'
 import { resolveEnvDeep } from './util/env'
-import { TranslationApiConfig } from './translators/types'
+import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
 
 const SRC_ROOT = 'i18n/en'
 
 function relFromEN(uri: vscode.Uri) {
   const ws = vscode.workspace.getWorkspaceFolder(uri)!
-  return path.posix.relative(path.posix.join(ws.uri.path, SRC_ROOT), uri.path)
+  return path.relative(path.join(ws.uri.fsPath, SRC_ROOT), uri.fsPath)
 }
 function outUri(ws: vscode.WorkspaceFolder, locale: string, rel: string) {
   return vscode.Uri.joinPath(ws.uri, 'i18n', locale, rel)
@@ -78,12 +78,13 @@ export async function processFileForLocales(
     )
   )
 
-  const rawCfgFor = (engine: string) => settings.get<TranslationApiConfig>(engine)
-  const cfgFor = (engine: string) => {
-    if (engine === 'copy') return {} // no config needed
+  const rawCfgFor = (engine: TranslatorEngine) => settings.get(engine)
+  const cfgFor = (engine: TranslatorEngine) => {
+    if (engine === 'copy') return { engine: 'copy' } satisfies TranslatorApiConfig
     const cfg = rawCfgFor(engine)
     if (!cfg) throw new Error(`Missing configuration for translation engine '${engine}'`)
-    return resolveEnvDeep(cfg) // may throw MissingEnvVarError
+    // TODO: Verify resolved type
+    return { engine, ...resolveEnvDeep(cfg) } as TranslatorApiConfig // may throw MissingEnvVarError
   }
 
   let contexts: (string | null)[] = new Array(extraction.segments.length).fill(null)
@@ -110,6 +111,7 @@ export async function processFileForLocales(
   }
 
   for (const targetLocale of params.locales) {
+    // source => target translation
     const engineName = pickEngine({
       source: params.sourceLocale,
       target: targetLocale,
@@ -117,7 +119,9 @@ export async function processFileForLocales(
       overrides,
       isMarkdown
     })
+
     const apiConfig = cfgFor(engineName)
+
     const fwd = await bulkTranslateWithEngine(
       extraction.segments,
       contexts,
@@ -125,8 +129,10 @@ export async function processFileForLocales(
       { source: params.sourceLocale, target: targetLocale, apiConfig },
       cache
     )
+
     await writeText(outUri(ws, targetLocale, rel), extraction.rebuild(fwd))
 
+    // target => source translation
     if (params.enableBackTranslation) {
       const backEngine = pickEngine({
         source: targetLocale,
@@ -135,7 +141,9 @@ export async function processFileForLocales(
         overrides,
         isMarkdown
       })
+
       const backCfg = cfgFor(backEngine)
+
       const back = await bulkTranslateWithEngine(
         fwd,
         contexts,
@@ -143,6 +151,7 @@ export async function processFileForLocales(
         { source: targetLocale, target: params.sourceLocale, apiConfig: backCfg },
         cache
       )
+
       await writeText(backOutUri(ws, targetLocale, rel), extraction.rebuild(back))
     }
   }
