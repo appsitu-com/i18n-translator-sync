@@ -1,7 +1,7 @@
-export * from './json';
-export * from './markdown';
+export * from './json'
+export * from './markdown'
 
-import { extractJSON_valuesOnly, JsonExtraction } from './json';
+import { extractJSON_valuesOnly, JsonExtraction } from './json'
 import { extractMarkdownOrMDX, MarkdownExtraction } from './markdown'
 
 export function extractForFile(filename: string, content: string): JsonExtraction | MarkdownExtraction {
