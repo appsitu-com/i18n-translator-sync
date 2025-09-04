@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import type { TranslationCache } from './cache.sqlite'
-import { extractForFile, jsonPathToString } from './extractor'
+import { extractForFile, jsonPathToString } from './extractors/index'
 import { loadContextCsvForJson } from './contextCsv'
 import { bulkTranslateWithEngine } from './bulkTranslate'
 import { pickEngine } from './translators/registry'
