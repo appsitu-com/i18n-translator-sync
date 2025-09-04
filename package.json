@@ -126,6 +126,7 @@
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.0",
     "@types/vscode": "^1.103.0",
     "typescript": "^5.9.2",
@@ -134,6 +135,11 @@
   "dependencies": {
     "better-sqlite3": "^12.2.0",
     "dotenv": "^17.2.1",
+    "js-yaml": "^4.1.0",
+    "remark": "^15.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx": "^3.1.1",
+    "remark-stringify": "^11.0.0",
     "unist-util-visit": "^5.0.0"
   }
 }
