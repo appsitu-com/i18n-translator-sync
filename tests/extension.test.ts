@@ -16,10 +16,13 @@ describe('extension', () => {
       index: 0
     }];
 
+    const subscription = { dispose: vi.fn() };
+
     (workspace.createFileSystemWatcher as any) = vi.fn().mockReturnValue({
-      onDidCreate: vi.fn().mockReturnValue({}),
-      onDidChange: vi.fn().mockReturnValue({}),
-      onDidDelete: vi.fn().mockReturnValue({})
+      onDidCreate: vi.fn().mockReturnValue(subscription),
+      onDidChange: vi.fn().mockReturnValue(subscription),
+      onDidDelete: vi.fn().mockReturnValue(subscription),
+      dispose: vi.fn()
     });
 
     (workspace.getConfiguration as any) = vi.fn().mockReturnValue({
@@ -29,7 +32,7 @@ describe('extension', () => {
       })
     });
 
-    (workspace.onDidRenameFiles as any) = vi.fn().mockReturnValue({});
+    (workspace.onDidRenameFiles as any) = vi.fn().mockReturnValue(subscription);
   })
 
   afterAll(() => {
