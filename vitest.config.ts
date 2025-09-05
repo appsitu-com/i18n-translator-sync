@@ -10,8 +10,9 @@ export default defineConfig({
     isolate: true,
     restoreMocks: true,
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'lcov'],
-      reportsDirectory: 'coverage',
+      reportsDirectory: './coverage',
       exclude: ['tests/**', 'dist/**', '**/mocks/**']
     }
   },
