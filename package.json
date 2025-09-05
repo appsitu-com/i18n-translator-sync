@@ -129,6 +129,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.0",
     "@types/vscode": "^1.103.0",
+    "@vitest/coverage-v8": "^3.2.4",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
