@@ -41,17 +41,13 @@ async function startTranslator(ctx: vscode.ExtensionContext) {
 
   const onAddOrChange = async (uri: vscode.Uri) => {
     try {
-      const locales = cfg().get<string[]>('targetLocales', [])
-      if (!locales.length || !cache) return
-      await processFileForLocales(
-        uri,
-        {
-          locales,
-          sourceLocale: cfg().get<string>('sourceLocale', 'en'),
-          enableBackTranslation: cfg().get<boolean>('enableBackTranslation', true)
-        },
-        cache
-      )
+      const c = cfg()
+      const sourceLocale = c.get<string>('sourceLocale', 'en')
+      const enableBackTranslation = c.get<boolean>('enableBackTranslation', true)
+      const targetLocales = c.get<string[]>('targetLocales', [])
+      const processCfg = { sourceLocale, targetLocales, enableBackTranslation }
+      if (!targetLocales.length || !cache) return
+      await processFileForLocales(uri, processCfg, cache)
     } catch (err: any) {
       vscode.window.showErrorMessage(`Translator error for ${uri.fsPath}: ${err?.message ?? String(err)}`)
     }
@@ -66,22 +62,21 @@ async function startTranslator(ctx: vscode.ExtensionContext) {
     }
   }
   const onRename = async (e: vscode.FileRenameEvent) => {
-    const locales = cfg().get<string[]>('targetLocales', [])
-    if (!locales.length || !cache) return
-    for (const f of e.files) {
-      const oldPath = f.oldUri.fsPath.replace(/\\/g, '/')
-      const newPath = f.newUri.fsPath.replace(/\\/g, '/')
-      if (oldPath.includes('/i18n/en/')) await removeFileForLocales(f.oldUri, locales)
-      if (newPath.includes('/i18n/en/'))
-        await processFileForLocales(
-          f.newUri,
-          {
-            locales,
-            sourceLocale: cfg().get<string>('sourceLocale', 'en'),
-            enableBackTranslation: cfg().get<boolean>('enableBackTranslation', true)
-          },
-          cache
-        )
+    const c = cfg()
+    const enableBackTranslation = c.get<boolean>('enableBackTranslation', true)
+    const sourceLocale = c.get<string>('sourceLocale', 'en')
+    const targetLocales = c.get<string[]>('targetLocales', [])
+    const processCfg = { sourceLocale, targetLocales, enableBackTranslation }
+
+    if (!targetLocales.length || !cache) return
+
+    for (const file of e.files) {
+      const oldPath = file.oldUri.fsPath.replace(/\\/g, '/')
+      const newPath = file.newUri.fsPath.replace(/\\/g, '/')
+      if (oldPath.includes('/i18n/en/')) await removeFileForLocales(file.oldUri, targetLocales)
+      if (newPath.includes('/i18n/en/')) {
+        await processFileForLocales(file.newUri, processCfg, cache)
+      }
     }
   }
 
