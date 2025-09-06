@@ -9,7 +9,7 @@
 MIT
 
 ## Features
-- Watches multiple source paths (configurable) and generates translated Markdown/MDX/JSON files into `i18n/<locale>/**`.
+- Watches multiple source paths (configurable) and generates translated Markdown/MDX/JSON/YAML/YML files into `i18n/<locale>/**`.
 - Project-specific configuration via `.translate.json` file.
 - Optional back-translations and context-aware JSON translations.
 - Translation server Start/Stop/Restart commands and VSCode Status bar.
@@ -29,6 +29,10 @@ MIT
 ## Configuration
 
 The extension supports project-specific configuration through a `.translate.json` file in the root of your workspace. See [Configuration Documentation](doc/Configuration.md) for details.
+
+## Code Architecture
+
+For information about the internal architecture of the extension, see [Architecture Documentation](doc/Architecture.md).
 
 ### Configuration Files
 

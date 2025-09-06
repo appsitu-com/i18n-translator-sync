@@ -1,0 +1,7 @@
+simple: This is a simple YML file
+nested:
+  value: This is a nested value
+list:
+  - First item
+  - Second item
+  - Third item

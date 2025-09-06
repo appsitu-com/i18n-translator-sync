@@ -66,7 +66,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-it('processFileForLocales writes forward and back files', async () => {
+it('processFileForLocales writes forward and back files for JSON', async () => {
   registerAllTranslators() // includes copy engine
   // pretend JSON file
   const src = Uri.file('/ws/i18n/en/demo.json')
@@ -74,6 +74,48 @@ it('processFileForLocales writes forward and back files', async () => {
   ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
   ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
   ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from(JSON.stringify({ a: 'x' }), 'utf8'))
+
+  const cache = new SQLiteCache(':memory:')
+  await processFileForLocales(
+    src,
+    cache as any,
+    { targetLocales: ['fr-FR'], sourceLocale: 'en', enableBackTranslation: true }
+  )
+
+  expect(workspace.fs.writeFile).toHaveBeenCalled()
+  const calls = (workspace.fs.writeFile as any).mock.calls
+  // two writes: forward and back
+  expect(calls).toHaveLength(2)
+})
+
+it('processFileForLocales writes forward and back files for YAML', async () => {
+  registerAllTranslators() // includes copy engine
+  // pretend YAML file
+  const src = Uri.file('/ws/i18n/en/demo.yaml')
+  ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
+  ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
+  ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from('greeting: Hello\nfarewell: Goodbye', 'utf8'))
+
+  const cache = new SQLiteCache(':memory:')
+  await processFileForLocales(
+    src,
+    cache as any,
+    { targetLocales: ['fr-FR'], sourceLocale: 'en', enableBackTranslation: true }
+  )
+
+  expect(workspace.fs.writeFile).toHaveBeenCalled()
+  const calls = (workspace.fs.writeFile as any).mock.calls
+  // two writes: forward and back
+  expect(calls).toHaveLength(2)
+})
+
+it('processFileForLocales writes forward and back files for YML', async () => {
+  registerAllTranslators() // includes copy engine
+  // pretend YML file
+  const src = Uri.file('/ws/i18n/en/demo.yml')
+  ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
+  ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
+  ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from('greeting: Hello\nfarewell: Goodbye', 'utf8'))
 
   const cache = new SQLiteCache(':memory:')
   await processFileForLocales(

@@ -1,0 +1,14 @@
+title: YAML Test Document
+description: A test document for i18n translation
+version: 1.0
+author:
+  name: Test User
+  email: test@example.com
+items:
+  - name: First Item
+    description: This is the first item
+  - name: Second Item
+    description: This is the second item
+config:
+  enabled: true
+  message: Translation works with YAML files

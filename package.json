@@ -222,7 +222,9 @@
     "deepl",
     "gemini",
     "markdown",
-    "json"
+    "json",
+    "yaml",
+    "yml"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {

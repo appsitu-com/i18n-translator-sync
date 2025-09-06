@@ -143,7 +143,7 @@ async function loadJsonContexts(extraction: any, srcUri: vscode.Uri): Promise<(s
   // Default to null contexts
   let contexts: (string | null)[] = new Array(extraction.segments.length).fill(null)
 
-  if (extraction.kind !== 'json') {
+  if (extraction.kind !== 'json' && extraction.kind !== 'yaml') {
     return contexts
   }
 
@@ -237,6 +237,8 @@ export async function processFileForLocales(
 
   // Determine file type
   const isMarkdown = filename.endsWith('.md') || filename.endsWith('.mdx') || filename.endsWith('.markdown')
+  const isYaml = filename.endsWith('.yml') || filename.endsWith('.yaml')
+  // YAML files use the same translator as JSON
 
   // Get engine configuration
   const defaults = {

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { extractJSON_valuesOnly, jsonPathToString } from '../../src/extractors/json'
+import { extractJSON, jsonPathToString } from '../../src/extractors/json'
 
 // JSON extraction tests
-describe('extractJSON_valuesOnly', () => {
+describe('extractJSON', () => {
   it('extracts strings from nested JSON objects and arrays', () => {
     const json = JSON.stringify(
       {
@@ -14,7 +14,7 @@ describe('extractJSON_valuesOnly', () => {
       null,
       2
     )
-    const ex = extractJSON_valuesOnly(json)
+    const ex = extractJSON(json)
     expect(ex.kind).toBe('json')
     expect(ex.segments).toEqual(['hello', 'world', 'foo', 'bar', 'baz'])
     if (ex.kind === 'json') {
@@ -32,7 +32,7 @@ describe('extractJSON_valuesOnly', () => {
 
   it('returns empty segments for JSON with no strings', () => {
     const json = JSON.stringify({ a: 1, b: true, c: null, d: [] }, null, 2)
-    const ex = extractJSON_valuesOnly(json)
+    const ex = extractJSON(json)
     expect(ex.segments).toEqual([])
     if (ex.kind === 'json') {
       expect(ex.paths).toEqual([])
@@ -41,7 +41,7 @@ describe('extractJSON_valuesOnly', () => {
 })
 
 // JSON extraction tests
-describe('extractJSON_valuesOnly', () => {
+describe('extractJSON', () => {
   it('extracts strings from nested JSON objects and arrays', () => {
     const json = JSON.stringify(
       {
@@ -53,7 +53,7 @@ describe('extractJSON_valuesOnly', () => {
       null,
       2
     )
-    const ex = extractJSON_valuesOnly(json)
+    const ex = extractJSON(json)
     expect(ex.kind).toBe('json')
     expect(ex.segments).toEqual(['hello', 'world', 'foo', 'bar', 'baz'])
     if (ex.kind === 'json') {
@@ -71,7 +71,7 @@ describe('extractJSON_valuesOnly', () => {
 
   it('returns empty segments for JSON with no strings', () => {
     const json = JSON.stringify({ a: 1, b: true, c: null, d: [] }, null, 2)
-    const ex = extractJSON_valuesOnly(json)
+    const ex = extractJSON(json)
     expect(ex.segments).toEqual([])
     if (ex.kind === 'json') {
       expect(ex.paths).toEqual([])

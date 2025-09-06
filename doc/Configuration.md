@@ -31,7 +31,7 @@ The extension now supports a project-specific configuration file called `.transl
 | `targetLocales` | `string[]` | Target locales to generate translations for | `['fr-FR', 'fr-CA']` |
 | `enableBackTranslation` | `boolean` | Enable back translation | `false` |
 | `defaultMarkdownEngine` | `string` | Default engine for markdown files (azure, google, deepl, gemini, copy) | `"azure"` |
-| `defaultJsonEngine` | `string` | Default engine for JSON files (azure, google, deepl, gemini, copy) | `"google"` |
+| `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy) | `"google"` |
 | `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales | `{"deepl": ["fr", "de"]}` |
 
 ## Backward Compatibility

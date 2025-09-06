@@ -15,4 +15,18 @@ describe('extractForFile', () => {
     expect(ex.kind).toBe('markdown');
     expect(ex.segments).toEqual(['Hello world.']);
   });
+
+  it('delegates to YAML extraction for .yaml files', () => {
+    const yaml = 'greeting: Hello\nfarewell: Goodbye';
+    const ex = extractForFile('file.yaml', yaml);
+    expect(ex.kind).toBe('yaml');
+    expect(ex.segments).toEqual(['Hello', 'Goodbye']);
+  });
+
+  it('delegates to YAML extraction for .yml files', () => {
+    const yml = 'greeting: Hello\nfarewell: Goodbye';
+    const ex = extractForFile('file.yml', yml);
+    expect(ex.kind).toBe('yaml');
+    expect(ex.segments).toEqual(['Hello', 'Goodbye']);
+  });
 });
