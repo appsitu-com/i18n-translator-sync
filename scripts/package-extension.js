@@ -332,6 +332,26 @@ async function ensureDependencies() {
   }
 }
 
+/**
+ * Display git tagging command with version information
+ * @param {string} version - The version to tag with
+ */
+function displayGitTaggingCommand(version) {
+  console.log('\n========================================');
+  console.log('NEXT STEPS:');
+  console.log('========================================');
+  console.log('To create a git tag for this release, run:');
+  console.log(`\n  git add package.json`);
+  console.log(`  git commit -m "Release version ${version}"`);
+  console.log(`  git tag -a v${version} -m "Version ${version}"`);
+  console.log(`  git push origin main --tags`);
+  console.log('\nThis will:');
+  console.log(' 1. Commit the version change to package.json');
+  console.log(' 2. Create an annotated tag for the release');
+  console.log(' 3. Push the changes and tags to the remote repository');
+  console.log('========================================\n');
+}
+
 async function main() {
   console.log('Starting extension packaging process...');
   console.log('Command line arguments:', process.argv);
@@ -363,6 +383,9 @@ async function main() {
     console.log('Extension packaging completed successfully!');
     console.log(`VSIX file created: ${vsixPath}`);
     console.log(`Version: ${newVersion}`);
+
+    // Display git tagging commands for the new version
+    displayGitTaggingCommand(newVersion);
   } catch (error) {
     console.error('Extension packaging failed:', error);
     process.exit(1);

@@ -2,7 +2,7 @@
   "name": "i18n-translator-vscode",
   "displayName": "i18n Translator",
   "publisher": "your-publisher",
-  "version": "0.2.0",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.103.0"
   },

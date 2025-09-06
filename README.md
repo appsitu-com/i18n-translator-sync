@@ -91,11 +91,28 @@ This will:
 2. Update the version in package.json
 3. Build the extension
 4. Package it as a VSIX file in the `releases/` directory
+5. Display git commands to tag the release
 
 You can also update the version independently:
 ```bash
 # Update version only (without packaging)
 yarn version:update
+```
+
+### Tagging Releases
+
+After creating a new version, the script will provide git commands to create and push a tag for the release:
+
+```bash
+# Commit the version change
+git add package.json
+git commit -m "Release version X.Y.Z"
+
+# Create an annotated tag
+git tag -a vX.Y.Z -m "Version X.Y.Z"
+
+# Push changes and tags
+git push origin main --tags
 ```
 
 For development iterations, you can create a quick package without updating the version:
