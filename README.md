@@ -115,6 +115,16 @@ git tag -a vX.Y.Z -m "Version X.Y.Z"
 git push origin main --tags
 ```
 
+### Cross-Platform Native Dependencies
+
+This extension uses `better-sqlite3`, which is a native module that requires platform-specific binaries. The packaging configuration is set up to handle cross-platform compatibility:
+
+- The extension uses the `vsce` packaging tool's native dependency support
+- In `package.json`, the `vsce.dependencies` array specifies which native modules to include
+- This ensures that the packaged extension will work on Windows, macOS, and Linux
+
+This approach is the recommended way to handle native dependencies in VS Code extensions, ensuring that end users don't need to install any additional dependencies.
+
 For development iterations, you can create a quick package without updating the version:
 ```bash
 # Create package without version selection

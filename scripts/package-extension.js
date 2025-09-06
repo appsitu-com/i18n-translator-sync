@@ -298,6 +298,7 @@ async function packageExtension(newVersion) {
 
     // Package with vsce (global npm tool) into the releases directory
     console.log('Packaging with @vscode/vsce (npm global tool)...');
+    // Use the proper package command with native dependency handling
     await execPromise(`npx @vscode/vsce package --out "${RELEASES_DIR}"`);
 
     const vsixName = `${RELEASES_DIR}/i18n-translator-vscode-${version}.vsix`;

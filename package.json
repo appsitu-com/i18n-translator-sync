@@ -2,7 +2,7 @@
   "name": "i18n-translator-vscode",
   "displayName": "i18n Translator",
   "publisher": "your-publisher",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -185,6 +185,11 @@
     "package:quick": "npx @vscode/vsce package",
     "test:cov": "vitest run --coverage",
     "version:update": "node scripts/update-version.js"
+  },
+  "vsce": {
+    "dependencies": [
+      "better-sqlite3"
+    ]
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
