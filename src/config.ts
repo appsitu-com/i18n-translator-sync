@@ -1,40 +1,53 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
+import { z } from 'zod'
 import { TranslatorEngine } from './translators/types'
 
-/**
- * Project configuration stored in .translate.json
- */
-export interface TranslateProjectConfig {
-  /**
-   * Source language paths to scan for files to translate
-   */
+const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
+
+// Define the schema for validation
+const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
+
+// Zod schema for validating .translate.json
+export const TranslateConfigSchema = z.object({
+  sourcePaths: z.array(z.string())
+    .describe('Source language paths to scan for files to translate')
+    .optional(),
+
+  sourceLocale: z.string()
+    .describe('Source locale (e.g., "en")')
+    .optional(),
+
+  targetLocales: z.array(z.string())
+    .describe('Target locales to generate translations for (e.g., ["fr", "es", "de"])')
+    .optional(),
+
+  enableBackTranslation: z.boolean()
+    .describe('Enable back translation')
+    .optional(),
+
+  defaultMarkdownEngine: translatorEngineEnum
+    .describe('Default engine for markdown files')
+    .optional(),
+
+  defaultJsonEngine: translatorEngineEnum
+    .describe('Default engine for JSON files')
+    .optional(),
+
+  engineOverrides: z.record(z.string(), z.array(z.string()))
+    .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns')
+    .optional()
+});
+
+// Infer the type from the schema - should match our interface
+export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema> & {
   sourcePaths: string[]
-  /**
-   * Source locale (default: 'en')
-   */
   sourceLocale: string
-  /**
-   * Target locales to generate translations for
-   */
   targetLocales: string[]
-  /**
-   * Enable back translation (default: false)
-   */
   enableBackTranslation: boolean
-  /**
-   * Default engine for markdown files
-   */
   defaultMarkdownEngine: TranslatorEngine
-  /**
-   * Default engine for JSON files
-   */
   defaultJsonEngine: TranslatorEngine
-  /**
-   * Engine overrides for specific locales
-   * Key is the engine name, value is an array of locale patterns
-   */
   engineOverrides: Record<string, string[]>
 }
 
@@ -52,6 +65,33 @@ const defaultConfig: TranslateProjectConfig = {
 }
 
 /**
+ * Format Zod validation errors for better user feedback
+ */
+function formatZodError(error: z.ZodError): string[] {
+  return error.issues.map(issue => {
+    const fieldPath = issue.path.join('.');
+    const fieldName = fieldPath || 'unknown field';
+
+    // Customize error messages based on field and error type
+    switch (fieldName) {
+      case 'sourcePaths':
+        return `Source paths: ${issue.message} (must be an array of strings)`;
+      case 'sourceLocale':
+        return `Source locale: ${issue.message} (must be a string like "en")`;
+      case 'targetLocales':
+        return `Target locales: ${issue.message} (must be an array of strings)`;
+      case 'defaultMarkdownEngine':
+      case 'defaultJsonEngine':
+        return `${fieldName}: ${issue.message} (must be one of: ${ENGINES.join(', ')})`;
+      case 'engineOverrides':
+        return `Engine overrides: ${issue.message} (must be a record with string array values)`;
+      default:
+        return `${fieldName}: ${issue.message}`;
+    }
+  });
+}
+
+/**
  * Load project configuration from .translate.json
  * Falls back to VSCode settings for backward compatibility
  */
@@ -62,10 +102,31 @@ export function loadProjectConfig(workspaceFolder: vscode.WorkspaceFolder): Tran
   try {
     if (fs.existsSync(configPath)) {
       const configContent = fs.readFileSync(configPath, 'utf8')
-      projectConfig = JSON.parse(configContent) as Partial<TranslateProjectConfig>
+      const parsedConfig = JSON.parse(configContent)
+
+      // Validate the configuration
+      const validationResult = TranslateConfigSchema.safeParse(parsedConfig)
+
+      if (!validationResult.success) {
+        // Format errors for better user feedback
+        const errors = formatZodError(validationResult.error)
+
+        // Show error notification
+        const errorMessage = `Invalid .translate.json configuration:\n${errors.join('\n')}`
+        vscode.window.showErrorMessage(errorMessage)
+        console.error(errorMessage)
+
+        // Still use what we can from the config, even with errors
+        projectConfig = parsedConfig
+      } else {
+        // Config is valid
+        projectConfig = validationResult.data
+      }
     }
-  } catch (error) {
-    vscode.window.showErrorMessage(`Error loading .translate.json: ${error}`)
+  } catch (error: any) {
+    const errorMessage = `Error loading .translate.json: ${error.message || error}`
+    vscode.window.showErrorMessage(errorMessage)
+    console.error(errorMessage)
   }
 
   // Fall back to VSCode settings for backward compatibility
@@ -82,13 +143,15 @@ export function loadProjectConfig(workspaceFolder: vscode.WorkspaceFolder): Tran
       // Convert from legacy string format to string[] format
       Object.fromEntries(
         Object.entries(
-          settings.get<Record<string, string>>('engineOverrides', {})
+          settings.get<Record<string, string | string[]>>('engineOverrides', {})
         ).map(([engine, localesStr]) => [
           engine,
-          localesStr.split(',').map(s => s.trim())
+          typeof localesStr === 'string' ?
+            localesStr.split(',').map(s => s.trim()) :
+            Array.isArray(localesStr) ? localesStr : []
         ])
       )
-  }
+  };
 }
 
 /**
