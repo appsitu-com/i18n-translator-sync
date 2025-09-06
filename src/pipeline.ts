@@ -7,88 +7,216 @@ import { bulkTranslateWithEngine } from './bulkTranslate'
 import { pickEngine } from './translators/registry'
 import { resolveEnvDeep } from './util/env'
 import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
-import { loadProjectConfig, findSourcePathForFile } from './config'
+import { loadProjectConfig, verifyFilePath } from './config'
+import { getRelativePath, createTargetUri, createBackTranslationUri } from './util/paths'
 
-function relFromEN(uri: vscode.Uri) {
-  const ws = vscode.workspace.getWorkspaceFolder(uri)!
+/**
+ * Validate workspace folder and return its path
+ */
+function validateWorkspace(ws: vscode.WorkspaceFolder | undefined): vscode.WorkspaceFolder {
   if (!ws || !ws.uri) {
-    throw new Error(`No workspace folder found for ${uri.fsPath}`);
+    throw new Error(`Invalid or missing workspace folder`)
   }
+  return ws
+}
 
-  // Ensure we have fsPath property
-  const wsPath = ws.uri.fsPath || ws.uri.path;
-  if (!wsPath) {
-    throw new Error(`Workspace folder URI has no path: ${JSON.stringify(ws.uri)}`);
-  }
-
+/**
+ * Get relative path from English source to the file
+ */
+function relFromEN(uri: vscode.Uri): string {
+  const ws = validateWorkspace(vscode.workspace.getWorkspaceFolder(uri))
   const config = loadProjectConfig(ws)
 
-  // Find which source path this file is in
-  const sourcePath = findSourcePathForFile(uri, config)
-  if (!sourcePath) {
-    // Import the verification function to get detailed debugging info
-    const { verifyFilePath } = require('./config');
-
+  try {
+    return getRelativePath(uri, config)
+  } catch (error) {
     // Run verification checks for detailed diagnostics
-    verifyFilePath(uri);
+    verifyFilePath(uri)
 
-    // Provide more detailed error with available paths
-    const availablePaths = config.sourcePaths.map(p => path.join(wsPath, p).replace(/\\/g, '/'));
-    const normalizedFilePath = uri.fsPath.replace(/\\/g, '/');
+    // Re-throw with more detailed error message
+    throw error
+  }
+}
 
-    throw new Error(
-      `File ${uri.fsPath} is not in any of the configured source paths.\n` +
-      `Available paths: ${JSON.stringify(availablePaths)}\n` +
-      `Normalized file path: ${normalizedFilePath}\n` +
-      `Workspace root: ${wsPath}`
-    );
-  }
+/**
+ * Create URI for translated output file
+ */
+function outUri(ws: vscode.WorkspaceFolder, locale: string, rel: string): vscode.Uri {
+  validateWorkspace(ws)
+  const config = loadProjectConfig(ws)
 
-  // Get relative path from source root
-  const sourceFolderPath = path.join(wsPath, sourcePath);
-  return path.relative(sourceFolderPath, uri.fsPath);
+  return createTargetUri(ws, config.sourceLocale, locale, rel, config)
 }
-function outUri(ws: vscode.WorkspaceFolder, locale: string, rel: string) {
-  if (!ws || !ws.uri) {
-    throw new Error(`Invalid workspace folder for output URI: ${JSON.stringify(ws)}`);
+
+/**
+ * Create URI for back-translation output file
+ */
+function backOutUri(ws: vscode.WorkspaceFolder, locale: string, rel: string): vscode.Uri {
+  validateWorkspace(ws)
+  const config = loadProjectConfig(ws)
+
+  return createBackTranslationUri(ws, locale, rel, config)
+}
+/**
+ * Ensure directory exists for a file
+ */
+async function ensureDirFor(file: vscode.Uri): Promise<void> {
+  try {
+    await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(file, '..'))
+  } catch (error) {
+    console.error(`Failed to create directory for ${file.fsPath}: ${error}`)
+    throw error
   }
-  return vscode.Uri.joinPath(ws.uri, 'i18n', locale, rel)
 }
-function backOutUri(ws: vscode.WorkspaceFolder, locale: string, rel: string) {
-  if (!ws || !ws.uri) {
-    throw new Error(`Invalid workspace folder for back-translation URI: ${JSON.stringify(ws)}`);
-  }
-  return vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en`, rel)
-}
-async function ensureDirFor(file: vscode.Uri) {
-  await vscode.workspace.fs.createDirectory(vscode.Uri.joinPath(file, '..'))
-}
-async function writeText(uri: vscode.Uri, text: string) {
+
+/**
+ * Write text content to a file, ensuring its directory exists
+ */
+async function writeText(uri: vscode.Uri, text: string): Promise<void> {
   await ensureDirFor(uri)
-  await vscode.workspace.fs.writeFile(uri, Buffer.from(text, 'utf8'))
+  try {
+    await vscode.workspace.fs.writeFile(uri, Buffer.from(text, 'utf8'))
+  } catch (error) {
+    console.error(`Failed to write file ${uri.fsPath}: ${error}`)
+    throw error
+  }
 }
-async function pruneEmptyDirs(root: vscode.Uri, relPath: string) {
+
+/**
+ * Clean up empty directories after file deletion
+ */
+async function pruneEmptyDirs(root: vscode.Uri, relPath: string): Promise<void> {
   const parts = relPath.split('/')
-  parts.pop()
+  parts.pop() // Remove the file name
+
   while (parts.length) {
     const dir = vscode.Uri.joinPath(root, ...parts)
     try {
       const entries = await vscode.workspace.fs.readDirectory(dir)
-      if (entries.length) break
+      if (entries.length) break // Directory not empty, stop pruning
       await vscode.workspace.fs.delete(dir, { recursive: false })
-      parts.pop()
+      parts.pop() // Move up to parent directory
     } catch {
-      break
+      break // Stop if error occurs (likely directory doesn't exist)
     }
   }
 }
 
+/**
+ * Get engine configuration for the given engine name
+ */
+function getEngineConfig(engineName: TranslatorEngine): TranslatorApiConfig {
+  const settings = vscode.workspace.getConfiguration('translator')
+  const rawConfig = settings.get(engineName)
+
+  if (!rawConfig) {
+    throw new Error(`Missing configuration for translation engine '${engineName}'`)
+  }
+
+  // Resolve environment variables in configuration
+  return resolveEnvDeep(rawConfig) as TranslatorApiConfig
+}
+
+/**
+ * Create engine override mapping from configuration
+ */
+function createEngineOverrides(overrideCfg: Record<string, string[]>): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(overrideCfg).flatMap(([engine, localePatterns]) =>
+      localePatterns.flatMap((localePattern) => {
+        const locale = localePattern.trim()
+        return locale.match(/:/)
+          ? [[locale, engine]] // locale is actually fromLocale:toLocale
+          : [
+              [`en:${locale}`, engine],
+              [`${locale}:en`, engine]
+            ]
+      })
+    )
+  )
+}
+
+/**
+ * Handle context CSV loading for JSON files
+ */
+async function loadJsonContexts(extraction: any, srcUri: vscode.Uri): Promise<(string | null)[]> {
+  // Default to null contexts
+  let contexts: (string | null)[] = new Array(extraction.segments.length).fill(null)
+
+  if (extraction.kind !== 'json') {
+    return contexts
+  }
+
+  const { map: ctxMap, stats } = await loadContextCsvForJson(srcUri)
+  const validPaths = new Set(extraction.paths.map(jsonPathToString))
+
+  // Find any issues with the context data
+  const unknown = Object.keys(ctxMap).filter((k) => !validPaths.has(k))
+  const msgs = []
+
+  if (unknown.length) {
+    msgs.push(`Unknown context path(s): ${unknown.slice(0, 6).join(', ')}${unknown.length > 6 ? ' …' : ''}`)
+  }
+
+  if (stats.duplicates.length) {
+    msgs.push(`Duplicate path(s): ${stats.duplicates.slice(0, 6).join(', ')}${stats.duplicates.length > 6 ? ' …' : ''}`)
+  }
+
+  if (stats.emptyValues.length) {
+    msgs.push(
+      `Empty context value(s): ${stats.emptyValues.slice(0, 6).join(', ')}${stats.emptyValues.length > 6 ? ' …' : ''}`
+    )
+  }
+
+  if (msgs.length) {
+    vscode.window.showWarningMessage(
+      `Translator context CSV issues in ${stats.fileUri?.fsPath || ''}: ${msgs.join(' | ')}`
+    )
+  }
+
+  return extraction.makeContexts(ctxMap)
+}
+
+/**
+ * Translate segments using specified engine
+ */
+async function translateSegments(
+  segments: string[],
+  contexts: (string | null)[],
+  engineName: TranslatorEngine,
+  sourceLocale: string,
+  targetLocale: string,
+  cache: TranslationCache
+): Promise<string[]> {
+  // If using copy engine, just return original segments
+  if (engineName === 'copy') {
+    return segments.slice()
+  }
+
+  // Get engine configuration and translate
+  const apiConfig = getEngineConfig(engineName)
+  return await bulkTranslateWithEngine(
+    segments,
+    contexts,
+    engineName,
+    {
+      source: sourceLocale,
+      target: targetLocale,
+      apiConfig
+    },
+    cache
+  )
+}
+
+/**
+ * Process file for all target locales
+ */
 export async function processFileForLocales(
   srcUri: vscode.Uri,
   cache: TranslationCache,
   params?: Partial<{ sourceLocale: string; targetLocales: string[]; enableBackTranslation: boolean }>
 ) {
-  const ws = vscode.workspace.getWorkspaceFolder(srcUri)!
+  const ws = validateWorkspace(vscode.workspace.getWorkspaceFolder(srcUri))
 
   // Load project configuration
   const projectConfig = loadProjectConfig(ws)
@@ -102,71 +230,29 @@ export async function processFileForLocales(
   const rel = relFromEN(srcUri)
   console.log(`File ${srcUri.fsPath} resolved to relative path: ${rel}`)
 
+  // Read and process file content
   const filename = srcUri.fsPath.replace(/\\/g, '/').toLowerCase()
   const content = (await vscode.workspace.fs.readFile(srcUri)).toString()
-
   const extraction = extractForFile(filename, content)
+
+  // Determine file type
   const isMarkdown = filename.endsWith('.md') || filename.endsWith('.mdx') || filename.endsWith('.markdown')
 
+  // Get engine configuration
   const defaults = {
     md: projectConfig.defaultMarkdownEngine,
     json: projectConfig.defaultJsonEngine
   }
 
-  // overrides the default translation engine for specific locales
-  const overrideCfg = projectConfig.engineOverrides
+  // Create engine overrides mapping
+  const overrides = createEngineOverrides(projectConfig.engineOverrides)
 
-  const overrides: Record<string, string> = Object.fromEntries(
-    Object.entries(overrideCfg).flatMap(([engine, localePatterns]) =>
-      localePatterns.flatMap(localePattern => {
-        const locale = localePattern.trim();
-        return locale.match(/:/)
-          ? [[locale, engine]] // locale is actually fromLocale:toLocale
-          : [
-              [`en:${locale}`, engine],
-              [`${locale}:en`, engine]
-            ]
-      })
-    )
-  )
+  // Load translation contexts for JSON files
+  const contexts = await loadJsonContexts(extraction, srcUri)
 
-  // Get translator configuration from VSCode settings (for backward compatibility)
-  // In the future, this could be moved to the .translate.json file as well
-  const settings = vscode.workspace.getConfiguration('translator')
-  const rawCfgFor = (engine: TranslatorEngine) => settings.get(engine)
-  const cfgFor = (engine: TranslatorEngine) => {
-    const cfg = rawCfgFor(engine)
-    if (!cfg) throw new Error(`Missing configuration for translation engine '${engine}'`)
-    // TODO: Verify resolved type
-    return resolveEnvDeep(cfg) as TranslatorApiConfig // may throw MissingEnvVarError
-  }
-
-  let contexts: (string | null)[] = new Array(extraction.segments.length).fill(null)
-  if (extraction.kind === 'json') {
-    const { map: ctxMap, stats } = await loadContextCsvForJson(srcUri)
-    const validPaths = new Set(extraction.paths.map(jsonPathToString))
-    const unknown = Object.keys(ctxMap).filter((k) => !validPaths.has(k))
-    const msgs = []
-    if (unknown.length)
-      msgs.push(`Unknown context path(s): ${unknown.slice(0, 6).join(', ')}${unknown.length > 6 ? ' …' : ''}`)
-    if (stats.duplicates.length)
-      msgs.push(
-        `Duplicate path(s): ${stats.duplicates.slice(0, 6).join(', ')}${stats.duplicates.length > 6 ? ' …' : ''}`
-      )
-    if (stats.emptyValues.length)
-      msgs.push(
-        `Empty context value(s): ${stats.emptyValues.slice(0, 6).join(', ')}${stats.emptyValues.length > 6 ? ' …' : ''}`
-      )
-    if (msgs.length)
-      vscode.window.showWarningMessage(
-        `Translator context CSV issues in ${stats.fileUri?.fsPath || ''}: ${msgs.join(' | ')}`
-      )
-    contexts = extraction.makeContexts(ctxMap)
-  }
-
+  // Process each target locale
   for (const targetLocale of targetLocales) {
-
-    // source => target Forward translation
+    // Forward translation (source to target)
     const engineName = pickEngine({
       source: sourceLocale,
       target: targetLocale,
@@ -175,19 +261,13 @@ export async function processFileForLocales(
       isMarkdown
     })
 
-    const fwd =
-      engineName == 'copy'
-        ? extraction.segments.slice()
-        : await bulkTranslateWithEngine(
-            extraction.segments,
-            contexts,
-            engineName,
-            { source: sourceLocale, target: targetLocale, apiConfig: cfgFor(engineName) },
-            cache
-          )
+    // Translate the segments
+    const fwd = await translateSegments(extraction.segments, contexts, engineName, sourceLocale, targetLocale, cache)
+
+    // Write forward translation output
     await writeText(outUri(ws, targetLocale, rel), extraction.rebuild(fwd))
 
-    // target => source Back translation
+    // Handle back translation if enabled
     if (enableBackTranslation) {
       const backEngine = pickEngine({
         source: targetLocale,
@@ -197,44 +277,61 @@ export async function processFileForLocales(
         isMarkdown
       })
 
+      // If using copy engine for forward translation, just copy the segments again
       const back =
-        engineName == 'copy'
+        engineName === 'copy'
           ? fwd.slice()
-          : await bulkTranslateWithEngine(
-              fwd,
-              contexts,
-              backEngine,
-              {
-                source: targetLocale,
-                target: sourceLocale,
-                apiConfig: cfgFor(backEngine)
-              },
-              cache
-            )
+          : await translateSegments(fwd, contexts, backEngine, targetLocale, sourceLocale, cache)
 
+      // Write back translation output
       await writeText(backOutUri(ws, targetLocale, rel), extraction.rebuild(back))
     }
   }
 }
 
+/**
+ * Remove translated files for a source file
+ */
 export async function removeFileForLocales(srcUri: vscode.Uri, locales?: string[]) {
-  const ws = vscode.workspace.getWorkspaceFolder(srcUri)!
-  const projectConfig = loadProjectConfig(ws)
+  const ws = validateWorkspace(vscode.workspace.getWorkspaceFolder(srcUri))
+  const config = loadProjectConfig(ws)
 
   // Use provided locales or fall back to project config
-  const targetLocales = locales || projectConfig.targetLocales
+  const targetLocales = locales || config.targetLocales
 
+  // Get relative path from source
   const rel = relFromEN(srcUri)
+
   for (const locale of targetLocales) {
+    // Get URIs for forward and back translation files
     const fwd = outUri(ws, locale, rel)
     const bwd = backOutUri(ws, locale, rel)
+
+    // Delete translation files
     try {
       await vscode.workspace.fs.delete(fwd, { recursive: false, useTrash: false })
-    } catch {}
+    } catch (error) {
+      // Ignore errors if file doesn't exist
+      console.log(`Could not delete ${fwd.fsPath}: ${error}`)
+    }
+
     try {
       await vscode.workspace.fs.delete(bwd, { recursive: false, useTrash: false })
-    } catch {}
-    await pruneEmptyDirs(vscode.Uri.joinPath(ws.uri, 'i18n', locale), rel)
-    await pruneEmptyDirs(vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en`), rel)
+    } catch (error) {
+      // Ignore errors if file doesn't exist
+      console.log(`Could not delete ${bwd.fsPath}: ${error}`)
+    }
+
+    // Clean up empty directories
+    if (config.targetDir) {
+      // If using custom target directory
+      const targetBasePath = path.join(ws.uri.fsPath, config.targetDir)
+      await pruneEmptyDirs(vscode.Uri.file(path.join(targetBasePath, 'i18n', locale)), rel)
+      await pruneEmptyDirs(vscode.Uri.file(path.join(targetBasePath, 'i18n', `${locale}_en`)), rel)
+    } else {
+      // Default cleanup paths
+      await pruneEmptyDirs(vscode.Uri.joinPath(ws.uri, 'i18n', locale), rel)
+      await pruneEmptyDirs(vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en`), rel)
+    }
   }
 }

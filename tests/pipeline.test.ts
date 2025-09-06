@@ -22,6 +22,8 @@ vi.mock('../src/cache.sqlite', async () => {
 vi.mock('../src/config', () => {
   return {
     loadProjectConfig: vi.fn(() => ({
+      sourceDir: '',
+      targetDir: '',
       sourcePaths: ['i18n/en'],
       sourceLocale: 'en',
       targetLocales: ['fr-FR'],
@@ -30,7 +32,10 @@ vi.mock('../src/config', () => {
       defaultJsonEngine: 'copy',
       engineOverrides: {}
     })),
-    findSourcePathForFile: vi.fn(() => 'i18n/en')
+    findSourcePathForFile: vi.fn(() => 'i18n/en'),
+    containsLocale: vi.fn(() => true),
+    replaceLocaleInPath: vi.fn((path, sourceLocale, targetLocale) =>
+      path.replace(sourceLocale, targetLocale))
   }
 })
 

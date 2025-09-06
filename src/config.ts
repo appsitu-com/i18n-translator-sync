@@ -3,6 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { z } from 'zod'
 import { TranslatorEngine } from './translators/types'
+import { containsLocale, replaceLocaleInPath, findSourcePathForFile, verifyFilePath as pathsVerifyFilePath } from './util/paths'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
 
@@ -11,6 +12,14 @@ const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
 
 // Zod schema for validating .translate.json
 export const TranslateConfigSchema = z.object({
+  sourceDir: z.string()
+    .describe('Base directory for source paths (prepended to sourcePaths)')
+    .optional(),
+
+  targetDir: z.string()
+    .describe('Base directory for target paths (prepended to generated target paths)')
+    .optional(),
+
   sourcePaths: z.array(z.string())
     .describe('Source language paths to scan for files to translate')
     .optional(),
@@ -42,6 +51,8 @@ export const TranslateConfigSchema = z.object({
 
 // Infer the type from the schema - should match our interface
 export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema> & {
+  sourceDir: string
+  targetDir: string
   sourcePaths: string[]
   sourceLocale: string
   targetLocales: string[]
@@ -55,6 +66,8 @@ export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema> & {
  * Default configuration values
  */
 const defaultConfig: TranslateProjectConfig = {
+  sourceDir: '',
+  targetDir: '',
   sourcePaths: ['i18n/en'],
   sourceLocale: 'en',
   targetLocales: [],
@@ -74,6 +87,10 @@ function formatZodError(error: z.ZodError): string[] {
 
     // Customize error messages based on field and error type
     switch (fieldName) {
+      case 'sourceDir':
+        return `Source directory: ${issue.message} (must be a string)`;
+      case 'targetDir':
+        return `Target directory: ${issue.message} (must be a string)`;
       case 'sourcePaths':
         return `Source paths: ${issue.message} (must be an array of strings)`;
       case 'sourceLocale':
@@ -133,6 +150,8 @@ export function loadProjectConfig(workspaceFolder: vscode.WorkspaceFolder): Tran
   const settings = vscode.workspace.getConfiguration('translator')
 
   return {
+    sourceDir: projectConfig.sourceDir || defaultConfig.sourceDir,
+    targetDir: projectConfig.targetDir || defaultConfig.targetDir,
     sourcePaths: projectConfig.sourcePaths || defaultConfig.sourcePaths,
     sourceLocale: projectConfig.sourceLocale || settings.get<string>('sourceLocale', defaultConfig.sourceLocale),
     targetLocales: projectConfig.targetLocales || settings.get<string[]>('targetLocales', defaultConfig.targetLocales),
@@ -154,47 +173,8 @@ export function loadProjectConfig(workspaceFolder: vscode.WorkspaceFolder): Tran
   };
 }
 
-/**
- * Find the source path that contains the given file
- */
-export function findSourcePathForFile(uri: vscode.Uri, config: TranslateProjectConfig): string | null {
-  const ws = vscode.workspace.getWorkspaceFolder(uri)
-  if (!ws) return null
-
-  // Handle both fsPath and path properties to work with tests
-  const wsPath = ws.uri.fsPath || ws.uri.path;
-  if (!wsPath) {
-    console.log(`Workspace has no path: ${JSON.stringify(ws.uri)}`)
-    return null;
-  }
-
-  const uriPath = uri.fsPath || uri.path;
-  if (!uriPath) {
-    console.log(`URI has no path: ${JSON.stringify(uri)}`)
-    return null;
-  }
-
-  // Normalize paths for consistent comparison (especially important on Windows)
-  const normalizedUriPath = uriPath.replace(/\\/g, '/').toLowerCase()
-  console.log(`Finding source path for: ${normalizedUriPath}`)
-
-  for (const sourcePath of config.sourcePaths) {
-    // Normalize the full source path
-    const fullSourcePath = path.join(wsPath, sourcePath).replace(/\\/g, '/').toLowerCase()
-    console.log(`Checking if file is in: ${fullSourcePath}`)
-
-    if (normalizedUriPath.startsWith(fullSourcePath)) {
-      console.log(`Match found: ${sourcePath}`)
-      return sourcePath
-    }
-  }
-
-  // For debugging
-  console.log(`No source path found for ${uriPath}. Checked paths:`,
-    config.sourcePaths.map(p => path.join(wsPath, p).replace(/\\/g, '/')))
-
-  return null
-}
+// Re-export path utilities from the paths module
+export { containsLocale, replaceLocaleInPath, findSourcePathForFile }
 
 /**
  * Utility function to verify if a file is in any of the configured source paths
@@ -207,30 +187,8 @@ export function verifyFilePath(uri: vscode.Uri): void {
     return
   }
 
-  // Handle both fsPath and path properties to work with tests
-  const wsPath = ws.uri.fsPath || ws.uri.path;
-  if (!wsPath) {
-    console.log(`Workspace has no path: ${JSON.stringify(ws.uri)}`)
-    return;
-  }
-
-  const uriPath = uri.fsPath || uri.path;
-  if (!uriPath) {
-    console.log(`URI has no path: ${JSON.stringify(uri)}`)
-    return;
-  }
-
   const config = loadProjectConfig(ws)
-  const normalizedUriPath = uriPath.replace(/\\/g, '/').toLowerCase()
 
-  console.log(`Verification for file: ${uriPath}`)
-  console.log(`Normalized path: ${normalizedUriPath}`)
-  console.log(`Workspace path: ${wsPath}`)
-  console.log(`Source paths:`, config.sourcePaths)
-
-  for (const sourcePath of config.sourcePaths) {
-    const fullSourcePath = path.join(wsPath, sourcePath).replace(/\\/g, '/').toLowerCase()
-    console.log(`Checking path ${sourcePath}: ${fullSourcePath}`)
-    console.log(`Is file in path? ${normalizedUriPath.startsWith(fullSourcePath)}`)
-  }
+  // Use the imported verification function from paths.ts
+  pathsVerifyFilePath(uri, config)
 }
