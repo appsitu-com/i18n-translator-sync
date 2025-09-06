@@ -7,14 +7,16 @@
  * 1. Ensures required dependencies are installed
  * 2. Updates package.json with required metadata for publishing
  * 3. Creates icon and other assets if missing
- * 4. Builds the extension
- * 5. Packages it into a VSIX file ready for publishing
+ * 4. Updates version based on user choice (major, minor, patch)
+ * 5. Builds the extension
+ * 6. Packages it into a VSIX file ready for publishing in the releases folder
  */
 
 const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const https = require('https');
+const { updateVersion } = require('./update-version');
 
 // Constants
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -23,6 +25,7 @@ const ICON_SVG_PATH = path.join(ROOT_DIR, 'images', 'icon.svg');
 const ICON_PNG_PATH = path.join(ROOT_DIR, 'images', 'icon.png');
 const PACKAGE_LOCK_PATH = path.join(ROOT_DIR, 'package-lock.json');
 const README_PATH = path.join(ROOT_DIR, 'README.md');
+const RELEASES_DIR = path.join(ROOT_DIR, 'releases');
 
 // Utilities
 function execPromise(command) {
@@ -126,6 +129,12 @@ async function ensureAssets() {
     if (!fs.existsSync(imagesDir)) {
       fs.mkdirSync(imagesDir, { recursive: true });
       console.log(`Created directory: ${imagesDir}`);
+    }
+
+    // Create releases directory if it doesn't exist
+    if (!fs.existsSync(RELEASES_DIR)) {
+      fs.mkdirSync(RELEASES_DIR, { recursive: true });
+      console.log(`Created releases directory: ${RELEASES_DIR}`);
     }
 
     // Ensure we have both SVG and PNG icons
@@ -270,24 +279,31 @@ async function buildExtension() {
   }
 }
 
-async function packageExtension() {
+async function packageExtension(newVersion) {
   console.log('Packaging extension...');
 
   try {
-    // Get version from package.json
-    const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf-8'));
-    const version = packageJson.version;
+    // Get version from parameter
+    const version = newVersion;
+
+    // Create releases directory if it doesn't exist
+    if (!fs.existsSync(RELEASES_DIR)) {
+      fs.mkdirSync(RELEASES_DIR, { recursive: true });
+      console.log(`Created releases directory: ${RELEASES_DIR}`);
+    }
 
     // Run prepublish script with yarn (local)
     console.log('Running prepublish script with yarn...');
     await execPromise('yarn vscode:prepublish');
 
-    // Package with vsce (global npm tool)
+    // Package with vsce (global npm tool) into the releases directory
     console.log('Packaging with @vscode/vsce (npm global tool)...');
-    await execPromise('npx @vscode/vsce package');
+    await execPromise(`npx @vscode/vsce package --out "${RELEASES_DIR}"`);
 
-    const vsixName = `i18n-translator-vscode-${version}.vsix`;
+    const vsixName = `${RELEASES_DIR}/i18n-translator-vscode-${version}.vsix`;
     console.log(`Extension packaged successfully as ${vsixName}`);
+
+    return vsixName;
   } catch (error) {
     console.error('Error packaging extension:', error);
     process.exit(1);
@@ -326,13 +342,27 @@ async function main() {
   }
 
   try {
+    // First ensure all dependencies are installed
     await ensureDependencies();
+
+    // Then update version (this will prompt user for version update type)
+    const newVersion = await updateVersion();
+
+    // Ensure all required assets exist
     await ensureAssets();
+
+    // Update package.json with required metadata
     await updatePackageJson();
+
+    // Build the extension
     await buildExtension();
-    await packageExtension();
+
+    // Package the extension with the new version
+    const vsixPath = await packageExtension(newVersion);
 
     console.log('Extension packaging completed successfully!');
+    console.log(`VSIX file created: ${vsixPath}`);
+    console.log(`Version: ${newVersion}`);
   } catch (error) {
     console.error('Extension packaging failed:', error);
     process.exit(1);

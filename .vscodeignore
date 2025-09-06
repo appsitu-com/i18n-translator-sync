@@ -24,5 +24,6 @@ ROADMAP.md
 .git/**
 scripts/**
 coverage/**
+releases/**
 node_modules/**
 !node_modules/better-sqlite3/**

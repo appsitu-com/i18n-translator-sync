@@ -7,3 +7,7 @@ node_modules/
 
 coverage/
 .translator.env
+
+# Exclude release artifacts
+releases/
+*.vsix

@@ -71,18 +71,43 @@ yarn package
 # Press F5 in VS Code to launch a new window with the extension
 ```
 
-### Packaging
+### Packaging and Versioning
 The extension uses:
 - Yarn for local project dependencies
 - npm for global tools (like @vscode/vsce)
 
-To create a VSIX package manually:
+To create a VSIX package with version management:
 ```bash
-# Install the packaging tool
-npm install -g @vscode/vsce
-
-# Create the package
+# Run the packaging script with interactive version selection
 yarn package
+```
+
+This will:
+1. Prompt you to select a version update type:
+   - Major version (x.0.0) - For breaking changes
+   - Minor version (0.x.0) - For new features (backward compatible)
+   - Patch version (0.0.x) - For bug fixes (backward compatible)
+   - Custom - Enter a specific version number
+2. Update the version in package.json
+3. Build the extension
+4. Package it as a VSIX file in the `releases/` directory
+
+You can also update the version independently:
+```bash
+# Update version only (without packaging)
+yarn version:update
+```
+
+For development iterations, you can create a quick package without updating the version:
+```bash
+# Create package without version selection
+yarn package:quick
+```
+
+If you need to regenerate the extension icon:
+```bash
+# Regenerate the PNG icon from SVG
+yarn package:regenerate-icon
 ```
 
 

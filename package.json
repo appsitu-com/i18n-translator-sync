@@ -2,7 +2,7 @@
   "name": "i18n-translator-vscode",
   "displayName": "i18n Translator",
   "publisher": "your-publisher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -183,7 +183,8 @@
     "package": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "package:quick": "npx @vscode/vsce package",
-    "test:cov": "vitest run --coverage"
+    "test:cov": "vitest run --coverage",
+    "version:update": "node scripts/update-version.js"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
