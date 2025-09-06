@@ -7,17 +7,57 @@ import { bulkTranslateWithEngine } from './bulkTranslate'
 import { pickEngine } from './translators/registry'
 import { resolveEnvDeep } from './util/env'
 import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
-
-const SRC_ROOT = 'i18n/en'
+import { loadProjectConfig, findSourcePathForFile } from './config'
 
 function relFromEN(uri: vscode.Uri) {
   const ws = vscode.workspace.getWorkspaceFolder(uri)!
-  return path.relative(path.join(ws.uri.fsPath, SRC_ROOT), uri.fsPath)
+  if (!ws || !ws.uri) {
+    throw new Error(`No workspace folder found for ${uri.fsPath}`);
+  }
+
+  // Ensure we have fsPath property
+  const wsPath = ws.uri.fsPath || ws.uri.path;
+  if (!wsPath) {
+    throw new Error(`Workspace folder URI has no path: ${JSON.stringify(ws.uri)}`);
+  }
+
+  const config = loadProjectConfig(ws)
+
+  // Find which source path this file is in
+  const sourcePath = findSourcePathForFile(uri, config)
+  if (!sourcePath) {
+    // Import the verification function to get detailed debugging info
+    const { verifyFilePath } = require('./config');
+
+    // Run verification checks for detailed diagnostics
+    verifyFilePath(uri);
+
+    // Provide more detailed error with available paths
+    const availablePaths = config.sourcePaths.map(p => path.join(wsPath, p).replace(/\\/g, '/'));
+    const normalizedFilePath = uri.fsPath.replace(/\\/g, '/');
+
+    throw new Error(
+      `File ${uri.fsPath} is not in any of the configured source paths.\n` +
+      `Available paths: ${JSON.stringify(availablePaths)}\n` +
+      `Normalized file path: ${normalizedFilePath}\n` +
+      `Workspace root: ${wsPath}`
+    );
+  }
+
+  // Get relative path from source root
+  const sourceFolderPath = path.join(wsPath, sourcePath);
+  return path.relative(sourceFolderPath, uri.fsPath);
 }
 function outUri(ws: vscode.WorkspaceFolder, locale: string, rel: string) {
+  if (!ws || !ws.uri) {
+    throw new Error(`Invalid workspace folder for output URI: ${JSON.stringify(ws)}`);
+  }
   return vscode.Uri.joinPath(ws.uri, 'i18n', locale, rel)
 }
 function backOutUri(ws: vscode.WorkspaceFolder, locale: string, rel: string) {
+  if (!ws || !ws.uri) {
+    throw new Error(`Invalid workspace folder for back-translation URI: ${JSON.stringify(ws)}`);
+  }
   return vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en`, rel)
 }
 async function ensureDirFor(file: vscode.Uri) {
@@ -45,42 +85,54 @@ async function pruneEmptyDirs(root: vscode.Uri, relPath: string) {
 
 export async function processFileForLocales(
   srcUri: vscode.Uri,
-  params: { locales: string[]; sourceLocale: string; enableBackTranslation: boolean },
-  cache: TranslationCache
+  cache: TranslationCache,
+  params?: Partial<{ sourceLocale: string; targetLocales: string[]; enableBackTranslation: boolean }>
 ) {
   const ws = vscode.workspace.getWorkspaceFolder(srcUri)!
+
+  // Load project configuration
+  const projectConfig = loadProjectConfig(ws)
+
+  // Use provided params or fall back to project config
+  const sourceLocale = params?.sourceLocale ?? projectConfig.sourceLocale
+  const targetLocales = params?.targetLocales ?? projectConfig.targetLocales
+  const enableBackTranslation = params?.enableBackTranslation ?? projectConfig.enableBackTranslation
+
+  // Get relative path from the source folder
   const rel = relFromEN(srcUri)
+  console.log(`File ${srcUri.fsPath} resolved to relative path: ${rel}`)
+
   const filename = srcUri.fsPath.replace(/\\/g, '/').toLowerCase()
   const content = (await vscode.workspace.fs.readFile(srcUri)).toString()
 
   const extraction = extractForFile(filename, content)
   const isMarkdown = filename.endsWith('.md') || filename.endsWith('.mdx') || filename.endsWith('.markdown')
 
-  const settings = vscode.workspace.getConfiguration('translator')
   const defaults = {
-    md: settings.get<string>('defaultMarkdownEngine', 'azure'),
-    json: settings.get<string>('defaultJsonEngine', 'google')
+    md: projectConfig.defaultMarkdownEngine,
+    json: projectConfig.defaultJsonEngine
   }
 
   // overrides the default translation engine for specific locales
-  const overrideCfg = settings.get<Record<string, string>>('engineOverrides', {})
+  const overrideCfg = projectConfig.engineOverrides
 
   const overrides: Record<string, string> = Object.fromEntries(
-    Object.entries(overrideCfg).flatMap(([engine, locales]) =>
-      locales
-        .split(',')
-        .map((locale) => locale.trim())
-        .map((locale) =>
-          locale.match(/:/)
-            ? [locale, engine] // locale is actually fromLocale:toLocale
-            : [
-                [`en:${locale}`, engine],
-                [`${locale}:en`, engine]
-              ]
-        )
+    Object.entries(overrideCfg).flatMap(([engine, localePatterns]) =>
+      localePatterns.flatMap(localePattern => {
+        const locale = localePattern.trim();
+        return locale.match(/:/)
+          ? [[locale, engine]] // locale is actually fromLocale:toLocale
+          : [
+              [`en:${locale}`, engine],
+              [`${locale}:en`, engine]
+            ]
+      })
     )
   )
 
+  // Get translator configuration from VSCode settings (for backward compatibility)
+  // In the future, this could be moved to the .translate.json file as well
+  const settings = vscode.workspace.getConfiguration('translator')
   const rawCfgFor = (engine: TranslatorEngine) => settings.get(engine)
   const cfgFor = (engine: TranslatorEngine) => {
     const cfg = rawCfgFor(engine)
@@ -112,11 +164,11 @@ export async function processFileForLocales(
     contexts = extraction.makeContexts(ctxMap)
   }
 
-  for (const targetLocale of params.locales) {
+  for (const targetLocale of targetLocales) {
 
     // source => target Forward translation
     const engineName = pickEngine({
-      source: params.sourceLocale,
+      source: sourceLocale,
       target: targetLocale,
       defaults,
       overrides,
@@ -130,16 +182,16 @@ export async function processFileForLocales(
             extraction.segments,
             contexts,
             engineName,
-            { source: params.sourceLocale, target: targetLocale, apiConfig: cfgFor(engineName) },
+            { source: sourceLocale, target: targetLocale, apiConfig: cfgFor(engineName) },
             cache
           )
     await writeText(outUri(ws, targetLocale, rel), extraction.rebuild(fwd))
 
     // target => source Back translation
-    if (params.enableBackTranslation) {
+    if (enableBackTranslation) {
       const backEngine = pickEngine({
         source: targetLocale,
-        target: params.sourceLocale,
+        target: sourceLocale,
         defaults,
         overrides,
         isMarkdown
@@ -154,7 +206,7 @@ export async function processFileForLocales(
               backEngine,
               {
                 source: targetLocale,
-                target: params.sourceLocale,
+                target: sourceLocale,
                 apiConfig: cfgFor(backEngine)
               },
               cache
@@ -165,10 +217,15 @@ export async function processFileForLocales(
   }
 }
 
-export async function removeFileForLocales(srcUri: vscode.Uri, locales: string[]) {
+export async function removeFileForLocales(srcUri: vscode.Uri, locales?: string[]) {
   const ws = vscode.workspace.getWorkspaceFolder(srcUri)!
+  const projectConfig = loadProjectConfig(ws)
+
+  // Use provided locales or fall back to project config
+  const targetLocales = locales || projectConfig.targetLocales
+
   const rel = relFromEN(srcUri)
-  for (const locale of locales) {
+  for (const locale of targetLocales) {
     const fwd = outUri(ws, locale, rel)
     const bwd = backOutUri(ws, locale, rel)
     try {

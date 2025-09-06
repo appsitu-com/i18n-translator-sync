@@ -61,6 +61,7 @@
             "azure",
             "google",
             "deepl",
+            "gemini",
             "copy"
           ],
           "default": "azure"
@@ -71,6 +72,7 @@
             "azure",
             "google",
             "deepl",
+            "gemini",
             "copy"
           ],
           "default": "google"
@@ -78,8 +80,51 @@
         "translator.engineOverrides": {
           "type": "object",
           "default": {
-            "deepl": "en-GB,fr-FR,fr,fr-CA,de-DE,de",
-            "copy": "en-US"
+            "deepl": [
+              "ar",
+              "bg",
+              "cs",
+              "da",
+              "de",
+              "el",
+              "en",
+              "en-GB",
+              "en-US",
+              "es",
+              "es-419",
+              "et",
+              "fi",
+              "fr",
+              "he",
+              "hu",
+              "id",
+              "it",
+              "ja",
+              "ko",
+              "lt",
+              "lv",
+              "nb",
+              "nl",
+              "pl",
+              "pt",
+              "pt-BR",
+              "pt-PT",
+              "ro",
+              "ru",
+              "sk",
+              "sl",
+              "sv",
+              "th",
+              "tr",
+              "uk",
+              "vi",
+              "zh",
+              "zh-Hans",
+              "zh-Hant"
+            ],
+            "copy": [
+              "en-US"
+            ]
           }
         },
         "translator.azure": {
@@ -100,6 +145,15 @@
           "default": {
             "key": "env:DEEPL_TRANSLATE_KEY",
             "free": true
+          }
+        },
+        "translator.gemini": {
+          "type": "object",
+          "default": {
+            "key": "env:GEMINI_API_KEY",
+            "geminiModel": "gemini-1.5-pro",
+            "temperature": 0.1,
+            "maxOutputTokens": 1024
           }
         },
         "translator.matecat": {

@@ -21,11 +21,16 @@ export interface TranslatorApiConfig {
   formality?: string
   deeplModel?: string
 
+  // engine: 'gemini'
+  geminiModel?: string
+  temperature?: number
+  maxOutputTokens?: number
+
   // engine: 'mymemory'
   email?: string
 }
 
-export type TranslatorEngine = 'azure' | 'google' | 'deepl' | 'mymemory' | 'copy'
+export type TranslatorEngine = 'azure' | 'google' | 'deepl' | 'mymemory' | 'gemini' | 'copy'
 
 export interface BulkTranslateOpts {
   sourceLocale: string

@@ -2,6 +2,22 @@ import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vites
 import { activate, deactivate } from '../src/extension'
 import vscode, { commands, workspace, watcher, Uri } from './mocks/vscode'
 
+// Mock the config module
+vi.mock('../src/config', () => {
+  return {
+    loadProjectConfig: vi.fn(() => ({
+      sourcePaths: ['i18n/en'],
+      sourceLocale: 'en',
+      targetLocales: [],
+      enableBackTranslation: true,
+      defaultMarkdownEngine: 'copy',
+      defaultJsonEngine: 'copy',
+      engineOverrides: {}
+    })),
+    findSourcePathForFile: vi.fn(() => 'i18n/en')
+  }
+})
+
 describe('extension', () => {
   // Set up mocks for each test
   beforeEach(() => {

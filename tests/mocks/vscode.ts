@@ -29,12 +29,15 @@ export const watcher = {
 }
 
 export const Uri = {
-  file: (fsPath: string) => ({ fsPath, path: fsPath.replace(/\\/g, '/') } as any),
-  joinPath: (...parts: any[]) =>
-    ({
-      fsPath: parts.map((p: any) => (typeof p === 'string' ? p : p.fsPath)).join('/'),
-      path: parts.map((p: any) => (typeof p === 'string' ? p : p.path)).join('/')
-    } as any)
+  file: (fsPath: string) => {
+    const path = fsPath.replace(/\\/g, '/');
+    return { fsPath, path } as any;
+  },
+  joinPath: (...parts: any[]) => {
+    const fsPath = parts.map((p: any) => (typeof p === 'string' ? p : p.fsPath)).join('/');
+    const path = parts.map((p: any) => (typeof p === 'string' ? p : p.path)).join('/');
+    return { fsPath, path } as any;
+  }
 }
 
 export const commands = { registerCommand: vi.fn() }

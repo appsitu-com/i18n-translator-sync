@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { pushCacheToMateCat, pullReviewedFromMateCat } from '../src/matecat'
+import { pushCacheToMateCat, pullReviewedFromMateCat } from '../src/matecate'
 import { workspace } from './mocks/vscode'
 
 class FakeCache {

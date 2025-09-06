@@ -104,7 +104,15 @@ export class SQLiteCache implements TranslationCache {
 
     for (const r of rows as any) {
       const line =
-        [r.engine_name, r.source_lang, r.target_lang, r.source_text, r.context, r.translated_text, r.updated_at.toString()]
+        [
+          r.engine_name,
+          r.source_lang,
+          r.target_lang,
+          r.source_text,
+          r.context,
+          r.translated_text,
+          r.updated_at.toString()
+        ]
           .map(esc)
           .join(',') + '\n'
       fs.writeSync(fd, line)

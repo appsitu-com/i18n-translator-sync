@@ -5,8 +5,7 @@ import { SQLiteCache } from './cache.sqlite'
 import { processFileForLocales, removeFileForLocales } from './pipeline'
 import { registerAllTranslators } from './translators'
 import { pullReviewedFromMateCat, pushCacheToMateCat } from './matecate'
-
-const SRC_ROOT = 'i18n/en'
+import { loadProjectConfig } from './config'
 let cache: SQLiteCache | undefined = undefined
 let watcher: vscode.FileSystemWatcher | null = null
 let subscriptions: vscode.Disposable[] = []
@@ -37,55 +36,126 @@ async function startTranslator(ctx: vscode.ExtensionContext) {
 
   cache = getCache()
 
-  watcher = vscode.workspace.createFileSystemWatcher(`**/${SRC_ROOT}/**`, false, false, false)
+  // Get the workspace
+  const ws = vscode.workspace.workspaceFolders?.[0]
+  if (!ws) {
+    vscode.window.showErrorMessage('No workspace folder found')
+    return
+  }
+
+  // Load project configuration
+  const projectConfig = loadProjectConfig(ws)
+
+  // Create watchers for each source path
+  const watchers: vscode.FileSystemWatcher[] = []
+  console.log(`Setting up watchers for paths: ${JSON.stringify(projectConfig.sourcePaths)}`)
+
+  for (const sourcePath of projectConfig.sourcePaths) {
+    // Create the glob pattern ensuring it works on all platforms
+    const normalizedPath = sourcePath.replace(/\\/g, '/')
+    const pattern = `**/${normalizedPath}/**`
+    console.log(`Creating watcher with pattern: ${pattern}`)
+
+    const watcher = vscode.workspace.createFileSystemWatcher(pattern, false, false, false)
+    watchers.push(watcher)
+    console.log(`Watcher created for ${pattern}`)
+  }
+
+  // Assign the first watcher as the main one (for backwards compatibility)
+  watcher = watchers[0] || null
+
+  if (!watcher) {
+    vscode.window.showWarningMessage('No source paths configured for translation monitoring')
+  }
 
   const onAddOrChange = async (uri: vscode.Uri) => {
     try {
-      const c = cfg()
-      const sourceLocale = c.get<string>('sourceLocale', 'en')
-      const enableBackTranslation = c.get<boolean>('enableBackTranslation', true)
-      const targetLocales = c.get<string[]>('targetLocales', [])
-      const processCfg = { sourceLocale, targetLocales, enableBackTranslation }
-      if (!targetLocales.length || !cache) return
-      await processFileForLocales(uri, processCfg, cache)
+      console.log(`File changed: ${uri.fsPath}`)
+
+      if (!cache) {
+        console.log('No translation cache available')
+        return
+      }
+
+      const ws = vscode.workspace.getWorkspaceFolder(uri)
+      if (!ws) {
+        console.log('No workspace found for file')
+        return
+      }
+
+      // Get project configuration (which may come from .translate.json)
+      const projectConfig = loadProjectConfig(ws)
+      console.log(`Config loaded with source paths: ${JSON.stringify(projectConfig.sourcePaths)}`)
+
+      // Check if we have any target locales
+      if (!projectConfig.targetLocales.length) {
+        console.log('No target locales configured')
+        return
+      }
+
+      // Process the file using project configuration
+      console.log(`Processing file: ${uri.fsPath}`)
+      await processFileForLocales(uri, cache)
+      console.log(`Successfully processed file: ${uri.fsPath}`)
     } catch (err: any) {
+      console.error(`Error processing file ${uri.fsPath}:`, err)
       vscode.window.showErrorMessage(`Translator error for ${uri.fsPath}: ${err?.message ?? String(err)}`)
     }
   }
+
   const onDelete = async (uri: vscode.Uri) => {
     try {
-      const locales = cfg().get<string[]>('targetLocales', [])
-      if (!locales.length) return
-      await removeFileForLocales(uri, locales)
+      await removeFileForLocales(uri)
     } catch (err: any) {
       vscode.window.showErrorMessage(`Translator error (delete) for ${uri.fsPath}: ${err?.message ?? String(err)}`)
     }
   }
-  const onRename = async (e: vscode.FileRenameEvent) => {
-    const c = cfg()
-    const enableBackTranslation = c.get<boolean>('enableBackTranslation', true)
-    const sourceLocale = c.get<string>('sourceLocale', 'en')
-    const targetLocales = c.get<string[]>('targetLocales', [])
-    const processCfg = { sourceLocale, targetLocales, enableBackTranslation }
 
-    if (!targetLocales.length || !cache) return
+  const onRename = async (e: vscode.FileRenameEvent) => {
+    if (!cache) return
 
     for (const file of e.files) {
-      const oldPath = file.oldUri.fsPath.replace(/\\/g, '/')
-      const newPath = file.newUri.fsPath.replace(/\\/g, '/')
-      if (oldPath.includes('/i18n/en/')) await removeFileForLocales(file.oldUri, targetLocales)
-      if (newPath.includes('/i18n/en/')) {
-        await processFileForLocales(file.newUri, processCfg, cache)
+      try {
+        const oldPath = file.oldUri.fsPath.replace(/\\/g, '/')
+        const newPath = file.newUri.fsPath.replace(/\\/g, '/')
+
+        const ws = vscode.workspace.getWorkspaceFolder(file.newUri)
+        if (!ws) continue
+
+        const projectConfig = loadProjectConfig(ws)
+
+        // Check if the file is within any source path
+        let isInSourcePath = false
+        for (const sourcePath of projectConfig.sourcePaths) {
+          const fullSourcePath = path.join(ws.uri.fsPath, sourcePath).replace(/\\/g, '/')
+          if (oldPath.startsWith(fullSourcePath) || newPath.startsWith(fullSourcePath)) {
+            isInSourcePath = true
+            break
+          }
+        }
+
+        if (isInSourcePath) {
+          if (file.oldUri) {
+            await removeFileForLocales(file.oldUri)
+          }
+          if (file.newUri) {
+            await processFileForLocales(file.newUri, cache)
+          }
+        }
+      } catch (err: any) {
+        vscode.window.showErrorMessage(`Translator error (rename) for ${file.newUri.fsPath}: ${err?.message ?? String(err)}`)
       }
     }
   }
 
   subscriptions = [
-    watcher.onDidCreate(onAddOrChange),
-    watcher.onDidChange(onAddOrChange),
-    watcher.onDidDelete(onDelete),
-    vscode.workspace.onDidRenameFiles(onRename),
-    watcher
+    ...watchers.flatMap(watcher => [
+      watcher.onDidCreate(onAddOrChange),
+      watcher.onDidChange(onAddOrChange),
+      watcher.onDidDelete(onDelete),
+      watcher
+    ]),
+    vscode.workspace.onDidRenameFiles(onRename)
   ]
   ctx.subscriptions.push(...subscriptions)
   vscode.window.showInformationMessage('Translator started')

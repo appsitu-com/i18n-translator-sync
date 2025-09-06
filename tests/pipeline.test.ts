@@ -1,9 +1,10 @@
 import * as path from 'path'
-import { it, vi, expect, beforeEach } from 'vitest'
+import { it, vi, expect, beforeEach, afterEach } from 'vitest'
 import { processFileForLocales, removeFileForLocales } from '../src/pipeline'
 import { workspace, Uri } from './mocks/vscode'
 import { registerAllTranslators } from '../src/translators'
 import { SQLiteCache } from '../src/cache.sqlite'
+import { loadProjectConfig } from '../src/config'
 
 vi.mock('../src/cache.sqlite', async () => {
   const mod = await vi.importActual<any>('../src/cache.sqlite')
@@ -18,9 +19,25 @@ vi.mock('../src/cache.sqlite', async () => {
   return { ...mod, SQLiteCache: FakeCache }
 })
 
+vi.mock('../src/config', () => {
+  return {
+    loadProjectConfig: vi.fn(() => ({
+      sourcePaths: ['i18n/en'],
+      sourceLocale: 'en',
+      targetLocales: ['fr-FR'],
+      enableBackTranslation: true,
+      defaultMarkdownEngine: 'copy',
+      defaultJsonEngine: 'copy',
+      engineOverrides: {}
+    })),
+    findSourcePathForFile: vi.fn(() => 'i18n/en')
+  }
+})
+
 beforeEach(() => {
+  vi.clearAllMocks()
   // workspace root and config
-  (workspace.getConfiguration as any).mockReturnValue({
+  ;(workspace.getConfiguration as any).mockReturnValue({
     get: (k: string, d: any) => {
       const m: any = {
         sourceLocale: 'en',
@@ -34,25 +51,30 @@ beforeEach(() => {
     }
   })
   // mock FS read/write
-  (workspace.fs.readFile as any).mockReset()
-  (workspace.fs.writeFile as any).mockReset()
-  (workspace.fs.createDirectory as any).mockResolvedValue(void 0)
-  (workspace.fs.readDirectory as any).mockResolvedValue([])
+  // (workspace.fs.readFile as any).mockReset()
+  // (workspace.fs.writeFile as any).mockReset()
+  // (workspace.fs.createDirectory as any).mockResolvedValue(void 0)
+  // (workspace.fs.readDirectory as any).mockResolvedValue([])
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
 })
 
 it('processFileForLocales writes forward and back files', async () => {
   registerAllTranslators() // includes copy engine
   // pretend JSON file
   const src = Uri.file('/ws/i18n/en/demo.json')
-  ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws' } }]
-  ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws' } })
+  // Update the mock to include both path and fsPath properties
+  ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
+  ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
   ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from(JSON.stringify({ a: 'x' }), 'utf8'))
 
   const cache = new SQLiteCache(':memory:')
   await processFileForLocales(
     src,
-    { locales: ['fr-FR'], sourceLocale: 'en', enableBackTranslation: true },
-    cache as any
+    cache as any,
+    { targetLocales: ['fr-FR'], sourceLocale: 'en', enableBackTranslation: true }
   )
 
   expect(workspace.fs.writeFile).toHaveBeenCalled()
@@ -63,9 +85,9 @@ it('processFileForLocales writes forward and back files', async () => {
 
 it('removeFileForLocales deletes forward and back files and prunes', async () => {
   const src = Uri.file('/ws/i18n/en/demo.json')
-  ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws' } }]
-  ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws' } })
+  ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
+  ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
 
-  await removeFileForLocales(src, ['fr-FR'])
+  await removeFileForLocales(src)
   expect(workspace.fs.delete).toHaveBeenCalledTimes(2)
 })
