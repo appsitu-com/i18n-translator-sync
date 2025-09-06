@@ -105,7 +105,7 @@ describe('extractMarkdownOrMDX', () => {
     const ex = extractMarkdownOrMDX(md)
 
     // There should be no segments to translate in a pure code block
-    expect(ex.segments.length).toBe(0)
+    expect(ex.segments).toEqual([])
 
     const rebuilt = ex.rebuild([])
     expect(rebuilt).toEqual(md)

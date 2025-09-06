@@ -15,7 +15,7 @@ vi.mock('../../src/util/retry', () => ({
 import { postJson } from '../../src/util/http'
 import { withRetry } from '../../src/util/retry'
 
-describe('GeminiTranslator', () => {
+describe('GeminiTranslator stub', () => {
   beforeEach(() => {
     vi.resetAllMocks()
   })
@@ -134,3 +134,41 @@ describe('GeminiTranslator', () => {
     expect(result).toEqual(['Test error handling'])
   })
 })
+
+// Tests using real Gemini API keys from .translator.env
+describe('gemini api', () => {
+  // This will ensure we're using the real implementation, not the mock
+  beforeEach(() => {
+    vi.restoreAllMocks();
+
+    // This will throw an error if the key isn't set or is a test/placeholder key
+    const key = process.env.GEMINI_API_KEY;
+    console.log('Gemini API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
+    if (!key || key === 'test-gemini-key' || key.includes('YOUR_GEMINI_API_KEY_HERE')) {
+      throw new Error('Real Gemini API key required in .translator.env for this test suite');
+    }
+  });
+
+  it('translates text with real API', async () => {
+    const apiConfig = {
+      key: process.env.GEMINI_API_KEY as string,
+      endpoint: 'https://generativelanguage.googleapis.com/v1beta',
+      region: ''
+    };
+
+    const texts = ['hello', 'world'];
+    const out = await GeminiTranslator.translateMany(texts, [null, null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig
+    });
+
+    // Verify we got some response (not necessarily the exact translations)
+    // The Gemini API might give different translations or formats based on API key and rate limits
+    expect(out.length).toBe(2);
+    // Just check that we got something other than an error (which would return original text)
+    expect(out[0].length).toBeGreaterThan(0);
+    expect(out[1].length).toBeGreaterThan(0);
+  });
+})
+

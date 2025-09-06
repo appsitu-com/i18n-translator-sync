@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { AzureTranslator } from '../../src/translators/azure'
-import { getEnv } from '../../src/util/env';
+import { getEnv } from '../../src/util/env'
 
-describe('azure', () => {
+describe('azure stub', () => {
   const originalFetch = globalThis.fetch as any
 
   beforeEach(() => {
@@ -33,19 +33,35 @@ describe('azure', () => {
     const out = await AzureTranslator.translateMany(['x', 'y', 'z'], [null, null, null], {
       sourceLocale: 'en-GB',
       targetLocale: 'fr-FR',
-      apiConfig: { key: 'AZ', region: 'westeurope', batchSize: 2, endpoint: 'https://api.cognitive.microsofttranslator.com' }
+      apiConfig: {
+        key: 'AZ',
+        region: 'westeurope',
+        batchSize: 2,
+        endpoint: 'https://api.cognitive.microsofttranslator.com'
+      }
     })
     expect(out).toEqual(['X', 'Y', 'Z'])
   })
 })
 
-// Requires API key set via environment variable
+// Tests using real Azure API keys from .translator.env
 describe('azure api', () => {
-  const apiConfig = {
-    key: getEnv('AZURE_TRANSLATION_KEY'),
-    region: getEnv('AZURE_TRANSLATION_REGION'),
-    endpoint: getEnv('AZURE_TRANSLATION_URL')
-  }
+  let apiConfig: any;
+
+  beforeEach(() => {
+    // This will throw an error if the key isn't set or is a test key
+    const key = process.env.AZURE_TRANSLATION_KEY;
+    console.log('Azure API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
+    if (!key || key === 'test-azure-key') {
+      throw new Error('Real Azure API key required in .translator.env for this test suite');
+    }
+
+    apiConfig = {
+      key: getEnv('AZURE_TRANSLATION_KEY'),
+      region: getEnv('AZURE_TRANSLATION_REGION'),
+      endpoint: getEnv('AZURE_TRANSLATION_URL')
+    }
+  });
 
   it('translates text without context', async () => {
     const texts = ['hello', 'world']
@@ -56,5 +72,5 @@ describe('azure api', () => {
     })
 
     expect(out).toEqual(['Bonjour', 'monde'])
-  })
+  });
 })

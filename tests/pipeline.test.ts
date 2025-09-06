@@ -85,7 +85,7 @@ it('processFileForLocales writes forward and back files', async () => {
   expect(workspace.fs.writeFile).toHaveBeenCalled()
   const calls = (workspace.fs.writeFile as any).mock.calls
   // two writes: forward and back
-  expect(calls.length).toBe(2)
+  expect(calls).toHaveLength(2)
 })
 
 it('removeFileForLocales deletes forward and back files and prunes', async () => {

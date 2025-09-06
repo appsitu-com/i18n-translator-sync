@@ -39,11 +39,24 @@ describe('google stub', () => {
   })
 })
 
+// Tests using real Google API keys from .translator.env
 describe('google api', () => {
-  const apiConfig = {
-    key: getEnv('GOOGLE_TRANSLATION_KEY'),
-    endpoint: getEnv('GOOGLE_TRANSLATION_URL')
-  }
+  let apiConfig: any;
+
+  beforeEach(() => {
+    // This will throw an error if the key isn't set or is a test key
+    const key = process.env.GOOGLE_TRANSLATION_KEY;
+    console.log('Google API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
+    if (!key || key === 'test-google-key') {
+      throw new Error('Real Google API key required in .translator.env for this test suite');
+    }
+
+    apiConfig = {
+      key: getEnv('GOOGLE_TRANSLATION_KEY'),
+      endpoint: getEnv('GOOGLE_TRANSLATION_URL')
+    }
+  });
+
   it('translates text without context', async () => {
     const texts = ['hello', 'world']
     const out = await GoogleTranslator.translateMany(texts, [null, null], {
@@ -53,5 +66,5 @@ describe('google api', () => {
     })
 
     expect(out).toEqual(['Bonjour', 'monde'])
-  })
+  });
 })

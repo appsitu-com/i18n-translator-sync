@@ -1,0 +1,342 @@
+#!/usr/bin/env node
+
+/**
+ * Extension Packaging Script
+ *
+ * This script handles the complete packaging workflow for the i18n-translator-vscode extension:
+ * 1. Ensures required dependencies are installed
+ * 2. Updates package.json with required metadata for publishing
+ * 3. Creates icon and other assets if missing
+ * 4. Builds the extension
+ * 5. Packages it into a VSIX file ready for publishing
+ */
+
+const fs = require('fs');
+const path = require('path');
+const { exec } = require('child_process');
+const https = require('https');
+
+// Constants
+const ROOT_DIR = path.resolve(__dirname, '..');
+const PACKAGE_JSON_PATH = path.join(ROOT_DIR, 'package.json');
+const ICON_SVG_PATH = path.join(ROOT_DIR, 'images', 'icon.svg');
+const ICON_PNG_PATH = path.join(ROOT_DIR, 'images', 'icon.png');
+const PACKAGE_LOCK_PATH = path.join(ROOT_DIR, 'package-lock.json');
+const README_PATH = path.join(ROOT_DIR, 'README.md');
+
+// Utilities
+function execPromise(command) {
+  return new Promise((resolve, reject) => {
+    console.log(`Executing: ${command}`);
+    exec(command, { cwd: ROOT_DIR }, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error: ${error.message}`);
+        console.error(`stderr: ${stderr}`);
+        reject(error);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+      resolve(stdout);
+    });
+  });
+}
+
+async function downloadFile(url, dest) {
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    https.get(url, (response) => {
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close();
+        console.log(`Downloaded ${url} to ${dest}`);
+        resolve();
+      });
+    }).on('error', (err) => {
+      fs.unlink(dest, () => {}); // Delete the file on error
+      reject(err);
+    });
+  });
+}
+
+async function ensureDependencyInstalled() {
+  try {
+    console.log('Checking for global @vscode/vsce installation (using npm)...');
+    await execPromise('npm list -g @vscode/vsce || npm install -g @vscode/vsce');
+    console.log('Global @vscode/vsce is installed via npm.');
+  } catch (error) {
+    console.error('Error ensuring @vscode/vsce is installed:', error);
+    process.exit(1);
+  }
+}
+
+async function updatePackageJson() {
+  console.log('Updating package.json with required metadata...');
+
+  try {
+    const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf-8'));
+
+    // Ensure required fields exist
+    const updates = {
+      description: "Extension for translating Markdown and JSON files using AI translation services",
+      keywords: ["i18n", "translation", "localization", "azure", "google", "deepl", "gemini", "markdown", "json"],
+      homepage: "https://github.com/tohagan/vscode-i18n-translator-ext",
+      repository: {
+        type: "git",
+        url: "https://github.com/tohagan/vscode-i18n-translator-ext.git"
+      },
+      bugs: {
+        url: "https://github.com/tohagan/vscode-i18n-translator-ext/issues"
+      },
+      author: {
+        name: "Tony O'Hagan"
+      },
+      license: "MIT",
+      icon: "images/icon.png",  // Use PNG for best compatibility with the marketplace
+      galleryBanner: {
+        color: "#0078d4",  // Match the blue color of the icon
+        theme: "dark"
+      },
+      categories: ["Other", "Machine Learning", "Formatters"],
+      preview: true
+    };
+
+    // Update package.json with new fields
+    const updatedPackageJson = { ...packageJson, ...updates };
+
+    // Write updated package.json
+    fs.writeFileSync(
+      PACKAGE_JSON_PATH,
+      JSON.stringify(updatedPackageJson, null, 2),
+      'utf-8'
+    );
+
+    console.log('package.json updated successfully');
+  } catch (error) {
+    console.error('Error updating package.json:', error);
+    process.exit(1);
+  }
+}
+
+async function ensureAssets() {
+  console.log('Ensuring required assets exist...');
+
+  try {
+    // Create images directory if it doesn't exist
+    const imagesDir = path.dirname(ICON_SVG_PATH);
+    if (!fs.existsSync(imagesDir)) {
+      fs.mkdirSync(imagesDir, { recursive: true });
+      console.log(`Created directory: ${imagesDir}`);
+    }
+
+    // Ensure we have both SVG and PNG icons
+    // VS Code supports SVG icons, but the Marketplace may prefer PNGs
+
+    // First ensure we have an SVG icon
+    const svgExists = fs.existsSync(ICON_SVG_PATH);
+    if (!svgExists) {
+      console.log('Creating SVG icon...');
+
+      // Create a custom SVG icon for the extension
+      const svgIcon = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Background globe -->
+  <circle cx="64" cy="64" r="62" fill="#0078d4" />
+
+  <!-- World map stylized grid lines -->
+  <path d="M64 10 A54 54 0 0 1 64 118 A54 54 0 0 1 64 10" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+  <path d="M15 64 L113 64" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+  <path d="M26 32 L102 32" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+  <path d="M26 96 L102 96" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+  <path d="M40 18 L40 110" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+  <path d="M88 18 L88 110" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+
+  <!-- Text inside -->
+  <text x="64" y="62" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">i18n</text>
+  <text x="64" y="88" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Translator</text>
+
+  <!-- Translation arrows -->
+  <path d="M30 45 L45 45 L42 42 M45 45 L42 48" stroke="white" stroke-width="2" fill="none" />
+  <path d="M98 82 L83 82 L86 79 M83 82 L86 85" stroke="white" stroke-width="2" fill="none" />
+</svg>`;
+
+      fs.writeFileSync(ICON_SVG_PATH, svgIcon, 'utf8');
+      console.log(`Created SVG icon at ${ICON_SVG_PATH}`);
+    } else {
+      console.log('SVG icon already exists');
+    }
+
+    // Now ensure we have a PNG icon
+    try {
+      if (!fs.existsSync(ICON_PNG_PATH) || process.argv.includes('--force-icon-generation')) {
+        console.log('Converting SVG to PNG for marketplace compatibility...');
+
+        if (svgExists) {
+          try {
+            // Import sharp dynamically to avoid requiring it if not needed
+            const sharp = require('sharp');
+
+            // Standard icon dimensions for VS Code extensions
+            const dimensions = [128, 128]; // Width, Height in pixels
+
+            // Read the SVG
+            const svgBuffer = fs.readFileSync(ICON_SVG_PATH);
+
+            // Process the conversion asynchronously
+            console.log(`Converting SVG to PNG with dimensions ${dimensions[0]}x${dimensions[1]}px...`);
+            await sharp(svgBuffer)
+              .resize(dimensions[0], dimensions[1])
+              .png()
+              .toFile(ICON_PNG_PATH);
+
+            console.log(`Successfully converted SVG to PNG: ${ICON_PNG_PATH}`);
+          } catch (sharpError) {
+            console.error(`Error converting SVG to PNG: ${sharpError.message}`);
+            console.log('Falling back to SVG copy method...');
+
+            // Fallback to simple copy if sharp fails
+            fs.copyFileSync(ICON_SVG_PATH, ICON_PNG_PATH);
+            console.log(`Copied SVG icon to PNG path as fallback: ${ICON_PNG_PATH}`);
+          }
+        } else {
+          // Use a placeholder PNG if we don't have an SVG
+          console.log('No SVG icon found. Will use placeholder PNG.');
+
+          // Create a placeholder - you would normally use a real PNG here
+          const defaultPng = Buffer.from(
+            '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',
+            'base64'
+          );
+          fs.writeFileSync(ICON_PNG_PATH, defaultPng);
+          console.log(`Created default PNG icon at ${ICON_PNG_PATH}`);
+        }
+      } else {
+        console.log('PNG icon already exists');
+      }
+    } catch (iconError) {
+      console.error(`Error handling icons: ${iconError.message}`);
+      console.log('Continuing with packaging process despite icon error...');
+    }
+
+    // Ensure the sample translation config files exist
+    const translateJsonSample = path.join(ROOT_DIR, '.translate.json.sample');
+    const translateJson = path.join(ROOT_DIR, '.translate.json');
+
+    // Make sure both files exist and are up to date
+    if (fs.existsSync(translateJson) && fs.existsSync(translateJsonSample)) {
+      console.log('.translate.json and .translate.json.sample files already exist');
+    } else if (fs.existsSync(translateJson) && !fs.existsSync(translateJsonSample)) {
+      // Copy from .translate.json to .translate.json.sample
+      fs.copyFileSync(translateJson, translateJsonSample);
+      console.log('Created .translate.json.sample from .translate.json');
+    } else if (!fs.existsSync(translateJson) && fs.existsSync(translateJsonSample)) {
+      // Copy from .translate.json.sample to .translate.json
+      fs.copyFileSync(translateJsonSample, translateJson);
+      console.log('Created .translate.json from .translate.json.sample');
+    } else {
+      // Create a default configuration
+      const defaultConfig = {
+        "sourcePaths": ["i18n/en", "docs/en"],
+        "sourceLocale": "en",
+        "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
+        "enableBackTranslation": true,
+        "defaultMarkdownEngine": "azure",
+        "defaultJsonEngine": "google",
+        "engineOverrides": {
+          "deepl": ["fr", "de"],
+          "azure": ["es:en", "ja:en"],
+          "gemini": ["zh-CN"]
+        }
+      };
+
+      fs.writeFileSync(translateJson, JSON.stringify(defaultConfig, null, 2), 'utf8');
+      fs.writeFileSync(translateJsonSample, JSON.stringify(defaultConfig, null, 2), 'utf8');
+      console.log('Created .translate.json and .translate.json.sample with default configuration');
+    }
+  } catch (error) {
+    console.error('Error ensuring assets exist:', error);
+    process.exit(1);
+  }
+}
+
+async function buildExtension() {
+  console.log('Building extension with yarn...');
+
+  try {
+    await execPromise('yarn build');
+    console.log('Extension built successfully using yarn');
+  } catch (error) {
+    console.error('Error building extension:', error);
+    process.exit(1);
+  }
+}
+
+async function packageExtension() {
+  console.log('Packaging extension...');
+
+  try {
+    // Get version from package.json
+    const packageJson = JSON.parse(fs.readFileSync(PACKAGE_JSON_PATH, 'utf-8'));
+    const version = packageJson.version;
+
+    // Run prepublish script with yarn (local)
+    console.log('Running prepublish script with yarn...');
+    await execPromise('yarn vscode:prepublish');
+
+    // Package with vsce (global npm tool)
+    console.log('Packaging with @vscode/vsce (npm global tool)...');
+    await execPromise('npx @vscode/vsce package');
+
+    const vsixName = `i18n-translator-vscode-${version}.vsix`;
+    console.log(`Extension packaged successfully as ${vsixName}`);
+  } catch (error) {
+    console.error('Error packaging extension:', error);
+    process.exit(1);
+  }
+}
+
+async function ensureDependencies() {
+  try {
+    console.log('Checking for required dependencies...');
+
+    // Check for sharp dependency
+    try {
+      require('sharp');
+      console.log('sharp is installed');
+    } catch (e) {
+      console.log('sharp is not installed, installing now...');
+      await execPromise('yarn add sharp --dev');
+      console.log('sharp installed successfully');
+    }
+
+    // Check for global @vscode/vsce
+    await ensureDependencyInstalled();
+  } catch (error) {
+    console.error('Error ensuring dependencies:', error);
+    throw error;
+  }
+}
+
+async function main() {
+  console.log('Starting extension packaging process...');
+  console.log('Command line arguments:', process.argv);
+
+  const forceIconGeneration = process.argv.includes('--force-icon-generation');
+  if (forceIconGeneration) {
+    console.log('Force icon generation flag detected. Will regenerate PNG icon from SVG.');
+  }
+
+  try {
+    await ensureDependencies();
+    await ensureAssets();
+    await updatePackageJson();
+    await buildExtension();
+    await packageExtension();
+
+    console.log('Extension packaging completed successfully!');
+  } catch (error) {
+    console.error('Extension packaging failed:', error);
+    process.exit(1);
+  }
+}
+
+main();

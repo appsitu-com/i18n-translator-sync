@@ -28,7 +28,14 @@ MIT
 
 ## Configuration
 
-The extension now supports project-specific configuration through a `.translate.json` file in the root of your workspace. See [Configuration Documentation](doc/Configuration.md) for details.
+The extension supports project-specific configuration through a `.translate.json` file in the root of your workspace. See [Configuration Documentation](doc/Configuration.md) for details.
+
+### Configuration Files
+
+- `.translate.json` - This file comes with the extension as a default configuration example. You can modify it directly for your project.
+- `.translate.json.sample` - This is a template file that you can copy and modify for your own configuration.
+
+Both files are included in the extension and can be used as a starting point for your project configuration.
 
 Example `.translate.json`:
 ```json
@@ -49,10 +56,33 @@ Example `.translate.json`:
 
 ## Dev quick start
 ```bash
-npm i
-npm run build
-npm run test
+# Install dependencies
+yarn
+
+# Build the extension
+yarn build
+
+# Run tests
+yarn test
+
+# Package the extension
+yarn package
+
 # Press F5 in VS Code to launch a new window with the extension
+```
+
+### Packaging
+The extension uses:
+- Yarn for local project dependencies
+- npm for global tools (like @vscode/vsce)
+
+To create a VSIX package manually:
+```bash
+# Install the packaging tool
+npm install -g @vscode/vsce
+
+# Create the package
+yarn package
 ```
 
 

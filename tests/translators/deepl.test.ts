@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { DeepLTranslator } from '../../src/translators/deepl'
-import { getEnv } from '../../src/util/env';
+import { getEnv } from '../../src/util/env'
 
 describe('deepl stub', () => {
   const originalFetch = globalThis.fetch as any
@@ -48,14 +48,24 @@ describe('deepl stub', () => {
   })
 })
 
-// Disabled to avoid using up free tier
+// Tests using real DeepL API keys from .translator.env
 describe('deepl api', () => {
+  let apiConfig: any;
 
-  const apiConfig = {
-    key: getEnv('DEEPL_TRANSLATION_KEY'),
-    endpoint: getEnv('DEEPL_TRANSLATION_URL'),
-    free: true
-  }
+  beforeEach(() => {
+    // This will throw an error if the key isn't set or is a test key
+    const key = process.env.DEEPL_TRANSLATION_KEY;
+    console.log('DeepL API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
+    if (!key || key === 'test-deepl-key') {
+      throw new Error('Real DeepL API key required in .translator.env for this test suite');
+    }
+
+    apiConfig = {
+      key: getEnv('DEEPL_TRANSLATION_KEY'),
+      endpoint: getEnv('DEEPL_TRANSLATION_URL'),
+      free: true
+    }
+  });
 
   it('translates text without context', async () => {
     const texts = ['hello', 'world']
@@ -66,5 +76,5 @@ describe('deepl api', () => {
     })
 
     expect(out).toEqual(['Bonjour', 'monde'])
-  })
+  });
 })

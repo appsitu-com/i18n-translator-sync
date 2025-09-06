@@ -4,7 +4,7 @@
   "publisher": "your-publisher",
   "version": "0.1.0",
   "engines": {
-    "vscode": "^1.90.0"
+    "vscode": "^1.103.0"
   },
   "activationEvents": [
     "onCommand:translator.start",
@@ -38,6 +38,11 @@
     "configuration": {
       "title": "Markdown & JSON Translator",
       "properties": {
+        "translator.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start the translator when opening a workspace"
+        },
         "translator.sourceLocale": {
           "type": "string",
           "default": "en"
@@ -174,8 +179,10 @@
     "watch": "tsc -w -p ./",
     "test": "vitest run",
     "test:watch": "vitest",
-    "vscode:prepublish": "npm run build",
-    "package": "vsce package",
+    "vscode:prepublish": "yarn build",
+    "package": "node scripts/package-extension.js",
+    "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
+    "package:quick": "npx @vscode/vsce package",
     "test:cov": "vitest run --coverage"
   },
   "devDependencies": {
@@ -184,6 +191,7 @@
     "@types/node": "^24.3.1",
     "@types/vscode": "^1.103.0",
     "@vitest/coverage-v8": "^3.2.4",
+    "sharp": "^0.34.3",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
   },
@@ -197,5 +205,40 @@
     "remark-stringify": "^11.0.0",
     "unist-util-visit": "^5.0.0",
     "zod": "^4.1.5"
-  }
+  },
+  "description": "Extension for translating Markdown and JSON files using AI translation services",
+  "keywords": [
+    "i18n",
+    "translation",
+    "localization",
+    "azure",
+    "google",
+    "deepl",
+    "gemini",
+    "markdown",
+    "json"
+  ],
+  "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tohagan/vscode-i18n-translator-ext.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tohagan/vscode-i18n-translator-ext/issues"
+  },
+  "author": {
+    "name": "Tony O'Hagan"
+  },
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#0078d4",
+    "theme": "dark"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "Formatters"
+  ],
+  "preview": true
 }

@@ -7,7 +7,8 @@ export interface TranslatorApiConfig {
   retry?: RetryOptions
 
   // engine: 'azure'
-  region: string
+  region?: string
+
   // textType?: string; // I think it will autodetect HTML vs plain text when unspecified
   category?: string
   batchSize?: number

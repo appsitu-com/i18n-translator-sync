@@ -1,10 +1,23 @@
 import { get } from 'http'
 import { vi } from 'vitest'
 
+// Add missing VS Code enums for tests
+export enum StatusBarAlignment {
+  Left = 1,
+  Right = 2
+}
+
 export const window = {
   showWarningMessage: vi.fn(),
   showErrorMessage: vi.fn(),
-  showInformationMessage: vi.fn()
+  showInformationMessage: vi.fn(),
+  createStatusBarItem: vi.fn().mockReturnValue({
+    text: '',
+    tooltip: '',
+    command: '',
+    show: vi.fn(),
+    dispose: vi.fn()
+  })
 }
 
 export const workspace = {

@@ -1,11 +1,13 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
+import * as fs from 'fs'
 import { existsSync } from 'fs'
 import { SQLiteCache } from './cache.sqlite'
 import { processFileForLocales, removeFileForLocales } from './pipeline'
 import { registerAllTranslators } from './translators'
 import { pullReviewedFromMateCat, pushCacheToMateCat } from './matecate'
 import { loadProjectConfig } from './config'
+import { initTranslatorEnv } from './util/env'
 let cache: SQLiteCache | undefined = undefined
 let watcher: vscode.FileSystemWatcher | null = null
 let subscriptions: vscode.Disposable[] = []
@@ -33,6 +35,9 @@ async function startTranslator(ctx: vscode.ExtensionContext) {
     vscode.window.showInformationMessage('Translator already running')
     return
   }
+
+  // Initialize the environment when starting translator
+  initTranslatorEnv()
 
   cache = getCache()
 
@@ -198,15 +203,92 @@ async function pullFromMateCat(): Promise<void> {
 }
 
 export async function activate(ctx: vscode.ExtensionContext) {
+  // Only register translators - don't initialize environment yet
   registerAllTranslators()
+
+  // Register commands
   ctx.subscriptions.push(
-    vscode.commands.registerCommand('translator.start', () => startTranslator(ctx)),
+    vscode.commands.registerCommand('translator.start', async () => {
+      // Check if API keys are configured before starting
+      try {
+        // Try to start the translator
+        await startTranslator(ctx);
+
+        // When manually started, ask if user wants to enable auto-start
+        const response = await vscode.window.showInformationMessage(
+          'Do you want to automatically start the translator whenever you open this workspace?',
+          'Yes', 'No'
+        );
+
+        if (response === 'Yes') {
+          await cfg().update('autoStart', true, vscode.ConfigurationTarget.Workspace);
+        }
+
+        // Also inform about API keys
+        if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+          const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '.translator.env');
+          if (fs.existsSync(envFile)) {
+            vscode.window.showInformationMessage(
+              'Don\'t forget to configure your translation API keys in the .translator.env file.',
+              'Open File',
+              'Documentation'
+            ).then(selection => {
+              if (selection === 'Open File') {
+                vscode.workspace.openTextDocument(envFile).then(doc => {
+                  vscode.window.showTextDocument(doc);
+                });
+              } else if (selection === 'Documentation') {
+                vscode.env.openExternal(vscode.Uri.parse('https://github.com/tohagan/vscode-i18n-translator-ext#api-keys'));
+              }
+            });
+          }
+        }
+      } catch (error: any) {
+        // Show error and offer to open env file
+        vscode.window.showErrorMessage(
+          `Error starting translator: ${error?.message || String(error)}`,
+          'Configure API Keys'
+        ).then(selection => {
+          if (selection === 'Configure API Keys' && vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+            const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '.translator.env');
+            if (fs.existsSync(envFile)) {
+              vscode.workspace.openTextDocument(envFile).then(doc => {
+                vscode.window.showTextDocument(doc);
+              });
+            }
+          }
+        });
+      }
+    }),
     vscode.commands.registerCommand('translator.stop', () => stopTranslator()),
     vscode.commands.registerCommand('translator.restart', () => restartTranslator(ctx)),
     vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
     vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat())
   )
-  await startTranslator(ctx)
+
+  // Check if auto-start is enabled for this workspace
+  const autoStart = cfg().get<boolean>('autoStart', false)
+  if (autoStart) {
+    await startTranslator(ctx)
+  } else {
+    // Show a status bar item that allows starting the translator
+    // Check if we're in a real VS Code environment first (not in tests)
+    if (typeof vscode.window.createStatusBarItem === 'function') {
+      try {
+        // Skip creating status bar item in test environments
+        if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
+          const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100)
+          statusBarItem.text = "$(globe) Start Translator"
+          statusBarItem.tooltip = "Start the i18n translator"
+          statusBarItem.command = 'translator.start'
+          statusBarItem.show()
+          ctx.subscriptions.push(statusBarItem)
+        }
+      } catch (error) {
+        console.warn('Could not create status bar item:', error)
+      }
+    }
+  }
 }
 
 export function deactivate() {
