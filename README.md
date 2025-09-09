@@ -82,7 +82,7 @@ You can then treat your AI translations as _draft_ to be be reviewed and revised
 The extension supports project-specific configuration through a `.translate.json` file in the root of your workspace or via your user and workspace settings.
 See [Configuration Documentation](doc/Configuration.md) for details.
 
-### api-keys
+### API Keys
 
 API keys for translation services are configured via environment variables that you can specify in `.translate.env` or in your operating system.
 Ensure that  `.translate.env` is included in your `.gitignore` file to exclude it from GIT.
