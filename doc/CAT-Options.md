@@ -1,4 +1,4 @@
-## Options for integration
+## Options for CAT integration - GPT answers
 
 Great brief — you’re already set up for a low-cost, high-control workflow. Here’s a concise shortlist that matches your needs (software UI + docs in JSON/Markdown, VS Code plugin, SQLite/CSV cache, volunteer/pro teams).
 
