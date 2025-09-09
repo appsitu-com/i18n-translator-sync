@@ -8,7 +8,7 @@ Thanks for helping improve **i18n Translator**! This guide explains how to set u
 - **VS Code** (latest) with TypeScript support
 
 > **Note about Yarn warning**
-> You may see: `The engine "vscode" appears to be invalid.`  
+> You may see: `The engine "vscode" appears to be invalid.`
 > This is safe to ignore. `"engines.vscode"` is required for VS Code extensions, but Yarn doesn’t validate it. If you prefer to silence it:
 > ```bash
 > yarn config set ignore-engines true
@@ -31,6 +31,49 @@ yarn test
 # Press F5 or use the "Run Extension" launch configuration
 ```
 
+## Native Modules: better-sqlite3 and Electron
+
+If you see an error like:
+
+```
+The module '.../better_sqlite3.node' was compiled against a different Node.js version...
+```
+
+You need to rebuild native modules for the Electron version used by VS Code.
+
+
+**How to find your VS Code Electron version:**
+
+1. Open VS Code and go to the menu: **Help > About** (or run the `Help: About` command from the Command Palette). The Electron version will be listed in the dialog.
+2. Alternatively, open the **Debug Console** (while debugging the extension) and enter:
+  ```js
+  process.versions.electron
+  ```
+
+  This will output the Electron version used by the current VS Code instance.
+
+3. You can also check the [VS Code release notes](https://code.visualstudio.com/updates/) for your version.
+
+**Rebuild native modules:**
+
+For example, if your VS Code uses Electron 37.2.3:
+
+```bash
+yarn electron-rebuild -v 37.2.3
+```
+
+This will rebuild `better-sqlite3` and other native modules for the correct ABI.  This `better-sqlite3` version is only used during local testing.
+
+In the `package.json` file we have the following rule to ensure that the published version will be auto updated to use the `better-sqlite3` version that matches a user's VSCode version when they install the extension.
+
+```json
+  "vsce": {
+    "dependencies": [
+      "better-sqlite3"
+    ]
+  }
+```
+
 ## Running the Extension
 1. In VS Code, press **F5** to launch an Extension Host window.
 2. In that window, run the commands:
@@ -44,6 +87,7 @@ The extension watches `i18n/en/**` for Markdown/MDX/JSON, generates translations
 Engine settings are read from VS Code settings (see `README.md`). Values can reference environment variables:
 - `env:VAR_NAME` or `${VAR_NAME}`
 - Missing variables show a friendly error and the current file’s translation is aborted (watchers continue running).
+- Translator environment variables can be set in a `translator.env` file in your project that should be excluded from GIT via `.gitignore`
 
 Common env vars:
 - `AZURE_TRANSLATOR_KEY`, `AZURE_TRANSLATOR_ENDPOINT`, `AZURE_REGION`

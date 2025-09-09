@@ -1,7 +1,24 @@
 {
   "version": "2.0.0",
   "tasks": [
-    { "type": "npm", "script": "build", "group": { "kind": "build", "isDefault": true }, "problemMatcher": "$tsc" },
-    { "type": "npm", "script": "test",  "group": "test", "problemMatcher": [] }
+    {
+      "label": "yarn: build",
+      "type": "shell",
+      "command": "yarn",
+      "args": ["build"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "yarn: test",
+      "type": "shell",
+      "command": "yarn",
+      "args": ["test"],
+      "group": "test",
+      "problemMatcher": []
+    }
   ]
 }

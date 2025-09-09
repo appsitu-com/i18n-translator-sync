@@ -1,13 +1,17 @@
 .DS_Store
-.env
-dist
 
-node_modules/
 *.log
 
-coverage/
+.env
 .translator.env
+node_modules/
+coverage/
 
 # Exclude release artifacts
+dist/
 releases/
 *.vsix
+
+# Test project folder
+test-project/i18n/*
+!test-project/i18n/en/

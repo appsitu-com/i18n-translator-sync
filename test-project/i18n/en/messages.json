@@ -1,0 +1,12 @@
+{
+  "greeting": "Hello, World!",
+  "messages": {
+    "welcome": "Welcome to the test project",
+    "intro": "This is a demonstration of JSON translation"
+  },
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save"
+  }
+}

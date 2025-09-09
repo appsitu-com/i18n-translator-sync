@@ -26,3 +26,4 @@ scripts/**
 coverage/**
 releases/**
 node_modules/**
+test-project/**
