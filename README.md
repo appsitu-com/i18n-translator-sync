@@ -88,6 +88,7 @@ See [Configuration Documentation](doc/Configuration.md) for details.
 
 API keys for translation services are configured via environment variables that you can specify in `.translate.env` or in your operating system.
 Ensure that  `.translate.env` is included in your `.gitignore` file to exclude it from GIT.
+We've avoiding using `.env.*` files so we don't interfere with your local project environment.
 
 The first time you run the `Translator: Start` in a project, `.translate.env` will be created (with placeholders) and it's name added to the `.gitignore` file.
 
