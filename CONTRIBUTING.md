@@ -3,9 +3,18 @@
 Thanks for helping improve **i18n Translator**! This guide explains how to set up your environment, run the project, and submit pull requests.
 
 ## Prerequisites
-- **Node.js 18+**
+
+- **Node.js 22+**
 - **Yarn** or **npm**
 - **VS Code** (latest) with TypeScript support
+
+## Code Architecture
+
+For information about the internal architecture of the extension, see [Architecture Documentation](doc/Architecture.md).
+
+## Getting Started
+
+This project uses NPM for global package installs and YARN for project installs.
 
 > **Note about Yarn warning**
 > You may see: `The engine "vscode" appears to be invalid.`
@@ -14,22 +23,49 @@ Thanks for helping improve **i18n Translator**! This guide explains how to set u
 > yarn config set ignore-engines true
 > ```
 
-## Getting Started
+### Install
+
 ```bash
 # clone
 git clone https://github.com/yourname/i18n-translator-vscode.git
 cd i18n-translator-vscode
 
-# install deps
-yarn install    # or: npm install
+# Install yarn
+npm install -g yarn
 
-# build & test
+# install packages
+yarn install
+```
+
+### Unit testing
+
+For each cloud service you plan to test, create accounts and configured API keys in `.translator.env`.
+Never commit your API key files to GIT.
+
+```bash
+cp .translator.env.sample .translator.env
+echo .translator.env >> .gitignore
+
+# build & run unit tests
 yarn build
 yarn test
 
-# debug in VS Code (opens a new window with the extension)
-# Press F5 or use the "Run Extension" launch configuration
+# Auto run tests on source code change
+yarn test:watch
+
+## Analyze test code coverage
+npm run test:cov
+
 ```
+
+### Debugging
+
+Use the "Run Extension with Test Project" in VS Code Debug panel.
+This will launch a new instance of VS Code and open the `test-project` subfolder.
+The test project contains a `.vscode/settings.json` file with `"translator.autoStart": true` that should auto start the extension server.
+
+Copy your API keys from `.translator.env` into `test-project/.translator.env` for use during manual testing.
+Make sure that `test-project/.gitignore` includes `.translator.env` - *so you don't accidentally commit your keys into GIT!*
 
 ## Native Modules: better-sqlite3 and Electron
 
@@ -39,8 +75,7 @@ If you see an error like:
 The module '.../better_sqlite3.node' was compiled against a different Node.js version...
 ```
 
-You need to rebuild native modules for the Electron version used by VS Code.
-
+You will need to rebuild native modules for the Electron version used by VS Code.
 
 **How to find your VS Code Electron version:**
 
@@ -67,53 +102,28 @@ This will rebuild `better-sqlite3` and other native modules for the correct ABI.
 In the `package.json` file we have the following rule to ensure that the published version will be auto updated to use the `better-sqlite3` version that matches a user's VSCode version when they install the extension.
 
 ```json
-  "vsce": {
-    "dependencies": [
-      "better-sqlite3"
-    ]
-  }
+"vsce": {
+  "dependencies": [
+    "better-sqlite3"
+  ]
+}
 ```
 
 ## Running the Extension
+
 1. In VS Code, press **F5** to launch an Extension Host window.
-2. In that window, run the commands:
+
+2. In that window, run a command:
    - **Translator: Start**
    - **Translator: Stop**
    - **Translator: Restart**
 
-The extension watches `i18n/en/**` for Markdown/MDX/JSON, generates translations for configured target locales, and (optionally) back-translations.
+
+The extension watches `i18n/en/**` for Markdown/MDX/JSON and generates translations for configured target language and (optionally) back-translations for each target language. You can create, update, rename or delete files in `i18n/en` and these changes should then be mirrored in each of the target and back translation folders.
 
 ## Configuration & Env Vars
-Engine settings are read from VS Code settings (see `README.md`). Values can reference environment variables:
-- `env:VAR_NAME` or `${VAR_NAME}`
-- Missing variables show a friendly error and the current file’s translation is aborted (watchers continue running).
-- Translator environment variables can be set in a `translator.env` file in your project that should be excluded from GIT via `.gitignore`
 
-Common env vars:
-- `AZURE_TRANSLATOR_KEY`, `AZURE_TRANSLATOR_ENDPOINT`, `AZURE_REGION`
-- `GOOGLE_TRANSLATE_KEY`
-- `DEEPL_KEY`
-
-## Project Layout
-```
-src/
-  translators/      # azure, google, deepl, copy (adapter interface)
-  util/             # env resolver, http helper
-  i18n pipeline/    # extractor, context CSV, cache (better-sqlite3), pipeline, extension
-
-tests/              # mirrors src/ structure (Vitest)
-.github/workflows/  # CI, release, publish
-doc/                # CI/CD setup
-.vscode/            # tasks + launch configs
-```
-
-## Testing
-- Unit tests use **Vitest** with a mocked `vscode` API.
-- Run tests watch-mode for fast feedback:
-  ```bash
-  yarn test
-  yarn test:watch
-  ```
+Refer to [Configuration.md](./doc/Configuration.md) for details of how to configure the translations.
 
 ## Code Style
 - TypeScript strict mode is enabled.
@@ -122,27 +132,19 @@ doc/                # CI/CD setup
 - Use meaningful variable names and include doc comments for exported functions.
 
 ## Commit & PR
+
 - Create feature branches: `feat/context-csv-validation`, `fix/azure-locale-normalization`
 - Write descriptive commit messages.
 - Add or update tests for your change.
 - Ensure `yarn build` and `yarn test` pass locally.
 - Open a PR with a concise description and screenshots/logs if applicable.
 
-## CI/CD
+## CI/CD (Not yet tested!)
+
 - **CI**: build + test on push/PR (`.github/workflows/ci.yml`).
 - **Release**: create a tag `vX.Y.Z` to build a VSIX and attach it to a GitHub Release.
 - **Publish**: when a Release is published, the VSIX is pushed to VS Code Marketplace & Open VSX (if secrets are configured).
 
-## Releasing (maintainers)
-```bash
-# bump version
-npm version patch    # or: minor | major
-git push && git push --tags
-# GitHub Actions will create the Release and publish to marketplaces if secrets exist
-```
-
-## Security & Secrets
-Never commit API keys. Use environment variables via VS Code settings (see above).
-
 ## Questions?
+
 Open an issue. PRs welcome — thanks for contributing!
