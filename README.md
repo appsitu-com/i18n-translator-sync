@@ -5,9 +5,6 @@
 [![Publish](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/publish.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/publish.yml) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## License
-MIT
-
 ## Features
 - [x] **Translate on Save** will instantly translate selected Markdown/MDX/JSON/YAML/YML files *as you save* each file.
 - [x] **Back translation** from each target language back to the source language that allow you to:
@@ -40,8 +37,8 @@ MIT
   - **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.
   - **Translator: Push to MateCat** - Exports the local TM database and pushes it to a MateCat project.
   - **Translator: Pull from MateCat** - Pulls the MateCat project revisions and imports these into the local TM database.
- 
-## MateCat integration 
+
+## MateCat integration
 
 We plan to integrate this extension with an online computer aide translation (CAT) service for volunteer and professional translators.
 You can then treat your AI translations as _draft_ to be be reviewed and revised by a human translation team.
@@ -225,4 +222,7 @@ Run tests with coverage and produce `coverage/lcov.info` (used by Codecov):
 ```bash
 npm run test:cov
 ```
+
+## License
+MIT
 
