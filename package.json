@@ -7,11 +7,6 @@
   "engines": {
     "vscode": "^1.103.0"
   },
-  "activationEvents": [
-    "onCommand:translator.start",
-    "onCommand:translator.stop",
-    "onCommand:translator.restart"
-  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
