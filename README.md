@@ -1,18 +1,28 @@
-# i18n Translator VS Code Extension
+# i18n Translator - VS Code extension for instant file translation. Supports many AI engines + a professional CAT service.
 
 <!-- [![CI](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/ci.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/ci.yml)
 [![Release](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/release.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/release.yml)
 [![Publish](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/publish.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/publish.yml) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## Terminology
+
+- `Source text` = The original text that you write in a source language you know
+- `Target text` - The translated text for each language in a list of target languages
+
 ## Features
-- [x] **Translate on Save** will instantly translate selected Markdown/MDX/JSON/YAML/YML files *as you save* each file.
-- [x] **Back translation** from each target language back to the source language that allow you to:
-  - You can check which source text was likely mistranslated - even when you can't read the target language
-  - View the back translations in your application
-  - Update the source text with an alternative source text and instantly re-check in all target languages.
+- [x] **Translate on Save** *as you save* source file it is instantly translated into a file for each target language.
+  - [x] Markdown & MDX files
+  - [x] JSON & YAML files
+  - [ ] Can convert translated JSON to a JavaScript or TypeScript file.
+- [x] **Back translation** from each target file back to a new file in the source language. This allow you to:
+  - Check which source text was likely mistranslated by an AI engine - even when you can't read the target language.
+  - View back translations in your application for any target language.
+  - Revise & save source text file with alternative words or phrases and instantly re-check the new back translation for all target languages.
 - [x] **Translation folder mirroring**
-  - When a folder is selected as the translation source, all changes to files in that folder (create/rename/delete) are mirrored in the target translation folders.
+  - When a source folder is configured, changes to files in that folder are mirrored in all the target translation folders.
+  - This ensures that files you create, rename or delete in the source folder are likewise created, renamed or deleted in all the target folders.
+  - New or updated files are re-translated and then back translated in to all target folders.
 - [x] **Multiple Translation Engines**
   - [x] Copy (no translation)
   - [x] Azure
