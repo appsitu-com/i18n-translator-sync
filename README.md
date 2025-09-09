@@ -9,11 +9,47 @@
 MIT
 
 ## Features
-- Watches multiple source paths (configurable) and generates translated Markdown/MDX/JSON/YAML/YML files into `i18n/<locale>/**`.
-- Project-specific configuration via `.translate.json` file.
+- **Translate on Save** will instantly translate selected Markdown/MDX/JSON/YAML/YML files *as you save* each file.
+- **back translation** from each target language back to the source language that allow you to:
+  - You can check which source text was likely mistranslated - even when you can't read the target language
+  - View the back translations in your application
+  - Update the source text with an alternative source text and instantly re-check in all target languages.
+- **Translation folder mirroring**
+  - When a folder is selected as the translation source, all changes to files in that folder (create/rename/delete) are mirrored in the target translation folders.
+- **Multiple Translation Engines** including: Azure, Google, DeepL, TM and LLM translators: Gemini and OpenRouter (coming soon).
+  - DeepL supports AI translation of English text to US and UK English.
+  - Open Router supports almost *any* LLM models via a single API router service.
+  - A no-translate "Copy" engine is available that's useful for either UK or US English or for testing this extension.
+- **Contextual Translation** (DeepL, Gemini and OpenRouter)
+  - Problem: Translations of short strings common in user interfaces (like button labels) are often poorly translated by AI engines
+  - Solution: Configure contextual information for keys in JSON and YAML files that provides contextual information included in prompts to LLM & DeepL APIs.
+- **Translation memory** (TM). We use a database of past translations that allows:
+  - Faster & cheaper translations as *new* or *changed* strings (JSON/YAML) or paragraphs (Markdown) are retranslated.
+  - Stable translations as AI engines tend to randomly alter results when retranslating.
+  - Automatic purging of unused past translations.
+  - Exported/imported to CSV files. CSV exports should be committed to GIt to preserve stable translations and reduce costs.
+- **VSCode commmands**:
+  - **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translate.json` file for your API keys that's excluded from GIT.
+  - **Translator: Stop** - Deactivates the "translate on save" feature.
+  - **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.
+  - **Translator: Push to MateCat** - Exports the local TM database and pushes it to a MateCat project.
+  - **Translator: Pull from MateCat** - Pulls the MateCat project revisions and imports these into the local TM database.
+
+## Future ROADMAP
+- [ ] A project TM database can be integrated with an online computer aide translation (CAT) service to allow:
+  - Treating AI results as draft translations to be be reviewed and revised by human translators.
+  - *Export & Push* your database to a CAT service project and later *Pull & Import* the revisions back.
+  - We will initially support the [MateCat.com](https://matecat.com) CAT service ...
+    - MateCat is open source platform you can run in house or use their *free* cloud service.
+    - Invite your own team translators for free or hire their professional translators for 200+ languages and dialects.
+    - MateCat has it's own leading edge AI tools and access to an 8M phrase public TM dictionary used by big tech software companies.
+    - Maintain your private TM database in MateCat or contribute to the public TM.
+    - Achieve consistent terminology and translation across all future projects.
+
+## Configuration Options
+
+- Project translation rules can be configured in a local `.translate.json` file (recommended) or in VSCode Workspace or User settings.
 - Optional back-translations and context-aware JSON translations.
-- Translation server Start/Stop/Restart commands and VSCode Status bar.
-- AI Translation Engines: Azure, Google, Gemini, DeepL and a no-translate Copy engine (e.g. for en-US or en-GB).
 - DeepL supports `en-US` => `en-GB` translations.
 - Back-translation folders `<locale>_en/**`
 - Configurable options:
@@ -26,9 +62,44 @@ MIT
   - Optimizes translation speed, reduces AI translation costs and removes AI translation "drift".
 - Future: Integration with Volunteer/ Pro translation team
 
+
 ## Configuration
 
-The extension supports project-specific configuration through a `.translate.json` file in the root of your workspace. See [Configuration Documentation](doc/Configuration.md) for details.
+The extension supports project-specific configuration through a `.translate.json` file in the root of your workspace or via your user and workspace settings.
+See [Configuration Documentation](doc/Configuration.md) for details.
+
+### api-keys
+
+API keys for translation services are configured via environment variables that you can specify in `.translate.env` or in your operating system.
+Ensure that  `.translate.env` is included in your `.gitignore` file to exclude it from GIT.
+
+The first time you run the `Translator: Start` in a project, `.translate.env` will be created (with placeholders) and it's name added to the `.gitignore` file.
+
+You only need to configure keys for the translation services you plan to use.
+See the extension settings to select which services to use for which file type.
+
+```ini
+# Azure Translation API configuration
+# Get API key from: https://learn.microsoft.com/azure/ai-services/translator/translator-how-to-signup
+AZURE_TRANSLATION_KEY='XXXXXXXXXXXXXXXXX'
+AZURE_TRANSLATION_REGION='westus'
+AZURE_TRANSLATION_URL='https://api.cognitive.microsofttranslator.com'
+
+# Google Translate API configuration
+# Get API key from: https://cloud.google.com/translate/docs/setup
+GOOGLE_TRANSLATION_KEY='XXXXXXXXXXXXXXXXXXXXX'
+GOOGLE_TRANSLATION_URL='https://translation.googleapis.com'
+
+# DeepL API configuration
+# Get API key from: https://www.deepl.com/pro-api
+DEEPL_TRANSLATION_KEY='XXXXXXXXXXXXXXXXXXXXX'
+DEEPL_TRANSLATION_URL='https://api-free.deepl.com'
+
+# Gemini AI API configuration
+# Get API key from: https://ai.google.dev/tutorials/setup
+GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
+
+```
 
 ## Code Architecture
 
