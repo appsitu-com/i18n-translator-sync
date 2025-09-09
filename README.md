@@ -5,6 +5,8 @@
 [![Publish](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/publish.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/publish.yml) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+**Status**: *Alpha*. Not yet ready for production use.
+
 ## Terminology
 
 - `Source text` = The original text that you write in a source language you know
