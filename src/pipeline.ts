@@ -85,7 +85,7 @@ async function writeText(uri: vscode.Uri, text: string): Promise<void> {
 /**
  * Clean up empty directories after file deletion
  */
-async function pruneEmptyDirs(root: vscode.Uri, relPath: string): Promise<void> {
+export async function pruneEmptyDirs(root: vscode.Uri, relPath: string): Promise<void> {
   const parts = relPath.split('/')
   parts.pop() // Remove the file name
 
