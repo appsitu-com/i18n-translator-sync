@@ -1,9 +1,9 @@
 {
   "name": "i18n-translator-vscode",
-  "description": "A Visual Studio Code extension for translation of Markdown/MDX/JSON/YAML/YML files. Multiple AI engines + integration with a professional translation CAT service.",
+  "description": "Extension for translating Markdown and JSON files using AI translation services",
   "displayName": "i18n Translator",
   "publisher": "your-publisher",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -218,9 +218,7 @@
     "deepl",
     "gemini",
     "markdown",
-    "json",
-    "yaml",
-    "yml"
+    "json"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {

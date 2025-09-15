@@ -1,9 +1,11 @@
 .vscode/**
 .vscode-test/**
 .github/**
-tests/**
+doc/**
 src/**
-out/**/*.map
+tests/**
+CONTRIBUTING.md
+ROADMAP.md
 .gitignore
 .translator.env
 .env
@@ -15,8 +17,6 @@ out/**/*.map
 **/vite.config.js
 **/*.map
 **/*.ts
-CONTRIBUTING.md
-ROADMAP.md
 **/.eslintrc.json
 **/.eslintignore
 **/*.tgz
