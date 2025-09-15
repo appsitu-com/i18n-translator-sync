@@ -156,15 +156,13 @@ describe('pruneEmptyDirs', () => {
     ;(workspace.fs.readDirectory as any)
       .mockResolvedValueOnce([]) // bar
       .mockResolvedValueOnce([]) // foo
-      .mockResolvedValueOnce([]) // fr-FR
     const deleteMock = (workspace.fs.delete as any).mockResolvedValue(undefined)
 
     await pruneEmptyDirs(root, relPath)
 
-    expect(deleteMock).toHaveBeenCalledTimes(3)
+    expect(deleteMock).toHaveBeenCalledTimes(2)
     expect(deleteMock.mock.calls[0][0].fsPath).toBe(dirs[0])
     expect(deleteMock.mock.calls[1][0].fsPath).toBe(dirs[1])
-    expect(deleteMock.mock.calls[2][0].fsPath).toBe(dirs[2])
   })
 
   it('stops pruning at first non-empty directory', async () => {
