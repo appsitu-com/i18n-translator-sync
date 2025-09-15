@@ -21,9 +21,9 @@ function validateWorkspace(ws: vscode.WorkspaceFolder | undefined): vscode.Works
 }
 
 /**
- * Get relative path from English source to the file
+ * Get relative path from source directory to the file
  */
-function relFromEN(uri: vscode.Uri): string {
+function getSourceRelativePath(uri: vscode.Uri): string {
   const ws = validateWorkspace(vscode.workspace.getWorkspaceFolder(uri))
   const config = loadProjectConfig(ws)
 
@@ -227,7 +227,7 @@ export async function processFileForLocales(
   const enableBackTranslation = params?.enableBackTranslation ?? projectConfig.enableBackTranslation
 
   // Get relative path from the source folder
-  const rel = relFromEN(srcUri)
+  const rel = getSourceRelativePath(srcUri)
   console.log(`File ${srcUri.fsPath} resolved to relative path: ${rel}`)
 
   // Read and process file content
@@ -302,7 +302,7 @@ export async function removeFileForLocales(srcUri: vscode.Uri, locales?: string[
   const targetLocales = locales || config.targetLocales
 
   // Get relative path from source
-  const rel = relFromEN(srcUri)
+  const rel = getSourceRelativePath(srcUri)
 
   for (const locale of targetLocales) {
     // Get URIs for forward and back translation files
