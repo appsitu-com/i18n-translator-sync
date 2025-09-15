@@ -1,5 +1,5 @@
 {
-  "sourcePaths": ["i18n/en"],
+  "sourcePaths": ["i18n/en", "i18n/en.json"],
   "sourceLocale": "en",
   "targetLocales": ["es", "fr", "de", "zh-CN"],
   "enableBackTranslation": true,
