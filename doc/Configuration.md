@@ -8,7 +8,7 @@ The extension now supports a project-specific configuration file called `.transl
 
 ```json
 {
-  "sourcePaths": ["i18n/en", "docs/en"],
+  "sourcePaths": ["i18n/en", "i18n/en.json"],
   "sourceLocale": "en",
   "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
   "enableBackTranslation": true,
@@ -26,7 +26,7 @@ The extension now supports a project-specific configuration file called `.transl
 
 | Option | Type | Description | Default |
 |--------|------|-------------|---------|
-| `sourcePaths` | `string[]` | Source language paths to scan for files to translate | `["i18n/en"]` |
+| `sourcePaths` | `string[]` | Source language directories to scan for files to translate OR single source files | `["i18n/en", "i18n/en.json"]` |
 | `sourceLocale` | `string` | Source locale | `"en"` |
 | `targetLocales` | `string[]` | Target locales to generate translations for | `['fr-FR', 'fr-CA']` |
 | `enableBackTranslation` | `boolean` | Enable back translation | `false` |
