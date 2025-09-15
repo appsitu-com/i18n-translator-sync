@@ -6,12 +6,14 @@ This file provides guidance for LLM (Large Language Model) engines and AI agents
 - This is a VS Code extension for translating Markdown, JSON, and YAML files using AI translation services.
 - It supports multiple translation engines (Azure, Google, DeepL, Gemini, Copy) and can handle context-aware translation via CSV files.
 - The extension is written in TypeScript and uses native modules (better-sqlite3) for caching.
+- It supports translating both directory structures and individual files, with flexible source path configuration.
 
 ## Key Conventions
 - Use Yarn for dependency management and scripts (see package.json).
 - All translation logic is in the `src/` directory. Extractors for file formats are in `src/extractors/`.
 - Shared logic for structured data (JSON/YAML) is in `src/extractors/structured.ts`.
 - The translation pipeline is managed in `src/pipeline.ts`.
+- Path handling utilities are in `src/util/paths.ts`.
 - Tests are in the `tests/` directory and use Vitest.
 - Native modules must be rebuilt for the Electron version used by VS Code (see CONTRIBUTING.md for instructions).
 
@@ -20,18 +22,25 @@ This file provides guidance for LLM (Large Language Model) engines and AI agents
 - Prefer small, composable modules and pure functions.
 - Do not use VS Code API inside translation engine adapters.
 - Use meaningful variable names and include doc comments for exported functions.
+- Maintain language neutrality in code - don't assume English (or any specific language) is always the source language.
+- Use clear, descriptive function and variable names that reflect their general purpose rather than specific use cases.
 - Follow the structure and conventions in existing code and documentation.
 
 ## Documentation
 - Documentation is in README.md, CONTRIBUTING.md and doc/*.md files.
-- Features, usage, and configuration are described in README.md and doc/Configuration.md .
-- Native module and development environment setup is described in CONTRIBUTING.md .
+- Features, usage, and configuration are described in README.md and doc/Configuration.md.
+- The configuration allows flexible source path setup via `.translate.json`:
+  - Directory paths (e.g., "i18n/en") for translating entire directory structures
+  - Individual file paths (e.g., "i18n/en.json") for single file translation to sibling files
+- Native module and development environment setup is described in CONTRIBUTING.md.
 
 ## Special Notes for LLMs
 - When generating code, ensure compatibility with VS Code extension APIs and Electron.
 - When updating dependencies or native modules, always consider Electron ABI compatibility.
 - When adding new extractors or translation engines, follow the patterns in `src/extractors/` and `src/translators/`.
 - For context-aware translation, ensure context CSVs are loaded and mapped correctly (see `src/contextCsv.ts`).
+- When working with source and target paths, always use language-neutral functions and terminology.
+- Remember that source paths can be both directories and individual files, so path handling code must support both scenarios.
 
 ## Contact
 - For questions or issues, refer to the GitHub repository: https://github.com/tohagan/vscode-i18n-translator-ext
