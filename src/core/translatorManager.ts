@@ -65,10 +65,33 @@ export class TranslatorManager {
       // Normalize path for consistency across platforms
       const normalizedPath = sourcePath.replace(/\\/g, '/');
 
-      // Create glob pattern for the file watcher
-      const pattern = `**/${normalizedPath}/**`;
+      // Create the full path to check if it's a file
+      const fullSourcePath = path.join(this.workspacePath, sourcePath);
+      const sourceUri = this.fileSystem.createUri(fullSourcePath);
 
-      this.logger.debug(`Creating watcher with pattern: ${pattern}`);
+      // Check if this is a file or directory
+      const isFilePath = await this.isFile(sourceUri);
+
+      // Create appropriate glob pattern for the file watcher
+      let pattern: string;
+
+      if (isFilePath) {
+        // For a file, watch that specific file
+        // Extract the directory and filename
+        const dirPath = path.dirname(normalizedPath);
+        const fileName = path.basename(normalizedPath);
+
+        // Create a specific pattern for just this file
+        pattern = dirPath === '.' ?
+          `**/${fileName}` :
+          `**/${dirPath}/${fileName}`;
+
+        this.logger.debug(`Creating file-specific watcher with pattern: ${pattern}`);
+      } else {
+        // For a directory, watch all files in that directory recursively
+        pattern = `**/${normalizedPath}/**`;
+        this.logger.debug(`Creating directory watcher with pattern: ${pattern}`);
+      }
 
       // Create file watcher
       const watcher = this.workspaceWatcher.createFileSystemWatcher(
@@ -123,7 +146,8 @@ export class TranslatorManager {
     try {
       this.logger.info(`File changed: ${uri.fsPath}`);
 
-      // Process the file using the pipeline
+      // For file change events, we always process the file as the content might have changed
+      // The timestamp-based check happens inside the pipeline.processFile method
       await this.pipeline.processFile(
         uri,
         this.workspacePath,
@@ -204,14 +228,67 @@ export class TranslatorManager {
   }
 
   /**
+   * Checks if a path is a file (rather than a directory)
+   * @param uri URI to check
+   * @returns True if the path exists and is a file
+   */
+  private async isFile(uri: IUri): Promise<boolean> {
+    try {
+      // Check if path exists
+      const exists = await this.fileSystem.fileExists(uri);
+      if (!exists) {
+        this.logger.warn(`Path does not exist: ${uri.fsPath}`);
+        return false;
+      }
+
+      // Try to read as directory
+      try {
+        await this.fileSystem.readDirectory(uri);
+        // If we can read it as a directory, it's not a file
+        return false;
+      } catch (error) {
+        // If we can't read it as a directory but it exists, it's likely a file
+
+        // Check if the file is readable
+        try {
+          await this.fileSystem.readFile(uri);
+          return true;
+        } catch (readError) {
+          this.logger.error(`File exists but cannot be read: ${uri.fsPath}: ${readError instanceof Error ? readError.message : String(readError)}`);
+          return false;
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Error checking if path is file: ${uri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
+      return false;
+    }
+  }
+
+  /**
+   * Check if a file is supported for translation
+   * @param filePath Path to check
+   * @returns True if supported
+   */
+  private isSupportedFile(filePath: string): boolean {
+    const lowerPath = filePath.toLowerCase();
+    return lowerPath.endsWith('.json') ||
+           lowerPath.endsWith('.md') ||
+           lowerPath.endsWith('.mdx') ||
+           lowerPath.endsWith('.yaml') ||
+           lowerPath.endsWith('.yml');
+  }
+
+  /**
    * Perform bulk translation of all source files
    * @param config The project configuration
    * @param progressCallback Optional callback to report progress
+   * @param force Force translation even if target is up to date
    * @returns Number of files processed
    */
   async bulkTranslate(
     config: TranslateProjectConfig,
-    progressCallback?: (current: number, total: number, file: string) => void
+    progressCallback?: (current: number, total: number, file: string) => void,
+    force: boolean = false
   ): Promise<number> {
     this.logger.info('Starting bulk translation of all source files');
 
@@ -225,18 +302,34 @@ export class TranslatorManager {
         const fullSourcePath = path.join(this.workspacePath, sourcePath);
         const sourceUri = this.fileSystem.createUri(fullSourcePath);
 
-        // Find all files in the source path
-        const pathFiles = await this.findAllFilesInDir(sourceUri);
+        // Check if this is a file or directory
+        const isFilePath = await this.isFile(sourceUri);
 
-        // Filter files by supported extensions
-        const supportedFiles = pathFiles.filter(fileUri => {
-          const filePath = fileUri.fsPath.toLowerCase();
-          return filePath.endsWith('.json') || filePath.endsWith('.md') ||
-                 filePath.endsWith('.mdx') || filePath.endsWith('.yaml') ||
-                 filePath.endsWith('.yml');
-        });
+        if (isFilePath) {
+          // It's a single file - add it directly if it's supported
+          if (this.isSupportedFile(fullSourcePath)) {
+            files.push(sourceUri);
+            this.logger.info(`Added single file for translation: ${fullSourcePath}`);
+          } else {
+            this.logger.warn(`Skipping unsupported file: ${fullSourcePath}`);
+          }
+        } else {
+          // It's a directory - find all files recursively
+          try {
+            // Find all files in the source path
+            const pathFiles = await this.findAllFilesInDir(sourceUri);
 
-        files = [...files, ...supportedFiles];
+            // Filter files by supported extensions
+            const supportedFiles = pathFiles.filter(fileUri =>
+              this.isSupportedFile(fileUri.fsPath)
+            );
+
+            files = [...files, ...supportedFiles];
+            this.logger.info(`Found ${supportedFiles.length} files in directory: ${fullSourcePath}`);
+          } catch (error) {
+            this.logger.error(`Error processing source path ${fullSourcePath}: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
       }
 
       totalFiles = files.length;
@@ -258,7 +351,9 @@ export class TranslatorManager {
             fileUri,
             this.workspacePath,
             config,
-            { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+            { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
+            undefined,
+            force // Pass force flag to respect timestamp check
           );
 
           filesProcessed++;
@@ -329,32 +424,60 @@ export class TranslatorManager {
       // Process each source path
       for (const sourcePath of config.sourcePaths) {
         const fullSourcePath = path.join(this.workspacePath, sourcePath);
+        const sourceUri = this.fileSystem.createUri(fullSourcePath);
 
-        // Find all files in the source path
-        const files = await this.findAllFilesInDir(this.fileSystem.createUri(fullSourcePath));
+        // Check if this is a file or directory
+        const isFilePath = await this.isFile(sourceUri);
 
-        this.logger.info(`Found ${files.length} files in source path: ${sourcePath}`);
+        if (isFilePath) {
+          // It's a single file - process it directly if it's supported
+          if (this.isSupportedFile(fullSourcePath)) {
+            this.logger.info(`Processing single source file: ${fullSourcePath}`);
 
-        // Process each file
-        for (const fileUri of files) {
-          try {
-            // Check if file is supported for translation (could add more filters here)
-            const filePath = fileUri.fsPath.toLowerCase();
-            if (filePath.endsWith('.json') || filePath.endsWith('.md') ||
-                filePath.endsWith('.mdx') || filePath.endsWith('.yaml') ||
-                filePath.endsWith('.yml')) {
-
+            try {
               await this.pipeline.processFile(
-                fileUri,
+                sourceUri,
                 this.workspacePath,
                 config,
                 { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
               );
 
               filesProcessed++;
+              this.logger.info(`Successfully processed source file: ${fullSourcePath}`);
+            } catch (error) {
+              this.logger.error(`Error processing source file ${fullSourcePath}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+          } else {
+            this.logger.warn(`Skipping unsupported file: ${fullSourcePath}`);
+          }
+        } else {
+          // It's a directory - find all files recursively
+          try {
+            // Find all files in the source path
+            const files = await this.findAllFilesInDir(sourceUri);
+
+            this.logger.info(`Found ${files.length} files in source path: ${sourcePath}`);
+
+            // Process each file
+            for (const fileUri of files) {
+              try {
+                // Check if file is supported for translation
+                if (this.isSupportedFile(fileUri.fsPath)) {
+                  await this.pipeline.processFile(
+                    fileUri,
+                    this.workspacePath,
+                    config,
+                    { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+                  );
+
+                  filesProcessed++;
+                }
+              } catch (error) {
+                this.logger.error(`Error processing existing file ${fileUri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
+              }
             }
           } catch (error) {
-            this.logger.error(`Error processing existing file ${fileUri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
+            this.logger.error(`Error processing source directory ${fullSourcePath}: ${error instanceof Error ? error.message : String(error)}`);
           }
         }
       }
@@ -439,6 +562,46 @@ export class TranslatorManager {
       (message: string) => this.logger.info(message));
 
     this.logger.info('Successfully pulled translations from MateCat');
+  }
+
+  /**
+   * Translate a single file
+   * @param fileUri URI of the file to translate
+   * @param config Project configuration
+   * @param force Force translation even if target is up to date
+   */
+  async translateSingleFile(fileUri: IUri, config: TranslateProjectConfig, force: boolean = false): Promise<void> {
+    this.logger.info(`Translating single file: ${fileUri.fsPath}`);
+
+    // Check if file exists
+    const exists = await this.fileSystem.fileExists(fileUri);
+    if (!exists) {
+      throw new Error(`File not found: ${fileUri.fsPath}`);
+    }
+
+    // Check if file is readable
+    try {
+      await this.fileSystem.readFile(fileUri);
+    } catch (error) {
+      throw new Error(`Cannot read file (check permissions): ${fileUri.fsPath}`);
+    }
+
+    // Check if file type is supported
+    if (!this.isSupportedFile(fileUri.fsPath)) {
+      throw new Error(`Unsupported file type: ${fileUri.fsPath}. Supported types: .json, .md, .mdx, .yaml, .yml`);
+    }
+
+    // Process the file using the pipeline
+    await this.pipeline.processFile(
+      fileUri,
+      this.workspacePath,
+      config,
+      { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
+      undefined,
+      force
+    );
+
+    this.logger.info(`Successfully translated file: ${fileUri.fsPath}`);
   }
 
   /**

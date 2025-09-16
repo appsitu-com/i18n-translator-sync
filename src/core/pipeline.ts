@@ -170,6 +170,32 @@ export class TranslatorPipeline {
   }
 
   /**
+   * Check if a target file needs to be translated by comparing timestamps
+   * @returns true if target needs to be translated (doesn't exist or is older than source)
+   */
+  private async needsTranslation(sourceUri: IUri, targetUri: IUri): Promise<boolean> {
+    try {
+      // Check if target file exists
+      const targetExists = await this.fileSystem.fileExists(targetUri)
+      if (!targetExists) {
+        // Target doesn't exist, needs translation
+        return true
+      }
+
+      // Get timestamps of source and target files
+      const sourceStats = await this.fileSystem.stat(sourceUri)
+      const targetStats = await this.fileSystem.stat(targetUri)
+
+      // Compare modification times - translate if source is newer
+      return sourceStats.mtime > targetStats.mtime
+    } catch (error) {
+      // If any error occurs, assume translation is needed
+      this.logger.warn(`Error checking if file needs translation: ${error}`)
+      return true
+    }
+  }
+
+  /**
    * Process file for all target locales
    */
   public async processFile(
@@ -177,7 +203,8 @@ export class TranslatorPipeline {
     workspacePath: string,
     config: TranslateProjectConfig,
     configProvider: { get: <T>(section: string, defaultValue?: T) => T },
-    params?: Partial<{ sourceLocale: string; targetLocales: string[]; enableBackTranslation: boolean }>
+    params?: Partial<{ sourceLocale: string; targetLocales: string[]; enableBackTranslation: boolean }>,
+    forceTranslation: boolean = false
   ): Promise<void> {
     // Use provided params or fall back to project config
     const sourceLocale = params?.sourceLocale ?? config.sourceLocale
@@ -212,6 +239,24 @@ export class TranslatorPipeline {
 
     // Process each target locale
     for (const targetLocale of targetLocales) {
+      // Create target URI
+      const targetUri = createTargetUri(
+        this.fileSystem,
+        workspacePath,
+        sourceLocale,
+        targetLocale,
+        rel,
+        config
+      )
+
+      // Check if translation is needed based on file timestamps
+      const translationNeeded = forceTranslation || await this.needsTranslation(srcUri, targetUri)
+
+      if (!translationNeeded) {
+        this.logger.info(`Skipping up-to-date file: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}]`)
+        continue
+      }
+
       // Forward translation (source to target)
       const engineName = pickEngine({
         source: sourceLocale,
@@ -234,22 +279,31 @@ export class TranslatorPipeline {
         configProvider
       )
 
-      // Create target URI
-      const targetUri = createTargetUri(
-        this.fileSystem,
-        workspacePath,
-        sourceLocale,
-        targetLocale,
-        rel,
-        config
-      )
-
       // Write forward translation output
       await this.writeText(targetUri, extraction.rebuild(fwd))
       // No additional logging after writing the file
 
       // Handle back translation if enabled
       if (enableBackTranslation) {
+        // Create back-translation URI
+        const backUri = createBackTranslationUri(
+          this.fileSystem,
+          workspacePath,
+          targetLocale,
+          rel,
+          config
+        )
+
+        // Check if back-translation is needed
+        const backTranslationNeeded = forceTranslation ||
+                                     await this.needsTranslation(targetUri, backUri) ||
+                                     translationNeeded; // If forward translation was updated, back translation is needed too
+
+        if (!backTranslationNeeded) {
+          this.logger.info(`Skipping up-to-date back-translation: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}]`)
+          continue;
+        }
+
         const backEngine = pickEngine({
           source: targetLocale,
           target: sourceLocale,
@@ -273,15 +327,6 @@ export class TranslatorPipeline {
                 sourceLocale,
                 configProvider
               )
-
-        // Create back-translation URI
-        const backUri = createBackTranslationUri(
-          this.fileSystem,
-          workspacePath,
-          targetLocale,
-          rel,
-          config
-        )
 
         // Write back translation output
         await this.writeText(backUri, extraction.rebuild(back))

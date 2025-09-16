@@ -180,6 +180,66 @@ export class CLITranslatorAdapter {
   }
 
   /**
+   * Translate a single file
+   * @param filePath Relative path to the file from the workspace
+   */
+  async translateFile(filePath: string): Promise<void> {
+    if (!this.translatorManager) {
+      console.info('Translator not running. Start the translator first.');
+      return;
+    }
+
+    try {
+      // Load project configuration
+      const projectConfig = await loadProjectConfig(
+        this.workspacePath,
+        this.configProvider,
+        this.logger,
+        this.fileSystem
+      );
+
+      // Create the absolute path to the file
+      const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(this.workspacePath, filePath);
+      const uri = this.fileSystem.createUri(absolutePath);
+
+      // Check if file exists
+      const exists = await this.fileSystem.fileExists(uri);
+      if (!exists) {
+        console.error(`Error: File not found: ${absolutePath}`);
+        console.error(`Please check the path and make sure the file exists.`);
+        return;
+      }
+
+      // Check if file is supported
+      const lowerFilePath = absolutePath.toLowerCase();
+      if (!(lowerFilePath.endsWith('.json') ||
+            lowerFilePath.endsWith('.md') ||
+            lowerFilePath.endsWith('.mdx') ||
+            lowerFilePath.endsWith('.yaml') ||
+            lowerFilePath.endsWith('.yml'))) {
+        console.error(`Error: Unsupported file type: ${absolutePath}`);
+        console.error(`Supported file types: .json, .md, .mdx, .yaml, .yml`);
+        return;
+      }
+
+      console.info(`Translating single file: ${filePath}`);
+
+      // Use the TranslatorManager to process the file
+      // Check if force flag is set in the process arguments
+      const forceTranslation = process.argv.includes('--force');
+
+      await this.translatorManager.translateSingleFile(uri, projectConfig, forceTranslation);
+
+      console.info(`Translation of ${filePath} completed successfully`);
+    } catch (e: any) {
+      console.error(`Translation of file failed: ${e.message}`);
+      if (e.stack) {
+        console.error(e.stack);
+      }
+    }
+  }
+
+  /**
    * Perform bulk translation of all source files in the project
    */
   async bulkTranslate(): Promise<void> {
@@ -197,7 +257,13 @@ export class CLITranslatorAdapter {
         this.fileSystem
       );
 
-      console.info('Starting bulk translation of all project files...');
+      // Check if force flag is set in the process arguments
+      const forceTranslation = process.argv.includes('--force');
+      if (forceTranslation) {
+        console.info('Starting bulk translation of all project files (forced)...');
+      } else {
+        console.info('Starting bulk translation of all project files (only updated files)...');
+      }
 
       // Create progress reporting function
       const progressCallback = (current: number, total: number, file: string) => {
@@ -206,8 +272,8 @@ export class CLITranslatorAdapter {
         console.info(`[${percent}%] Translating file ${current}/${total}: ${filename}`);
       };
 
-      // Call the bulk translate method with progress reporting
-      const filesProcessed = await this.translatorManager.bulkTranslate(projectConfig, progressCallback);
+      // Modify the TranslatorPipeline to handle the force flag by updating file processing methods
+      const filesProcessed = await this.translatorManager.bulkTranslate(projectConfig, progressCallback, forceTranslation);
 
       console.info(`Bulk translation completed: ${filesProcessed} files processed`);
     } catch (e: any) {

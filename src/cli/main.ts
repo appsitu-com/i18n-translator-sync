@@ -19,6 +19,8 @@ export async function runCli(): Promise<void> {
     .option('--push-matecat', 'Push translations to MateCat')
     .option('--pull-matecat', 'Pull translations from MateCat')
     .option('--bulk-translate', 'Perform bulk translation of all files')
+    .option('--file <path>', 'Process a single file for translation (relative to workspace)')
+    .option('--force', 'Force translation even if target files are up to date')
     .option('--watch', 'Watch for file changes', true)
     .option('--no-watch', 'Disable file watching')
     .parse(process.argv);
@@ -61,12 +63,16 @@ export async function runCli(): Promise<void> {
       await adapter.pullFromMateCat();
     }
 
+    if (options.file) {
+      await adapter.translateFile(options.file);
+    }
+
     if (options.bulkTranslate) {
       await adapter.bulkTranslate();
     }
 
     // Determine if any command was executed
-    const commandExecuted = options.pushMatecat || options.pullMatecat || options.bulkTranslate;
+    const commandExecuted = options.pushMatecat || options.pullMatecat || options.bulkTranslate || options.file;
 
     // Keep the process running if watching is enabled and no specific command was executed
     if (options.watch && !commandExecuted) {

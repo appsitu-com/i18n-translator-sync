@@ -22,6 +22,26 @@ export interface IUri {
 }
 
 /**
+ * File stats interface
+ */
+export interface FileStat {
+  /**
+   * File size in bytes
+   */
+  size: number
+
+  /**
+   * File creation time as timestamp
+   */
+  ctime: number
+
+  /**
+   * File modification time as timestamp
+   */
+  mtime: number
+}
+
+/**
  * File system operations interface
  * This provides a common abstraction layer that can be implemented
  * for both VSCode and Node.js environments
@@ -66,6 +86,11 @@ export interface FileSystem {
    * Join a URI with a path segment
    */
   joinPath(uri: IUri, ...pathSegments: string[]): IUri
+
+  /**
+   * Get file stats (size, creation time, modification time)
+   */
+  stat(uri: IUri): Promise<FileStat>
 }
 
 /**
@@ -140,6 +165,22 @@ export class NodeFileSystem implements FileSystem {
       if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
         throw error
       }
+    }
+  }
+
+  /**
+   * Get file stats
+   */
+  async stat(uri: IUri): Promise<FileStat> {
+    try {
+      const stats = await fs.stat(uri.fsPath)
+      return {
+        size: stats.size,
+        ctime: stats.ctimeMs,
+        mtime: stats.mtimeMs
+      }
+    } catch (error) {
+      throw new Error(`Failed to get file stats for ${uri.fsPath}: ${error}`)
     }
   }
 }

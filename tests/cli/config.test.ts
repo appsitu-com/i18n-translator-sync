@@ -59,7 +59,7 @@ describe('CliConfigProvider', () => {
       // File does not exist
       await configProvider.load();
 
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Configuration file not found'));
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Project configuration file not found'));
       expect(configProvider.get('nonexistent.key', 'default')).toBe('default');
     });
 
@@ -68,7 +68,7 @@ describe('CliConfigProvider', () => {
 
       await configProvider.load();
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error loading configuration'));
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error loading project configuration'));
       expect(configProvider.get('some.key', 'default')).toBe('default');
     });
   });

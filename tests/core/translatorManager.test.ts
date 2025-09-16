@@ -13,6 +13,13 @@ const createMockFileSystem = () => ({
   fileExists: vi.fn(),
   createDirectory: vi.fn(),
   readDirectory: vi.fn(),
+  stat: vi.fn().mockResolvedValue({
+    isFile: true,
+    isDirectory: false,
+    mtime: new Date(),
+    ctime: new Date(),
+    size: 100
+  }),
   createUri: vi.fn((path) => ({ fsPath: path, path, scheme: 'file' })),
   joinPath: vi.fn((uri, ...segments) => {
     const joined = [uri.fsPath, ...segments].join('/');
@@ -183,25 +190,31 @@ describe('TranslatorManager', () => {
   });
 
   describe('MateCat integration', () => {
-    let matecatModule: any;
+    beforeEach(() => {
+      // Mock the MateCat service with functions that don't throw errors
+      (translatorManager as any).mateCatService = {
+        pushCacheToMateCat: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFromMateCat: vi.fn().mockResolvedValue(5)
+      };
 
-    beforeEach(async () => {
-      matecatModule = await import('../../src/matecate');
-      vi.spyOn(matecatModule, 'pushCacheToMateCat').mockResolvedValue(undefined);
-      vi.spyOn(matecatModule, 'pullReviewedFromMateCat').mockResolvedValue(undefined);
+      // Mock the getMateCatSettings method to return valid settings
+      (translatorManager as any).getMateCatSettings = vi.fn().mockReturnValue({
+        pushUrl: 'http://example.com/push',
+        pullUrl: 'http://example.com/pull',
+        apiKey: 'test-key',
+        projectId: 'test-project'
+      });
     });
 
     it('should push translations to MateCat', async () => {
       await translatorManager.pushToMateCat();
-
-      expect(matecatModule.pushCacheToMateCat).toHaveBeenCalledWith(cache);
+      expect((translatorManager as any).mateCatService.pushCacheToMateCat).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('Successfully pushed translations to MateCat');
     });
 
     it('should pull translations from MateCat', async () => {
       await translatorManager.pullFromMateCat();
-
-      expect(matecatModule.pullReviewedFromMateCat).toHaveBeenCalledWith(cache);
+      expect((translatorManager as any).mateCatService.pullReviewedFromMateCat).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('Successfully pulled translations from MateCat');
     });
   });
