@@ -1,4 +1,3 @@
-import { Type } from './../../node_modules/@types/js-yaml/index.d';
 import { remark } from 'remark'
 import stringify from 'remark-stringify'
 import frontmatter from 'remark-frontmatter'

@@ -3,7 +3,6 @@ import * as path from 'path';
 import { ConfigProvider } from '../core/config';
 import { FileSystem } from '../core/util/fs';
 import { Logger } from '../core/util/logger';
-import { resolveEnvDeep } from '../core/util/env';
 
 /**
  * CLI configuration provider

@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { TranslatorAdapter } from '../core/adapters/baseAdapter';
 import { WorkspaceWatcher } from '../core/util/watcher';
 import { initTranslatorEnv } from '../core/util/env';
@@ -76,7 +75,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * Start the translator with VSCode-specific initialization
    * @param context VSCode extension context
    */
-  async startWithContext(context: vscode.ExtensionContext): Promise<void> {
+  async startWithContext(_context: vscode.ExtensionContext): Promise<void> {
     // Check if already running
     if (this.running) {
       vscode.window.showInformationMessage('Translator already running');
@@ -111,9 +110,9 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * Restart the translator with VSCode context
    * @param context VSCode extension context
    */
-  async restartWithContext(context: vscode.ExtensionContext): Promise<void> {
+  async restartWithContext(_context: vscode.ExtensionContext): Promise<void> {
     this.stop();
-    await this.startWithContext(context);
+    await this.startWithContext(_context);
   }
 
   /**

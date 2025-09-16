@@ -21,8 +21,9 @@ export function pickEngine(params: {
   target: string
   defaults: { md: string; json: string }
   overrides: Record<string, string>
-  isMarkdown: boolean
+  fileType: string
 }): TranslatorEngine {
   const key = `${params.source}:${params.target}`
-  return (params.overrides[key] ?? (params.isMarkdown ? params.defaults.md : params.defaults.json)) as TranslatorEngine
+  const defaultEngine = params.defaults[params.fileType as keyof typeof params.defaults] || params.defaults.json
+  return (params.overrides[key] ?? defaultEngine) as TranslatorEngine
 }

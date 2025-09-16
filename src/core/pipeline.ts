@@ -12,8 +12,7 @@ import { TranslateProjectConfig } from './config'
 import {
   getRelativePath,
   createTargetUri,
-  createBackTranslationUri,
-  normalizePath
+  createBackTranslationUri
 } from './util/paths'
 
 /**
@@ -190,6 +189,27 @@ export class TranslatorPipeline {
     }
   }
 
+  getFileType(filePath: string): string {
+    const lowerPath = filePath.toLowerCase();
+    if (lowerPath.endsWith('.md') || lowerPath.endsWith('.mdx') || lowerPath.endsWith('.markdown')) {
+      return 'md';
+    }
+    if (lowerPath.endsWith('.json')) {
+      return 'json';
+    }
+    if (lowerPath.endsWith('.yml') || lowerPath.endsWith('.yaml')) {
+      return 'yaml';
+    }
+    // if (lowerPath.endsWith('.txt')) {
+    //   return 'txt';
+    // }
+    // if (lowerPath.endsWith('.html') || lowerPath.endsWith('.htm')) {
+    //   return 'html';
+    // }
+
+    throw new Error(`Unsupported file type for path: ${filePath}`);
+  }
+
   /**
    * Process file for all target locales
    */
@@ -216,8 +236,7 @@ export class TranslatorPipeline {
     const extraction = extractForFile(filename, content)
 
     // Determine file type
-    const isMarkdown = filename.endsWith('.md') || filename.endsWith('.mdx') || filename.endsWith('.markdown')
-    const isYaml = filename.endsWith('.yml') || filename.endsWith('.yaml')
+    const fileType = this.getFileType(filename);
     // YAML files use the same translator as JSON
 
     // Get engine configuration
@@ -258,7 +277,7 @@ export class TranslatorPipeline {
         target: targetLocale,
         defaults,
         overrides,
-        isMarkdown
+        fileType
       })
 
       // Simple, concise logging with just one line per file translation
@@ -304,7 +323,7 @@ export class TranslatorPipeline {
           target: sourceLocale,
           defaults,
           overrides,
-          isMarkdown
+          fileType
         })
 
         // Simple, concise logging with just one line for back-translation

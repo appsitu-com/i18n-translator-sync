@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import { TranslatorManager } from '../translatorManager';
 import { loadProjectConfig } from '../config';
 import { Logger } from '../util/logger';
-import { FileSystem, IUri } from '../util/fs';
+import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
 import { SQLiteCache } from '../cache/sqlite';
 import { ConfigProvider } from '../config';

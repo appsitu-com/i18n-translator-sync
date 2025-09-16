@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import * as path from 'path';
 import * as process from 'process';
-import * as fs from 'fs';
 import { NodeFileSystem } from '../core/util/fs';
 import { ConsoleLogger, LogLevel } from '../core/util/logger';
 import { CliConfigProvider } from './config';
@@ -77,7 +76,6 @@ export class CliCommands {
       this.logger.info(`Using workspace: ${workspacePath}`);
 
       // Load environment variables
-      const envPath = path.join(workspacePath, '.translator.env');
       await initTranslatorEnv(workspacePath, this.logger);
 
       // Initialize config provider

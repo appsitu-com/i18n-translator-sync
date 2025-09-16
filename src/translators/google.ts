@@ -1,6 +1,6 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
-import { RetryOptions, withRetry } from '../util/retry'
+import { withRetry } from '../util/retry'
 
 const langMap: Record<string, string> = {
   'zh-CN': 'zh-CN',

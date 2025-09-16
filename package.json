@@ -196,7 +196,9 @@
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "package:quick": "npx @vscode/vsce package",
     "test:cov": "vitest run --coverage",
-    "version:update": "node scripts/update-version.js"
+    "version:update": "node scripts/update-version.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
   },
   "vsce": {
     "dependencies": [
@@ -208,8 +210,12 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.1",
     "@types/vscode": "^1.103.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
     "@vitest/coverage-v8": "^3.2.4",
     "electron-rebuild": "^3.2.9",
+    "eslint": "^9.35.0",
+    "eslint-plugin-unused-imports": "^4.2.0",
     "sharp": "^0.34.3",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"

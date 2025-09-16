@@ -1,4 +1,3 @@
-import * as path from 'path';
 import { NodeFileSystem, nodeFileSystem } from '../core/util/fs';
 import { ConsoleLogger } from '../core/util/logger';
 import { CliWorkspaceWatcher } from './watcher';

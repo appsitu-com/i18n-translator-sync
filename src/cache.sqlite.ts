@@ -98,7 +98,7 @@ export class SQLiteCache implements TranslationCache {
 
     fs.writeSync(fd, 'engine_name,source_lang,target_lang,source_text,context,translated_text,updated_at\n')
     const esc = (s: string) => {
-      const safe = (s ?? '').replace(/\"/g, '""')
+      const safe = (s ?? '').replace(/"/g, '""')
       return `"${safe}"`
     }
 

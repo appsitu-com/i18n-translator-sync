@@ -39,7 +39,7 @@ export const initTranslatorEnv = () => {
           if (fs.existsSync(envExample)) {
             dotenv.config({ path: envExample, quiet: true });
           }
-        } catch (error) {
+        } catch {
           // Ignore any errors in test environment
         }
       }

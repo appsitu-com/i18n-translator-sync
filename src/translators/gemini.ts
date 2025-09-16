@@ -1,6 +1,6 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
-import { RetryOptions, withRetry } from '../util/retry'
+import { withRetry } from '../util/retry'
 
 // Language code mapping for Gemini
 // Gemini supports standard language codes but we'll normalize some variants

@@ -7,7 +7,7 @@ import { Logger, LogLevel } from '../core/util/logger';
 export class VSCodeLogger implements Logger {
   constructor(private outputChannel: vscode.OutputChannel) {}
 
-  setLevel(level: LogLevel): void {
+  setLevel(_level: LogLevel): void {
     // VSCode logger doesn't support log levels directly
     // We could store the level and filter messages, but we'll just accept all messages
   }

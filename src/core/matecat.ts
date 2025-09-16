@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { Logger } from './util/logger';
-import { resolveEnvDeep } from './util/env';
 import { TranslationCache } from './cache/sqlite';
 
 /**

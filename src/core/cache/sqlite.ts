@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs'
-import { FileSystem, IUri } from '../util/fs'
+import { FileSystem } from '../util/fs'
 import { Logger } from '../util/logger'
 
 export type Pair = { src: string; dst: string; ctx?: string | null }
@@ -187,7 +187,7 @@ export class SQLiteCache implements TranslationCache {
 
     fs.writeSync(fd, 'engine_name,source_lang,target_lang,source_text,context,translated_text,updated_at\n')
     const esc = (s: string) => {
-      const safe = (s ?? '').replace(/\"/g, '""')
+      const safe = (s ?? '').replace(/"/g, '""')
       return `"${safe}"`
     }
 

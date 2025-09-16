@@ -1,6 +1,5 @@
 import * as chokidar from 'chokidar';
 import * as path from 'path';
-import * as minimatch from 'minimatch';
 import { Logger } from '../core/util/logger';
 import { FileSystem, IUri } from '../core/util/fs';
 import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable, FileRenameEvent } from '../core/util/watcher';
@@ -31,7 +30,7 @@ class CliFileWatcher implements FileWatcher {
 
     // Create chokidar watcher
     this.watcher = chokidar.watch(watchPattern, {
-      ignored: /(^|[\/\\])\../, // Ignore dotfiles
+      ignored: /(^|[/\\])\.\./, // Ignore dotfiles
       persistent: true,
       ignoreInitial: true,
       awaitWriteFinish: {

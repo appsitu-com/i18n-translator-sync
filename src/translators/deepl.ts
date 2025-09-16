@@ -1,7 +1,7 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 
-const LOCALE_MAP: Record<string, string> = {
+const _LOCALE_MAP: Record<string, string> = {
   // English
   en: 'EN', // generic EN
   'en-US': 'EN-US',

@@ -237,7 +237,7 @@ export async function processFileForLocales(
 
   // Determine file type
   const isMarkdown = filename.endsWith('.md') || filename.endsWith('.mdx') || filename.endsWith('.markdown')
-  const isYaml = filename.endsWith('.yml') || filename.endsWith('.yaml')
+  const _isYaml = filename.endsWith('.yml') || filename.endsWith('.yaml')
   // YAML files use the same translator as JSON
 
   // Get engine configuration
@@ -260,7 +260,7 @@ export async function processFileForLocales(
       target: targetLocale,
       defaults,
       overrides,
-      isMarkdown
+      fileType: isMarkdown ? 'md' : 'json'
     })
 
     // Translate the segments
@@ -276,7 +276,7 @@ export async function processFileForLocales(
         target: sourceLocale,
         defaults,
         overrides,
-        isMarkdown
+        fileType: isMarkdown ? 'md' : 'json'
       })
 
       // If using copy engine for forward translation, just copy the segments again

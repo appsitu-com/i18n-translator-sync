@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { z } from 'zod'
 import { TranslatorEngine } from '../translators/types'
-import { FileSystem, IUri } from './util/fs'
+import { FileSystem } from './util/fs'
 import { Logger } from './util/logger'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const

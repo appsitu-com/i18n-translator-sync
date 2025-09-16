@@ -1,5 +1,4 @@
 import * as vscode from 'vscode'
-import { IUri } from './core/util/fs'
 import { loadContextCsvForJson as loadContextCsvCore } from './core/contextCsv'
 import { vsCodeFileSystem, toIUri, toVSCodeUri } from './vscode/filesystem'
 

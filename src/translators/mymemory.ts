@@ -1,4 +1,4 @@
-import type { Translator, BulkTranslateOpts, TranslatorApiConfig } from './types'
+import type { Translator, BulkTranslateOpts } from './types'
 import { withRetry } from '../util/retry'
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {

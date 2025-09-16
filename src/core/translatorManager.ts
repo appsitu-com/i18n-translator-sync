@@ -152,7 +152,7 @@ export class TranslatorManager {
         uri,
         this.workspacePath,
         config,
-        { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+        { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
       );
 
       this.logger.info(`Successfully processed file: ${uri.fsPath}`);
@@ -213,7 +213,7 @@ export class TranslatorManager {
             file.newUri,
             this.workspacePath,
             config,
-            { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+            { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
           );
 
           this.logger.info(`Successfully handled rename from ${oldPath} to ${newPath}`);
@@ -246,7 +246,7 @@ export class TranslatorManager {
         await this.fileSystem.readDirectory(uri);
         // If we can read it as a directory, it's not a file
         return false;
-      } catch (error) {
+      } catch {
         // If we can't read it as a directory but it exists, it's likely a file
 
         // Check if the file is readable
@@ -351,7 +351,7 @@ export class TranslatorManager {
             fileUri,
             this.workspacePath,
             config,
-            { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
+            { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
             undefined,
             force // Pass force flag to respect timestamp check
           );
@@ -388,7 +388,7 @@ export class TranslatorManager {
   /**
    * Pull all translations
    */
-  async pullTranslations(config: TranslateProjectConfig): Promise<void> {
+  async pullTranslations(_config: TranslateProjectConfig): Promise<void> {
     this.logger.info('Pulling all translations');
 
     // TODO: Implement pull translations functionality
@@ -439,7 +439,7 @@ export class TranslatorManager {
                 sourceUri,
                 this.workspacePath,
                 config,
-                { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+                { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
               );
 
               filesProcessed++;
@@ -467,7 +467,7 @@ export class TranslatorManager {
                     fileUri,
                     this.workspacePath,
                     config,
-                    { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+                    { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
                   );
 
                   filesProcessed++;
@@ -582,7 +582,7 @@ export class TranslatorManager {
     // Check if file is readable
     try {
       await this.fileSystem.readFile(fileUri);
-    } catch (error) {
+    } catch {
       throw new Error(`Cannot read file (check permissions): ${fileUri.fsPath}`);
     }
 
@@ -596,7 +596,7 @@ export class TranslatorManager {
       fileUri,
       this.workspacePath,
       config,
-      { get: <T>(section: string, defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
+      { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
       undefined,
       force
     );

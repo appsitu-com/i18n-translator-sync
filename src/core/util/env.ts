@@ -64,7 +64,7 @@ export const initTranslatorEnv = async (
           if (exampleExists) {
             dotenv.config({ path: envExample, quiet: true });
           }
-        } catch (error) {
+        } catch {
           // Ignore any errors in test environment
         }
       }
@@ -262,7 +262,7 @@ export function getEnv(name: string, logger: Logger): string {
       if (isTestEnvironment) {
         logger.error(`Environment variable "${name}" is not set.`);
       } else {
-        logger.error(`${serviceInfo} API key missing. Configure "${name}" in your .translator.env file.`);
+        logger.error(`${serviceInfo} API key missing. Configure "${name}" in your .translator.env file. Refer to ${docsUrl} for setup instructions.`);
       }
     }
     throw new MissingEnvVarError(name);
