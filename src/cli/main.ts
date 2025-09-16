@@ -56,17 +56,25 @@ export async function runCli(): Promise<void> {
 
   if (options.pushMatecat) {
     await adapter.pushToMateCat()
+    console.log('MateCat push operation completed. Exiting.')
+    process.exit(0)
   } else if (options.pullMatecat) {
     await adapter.pullFromMateCat()
+    console.log('MateCat pull operation completed. Exiting.')
+    process.exit(0)
   } else if (options.bulkTranslate) {
     await adapter.bulkTranslate(options.force)
-  } else {
+    console.log('Bulk translation completed. Exiting.')
+    process.exit(0)
+  } else { // watch mode
     await adapter.bulkTranslate(options.force)
     await adapter.start()
     console.log('Translator is running in watch mode. Press Ctrl+C to stop.')
-    setInterval(() => {}, 1000) // Keep the process alive
-  }
 
-  console.log('Operation completed. Exiting.')
-  process.exit(0)
+    // Keep the process alive indefinitely in watch mode
+    // This should never resolve unless process is terminated externally
+    await new Promise(() => {
+      setInterval(() => {}, 60000) // Keep the process alive with heartbeat every minute
+    })
+  }
 }
