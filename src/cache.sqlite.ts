@@ -76,7 +76,7 @@ export class SQLiteCache implements TranslationCache {
         const t = texts[i]
         const c = (contexts[i] ?? '').toString()
         const row = this.sel.get(engine, source, target, t, c) as any
-        if (row) out.set(`${t}\u0001${c}`, row.translated_text)
+        if (row) out.set(`${t}::${c}`, row.translated_text)
       }
     })()
     return out

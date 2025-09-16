@@ -141,6 +141,20 @@ describe('gemini api', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
 
+    // Explicitly load .translator.env file before each test
+    const dotenv = require('dotenv');
+    const path = require('path');
+    const fs = require('fs');
+
+    const envPath = path.resolve(process.cwd(), 'test-project/.translator.env');
+    if (fs.existsSync(envPath)) {
+      console.log('Loading environment from:', envPath);
+      const result = dotenv.config({ path: envPath, override: true });
+      if (result.error) {
+        console.error('Error loading .translator.env:', result.error);
+      }
+    }
+
     // This will throw an error if the key isn't set or is a test/placeholder key
     const key = process.env.GEMINI_API_KEY;
     console.log('Gemini API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
@@ -152,7 +166,7 @@ describe('gemini api', () => {
   it('translates text with real API', async () => {
     const apiConfig = {
       key: process.env.GEMINI_API_KEY as string,
-      endpoint: 'https://generativelanguage.googleapis.com/v1beta',
+      endpoint: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta',
       region: ''
     };
 

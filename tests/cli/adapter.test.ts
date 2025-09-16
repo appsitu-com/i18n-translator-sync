@@ -199,13 +199,8 @@ describe('CLITranslatorAdapter', () => {
     // Check that CLI configuration was loaded
     expect(mockConfigProvider.load).toHaveBeenCalled();
 
-    // Check that CLI-specific initialization was done
-    expect(env.initTranslatorEnv).toHaveBeenCalledWith(
-      testWorkspacePath,
-      expect.anything(),
-      expect.anything(),
-      expect.any(Function) // handleFileOpen
-    );
+    // No longer checking for initTranslatorEnv being called directly from CLI adapter
+    // since that functionality has moved to the base adapter class
 
     // Check that base initialize was called
     expect(mockInitialize).toHaveBeenCalled();

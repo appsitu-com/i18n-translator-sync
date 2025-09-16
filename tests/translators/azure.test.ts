@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, vi, it, expect, beforeEach, afterEach } from 'vitest'
 import { AzureTranslator } from '../../src/translators/azure'
 import { getEnv } from '../../src/util/env'
 
@@ -49,6 +49,20 @@ describe('azure api', () => {
   let apiConfig: any;
 
   beforeEach(() => {
+    // Explicitly load .translator.env file before each test
+    const dotenv = require('dotenv');
+    const path = require('path');
+    const fs = require('fs');
+
+    const envPath = path.resolve(process.cwd(), 'test-project/.translator.env');
+    if (fs.existsSync(envPath)) {
+      console.log('Loading environment from:', envPath);
+      const result = dotenv.config({ path: envPath, override: true });
+      if (result.error) {
+        console.error('Error loading .translator.env:', result.error);
+      }
+    }
+
     // This will throw an error if the key isn't set or is a test key
     const key = process.env.AZURE_TRANSLATION_KEY;
     console.log('Azure API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
@@ -57,9 +71,9 @@ describe('azure api', () => {
     }
 
     apiConfig = {
-      key: getEnv('AZURE_TRANSLATION_KEY'),
-      region: getEnv('AZURE_TRANSLATION_REGION'),
-      endpoint: getEnv('AZURE_TRANSLATION_URL')
+      key: process.env.AZURE_TRANSLATION_KEY,
+      region: process.env.AZURE_TRANSLATION_REGION || 'westus',
+      endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
     }
   });
 

@@ -149,12 +149,7 @@ export class TranslatorPipeline {
     targetLocale: string,
     configProvider: { get: <T>(section: string, defaultValue?: T) => T }
   ): Promise<string[]> {
-    // If using copy engine, just return original segments
-    if (engineName === 'copy') {
-      return segments.slice()
-    }
-
-    // Get engine configuration and translate
+    // Get engine configuration and translate (even for copy engine)
     const apiConfig = this.getEngineConfig(engineName, configProvider)
     return await bulkTranslateWithEngine(
       segments,

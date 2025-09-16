@@ -3,11 +3,11 @@
   "sourceLocale": "en",
   "targetLocales": ["en-US", "es", "fr", "de", "zh-CN"],
   "enableBackTranslation": true,
-  "defaultMarkdownEngine": "copy",
-  "defaultJsonEngine": "copy",
+  "defaultMarkdownEngine": "google",
+  "defaultJsonEngine": "google",
   "engineOverrides": {
     "copy": ["en-US"],
-    "deepl": ["fr", "de"],
-    "azure": ["es:en"]
+    "google": ["fr", "de", "zh-CN"],
+    "azure": ["es"]
   }
 }

@@ -1,5 +1,4 @@
 import * as path from 'path';
-import { initTranslatorEnv } from '../core/util/env';
 import { NodeFileSystem, nodeFileSystem } from '../core/util/fs';
 import { ConsoleLogger } from '../core/util/logger';
 import { CliWorkspaceWatcher } from './watcher';
@@ -51,15 +50,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
       // Load CLI configuration
       await this.cliConfigProvider.load();
 
-      // Initialize environment
-      await initTranslatorEnv(
-        this.workspacePath,
-        this.logger,
-        this.fileSystem,
-        this.handleFileOpen.bind(this)
-      );
-
-      // Call the base class initialize
+      // Call the base class initialize which now handles loading .translator.env
       await super.initialize();
     } catch (error: any) {
       this.logger.error(`Error initializing translator: ${error.message || String(error)}`);

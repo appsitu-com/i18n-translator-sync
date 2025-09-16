@@ -53,6 +53,20 @@ describe('deepl api', () => {
   let apiConfig: any;
 
   beforeEach(() => {
+    // Explicitly load .translator.env file before each test
+    const dotenv = require('dotenv');
+    const path = require('path');
+    const fs = require('fs');
+
+    const envPath = path.resolve(process.cwd(), 'test-project/.translator.env');
+    if (fs.existsSync(envPath)) {
+      console.log('Loading environment from:', envPath);
+      const result = dotenv.config({ path: envPath, override: true });
+      if (result.error) {
+        console.error('Error loading .translator.env:', result.error);
+      }
+    }
+
     // This will throw an error if the key isn't set or is a test key
     const key = process.env.DEEPL_TRANSLATION_KEY;
     console.log('DeepL API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
@@ -61,8 +75,8 @@ describe('deepl api', () => {
     }
 
     apiConfig = {
-      key: getEnv('DEEPL_TRANSLATION_KEY'),
-      endpoint: getEnv('DEEPL_TRANSLATION_URL'),
+      key: process.env.DEEPL_TRANSLATION_KEY,
+      endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
       free: true
     }
   });
