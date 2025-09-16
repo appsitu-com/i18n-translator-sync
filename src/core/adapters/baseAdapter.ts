@@ -3,7 +3,7 @@ import { TranslatorManager } from '../translatorManager';
 import { loadProjectConfig, TranslateProjectConfig } from '../config';
 import { Logger } from '../util/logger';
 import { FileSystem, IUri } from '../util/fs';
-import { WorkspaceWatcher } from '../watcher';
+import { WorkspaceWatcher } from '../util/watcher';
 import { SQLiteCache } from '../cache/sqlite';
 import { ConfigProvider } from '../config';
 
@@ -38,19 +38,23 @@ export abstract class TranslatorAdapter {
   /**
    * Get or create the cache
    */
-  protected getCache(dbMustExist = false): SQLiteCache | undefined {
+  protected async getCache(dbMustExist = false): Promise<SQLiteCache | undefined> {
     const dbPath = path.join(this.workspacePath, '.i18n-cache', 'translation.db');
 
-    if (dbMustExist && !this.fileSystem.fileExistsSync(dbPath)) {
-      this.logger.error(`${dbPath}: Translation cache not found. Start the translator to create it.`);
-      return undefined;
+    // Check if the database file exists (for dbMustExist mode)
+    if (dbMustExist) {
+      const dbUri = this.fileSystem.createUri(dbPath);
+      const exists = await this.fileSystem.fileExists(dbUri);
+      if (!exists) {
+        this.logger.error(`${dbPath}: Translation cache not found. Start the translator to create it.`);
+        return undefined;
+      }
     }
 
     // Ensure the cache directory exists
     const cacheDir = path.dirname(dbPath);
-    if (!this.fileSystem.directoryExistsSync(cacheDir)) {
-      this.fileSystem.createDirectorySync(cacheDir);
-    }
+    const dirUri = this.fileSystem.createUri(cacheDir);
+    await this.fileSystem.createDirectory(dirUri);
 
     this.cache = new SQLiteCache(dbPath, this.logger);
     return this.cache;
@@ -66,8 +70,8 @@ export abstract class TranslatorAdapter {
         await this.configProvider.load();
       }
 
-      // Get cache
-      this.cache = this.getCache();
+      // Get cache (using await since it's now async)
+      this.cache = await this.getCache();
       if (!this.cache) {
         return;
       }
