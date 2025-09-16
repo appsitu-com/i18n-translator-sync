@@ -182,6 +182,7 @@
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
     "cli": "yarn build && node ./dist/cli/index.js test-project",
+    "cli:force": "yarn build && node ./dist/cli/index.js test-project --force",
     "cli:debug": "yarn build && node --inspect ./dist/cli/index.js test-project",
     "test": "vitest run",
     "test:watch": "vitest",

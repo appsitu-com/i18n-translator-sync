@@ -32,23 +32,26 @@ export const window = {
     hide: vi.fn(),
     dispose: vi.fn(),
     clear: vi.fn()
-  })
+  }),
+  createTextEditorDecorationType: vi.fn(),
+  showTextDocument: vi.fn()
 }
 
+import { enhancedFileSystemMock } from './filesystem';
+
 export const workspace = {
-  fs: {
-    readFile: vi.fn(),
-    writeFile: vi.fn(),
-    delete: vi.fn(),
-    stat: vi.fn(),
-    readDirectory: vi.fn(),
-    createDirectory: vi.fn()
-  },
-  workspaceFolders: [],
+  fs: enhancedFileSystemMock,
+  workspaceFolders: [{
+    uri: { fsPath: '/test/workspace' },
+    name: 'TestWorkspace',
+    index: 0
+  }],
   getWorkspaceFolder: vi.fn(),
   getConfiguration: vi.fn().mockReturnValue({ get: vi.fn() }),
   createFileSystemWatcher: () => watcher,
-  onDidRenameFiles: vi.fn()
+  onDidRenameFiles: vi.fn(),
+  onDidChangeConfiguration: vi.fn(),
+  openTextDocument: vi.fn().mockResolvedValue({})
 }
 
 export const watcher = {
@@ -60,15 +63,32 @@ export const watcher = {
 export const Uri = {
   file: (fsPath: string) => {
     const path = fsPath.replace(/\\/g, '/');
-    return { fsPath, path } as any;
+    return { fsPath, path, scheme: 'file' } as any;
   },
   joinPath: (...parts: any[]) => {
     const fsPath = parts.map((p: any) => (typeof p === 'string' ? p : p.fsPath)).join('/');
     const path = parts.map((p: any) => (typeof p === 'string' ? p : p.path)).join('/');
-    return { fsPath, path } as any;
-  }
+    return { fsPath, path, scheme: 'file' } as any;
+  },
+  parse: vi.fn(uri => ({ fsPath: uri, path: uri, scheme: 'file' }))
 }
 
 export const commands = { registerCommand: vi.fn() }
 
-export default { window, workspace, Uri, commands, FileType, StatusBarAlignment }
+export const languages = {
+  createDiagnosticCollection: vi.fn()
+}
+
+export const EventEmitter = vi.fn().mockImplementation(() => ({
+  event: {},
+  fire: vi.fn()
+}))
+
+export const Position = vi.fn()
+export const Range = vi.fn()
+export const Disposable = {
+  from: vi.fn()
+}
+export const ThemeColor = vi.fn()
+
+export default { window, workspace, Uri, commands, FileType, StatusBarAlignment, languages, EventEmitter, Position, Range, Disposable, ThemeColor }

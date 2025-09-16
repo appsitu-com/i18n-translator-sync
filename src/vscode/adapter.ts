@@ -1,161 +1,123 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import * as fs from 'fs';
-import { TranslatorManager } from '../core/translatorManager';
-import { loadProjectConfig } from '../core/config';
+import { TranslatorAdapter } from '../core/adapters/baseAdapter';
+import { WorkspaceWatcher } from '../core/util/watcher';
 import { initTranslatorEnv } from '../core/util/env';
-import { VSCodeFileSystem, VSCodeUri } from './filesystem';
+import { VSCodeFileSystem } from './filesystem';
 import { VSCodeLogger } from './logger';
 import { VSCodeWorkspaceWatcher } from './watcher';
-import { SQLiteCache } from '../core/cache/sqlite';
-import { pushCacheToMateCat, pullReviewedFromMateCat } from '../matecate';
 import { VsCodeConfigProvider } from './config';
 
 /**
  * VSCode adapter for the TranslatorManager
  */
-export class VSCodeTranslatorAdapter {
-  private translatorManager: TranslatorManager | null = null;
+export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   private outputChannel: vscode.OutputChannel;
-  private cache: SQLiteCache | undefined;
-  private logger: VSCodeLogger;
-  private fileSystem: VSCodeFileSystem;
   private subscriptions: vscode.Disposable[] = [];
+  private vsCodeLogger: VSCodeLogger;
+  private vsCodeFileSystem: VSCodeFileSystem;
+  private vsCodeConfigProvider: VsCodeConfigProvider;
 
   constructor() {
     // Create platform-specific components
-    this.outputChannel = vscode.window.createOutputChannel('i18n Translator');
-    this.logger = new VSCodeLogger(this.outputChannel);
-    this.fileSystem = new VSCodeFileSystem();
-  }
+    const outputChannel = vscode.window.createOutputChannel('i18n Translator');
+    const logger = new VSCodeLogger(outputChannel);
+    const fileSystem = new VSCodeFileSystem();
+    const configProvider = new VsCodeConfigProvider();
 
-  /**
-   * Config provider
-   */
-  private configProvider = new VsCodeConfigProvider();
-
-  /**
-   * Get or create the cache
-   */
-  private getCache(dbMustExist = false): SQLiteCache | undefined {
+    // Get workspace path
     const ws = vscode.workspace.workspaceFolders?.[0];
     if (!ws) {
-      vscode.window.showInformationMessage('VSCode workspace is not opened');
-      return undefined;
+      throw new Error('No workspace folder found');
     }
 
-    const dbPath = path.join(ws.uri.fsPath, '.i18n-cache', 'translation.db');
-    if (dbMustExist && !fs.existsSync(dbPath)) {
-      vscode.window.showInformationMessage(
-        `${dbPath}: Translation cache not found. Start the translator to create it.`
-      );
-      return undefined;
-    }
+    super(ws.uri.fsPath, logger, fileSystem, configProvider);
 
-    this.cache = new SQLiteCache(dbPath, this.logger);
-    return this.cache;
+    // Store VSCode-specific components
+    this.outputChannel = outputChannel;
+    this.vsCodeLogger = logger;
+    this.vsCodeFileSystem = fileSystem;
+    this.vsCodeConfigProvider = configProvider;
   }
 
   /**
-   * Start the translator
+   * Implementation of the abstract method to handle file opens in VSCode
    */
-  async start(context: vscode.ExtensionContext): Promise<void> {
+  protected async handleFileOpen(path: string): Promise<void> {
+    try {
+      const doc = await vscode.workspace.openTextDocument(path);
+      await vscode.window.showTextDocument(doc);
+    } catch (error) {
+      this.logger.error(`Error opening file: ${error}`);
+    }
+  }
+
+  /**
+   * Implementation of the abstract method to create a workspace watcher for VSCode
+   */
+  protected createWatcher(): WorkspaceWatcher {
+    return new VSCodeWorkspaceWatcher();
+  }
+
+  /**
+   * VSCode-specific initialization
+   */
+  async initializeVSCode(): Promise<void> {
+    // Initialize environment
+    await initTranslatorEnv(
+      this.workspacePath,
+      this.logger,
+      this.fileSystem,
+      this.handleFileOpen.bind(this)
+    );
+  }
+
+  /**
+   * Start the translator with VSCode-specific initialization
+   * @param context VSCode extension context
+   */
+  async startWithContext(context: vscode.ExtensionContext): Promise<void> {
     // Check if already running
-    if (this.translatorManager) {
+    if (this.running) {
       vscode.window.showInformationMessage('Translator already running');
       return;
     }
 
-    // Get workspace
-    const ws = vscode.workspace.workspaceFolders?.[0];
-    if (!ws) {
-      vscode.window.showErrorMessage('No workspace folder found');
-      return;
-    }
-
     try {
-      // Initialize environment
-      await initTranslatorEnv(
-        ws.uri.fsPath,
-        this.logger,
-        this.fileSystem,
-        async (path: string) => {
-          const doc = await vscode.workspace.openTextDocument(path);
-          await vscode.window.showTextDocument(doc);
-        }
-      );
+      await this.initializeVSCode();
+      await this.initialize();
+      await this.start();
 
-      // Get cache
-      this.cache = this.getCache();
-      if (!this.cache) {
-        return;
-      }
-
-      // Create workspace watcher
-      const watcher = new VSCodeWorkspaceWatcher();
-
-      // Create translator manager
-      this.translatorManager = new TranslatorManager(
-        this.fileSystem,
-        this.logger,
-        this.cache,
-        ws.uri.fsPath,
-        watcher,
-        this.configProvider
-      );
-
-      // Load project configuration
-      const projectConfig = await loadProjectConfig(
-        ws.uri.fsPath,
-        this.configProvider,
-        this.logger,
-        this.fileSystem
-      );
-
-      // Start watching
-      await this.translatorManager.startWatching(projectConfig);
-
-      // Show success message
+      // Show VSCode-specific success message
       vscode.window.showInformationMessage('Translator started');
     } catch (error: any) {
       vscode.window.showErrorMessage(`Error starting translator: ${error.message || String(error)}`);
-
-      // Cleanup on error
-      if (this.translatorManager) {
-        this.translatorManager.dispose();
-        this.translatorManager = null;
-      }
-
       throw error;
     }
   }
 
   /**
-   * Stop the translator
+   * Override the stop method to show VSCode-specific messages
    */
   stop(): void {
-    if (!this.translatorManager) {
-      vscode.window.showInformationMessage('Translator not running');
-      return;
+    super.stop();
+
+    if (!this.running) {
+      vscode.window.showInformationMessage('Translator stopped');
     }
-
-    // Dispose resources
-    this.translatorManager.dispose();
-    this.translatorManager = null;
-
-    vscode.window.showInformationMessage('Translator stopped');
   }
 
   /**
-   * Restart the translator
+   * Restart the translator with VSCode context
+   * @param context VSCode extension context
    */
-  async restart(context: vscode.ExtensionContext): Promise<void> {
+  async restartWithContext(context: vscode.ExtensionContext): Promise<void> {
     this.stop();
-    await this.start(context);
+    await this.startWithContext(context);
   }
 
   /**
-   * Push translations to MateCat
+   * Override the pushToMateCat method to add VSCode-specific messaging
    */
   async pushToMateCat(): Promise<void> {
     if (!this.translatorManager) {
@@ -164,8 +126,7 @@ export class VSCodeTranslatorAdapter {
     }
 
     try {
-      // Use the TranslatorManager's MateCat integration
-      await this.translatorManager.pushToMateCat();
+      await super.pushToMateCat();
       vscode.window.showInformationMessage('Successfully pushed translations to MateCat');
     } catch (e: any) {
       vscode.window.showErrorMessage(`MateCat push failed: ${e.message}`);
@@ -173,7 +134,7 @@ export class VSCodeTranslatorAdapter {
   }
 
   /**
-   * Pull translations from MateCat
+   * Override the pullFromMateCat method to add VSCode-specific messaging
    */
   async pullFromMateCat(): Promise<void> {
     if (!this.translatorManager) {
@@ -182,8 +143,7 @@ export class VSCodeTranslatorAdapter {
     }
 
     try {
-      // Use the TranslatorManager's MateCat integration
-      await this.translatorManager.pullFromMateCat();
+      await super.pullFromMateCat();
       vscode.window.showInformationMessage('Successfully pulled translations from MateCat');
     } catch (e: any) {
       vscode.window.showErrorMessage(`MateCat pull failed: ${e.message}`);
@@ -206,10 +166,7 @@ export class VSCodeTranslatorAdapter {
    * Dispose all resources
    */
   dispose(): void {
-    if (this.translatorManager) {
-      this.translatorManager.dispose();
-      this.translatorManager = null;
-    }
+    super.dispose();
 
     for (const subscription of this.subscriptions) {
       subscription.dispose();

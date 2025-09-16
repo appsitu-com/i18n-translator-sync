@@ -6,6 +6,13 @@ import { ConfigProvider } from '../core/config';
  */
 export class VsCodeConfigProvider implements ConfigProvider {
   /**
+   * Load configuration - no-op for VSCode as it's always loaded
+   */
+  async load(): Promise<void> {
+    // No-op: VSCode's configuration is always available
+  }
+
+  /**
    * Get configuration for a specific section
    */
   get<T>(section: string, defaultValue?: T): T {

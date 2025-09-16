@@ -3,12 +3,12 @@
 /**
  * CLI entry point - delegates to main.ts which has the actual implementation
  */
-import { runCli } from './main';
+import { runCli } from './main'
 
-runCli().catch(error => {
-  console.error(`Fatal error: ${error instanceof Error ? error.message : String(error)}`);
+runCli().catch((error) => {
+  console.error(`Fatal error: ${error instanceof Error ? error.message : String(error)}`)
   if (error instanceof Error && error.stack) {
-    console.error(error.stack);
+    console.error(error.stack)
   }
-  process.exit(1);
-});
+  process.exit(1)
+})

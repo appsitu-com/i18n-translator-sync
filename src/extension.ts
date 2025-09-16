@@ -17,7 +17,7 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
       vsCodeAdapter = new VSCodeTranslatorAdapter();
     }
 
-    await vsCodeAdapter.start(context);
+    await vsCodeAdapter.startWithContext(context);
 
     // When manually started, ask if user wants to enable auto-start
     const response = await vscode.window.showInformationMessage(
@@ -90,10 +90,10 @@ export function stopTranslator(): void {
  */
 export async function restartTranslator(context: vscode.ExtensionContext): Promise<void> {
   if (vsCodeAdapter) {
-    await vsCodeAdapter.restart(context);
+    await vsCodeAdapter.restartWithContext(context);
   } else {
     vsCodeAdapter = new VSCodeTranslatorAdapter();
-    await vsCodeAdapter.start(context);
+    await vsCodeAdapter.startWithContext(context);
   }
 }
 

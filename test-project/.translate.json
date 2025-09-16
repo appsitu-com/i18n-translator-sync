@@ -1,11 +1,13 @@
 {
   "sourcePaths": ["i18n/en", "i18n/en.json"],
   "sourceLocale": "en",
-  "targetLocales": ["es", "fr", "de", "zh-CN"],
+  "targetLocales": ["en-US", "es", "fr", "de", "zh-CN"],
   "enableBackTranslation": true,
   "defaultMarkdownEngine": "copy",
   "defaultJsonEngine": "copy",
   "engineOverrides": {
-    "copy": ["es", "fr", "de", "zh-CN"]
+    "copy": ["en-US"],
+    "deepl": ["fr", "de"],
+    "azure": ["es:en"]
   }
 }

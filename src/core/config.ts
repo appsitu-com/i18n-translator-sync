@@ -65,6 +65,11 @@ export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema> & {
 // Interface for platform-specific configuration
 export interface ConfigProvider {
   /**
+   * Load configuration (implementation depends on platform)
+   */
+  load?(): Promise<void>
+
+  /**
    * Get configuration for a specific section
    */
   get<T>(section: string, defaultValue?: T): T
