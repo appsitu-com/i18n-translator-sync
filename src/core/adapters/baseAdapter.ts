@@ -259,10 +259,10 @@ export abstract class TranslatorAdapter {
 
   /**
    * Perform bulk translation of all source files in the project
-   * @param forceRetranslations Force translation even if target is up-to-date
+   * @param force Force translation even if target is up-to-date
    * @returns Number of files processed
    */
-  async bulkTranslate(forceRetranslations: boolean): Promise<number> {
+  async bulkTranslate(force: boolean): Promise<number> {
     // Check for initialization
     if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before bulkTranslate()');
 
@@ -276,7 +276,7 @@ export abstract class TranslatorAdapter {
       );
 
       // Log the operation mode based on the force parameter
-      if (forceRetranslations) {
+      if (force) {
         this.logger.info('Starting bulk translation of all project files (forced)...');
       } else {
         this.logger.info('Starting bulk translation of all project files (only updated files)...');
@@ -289,7 +289,7 @@ export abstract class TranslatorAdapter {
         this.logger.info(`[${percent}%] Translating file ${current}/${total}: ${filename}`);
       };
 
-      const filesProcessed = await this.translatorManager.bulkTranslate(projectConfig, progressCallback, forceRetranslations);
+      const filesProcessed = await this.translatorManager.bulkTranslate(projectConfig, progressCallback, force);
       this.logger.info(`Bulk translation completed: ${filesProcessed} files processed`);
 
       return filesProcessed;
