@@ -8,6 +8,9 @@
     "vscode": "^1.103.0"
   },
   "main": "./dist/extension.js",
+  "bin": {
+    "i18n-translator": "./dist/cli/index.js"
+  },
   "contributes": {
     "commands": [
       {
@@ -177,6 +180,9 @@
   "scripts": {
     "build": "tsc -p ./",
     "watch": "tsc -w -p ./",
+    "build:cli": "tsc -p ./",
+    "cli": "yarn build && node ./dist/cli/index.js test-project",
+    "cli:debug": "yarn build && node --inspect ./dist/cli/index.js test-project",
     "test": "vitest run",
     "test:watch": "vitest",
     "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
@@ -209,8 +215,11 @@
   },
   "dependencies": {
     "better-sqlite3": "^12.2.0",
+    "chokidar": "^4.0.3",
+    "commander": "^14.0.1",
     "dotenv": "^17.2.1",
     "js-yaml": "^4.1.0",
+    "minimatch": "^10.0.3",
     "remark": "^15.0.1",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx": "^3.1.1",

@@ -1,4 +1,4 @@
-# i18n Translator - VS Code extension for instant file translation. Supports many AI engines + a professional CAT service.
+# i18n Translator - VS Code extension and CLI tool for instant file translation. Supports many AI engines + a professional CAT service.
 
 <!-- [![CI](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/ci.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/ci.yml)
 [![Release](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/release.yml/badge.svg)](https://github.com/yourname/vscode-i18n-translator-ext/actions/workflows/release.yml)
@@ -11,6 +11,13 @@
 
 - `Source text` = The original text that you write in a source language you know
 - `Target text` - The translated text for each language in a list of target languages
+
+## Modes
+
+- **VS Code Extension**: Integrate with VS Code IDE for a seamless translation experience
+- **CLI Application**: Use as a command-line tool for CI/CD pipelines and automation
+
+See [CLI Documentation](doc/CLI.md) for details on the command-line interface.
 
 ## Feature Roadmap
 

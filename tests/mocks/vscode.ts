@@ -7,6 +7,13 @@ export enum StatusBarAlignment {
   Right = 2
 }
 
+export enum FileType {
+  Unknown = 0,
+  File = 1,
+  Directory = 2,
+  SymbolicLink = 64
+}
+
 export const window = {
   showWarningMessage: vi.fn(),
   showErrorMessage: vi.fn(),
@@ -33,6 +40,7 @@ export const workspace = {
     readFile: vi.fn(),
     writeFile: vi.fn(),
     delete: vi.fn(),
+    stat: vi.fn(),
     readDirectory: vi.fn(),
     createDirectory: vi.fn()
   },
@@ -63,4 +71,4 @@ export const Uri = {
 
 export const commands = { registerCommand: vi.fn() }
 
-export default { window, workspace, Uri, commands }
+export default { window, workspace, Uri, commands, FileType, StatusBarAlignment }

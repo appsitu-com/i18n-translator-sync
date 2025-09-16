@@ -63,12 +63,12 @@ describe('extension.ts', () => {
 
     ;(workspace.onDidRenameFiles as any) = vi.fn().mockReturnValue(subscriptionMock('onDidRenameFiles'))
 
-    vi.spyOn(extension as any, 'startTranslator').mockResolvedValue(subscriptionMock('startTranslator'))
-    vi.spyOn(extension as any, 'stopTranslator').mockImplementation(() => {})
-    vi.spyOn(extension as any, 'restartTranslator').mockResolvedValue(subscriptionMock('restartTranslator'))
-    vi.spyOn(extension as any, 'pushToMateCat').mockResolvedValue(subscriptionMock('pushToMateCat'))
-    vi.spyOn(extension as any, 'pullFromMateCat').mockResolvedValue(subscriptionMock('pullFromMateCat'))
-    vi.spyOn(extension as any, 'onStartTranslator').mockResolvedValue(undefined)
+    vi.spyOn(extension, 'onStartTranslator').mockResolvedValue(undefined)
+    vi.spyOn(extension, 'stopTranslator').mockImplementation(() => {})
+    vi.spyOn(extension, 'restartTranslator').mockResolvedValue(undefined)
+    vi.spyOn(extension, 'pushToMateCat').mockResolvedValue(undefined)
+    vi.spyOn(extension, 'pullFromMateCat').mockResolvedValue(undefined)
+    vi.spyOn(extension, 'onShowOutput').mockImplementation(() => {})
     vi.spyOn(vscode.workspace, 'getConfiguration').mockReturnValue({
       get: vi.fn().mockReturnValue(false),
       update: vi.fn()
@@ -202,27 +202,3 @@ describe('extension.ts', () => {
     })
   })
 })
-
-
-// describe('extension', () => {
-//   // Set up mocks for each test
-//   beforeEach(() => {
-//     // Reset mocks before each test
-//     vi.clearAllMocks();
-
-//     // Set up specific mock behavior for extension tests
-//     (workspace as any).workspaceFolders = [{
-//       uri: Uri.file('/test-workspace'),
-//       name: 'test',
-//       index: 0
-//     }];
-
-//     (workspace.getConfiguration as any) = vi.fn().mockReturnValue({
-//       get: vi.fn().mockImplementation((key: string, defaultValue: any) => {
-//         if (key === 'targetLocales') return [];
-//         return defaultValue;
-//       })
-//     });
-
-//   })
-// })

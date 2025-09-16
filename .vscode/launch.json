@@ -26,7 +26,7 @@
       }
     },
     {
-      "name": "Run Extension with Test Project",
+      "name": "Debug Extension with Test Project",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -61,6 +61,65 @@
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "Debug CLI with Test Project",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/cli/index.ts",
+      "args": [
+        "${workspaceFolder}/test-project",
+        "--config",
+        "${workspaceFolder}/test-project/.translate.json",
+        "--watch"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "preLaunchTask": "yarn: build",
+      "smartStep": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "translator:*"
+      }
+    },
+    {
+      "name": "Debug CLI Bulk Translate",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/src/cli/index.ts",
+      "args": [
+        "${workspaceFolder}/test-project",
+        "--config",
+        "${workspaceFolder}/test-project/.translate.json",
+        "--bulk-translate",
+        "--no-watch"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "preLaunchTask": "yarn: build",
+      "smartStep": true,
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
+      "env": {
+        "NODE_ENV": "development",
+        "DEBUG": "translator:*,bulk:*"
+      }
     }
   ]
 }
