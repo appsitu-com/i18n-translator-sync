@@ -90,6 +90,20 @@ export class VSCodeFileSystem implements FileSystem {
     const vscodeUri = base instanceof VSCodeUri ? base.uri : vscode.Uri.file(base.fsPath);
     return new VSCodeUri(vscode.Uri.joinPath(vscodeUri, ...pathSegments));
   }
+
+  async stat(uri: IUri): Promise<{size: number, ctime: number, mtime: number}> {
+    try {
+      const vscodeUri = uri instanceof VSCodeUri ? uri.uri : vscode.Uri.file(uri.fsPath);
+      const stats = await vscode.workspace.fs.stat(vscodeUri);
+      return {
+        size: stats.size,
+        ctime: stats.ctime,
+        mtime: stats.mtime
+      };
+    } catch (error) {
+      throw new Error(`Failed to get file stats for ${uri.fsPath}: ${error}`);
+    }
+  }
 }
 
 // Singleton instance for VS Code file system
