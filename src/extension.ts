@@ -13,6 +13,7 @@ import { initTranslatorEnv } from './util/env'
 export let cache: SQLiteCache | undefined = undefined
 export let watchers: vscode.FileSystemWatcher[] = []
 export let subscriptions: vscode.Disposable[] = []
+export let outputChannel: vscode.OutputChannel
 
 function cfg() {
   return vscode.workspace.getConfiguration('translator')
@@ -115,17 +116,17 @@ export async function startTranslator(ctx: vscode.ExtensionContext) {
   const projectConfig = loadProjectConfig(ws)
 
   // Create watchers for each source path
-  console.log(`Setting up watchers for paths: ${JSON.stringify(projectConfig.sourcePaths)}`)
+  outputChannel.appendLine(`Setting up watchers for paths: ${JSON.stringify(projectConfig.sourcePaths)}`)
 
   for (const sourcePath of projectConfig.sourcePaths) {
     // Create the glob pattern ensuring it works on all platforms
     const normalizedPath = sourcePath.replace(/\\/g, '/')
     const pattern = `**/${normalizedPath}/**`
-    console.log(`Creating watcher with pattern: ${pattern}`)
+    outputChannel.appendLine(`Creating watcher with pattern: ${pattern}`)
 
     const watcher = vscode.workspace.createFileSystemWatcher(pattern, false, false, false)
     watchers.push(watcher)
-    console.log(`Watcher created for ${pattern}`)
+    outputChannel.appendLine(`Watcher created for ${pattern}`)
   }
 
   if (watchers.length === 0) {
@@ -134,35 +135,36 @@ export async function startTranslator(ctx: vscode.ExtensionContext) {
 
   const onAddOrChange = async (uri: vscode.Uri) => {
     try {
-      console.log(`File changed: ${uri.fsPath}`)
+      outputChannel.appendLine(`File changed: ${uri.fsPath}`)
 
       if (!cache) {
-        console.log('No translation cache available')
+        outputChannel.appendLine('No translation cache available')
         return
       }
 
       const ws = vscode.workspace.getWorkspaceFolder(uri)
       if (!ws) {
-        console.log('No workspace found for file')
+        outputChannel.appendLine('No workspace found for file')
         return
       }
 
       // Get project configuration (which may come from .translate.json)
       const projectConfig = loadProjectConfig(ws)
-      console.log(`Config loaded with source paths: ${JSON.stringify(projectConfig.sourcePaths)}`)
+      outputChannel.appendLine(`Config loaded with source paths: ${JSON.stringify(projectConfig.sourcePaths)}`)
 
       // Check if we have any target locales
       if (!projectConfig.targetLocales.length) {
-        console.log('No target locales configured')
+        outputChannel.appendLine('No target locales configured')
         return
       }
 
       // Process the file using project configuration
-      console.log(`Processing file: ${uri.fsPath}`)
+      outputChannel.appendLine(`Processing file: ${uri.fsPath}`)
       await processFileForLocales(uri, cache)
-      console.log(`Successfully processed file: ${uri.fsPath}`)
+      outputChannel.appendLine(`Successfully processed file: ${uri.fsPath}`)
     } catch (err: any) {
-      console.error(`Error processing file ${uri.fsPath}:`, err)
+      outputChannel.appendLine(`ERROR: Error processing file ${uri.fsPath}: ${err?.message ?? String(err)}`)
+      outputChannel.appendLine(err.stack || 'No stack trace available')
       vscode.window.showErrorMessage(`Translator error for ${uri.fsPath}: ${err?.message ?? String(err)}`)
     }
   }
@@ -230,7 +232,7 @@ export async function startTranslator(ctx: vscode.ExtensionContext) {
 export function stopTranslator() {
   if (subscriptions.length > 0) {
     subscriptions.forEach((s) => {
-      console.log('Disposing subscription', typeof s.dispose)
+      outputChannel.appendLine('Disposing subscription')
       s.dispose()
     })
     subscriptions = []
@@ -269,7 +271,28 @@ export async function pullFromMateCat(): Promise<void> {
   }
 }
 
+function onShowOutput() {
+  outputChannel.appendLine(`Output channel shown at: ${new Date().toISOString()}`)
+  outputChannel.appendLine("If you don't see any logs, try running one of the translator commands:")
+  outputChannel.appendLine('- Translator: Start')
+  outputChannel.appendLine('- Translator: Stop')
+  outputChannel.appendLine('- Translator: Restart')
+  outputChannel.show()
+}
+
 export async function activate(ctx: vscode.ExtensionContext) {
+  // Create output channel
+  outputChannel = vscode.window.createOutputChannel('i18n Translator')
+  ctx.subscriptions.push(outputChannel)
+  outputChannel.appendLine('i18n Translator extension activated')
+  outputChannel.appendLine(`Activation time: ${new Date().toISOString()}`)
+  outputChannel.appendLine('To see this output, run the command "Translator: Show Output"')
+
+  // Show the output channel during development
+  if (process.env.VSCODE_DEBUG_MODE === '1' || process.env.NODE_ENV === 'development') {
+    outputChannel.show()
+  }
+
   // Only register translators - don't initialize environment yet
   registerAllTranslators()
 
@@ -279,7 +302,9 @@ export async function activate(ctx: vscode.ExtensionContext) {
     vscode.commands.registerCommand('translator.stop', () => stopTranslator()),
     vscode.commands.registerCommand('translator.restart', () => restartTranslator(ctx)),
     vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
-    vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat())
+    vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
+    // check output channel is working
+    vscode.commands.registerCommand('translator.showOutput', () => onShowOutput())
   )
 
   // Check if auto-start is enabled for this workspace

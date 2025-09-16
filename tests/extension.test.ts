@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, afterAll, vi } from 'vitest'
-import { activate, deactivate, subscriptions } from '../src/extension'
-import vscode, { commands, workspace, watcher, Uri } from './mocks/vscode'
+import vscode, { workspace } from './mocks/vscode'
 import * as extension from '../src/extension'
 
 
@@ -26,6 +25,7 @@ describe('extension.ts', () => {
   let showInfoSpy: any
   let showErrorSpy: any
   let createStatusBarItemSpy: any
+  let createOutputChannelSpy: any
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -44,6 +44,14 @@ describe('extension.ts', () => {
       command: '',
       show: vi.fn(),
       dispose: vi.fn()
+    })
+    createOutputChannelSpy = vi.spyOn(vscode.window, 'createOutputChannel').mockReturnValue({
+      appendLine: vi.fn((msg) => console.log(msg)), // Log to console during tests
+      append: vi.fn((msg) => process.stdout.write(msg)),
+      show: vi.fn(),
+      hide: vi.fn(),
+      dispose: vi.fn(),
+      clear: vi.fn()
     })
 
     ;(workspace.createFileSystemWatcher as any) = vi.fn().mockReturnValue({
@@ -99,7 +107,8 @@ describe('extension.ts', () => {
         'translator.stop',
         'translator.restart',
         'translator.push',
-        'translator.pull'
+        'translator.pull',
+        'translator.showOutput'
       ]
       for (const cmd of expectedCommands) {
         expect(registerCommandSpy).toHaveBeenCalledWith(cmd, expect.any(Function))
@@ -133,6 +142,14 @@ describe('extension.ts', () => {
       await extension.activate(ctx)
       await (registerCommandSpy.mock.calls.find((call: any[]) => call[0] === 'translator.pull')[1])(ctx)
       // No error thrown
+    })
+
+    it('translator.showOutput should show the output channel', async () => {
+      await extension.activate(ctx)
+      await (registerCommandSpy.mock.calls.find((call: any[]) => call[0] === 'translator.showOutput')[1])()
+      // Check if output channel show method was called
+      expect(createOutputChannelSpy).toHaveBeenCalledWith('i18n Translator')
+      expect(createOutputChannelSpy.mock.results[0].value.show).toHaveBeenCalled()
     })
   })
 

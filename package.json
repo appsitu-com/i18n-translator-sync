@@ -29,6 +29,10 @@
       {
         "command": "translator.pull",
         "title": "Translator: Pull translations from MateCat"
+      },
+      {
+        "command": "translator.showOutput",
+        "title": "Translator: Show Output"
       }
     ],
     "configuration": {
@@ -175,8 +179,12 @@
     "watch": "tsc -w -p ./",
     "test": "vitest run",
     "test:watch": "vitest",
-    "reinstall": "sh ./scripts/rebuild-sqlite.sh",
-    "vscode:prepublish": "npm run build",
+    "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
+    "rebuild:sqlite:electron": "node ./scripts/rebuild-sqlite.js --electron",
+    "rebuild:sqlite:electron:quick": "node ./scripts/rebuild-sqlite.js --electron --skip-if-unchanged",
+    "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
+    "pretest": "npm run rebuild:sqlite",
+    "vscode:prepublish": "npm run rebuild:sqlite:electron && npm run build",
     "package": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "package:quick": "npx @vscode/vsce package",

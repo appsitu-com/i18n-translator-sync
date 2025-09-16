@@ -19,6 +19,17 @@
       "args": ["test"],
       "group": "test",
       "problemMatcher": []
+    },
+    {
+      "label": "yarn: prepare-debug",
+      "type": "shell",
+      "command": "yarn",
+      "args": ["rebuild:sqlite:electron:quick"],
+      "dependsOn": ["yarn: build"],
+      "presentation": {
+        "reveal": "silent",
+        "close": true
+      }
     }
   ]
 }

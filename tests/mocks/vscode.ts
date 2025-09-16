@@ -17,6 +17,14 @@ export const window = {
     command: '',
     show: vi.fn(),
     dispose: vi.fn()
+  }),
+  createOutputChannel: vi.fn().mockReturnValue({
+    appendLine: vi.fn((msg) => console.log(msg)), // Log to console during tests
+    append: vi.fn((msg) => process.stdout.write(msg)),
+    show: vi.fn(),
+    hide: vi.fn(),
+    dispose: vi.fn(),
+    clear: vi.fn()
   })
 }
 
