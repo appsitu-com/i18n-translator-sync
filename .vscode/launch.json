@@ -7,24 +7,10 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-      "sourceMaps": true,
-      "preLaunchTask": "yarn: prepare-debug",
-      "env": {
-        "VSCODE_DEBUG_MODE": "1",
-        "DEBUG": "vscode:*"
-      }
-    },
-    {
-      "name": "Run Extension with Test Project",
-      "type": "extensionHost",
-      "request": "launch",
-      "runtimeExecutable": "${execPath}",
-      "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
-        "${workspaceFolder}/test-project"
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js",
+        "!**/node_modules/**/*.js"
       ],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
       "preLaunchTask": "yarn: prepare-debug",
@@ -36,7 +22,34 @@
       ],
       "env": {
         "VSCODE_DEBUG_MODE": "1",
-        "DEBUG": "vscode:*"
+        "DEBUG": "vscode:*,extension:*"
+      }
+    },
+    {
+      "name": "Run Extension with Test Project",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}/test-project"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js",
+        "!**/node_modules/**/*.js"
+      ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
+      "preLaunchTask": "yarn: prepare-debug",
+      "trace": true,
+      "smartStep": false,
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
+      "env": {
+        "VSCODE_DEBUG_MODE": "1",
+        "DEBUG": "vscode:*,extension:*"
       }
     },
     {
