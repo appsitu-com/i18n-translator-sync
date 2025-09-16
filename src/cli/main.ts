@@ -70,11 +70,6 @@ export async function runCli(): Promise<void> {
     await adapter.bulkTranslate(options.force)
     await adapter.start()
     console.log('Translator is running in watch mode. Press Ctrl+C to stop.')
-
-    // Keep the process alive indefinitely in watch mode
-    // This should never resolve unless process is terminated externally
-    await new Promise(() => {
-      setInterval(() => {}, 60000) // Keep the process alive with heartbeat every minute
-    })
+    setInterval(() => {}, 60000) // Keep the process alive
   }
 }
