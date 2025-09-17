@@ -18,12 +18,12 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
    */
   constructor(workspacePath: string, configPath: string) {
     const logger = new ConsoleLogger();
-    
+
     // Enable debug logging if DEBUG environment variable is set
     if (process.env.DEBUG) {
       logger.setLevel(LogLevel.Debug);
     }
-    
+
     const fileSystem = new NodeFileSystem();
     const configProvider = new CliConfigProvider(nodeFileSystem, logger, configPath);
 
