@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { GoogleTranslator } from '../../src/translators/google'
-import { getEnv } from '../../src/util/env'
 
 describe('google stub', () => {
   const originalFetch = globalThis.fetch as any

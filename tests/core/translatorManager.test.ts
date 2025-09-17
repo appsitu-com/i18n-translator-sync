@@ -37,9 +37,7 @@ const createMockLogger = () => ({
 });
 
 const createMockFileWatcher = () => ({
-  onDidCreate: vi.fn(),
-  onDidChange: vi.fn(),
-  onDidDelete: vi.fn(),
+  watch: vi.fn(),
   dispose: vi.fn()
 });
 
@@ -132,17 +130,17 @@ describe('TranslatorManager', () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
       // Should create a watcher for each source path
-      expect(workspaceWatcher.createFileSystemWatcher).toHaveBeenCalledWith(
-        '**/i18n/en/**',
-        false,
-        false,
-        false
-      );
+      expect(workspaceWatcher.createFileSystemWatcher).toHaveBeenCalledWith('i18n/en/**');
 
-      // Should set up event handlers
-      expect(mockFileWatcher.onDidCreate).toHaveBeenCalled();
-      expect(mockFileWatcher.onDidChange).toHaveBeenCalled();
-      expect(mockFileWatcher.onDidDelete).toHaveBeenCalled();
+      // Should set up watch with event handlers
+      expect(mockFileWatcher.watch).toHaveBeenCalledWith(
+        'i18n/en/**',
+        expect.objectContaining({
+          onDidCreate: expect.any(Function),
+          onDidChange: expect.any(Function),
+          onDidDelete: expect.any(Function)
+        })
+      );
 
       // Should set up rename handler
       expect(workspaceWatcher.onDidRenameFiles).toHaveBeenCalled();
@@ -237,14 +235,17 @@ describe('TranslatorManager', () => {
       // Start watching
       await translatorManager.startWatching(defaultProjectConfig);
 
-      // Get the file creation handler
-      const createHandler = vi.mocked(mockFileWatcher.onDidCreate).mock.calls[0][0];
+      // Get the watch method call to extract the listeners
+      const watchCall = vi.mocked(mockFileWatcher.watch).mock.calls[0];
+      const listeners = watchCall[1];
 
       // Create a test URI
       const testUri = { fsPath: '/workspace/i18n/en/test.json', scheme: 'file', path: '/workspace/i18n/en/test.json' };
 
-      // Trigger the handler
-      await createHandler(testUri);
+      // Trigger the create handler
+      if (listeners.onDidCreate) {
+        await listeners.onDidCreate(testUri);
+      }
 
       // Should call the pipeline
       expect(mockPipeline.processFile).toHaveBeenCalledWith(
@@ -263,14 +264,17 @@ describe('TranslatorManager', () => {
       // Start watching
       await translatorManager.startWatching(defaultProjectConfig);
 
-      // Get the file deletion handler
-      const deleteHandler = vi.mocked(mockFileWatcher.onDidDelete).mock.calls[0][0];
+      // Get the watch method call to extract the listeners
+      const watchCall = vi.mocked(mockFileWatcher.watch).mock.calls[0];
+      const listeners = watchCall[1];
 
       // Create a test URI
       const testUri = { fsPath: '/workspace/i18n/en/deleted.json', scheme: 'file', path: '/workspace/i18n/en/deleted.json' };
 
-      // Trigger the handler
-      await deleteHandler(testUri);
+      // Trigger the delete handler
+      if (listeners.onDidDelete) {
+        await listeners.onDidDelete(testUri);
+      }
 
       // Should call the pipeline
       expect(mockPipeline.removeFile).toHaveBeenCalledWith(

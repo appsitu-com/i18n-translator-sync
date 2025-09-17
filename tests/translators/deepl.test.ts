@@ -1,6 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { DeepLTranslator } from '../../src/translators/deepl'
-import { getEnv } from '../../src/util/env'
 
 describe('deepl stub', () => {
   const originalFetch = globalThis.fetch as any

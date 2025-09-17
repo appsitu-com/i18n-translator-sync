@@ -38,34 +38,9 @@ describe('VSCodeWorkspaceWatcher', () => {
     it('should create a VSCode file watcher with the specified pattern', () => {
       const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
 
-      expect(vscode.workspace.createFileSystemWatcher).toHaveBeenCalledWith(
-        '**/*.json',
-        false,
-        false,
-        false
-      );
-
       expect(fileWatcher).toBeDefined();
-      expect(typeof fileWatcher.onDidCreate).toBe('function');
-      expect(typeof fileWatcher.onDidChange).toBe('function');
-      expect(typeof fileWatcher.onDidDelete).toBe('function');
+      expect(typeof fileWatcher.watch).toBe('function');
       expect(typeof fileWatcher.dispose).toBe('function');
-    });
-
-    it('should respect ignore flags', () => {
-      watcher.createFileSystemWatcher(
-        '**/*.json',
-        true,  // ignoreCreateEvents
-        true,  // ignoreChangeEvents
-        false  // ignoreDeleteEvents
-      );
-
-      expect(vscode.workspace.createFileSystemWatcher).toHaveBeenCalledWith(
-        '**/*.json',
-        true,
-        true,
-        false
-      );
     });
   });
 

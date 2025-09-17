@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FileWatcher, WorkspaceWatcher, Disposable, FileRenameEvent } from '../core/util/watcher';
+import { FileWatcher, WorkspaceWatcher, Disposable, FileRenameEvent, FileWatcherListeners } from '../core/util/watcher';
 import { VSCodeUri, VSCodeFileSystem } from './filesystem';
 import { IUri } from '../core/util/fs';
 
@@ -8,68 +8,53 @@ import { IUri } from '../core/util/fs';
  */
 class VSCodeFileWatcher implements FileWatcher {
   private disposables: Disposable[] = [];
-  private watcher: vscode.FileSystemWatcher;
+  private watchers: Map<string, vscode.FileSystemWatcher> = new Map();
 
-  constructor(
-    globPattern: string,
-    ignoreCreateEvents: boolean = false,
-    ignoreChangeEvents: boolean = false,
-    ignoreDeleteEvents: boolean = false
-  ) {
-    // Create VS Code file watcher
-    this.watcher = vscode.workspace.createFileSystemWatcher(
-      globPattern,
-      ignoreCreateEvents,
-      ignoreChangeEvents,
-      ignoreDeleteEvents
+  watch(globPattern: string, listeners: FileWatcherListeners): Disposable {
+    // Create VS Code file watcher - don't ignore any events since we always provide all listeners
+    const watcher = vscode.workspace.createFileSystemWatcher(globPattern);
+
+    // Set up event listeners
+    const subscriptions: vscode.Disposable[] = [];
+
+    subscriptions.push(
+      watcher.onDidCreate(vscodeUri => {
+        listeners.onDidCreate(new VSCodeUri(vscodeUri));
+      })
     );
 
-    // Add watcher to disposables
-    this.disposables.push({
-      dispose: () => this.watcher.dispose()
-    });
-  }
+    subscriptions.push(
+      watcher.onDidChange(vscodeUri => {
+        listeners.onDidChange(new VSCodeUri(vscodeUri));
+      })
+    );
 
-  onDidCreate(listener: (uri: IUri) => void): Disposable {
-    const subscription = this.watcher.onDidCreate(vscodeUri => {
-      listener(new VSCodeUri(vscodeUri));
-    });
+    subscriptions.push(
+      watcher.onDidDelete(vscodeUri => {
+        listeners.onDidDelete(new VSCodeUri(vscodeUri));
+      })
+    );
 
-    const disposable = {
-      dispose: () => subscription.dispose()
+    // Store watcher for cleanup
+    const watcherId = `${globPattern}-${Date.now()}`;
+    this.watchers.set(watcherId, watcher);
+
+    // Return disposable for this specific watch
+    return {
+      dispose: () => {
+        watcher.dispose();
+        subscriptions.forEach(sub => sub.dispose());
+        this.watchers.delete(watcherId);
+      }
     };
-
-    this.disposables.push(disposable);
-    return disposable;
-  }
-
-  onDidChange(listener: (uri: IUri) => void): Disposable {
-    const subscription = this.watcher.onDidChange(vscodeUri => {
-      listener(new VSCodeUri(vscodeUri));
-    });
-
-    const disposable = {
-      dispose: () => subscription.dispose()
-    };
-
-    this.disposables.push(disposable);
-    return disposable;
-  }
-
-  onDidDelete(listener: (uri: IUri) => void): Disposable {
-    const subscription = this.watcher.onDidDelete(vscodeUri => {
-      listener(new VSCodeUri(vscodeUri));
-    });
-
-    const disposable = {
-      dispose: () => subscription.dispose()
-    };
-
-    this.disposables.push(disposable);
-    return disposable;
   }
 
   dispose(): void {
+    for (const watcher of this.watchers.values()) {
+      watcher.dispose();
+    }
+    this.watchers.clear();
+
     for (const disposable of this.disposables) {
       disposable.dispose();
     }
@@ -84,18 +69,8 @@ export class VSCodeWorkspaceWatcher implements WorkspaceWatcher {
   private disposables: Disposable[] = [];
   private fileSystem = new VSCodeFileSystem();
 
-  createFileSystemWatcher(
-    globPattern: string,
-    ignoreCreateEvents: boolean = false,
-    ignoreChangeEvents: boolean = false,
-    ignoreDeleteEvents: boolean = false
-  ): FileWatcher {
-    return new VSCodeFileWatcher(
-      globPattern,
-      ignoreCreateEvents,
-      ignoreChangeEvents,
-      ignoreDeleteEvents
-    );
+  createFileSystemWatcher(globPattern: string): FileWatcher {
+    return new VSCodeFileWatcher();
   }
 
   onDidRenameFiles(listener: (e: FileRenameEvent) => void): Disposable {

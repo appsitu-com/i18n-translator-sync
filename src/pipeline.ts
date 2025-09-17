@@ -5,10 +5,11 @@ import { extractForFile, jsonPathToString } from './extractors/index'
 import { loadContextCsvForJson } from './contextCsv'
 import { bulkTranslateWithEngine } from './bulkTranslate'
 import { pickEngine } from './translators/registry'
-import { resolveEnvDeep } from './util/env'
+import { resolveEnvDeep } from './core/util/env'
 import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
 import { loadProjectConfig, verifyFilePath } from './config'
 import { getRelativePath, createTargetUri, createBackTranslationUri } from './util/paths'
+import { VSCodeLogger } from './vscode/logger'
 
 /**
  * Validate workspace folder and return its path
@@ -114,7 +115,9 @@ function getEngineConfig(engineName: TranslatorEngine): TranslatorApiConfig {
   }
 
   // Resolve environment variables in configuration
-  return resolveEnvDeep(rawConfig) as TranslatorApiConfig
+  const outputChannel = vscode.window.createOutputChannel('Pipeline Config');
+  const logger = new VSCodeLogger(outputChannel);
+  return resolveEnvDeep(rawConfig, logger) as TranslatorApiConfig
 }
 
 /**

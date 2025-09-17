@@ -1,23 +1,35 @@
 // test bootstrap
-import { initTranslatorEnv } from '../src/util/env';
+import { initTranslatorEnv } from '../src/core/util/env';
+import { nodeFileSystem } from '../src/core/util/fs';
 import * as fs from 'fs';
 import * as path from 'path';
 import dotenv from 'dotenv';
 
+// Simple console logger for tests
+const testLogger = {
+  info: (msg: string) => console.log(`[test] ${msg}`),
+  warn: (msg: string) => console.warn(`[test] ${msg}`),
+  error: (msg: string) => console.error(`[test] ${msg}`),
+  debug: (msg: string) => console.debug(`[test] ${msg}`),
+  appendLine: (msg: string) => console.log(`[test] ${msg}`),
+  show: () => {} // no-op for tests
+};
+
 // Load environment variables from test-project/.translator.env before running tests
 const testProjectEnvFile = path.resolve(__dirname, '../test-project/.translator.env');
 if (fs.existsSync(testProjectEnvFile)) {
-  console.log('Loading environment variables from:', testProjectEnvFile);
+  // console.log('Loading environment variables from:', testProjectEnvFile);
   const result = dotenv.config({ path: testProjectEnvFile, override: true });
   if (result.error) {
     console.error('Error loading test-project/.translator.env:', result.error);
   } else {
-    console.log('Successfully loaded API keys from test-project/.translator.env');
+    // console.log('Successfully loaded API keys from test-project/.translator.env');
   }
 } else {
   console.warn('test-project/.translator.env not found, using fallback initialization');
   // Initialize the environment from .translator.env in current directory as fallback
-  initTranslatorEnv();
+  const rootDir = path.resolve(__dirname, '..');
+  initTranslatorEnv(rootDir, testLogger, nodeFileSystem);
 }
 
 // SQLite test environment setup - ensure it's available

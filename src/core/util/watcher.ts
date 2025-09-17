@@ -26,26 +26,39 @@ export interface FileRenameEvent {
 }
 
 /**
+ * File watcher event listeners
+ */
+export interface FileWatcherListeners {
+  /**
+   * Called when a file is created
+   */
+  onDidCreate: (uri: IUri) => void
+
+  /**
+   * Called when a file is changed
+   */
+  onDidChange: (uri: IUri) => void
+
+  /**
+   * Called when a file is deleted
+   */
+  onDidDelete: (uri: IUri) => void
+}
+
+/**
  * Interface for file watchers
  */
 export interface FileWatcher {
   /**
-   * Register a listener for file creation events
+   * Watch files matching the given pattern and register event listeners
+   * @param globPattern The glob pattern to watch
+   * @param listeners The event listeners to register
+   * @returns A disposable to stop watching
    */
-  onDidCreate(listener: (uri: IUri) => void): Disposable
+  watch(globPattern: string, listeners: FileWatcherListeners): Disposable
 
   /**
-   * Register a listener for file change events
-   */
-  onDidChange(listener: (uri: IUri) => void): Disposable
-
-  /**
-   * Register a listener for file deletion events
-   */
-  onDidDelete(listener: (uri: IUri) => void): Disposable
-
-  /**
-   * Dispose the watcher
+   * Dispose the watcher and all active watches
    */
   dispose(): void
 }
@@ -57,12 +70,7 @@ export interface WorkspaceWatcher {
   /**
    * Create a file system watcher
    */
-  createFileSystemWatcher(
-    globPattern: string,
-    ignoreCreateEvents?: boolean,
-    ignoreChangeEvents?: boolean,
-    ignoreDeleteEvents?: boolean
-  ): FileWatcher
+  createFileSystemWatcher(globPattern: string): FileWatcher
 
   /**
    * Register a listener for file rename events

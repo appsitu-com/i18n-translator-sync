@@ -2,34 +2,29 @@ import * as chokidar from 'chokidar';
 import * as path from 'path';
 import { Logger } from '../core/util/logger';
 import { FileSystem, IUri } from '../core/util/fs';
-import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable, FileRenameEvent } from '../core/util/watcher';
+import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable, FileRenameEvent, FileWatcherListeners } from '../core/util/watcher';
 
 /**
  * CLI implementation of file watcher using Chokidar
  */
 class CliFileWatcher implements FileWatcher {
   private disposables: Disposable[] = [];
-  private watcher: chokidar.FSWatcher;
-  private createListeners: Array<(uri: IUri) => void> = [];
-  private changeListeners: Array<(uri: IUri) => void> = [];
-  private deleteListeners: Array<(uri: IUri) => void> = [];
+  private watchers: Map<string, chokidar.FSWatcher> = new Map();
 
   constructor(
     private fs: FileSystem,
     private logger: Logger,
-    globPattern: string,
-    private ignoreCreateEvents: boolean = false,
-    private ignoreChangeEvents: boolean = false,
-    private ignoreDeleteEvents: boolean = false,
     private workspacePath: string
-  ) {
+  ) {}
+
+  watch(globPattern: string, listeners: FileWatcherListeners): Disposable {
     this.logger.debug(`Creating watcher for pattern: ${globPattern}`);
 
-    // Convert VSCode glob pattern to chokidar pattern
-    const watchPattern = path.join(workspacePath, globPattern);
+    // Convert glob pattern to chokidar pattern by joining with workspace path
+    const watchPattern = path.join(this.workspacePath, globPattern);
 
     // Create chokidar watcher
-    this.watcher = chokidar.watch(watchPattern, {
+    const watcher = chokidar.watch(watchPattern, {
       ignored: /(^|[/\\])\.\./, // Ignore dotfiles
       persistent: true,
       ignoreInitial: true,
@@ -40,88 +35,41 @@ class CliFileWatcher implements FileWatcher {
     });
 
     // Set up event handlers
-    if (!ignoreCreateEvents) {
-      this.watcher.on('add', (filePath: string) => {
-        this.onFileCreated(filePath);
-      });
-    }
-
-    if (!ignoreChangeEvents) {
-      this.watcher.on('change', (filePath: string) => {
-        this.onFileChanged(filePath);
-      });
-    }
-
-    if (!ignoreDeleteEvents) {
-      this.watcher.on('unlink', (filePath: string) => {
-        this.onFileDeleted(filePath);
-      });
-    }
-
-    // Add watcher to disposables
-    this.disposables.push(toDisposable(() => {
-      this.watcher.close();
-    }));
-  }
-
-  private onFileCreated(filePath: string): void {
-    this.logger.debug(`File created: ${filePath}`);
-    const uri = this.fs.createUri(filePath);
-    for (const listener of this.createListeners) {
-      listener(uri);
-    }
-  }
-
-  private onFileChanged(filePath: string): void {
-    this.logger.debug(`File changed: ${filePath}`);
-    const uri = this.fs.createUri(filePath);
-    for (const listener of this.changeListeners) {
-      listener(uri);
-    }
-  }
-
-  private onFileDeleted(filePath: string): void {
-    this.logger.debug(`File deleted: ${filePath}`);
-    const uri = this.fs.createUri(filePath);
-    for (const listener of this.deleteListeners) {
-      listener(uri);
-    }
-  }
-
-  onDidCreate(listener: (uri: IUri) => void): Disposable {
-    this.createListeners.push(listener);
-
-    const disposable = toDisposable(() => {
-      this.createListeners = this.createListeners.filter(l => l !== listener);
+    watcher.on('add', (filePath: string) => {
+      this.logger.debug(`File created: ${filePath}`);
+      const uri = this.fs.createUri(filePath);
+      listeners.onDidCreate(uri);
     });
 
-    this.disposables.push(disposable);
-    return disposable;
-  }
-
-  onDidChange(listener: (uri: IUri) => void): Disposable {
-    this.changeListeners.push(listener);
-
-    const disposable = toDisposable(() => {
-      this.changeListeners = this.changeListeners.filter(l => l !== listener);
+    watcher.on('change', (filePath: string) => {
+      this.logger.debug(`File changed: ${filePath}`);
+      const uri = this.fs.createUri(filePath);
+      listeners.onDidChange(uri);
     });
 
-    this.disposables.push(disposable);
-    return disposable;
-  }
-
-  onDidDelete(listener: (uri: IUri) => void): Disposable {
-    this.deleteListeners.push(listener);
-
-    const disposable = toDisposable(() => {
-      this.deleteListeners = this.deleteListeners.filter(l => l !== listener);
+    watcher.on('unlink', (filePath: string) => {
+      this.logger.debug(`File deleted: ${filePath}`);
+      const uri = this.fs.createUri(filePath);
+      listeners.onDidDelete(uri);
     });
 
-    this.disposables.push(disposable);
-    return disposable;
+    // Store watcher for cleanup
+    const watcherId = `${globPattern}-${Date.now()}`;
+    this.watchers.set(watcherId, watcher);
+
+    // Return disposable for this specific watch
+    return toDisposable(() => {
+      watcher.close();
+      this.watchers.delete(watcherId);
+    });
   }
 
   dispose(): void {
+    for (const watcher of this.watchers.values()) {
+      watcher.close();
+    }
+    this.watchers.clear();
+
     for (const disposable of this.disposables) {
       disposable.dispose();
     }
@@ -188,48 +136,16 @@ export class CliWorkspaceWatcher implements WorkspaceWatcher {
     }
   }
 
-  createFileSystemWatcher(
-    globPattern: string,
-    ignoreCreateEvents: boolean = false,
-    ignoreChangeEvents: boolean = false,
-    ignoreDeleteEvents: boolean = false
-  ): FileWatcher {
+  createFileSystemWatcher(globPattern: string): FileWatcher {
     const watcher = new CliFileWatcher(
       this.fs,
       this.logger,
-      globPattern,
-      ignoreCreateEvents,
-      ignoreChangeEvents,
-      ignoreDeleteEvents,
       this.workspacePath
     );
 
     this.watchers.push(watcher);
 
-    // Track deletions for potential rename detection
-    if (!ignoreDeleteEvents) {
-      watcher.onDidDelete((uri) => {
-        this.deletedFiles.set(path.basename(uri.fsPath), {
-          path: uri.fsPath,
-          timestamp: Date.now()
-        });
-      });
-    }
-
-    // Track creations for potential rename detection
-    if (!ignoreCreateEvents) {
-      watcher.onDidCreate((uri) => {
-        const basename = path.basename(uri.fsPath);
-        const deleted = this.deletedFiles.get(basename);
-
-        if (deleted && uri.fsPath !== deleted.path) {
-          // Potential rename detected
-          this.processRename(deleted.path, uri.fsPath);
-          this.deletedFiles.delete(basename);
-        }
-      });
-    }
-
+    // Return the watcher instance - no automatic listeners setup
     return watcher;
   }
 

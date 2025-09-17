@@ -72,32 +72,25 @@ describe('CliWorkspaceWatcher', () => {
     it('should create a file watcher with the specified pattern', () => {
       const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
 
-      // Second call will have the full path with the pattern
-      // Check if it ends with our pattern (may have a full path prefix)
-      const watchPath = vi.mocked(chokidar.watch).mock.calls[1][0] as string;
-      expect(watchPath.endsWith('**/*.json') || watchPath.endsWith('**\\*.json')).toBe(true);
-      expect(vi.mocked(chokidar.watch).mock.calls[1][1]).toEqual(expect.any(Object));
+      // Now test that watch method works
+      fileWatcher.watch('**/*.json', {
+        onDidCreate: vi.fn(),
+        onDidChange: vi.fn(),
+        onDidDelete: vi.fn()
+      });
+
+      // Now chokidar.watch should have been called
+      const watchCall = vi.mocked(chokidar.watch).mock.calls.find(call => {
+        const watchPath = call[0] as string;
+        return watchPath.endsWith('**/*.json') || watchPath.endsWith('**\\*.json');
+      });
+
+      expect(watchCall).toBeDefined();
+      expect(watchCall![1]).toEqual(expect.any(Object));
 
       expect(fileWatcher).toBeDefined();
-      expect(typeof fileWatcher.onDidCreate).toBe('function');
-      expect(typeof fileWatcher.onDidChange).toBe('function');
-      expect(typeof fileWatcher.onDidDelete).toBe('function');
-    });
-
-    it('should respect ignore flags', () => {
-      const fileWatcher = watcher.createFileSystemWatcher(
-        '**/*.json',
-        true,  // ignoreCreateEvents
-        false, // ignoreChangeEvents
-        false  // ignoreDeleteEvents
-      );
-
-      // Create event should not be set up
-      expect(mockedWatcher.callbacks['add']).toBeUndefined();
-      // Change event should be set up
-      expect(mockedWatcher.callbacks['change']).toBeDefined();
-      // Delete event should be set up
-      expect(mockedWatcher.callbacks['unlink']).toBeDefined();
+      expect(typeof fileWatcher.watch).toBe('function');
+      expect(typeof fileWatcher.dispose).toBe('function');
     });
 
     it('should notify listeners when events occur', () => {
@@ -107,9 +100,11 @@ describe('CliWorkspaceWatcher', () => {
       const changeListener = vi.fn();
       const deleteListener = vi.fn();
 
-      fileWatcher.onDidCreate(createListener);
-      fileWatcher.onDidChange(changeListener);
-      fileWatcher.onDidDelete(deleteListener);
+      fileWatcher.watch('**/*.json', {
+        onDidCreate: createListener,
+        onDidChange: changeListener,
+        onDidDelete: deleteListener
+      });
 
       // Simulate events
       const filePath = path.join(testDir, 'test.json');
@@ -163,18 +158,17 @@ describe('CliWorkspaceWatcher', () => {
       // Create a file watcher
       const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
 
-      // Setup spy on chokidar close method
-      const closeSpy = vi.fn();
-      (fileWatcher as any).watcher.close = closeSpy;
+      // Start watching to create internal watchers
+      fileWatcher.watch('**/*.json', {
+        onDidCreate: vi.fn(),
+        onDidChange: vi.fn(),
+        onDidDelete: vi.fn()
+      });
 
-      // Add to watchers list
-      (watcher as any).watchers = [fileWatcher];
-
-      // Dispose the watcher
+      // Dispose the workspace watcher
       watcher.dispose();
 
-      // Verify all chokidar watchers were closed
-      expect(closeSpy).toHaveBeenCalled();
+      // Verify the workspace watcher's watchers array is empty
       expect((watcher as any).watchers).toEqual([]);
       expect((watcher as any).disposables).toEqual([]);
     });

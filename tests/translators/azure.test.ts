@@ -1,6 +1,5 @@
 import { describe, vi, it, expect, beforeEach, afterEach } from 'vitest'
 import { AzureTranslator } from '../../src/translators/azure'
-import { getEnv } from '../../src/util/env'
 
 describe('azure stub', () => {
   const originalFetch = globalThis.fetch as any

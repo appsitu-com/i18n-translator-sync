@@ -76,35 +76,24 @@ export class TranslatorManager {
       let pattern: string;
 
       if (isFilePath) {
-        // For a file, watch that specific file
-        // Extract the directory and filename
-        const dirPath = path.dirname(normalizedPath);
-        const fileName = path.basename(normalizedPath);
-
-        // Create a specific pattern for just this file
-        pattern = dirPath === '.' ?
-          `**/${fileName}` :
-          `**/${dirPath}/${fileName}`;
-
+        // For a file, watch that specific file directly
+        pattern = normalizedPath;
         this.logger.debug(`Creating file-specific watcher with pattern: ${pattern}`);
       } else {
         // For a directory, watch all files in that directory recursively
-        pattern = `**/${normalizedPath}/**`;
+        pattern = `${normalizedPath}/**`;
         this.logger.debug(`Creating directory watcher with pattern: ${pattern}`);
       }
 
       // Create file watcher
-      const watcher = this.workspaceWatcher.createFileSystemWatcher(
-        pattern,
-        false, // ignoreCreateEvents
-        false, // ignoreChangeEvents
-        false  // ignoreDeleteEvents
-      );
+      const watcher = this.workspaceWatcher.createFileSystemWatcher(pattern);
 
-      // Set up event handlers
-      watcher.onDidCreate(uri => this.onAddOrChange(uri, config));
-      watcher.onDidChange(uri => this.onAddOrChange(uri, config));
-      watcher.onDidDelete(uri => this.onDelete(uri, config));
+      // Set up event handlers using the new watch method
+      watcher.watch(pattern, {
+        onDidCreate: uri => this.onAddOrChange(uri, config),
+        onDidChange: uri => this.onAddOrChange(uri, config),
+        onDidDelete: uri => this.onDelete(uri, config)
+      });
 
       // Add watcher to disposables
       this.watchers.push(watcher);

@@ -3,7 +3,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { SQLiteCache } from './cache.sqlite';
-import { resolveEnvDeep } from './util/env';
+import { resolveEnvDeep } from './core/util/env';
+import { VSCodeLogger } from './vscode/logger';
 
 type MateCatSettings = {
   pushUrl: string;   // e.g., https://matecat.example/api/projects/{projectId}/files
@@ -20,7 +21,10 @@ function cfg(): vscode.WorkspaceConfiguration {
 
 function getMateCatSettings(): MateCatSettings {
   const raw = cfg().get<any>('matecat', {});
-  return resolveEnvDeep<MateCatSettings>(raw);
+  // Create a temporary logger for resolving env vars
+  const outputChannel = vscode.window.createOutputChannel('MateCat');
+  const logger = new VSCodeLogger(outputChannel);
+  return resolveEnvDeep<MateCatSettings>(raw, logger);
 }
 
 async function exportCacheCsv(cache: SQLiteCache, tmpDir?: string): Promise<string> {

@@ -1,6 +1,5 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import dotenv from 'dotenv';
 import { TranslatorManager } from '../translatorManager';
 import { loadProjectConfig } from '../config';
 import { Logger } from '../util/logger';
@@ -10,7 +9,6 @@ import { SQLiteCache } from '../cache/sqlite';
 import { ConfigProvider } from '../config';
 import { initTranslatorEnv } from '../util/env';
 import { registerAllTranslators } from '../../translators';
-import { getApiKeyEnvVars } from '../../types/env';
 
 /**
  * Base adapter for the TranslatorManager that can be extended for different environments
@@ -66,44 +64,6 @@ export abstract class TranslatorAdapter {
   }
 
   /**
-   * Load environment variables from .translator.env file in the workspace
-   * This is used by both CLI and VSCode adapters
-   */
-  protected async loadEnvironmentVariables(): Promise<void> {
-    // Explicitly load .translator.env from the workspace path
-    const envFilePath = path.join(this.workspacePath, '.translator.env');
-    if (fs.existsSync(envFilePath)) {
-      this.logger.info(`Loading environment variables from ${envFilePath}`);
-      const result = dotenv.config({ path: envFilePath, override: true });
-      if (result.error) {
-        this.logger.error(`Error loading .translator.env: ${result.error}`);
-      } else {
-        this.logger.info(`Successfully loaded API keys from .translator.env`);
-
-        // Log environment variables (without showing the actual keys)
-        const apiKeyVars = getApiKeyEnvVars();
-        for (const varName of apiKeyVars) {
-          if (process.env[varName]) {
-            // this.logger.info(`Found ${varName}: ${process.env[varName].substring(0, 3)}...`);
-          } else {
-            this.logger.warn(`Missing ${varName} environment variable`);
-          }
-        }
-      }
-    } else {
-      this.logger.warn(`No .translator.env file found at ${envFilePath}`);
-    }
-
-    // Initialize environment
-    await initTranslatorEnv(
-      this.workspacePath,
-      this.logger,
-      this.fileSystem,
-      this.handleFileOpen.bind(this)
-    );
-  }
-
-  /**
    * Initialize the translator (load config but don't start watching)
    */
   async initialize(): Promise<void> {
@@ -116,8 +76,13 @@ export abstract class TranslatorAdapter {
         await this.configProvider.load();
       }
 
-      // Load environment variables from .translator.env
-      await this.loadEnvironmentVariables();
+      // Initialize environment (loads .translator.env file)
+      await initTranslatorEnv(
+        this.workspacePath,
+        this.logger,
+        this.fileSystem,
+        this.handleFileOpen?.bind(this)
+      );
 
       // Get cache (using await since it's now async)
       this.cache = await this.getCache();
