@@ -1,5 +1,5 @@
 import { NodeFileSystem, nodeFileSystem } from '../core/util/fs';
-import { ConsoleLogger } from '../core/util/logger';
+import { ConsoleLogger, LogLevel } from '../core/util/logger';
 import { CliWorkspaceWatcher } from './watcher';
 import { CliConfigProvider } from './config';
 import { TranslatorAdapter } from '../core/adapters/baseAdapter';
@@ -18,6 +18,12 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
    */
   constructor(workspacePath: string, configPath: string) {
     const logger = new ConsoleLogger();
+    
+    // Enable debug logging if DEBUG environment variable is set
+    if (process.env.DEBUG) {
+      logger.setLevel(LogLevel.Debug);
+    }
+    
     const fileSystem = new NodeFileSystem();
     const configProvider = new CliConfigProvider(nodeFileSystem, logger, configPath);
 

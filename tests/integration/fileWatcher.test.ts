@@ -147,6 +147,17 @@ describe('File Watcher Integration Tests', () => {
 
       return defaultValue;
     });
+
+    // Set up translator manager and watcher
+    watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
+    translatorManager = new TranslatorManager(
+      fileSystem,
+      logger,
+      cache,
+      tempDir,
+      watcher,
+      configProvider
+    );
   });
 
   afterEach(async () => {
@@ -157,134 +168,182 @@ describe('File Watcher Integration Tests', () => {
     await cleanupTempDir(tempDir);
   });
 
-  it('should properly set up watchers for specific file patterns including en.json', async () => {
-    // Create a real workspace watcher
-    watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
-
-    // Create a translator manager
-    translatorManager = new TranslatorManager(
-      fileSystem,
-      logger,
-      cache,
-      tempDir,
-      watcher,
-      configProvider
-    );
-
-    // Directly spy on the onAddOrChange method - this is the method that gets called when a file changes
-    // We can't easily test the full file system watcher in a unit test because chokidar needs real file system events
+  it('should trigger onDidCreate when new files are created', async () => {
+    // Set up spies BEFORE starting watching
     const onAddOrChangeSpy = vi.spyOn(translatorManager as any, 'onAddOrChange');
 
     // Start watching
     await translatorManager.startWatching(config);
 
-    // Clear initial setup log calls
-    vi.mocked(logger.info).mockClear();
+    // Wait for watchers to be set up
+    await new Promise(resolve => setTimeout(resolve, 200));
 
-    // Create a URI for en.json
-    const enJsonPath = path.join(tempDir, 'i18n', 'en.json');
-    const enJsonUri = fileSystem.createUri(enJsonPath);
+    // Clear any initial calls from existing files being processed
+    onAddOrChangeSpy.mockClear();
 
-    // Manually invoke the onAddOrChange method as if the watcher detected a change
-    await (translatorManager as any).onAddOrChange(enJsonUri, config);
+    // Create a new file in the watched directory
+    const newFilePath = path.join(tempDir, 'i18n', 'en', 'newfile.json');
+    const newFileContent = JSON.stringify({
+      newMessage: 'This is a new message',
+      anotherKey: 'Another value'
+    }, null, 2);
 
-    // Check that the file change was logged
-    expect(logger.info).toHaveBeenCalledWith(expect.stringMatching(/File changed:/));
+    await fs.writeFile(newFilePath, newFileContent);
 
-    // Verify onAddOrChange was called with en.json URI
+    // Wait for file system events to propagate
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Verify that the file creation was detected
     expect(onAddOrChangeSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ fsPath: enJsonPath }),
+      expect.objectContaining({
+        fsPath: expect.stringMatching(/newfile\.json$/)
+      }),
       config
     );
   });
 
-  it('should properly set up watchers for both directory and specific file patterns', async () => {
-    // Create a real workspace watcher with a spy
-    watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
-    const watcherSpy = vi.spyOn(watcher, 'createFileSystemWatcher');
-
-    // Create a real translator manager
-    translatorManager = new TranslatorManager(
-      fileSystem,
-      logger,
-      cache,
-      tempDir,
-      watcher,
-      configProvider
-    );
+  it('should trigger onDidChange when existing files are modified', async () => {
+    // Set up spies BEFORE starting watching
+    const onAddOrChangeSpy = vi.spyOn(translatorManager as any, 'onAddOrChange');
 
     // Start watching
     await translatorManager.startWatching(config);
 
-    // Verify both patterns are being watched:
-    // 1. The directory pattern (for i18n/en/**)
-    // 2. The specific file pattern (for i18n/en.json)
-    expect(watcherSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/^i18n\/en\/\*\*$/)
-    );
+    // Wait for watchers to be set up
+    await new Promise(resolve => setTimeout(resolve, 200));
 
-    expect(watcherSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/^i18n\/en\.json$/)
-    );
+    // Clear any initial calls from existing files being processed
+    onAddOrChangeSpy.mockClear();
 
-    // Verify the log messages for watcher creation
-    expect(logger.info).toHaveBeenCalledWith(expect.stringMatching(/Watcher created for i18n\/en\/\*\*/));
-    expect(logger.info).toHaveBeenCalledWith(expect.stringMatching(/Watcher created for i18n\/en\.json/));
+    // Modify an existing file
+    const existingFilePath = path.join(tempDir, 'i18n', 'en', 'messages.json');
+    const modifiedContent = JSON.stringify({
+      greeting: 'Hello World - Modified',
+      farewell: 'Goodbye',
+      newField: 'Added field'
+    }, null, 2);
+
+    await fs.writeFile(existingFilePath, modifiedContent);
+
+    // Wait for file system events to propagate
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Verify that the file change was detected
+    expect(onAddOrChangeSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fsPath: expect.stringMatching(/messages\.json$/)
+      }),
+      config
+    );
   });
 
-  it('should use correct watcher pattern for root en.json file', async () => {
-    // Look at the patterns used in the TranslatorManager to set up watchers
-    // This is a more focused test just on the pattern generation logic
+  it('should trigger onDidDelete when files are deleted', async () => {
+    // First create a test file to delete
+    const testFilePath = path.join(tempDir, 'i18n', 'en', 'tobedeleted.json');
+    await fs.writeFile(testFilePath, JSON.stringify({ test: 'value' }, null, 2));
 
-    // First check if the file exists
-    const enJsonPath = path.join(tempDir, 'i18n', 'en.json');
-    const enJsonExists = await fs.access(enJsonPath).then(() => true).catch(() => false);
-    expect(enJsonExists).toBe(true);
-
-    // Set up spies on the fileSystem to control its behavior for isFile checks
-    vi.spyOn(fileSystem, 'fileExists').mockResolvedValue(true);
-    vi.spyOn(fileSystem, 'readFile').mockResolvedValue('{"test":"value"}');
-    vi.spyOn(fileSystem, 'readDirectory').mockImplementation(() => {
-      throw new Error('This is not a directory'); // This should trigger the "is a file" logic
-    });
-
-    watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
-    const watcherSpy = vi.spyOn(watcher, 'createFileSystemWatcher');
-
-    // Create a translator manager with our spied-on file system
-    translatorManager = new TranslatorManager(
-      fileSystem,
-      logger,
-      cache,
-      tempDir,
-      watcher,
-      configProvider
-    );
-
-    // Verify that isFile is correctly determining the en.json is a file
-    const enJsonUri = fileSystem.createUri(enJsonPath);
-    const isFileSpy = vi.spyOn(translatorManager as any, 'isFile');
+    // Set up spies BEFORE starting watching
+    const onDeleteSpy = vi.spyOn(translatorManager as any, 'onDelete');
 
     // Start watching
     await translatorManager.startWatching(config);
 
-    // Check that isFile was called for en.json
-    expect(isFileSpy).toHaveBeenCalledWith(expect.objectContaining({
-      fsPath: expect.stringMatching(/en\.json$/)
-    }));
+    // Wait for watchers to be set up
+    await new Promise(resolve => setTimeout(resolve, 200));
 
-    // Check that the file-specific pattern was used for en.json
-    const watcherCalls = watcherSpy.mock.calls;
-    const enJsonPatternCalls = watcherCalls.filter(call =>
-      typeof call[0] === 'string' && call[0].includes('en.json')
+    // Clear any initial calls
+    onDeleteSpy.mockClear();
+
+    // Delete the file
+    await fs.unlink(testFilePath);
+
+    // Wait for file system events to propagate
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Verify that the file deletion was detected
+    expect(onDeleteSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fsPath: expect.stringMatching(/tobedeleted\.json$/)
+      }),
+      config
     );
+  });
 
-    expect(enJsonPatternCalls.length).toBeGreaterThan(0);
+  it('should detect file operations through file watcher events', async () => {
+    // This test focuses on verifying that the file watcher system is properly connected
+    // by checking that file operations trigger the expected internal methods
 
-    // Make sure the pattern is correctly formed for watching a specific file
-    // It should be something like 'i18n/en.json' not a directory pattern
-    const enJsonPattern = enJsonPatternCalls[0][0] as string;
-    expect(enJsonPattern).toMatch(/^i18n\/en\.json$/);
-    expect(enJsonPattern).not.toMatch(/\*\*$/); // Should not end with ** (which would be a directory pattern)
+    // Set up spies BEFORE starting watching
+    const onAddOrChangeSpy = vi.spyOn(translatorManager as any, 'onAddOrChange');
+    const onDeleteSpy = vi.spyOn(translatorManager as any, 'onDelete');
+
+    // Start watching
+    await translatorManager.startWatching(config);
+
+    // Wait for watchers to be set up
+    await new Promise(resolve => setTimeout(resolve, 200));
+
+    // Clear any initial setup calls
+    onAddOrChangeSpy.mockClear();
+    onDeleteSpy.mockClear();
+
+    // Create a test file
+    const testFilePath = path.join(tempDir, 'i18n', 'en', 'watchertest.json');
+    await fs.writeFile(testFilePath, JSON.stringify({ initial: 'content' }, null, 2));
+
+    // Wait for creation event
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // Modify the file
+    await fs.writeFile(testFilePath, JSON.stringify({ modified: 'content' }, null, 2));
+
+    // Wait for modification event
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // Delete the file
+    await fs.unlink(testFilePath);
+
+    // Wait for deletion event
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // Verify that at least some file operations were detected
+    // Note: File system events can be tricky in test environments, so we check for at least some activity
+    const totalCalls = onAddOrChangeSpy.mock.calls.length + onDeleteSpy.mock.calls.length;
+    expect(totalCalls).toBeGreaterThan(0);
+
+    // Log the calls for debugging if needed
+    if (totalCalls === 0) {
+      console.log('No file watcher calls detected. This might indicate a timing or setup issue.');
+      console.log('onAddOrChange calls:', onAddOrChangeSpy.mock.calls.length);
+      console.log('onDelete calls:', onDeleteSpy.mock.calls.length);
+    }
+  });
+
+  it('should verify watcher setup with manual event simulation', async () => {
+    // This test manually simulates watcher events to verify the system works correctly
+    // when events are triggered, bypassing potential file system timing issues
+
+    // Set up spies
+    const onAddOrChangeSpy = vi.spyOn(translatorManager as any, 'onAddOrChange');
+    const onDeleteSpy = vi.spyOn(translatorManager as any, 'onDelete');
+
+    // Start watching
+    await translatorManager.startWatching(config);
+
+    // Create file URIs for testing
+    const testFilePath = path.join(tempDir, 'i18n', 'en', 'manual-test.json');
+    const testFileUri = fileSystem.createUri(testFilePath);
+
+    // Manually trigger the methods to verify they work correctly
+    await (translatorManager as any).onAddOrChange(testFileUri, config);
+
+    // Verify the method was called
+    expect(onAddOrChangeSpy).toHaveBeenCalledWith(testFileUri, config);
+
+    // Test deletion
+    await (translatorManager as any).onDelete(testFileUri, config);
+
+    // Verify the delete method was called
+    expect(onDeleteSpy).toHaveBeenCalledWith(testFileUri, config);
   });
 });

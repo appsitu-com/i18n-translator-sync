@@ -21,7 +21,17 @@ class CliFileWatcher implements FileWatcher {
     this.logger.debug(`Creating watcher for pattern: ${globPattern}`);
 
     // Convert glob pattern to chokidar pattern by joining with workspace path
-    const watchPattern = path.join(this.workspacePath, globPattern);
+    let watchPattern = path.join(this.workspacePath, globPattern);
+
+    // Handle Windows-specific chokidar pattern issues
+    // On Windows, chokidar has issues with glob patterns like /** so we need to adjust
+    if (globPattern.endsWith('/**')) {
+      // For directory recursive patterns, watch the directory directly
+      // and chokidar will automatically watch subdirectories
+      const dirPattern = globPattern.slice(0, -3); // Remove '/**'
+      watchPattern = path.join(this.workspacePath, dirPattern);
+      this.logger.debug(`Adjusted recursive directory pattern to: ${watchPattern}`);
+    }
 
     // Create chokidar watcher
     const watcher = chokidar.watch(watchPattern, {
@@ -136,7 +146,7 @@ export class CliWorkspaceWatcher implements WorkspaceWatcher {
     }
   }
 
-  createFileSystemWatcher(globPattern: string): FileWatcher {
+  createFileSystemWatcher(): FileWatcher {
     const watcher = new CliFileWatcher(
       this.fs,
       this.logger,

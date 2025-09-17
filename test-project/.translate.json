@@ -9,5 +9,17 @@
     "copy": ["en-US"],
     "google": ["fr", "de", "zh-CN"],
     "azure": ["es"]
+  },
+  "translator": {
+    "copy": {},
+    "google": {
+      "apiKey": "${GOOGLE_TRANSLATION_KEY}",
+      "endpoint": "${GOOGLE_TRANSLATION_URL}"
+    },
+    "azure": {
+      "apiKey": "${AZURE_TRANSLATION_KEY}",
+      "region": "${AZURE_TRANSLATION_REGION}",
+      "endpoint": "${AZURE_TRANSLATION_URL}"
+    }
   }
 }

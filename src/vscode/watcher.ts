@@ -69,7 +69,7 @@ export class VSCodeWorkspaceWatcher implements WorkspaceWatcher {
   private disposables: Disposable[] = [];
   private fileSystem = new VSCodeFileSystem();
 
-  createFileSystemWatcher(globPattern: string): FileWatcher {
+  createFileSystemWatcher(): FileWatcher {
     return new VSCodeFileWatcher();
   }
 

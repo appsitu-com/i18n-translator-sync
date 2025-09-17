@@ -35,8 +35,8 @@ describe('VSCodeWorkspaceWatcher', () => {
   });
 
   describe('createFileSystemWatcher', () => {
-    it('should create a VSCode file watcher with the specified pattern', () => {
-      const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
+    it('should create a VSCode file watcher', () => {
+      const fileWatcher = watcher.createFileSystemWatcher();
 
       expect(fileWatcher).toBeDefined();
       expect(typeof fileWatcher.watch).toBe('function');

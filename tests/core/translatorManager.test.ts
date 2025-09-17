@@ -130,7 +130,7 @@ describe('TranslatorManager', () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
       // Should create a watcher for each source path
-      expect(workspaceWatcher.createFileSystemWatcher).toHaveBeenCalledWith('i18n/en/**');
+      expect(workspaceWatcher.createFileSystemWatcher).toHaveBeenCalledWith();
 
       // Should set up watch with event handlers
       expect(mockFileWatcher.watch).toHaveBeenCalledWith(

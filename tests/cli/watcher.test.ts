@@ -69,8 +69,8 @@ describe('CliWorkspaceWatcher', () => {
   });
 
   describe('createFileSystemWatcher', () => {
-    it('should create a file watcher with the specified pattern', () => {
-      const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
+    it('should create a file watcher', () => {
+      const fileWatcher = watcher.createFileSystemWatcher();
 
       // Now test that watch method works
       fileWatcher.watch('**/*.json', {
@@ -94,7 +94,7 @@ describe('CliWorkspaceWatcher', () => {
     });
 
     it('should notify listeners when events occur', () => {
-      const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
+      const fileWatcher = watcher.createFileSystemWatcher();
 
       const createListener = vi.fn();
       const changeListener = vi.fn();
@@ -131,7 +131,7 @@ describe('CliWorkspaceWatcher', () => {
       watcher.onDidRenameFiles(renameListener);
 
       // Mock a file watcher to track deletions for rename detection
-      const fileWatcher = watcher.createFileSystemWatcher('**/*');
+      const fileWatcher = watcher.createFileSystemWatcher();
 
       // We need to access the private method for testing
       const processRename = (watcher as any).processRename.bind(watcher);
@@ -156,7 +156,7 @@ describe('CliWorkspaceWatcher', () => {
   describe('dispose', () => {
     it('should dispose all watchers and listeners', () => {
       // Create a file watcher
-      const fileWatcher = watcher.createFileSystemWatcher('**/*.json');
+      const fileWatcher = watcher.createFileSystemWatcher();
 
       // Start watching to create internal watchers
       fileWatcher.watch('**/*.json', {

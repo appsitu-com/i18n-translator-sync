@@ -70,7 +70,7 @@ export interface WorkspaceWatcher {
   /**
    * Create a file system watcher
    */
-  createFileSystemWatcher(globPattern: string): FileWatcher
+  createFileSystemWatcher(): FileWatcher
 
   /**
    * Register a listener for file rename events

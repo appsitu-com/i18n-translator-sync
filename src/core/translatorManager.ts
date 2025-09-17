@@ -86,7 +86,7 @@ export class TranslatorManager {
       }
 
       // Create file watcher
-      const watcher = this.workspaceWatcher.createFileSystemWatcher(pattern);
+      const watcher = this.workspaceWatcher.createFileSystemWatcher();
 
       // Set up event handlers using the new watch method
       watcher.watch(pattern, {
@@ -141,7 +141,7 @@ export class TranslatorManager {
         uri,
         this.workspacePath,
         config,
-        { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+        this.configProvider
       );
 
       this.logger.info(`Successfully processed file: ${uri.fsPath}`);
@@ -202,7 +202,7 @@ export class TranslatorManager {
             file.newUri,
             this.workspacePath,
             config,
-            { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+            this.configProvider
           );
 
           this.logger.info(`Successfully handled rename from ${oldPath} to ${newPath}`);
@@ -340,7 +340,7 @@ export class TranslatorManager {
             fileUri,
             this.workspacePath,
             config,
-            { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
+            this.configProvider,
             undefined,
             force // Pass force flag to respect timestamp check
           );
@@ -428,7 +428,7 @@ export class TranslatorManager {
                 sourceUri,
                 this.workspacePath,
                 config,
-                { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+                this.configProvider
               );
 
               filesProcessed++;
@@ -456,7 +456,7 @@ export class TranslatorManager {
                     fileUri,
                     this.workspacePath,
                     config,
-                    { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T }
+                    this.configProvider
                   );
 
                   filesProcessed++;
@@ -585,7 +585,7 @@ export class TranslatorManager {
       fileUri,
       this.workspacePath,
       config,
-      { get: <T>(section: string, _defaultValue?: T) => config[section as keyof TranslateProjectConfig] as T },
+      this.configProvider,
       undefined,
       force
     );

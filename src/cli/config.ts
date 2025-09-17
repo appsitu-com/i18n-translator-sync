@@ -104,6 +104,7 @@ export class CliConfigProvider implements ConfigProvider {
       }
 
       this.logger.debug(`Loaded ${section} translator config: ${JSON.stringify({ ...engineConfig, key: engineConfig.key ? '***' : undefined })}`);
+      
       return engineConfig as T;
     }
 
