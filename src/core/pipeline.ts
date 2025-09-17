@@ -7,6 +7,7 @@ import { loadContextCsvForJson } from './contextCsv'
 import { bulkTranslateWithEngine } from '../bulkTranslate'
 import { pickEngine } from '../translators/registry'
 import { resolveEnvDeep } from './util/env'
+import { generateContextCsvWarnings } from './util/contextCsvWarnings'
 import { TranslatorApiConfig, TranslatorEngine } from '../translators/types'
 import { TranslateProjectConfig } from './config'
 import {
@@ -106,23 +107,8 @@ export class TranslatorPipeline {
       const { map: ctxMap, stats } = await loadContextCsvForJson(this.fileSystem, srcUri);
       const validPaths = new Set(extraction.paths.map(jsonPathToString))
 
-      // Find any issues with the context data
-      const unknown = Object.keys(ctxMap).filter((k) => !validPaths.has(k))
-      const msgs = []
-
-      if (unknown.length) {
-        msgs.push(`Unknown context path(s): ${unknown.slice(0, 6).join(', ')}${unknown.length > 6 ? ' …' : ''}`)
-      }
-
-      if (stats.duplicates.length) {
-        msgs.push(`Duplicate path(s): ${stats.duplicates.slice(0, 6).join(', ')}${stats.duplicates.length > 6 ? ' …' : ''}`)
-      }
-
-      if (stats.emptyValues.length) {
-        msgs.push(
-          `Empty context value(s): ${stats.emptyValues.slice(0, 6).join(', ')}${stats.emptyValues.length > 6 ? ' …' : ''}`
-        )
-      }
+      // Generate context CSV warning messages
+      const msgs = generateContextCsvWarnings(ctxMap, validPaths, stats)
 
       if (msgs.length) {
         this.logger.warn(

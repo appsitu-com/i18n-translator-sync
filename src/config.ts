@@ -3,6 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { z } from 'zod'
 import { TranslatorEngine } from './translators/types'
+import { formatZodError } from './core/util/configUtils'
 import { containsLocale, replaceLocaleInPath, findSourcePathForFile, verifyFilePath as pathsVerifyFilePath } from './util/paths'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
@@ -75,37 +76,6 @@ const defaultConfig: TranslateProjectConfig = {
   defaultMarkdownEngine: 'azure',
   defaultJsonEngine: 'google',
   engineOverrides: {} as Record<string, string[]>
-}
-
-/**
- * Format Zod validation errors for better user feedback
- */
-function formatZodError(error: z.ZodError): string[] {
-  return error.issues.map(issue => {
-    const fieldPath = issue.path.join('.');
-    const fieldName = fieldPath || 'unknown field';
-
-    // Customize error messages based on field and error type
-    switch (fieldName) {
-      case 'sourceDir':
-        return `Source directory: ${issue.message} (must be a string)`;
-      case 'targetDir':
-        return `Target directory: ${issue.message} (must be a string)`;
-      case 'sourcePaths':
-        return `Source paths: ${issue.message} (must be an array of strings)`;
-      case 'sourceLocale':
-        return `Source locale: ${issue.message} (must be a string like "en")`;
-      case 'targetLocales':
-        return `Target locales: ${issue.message} (must be an array of strings)`;
-      case 'defaultMarkdownEngine':
-      case 'defaultJsonEngine':
-        return `${fieldName}: ${issue.message} (must be one of: ${ENGINES.join(', ')})`;
-      case 'engineOverrides':
-        return `Engine overrides: ${issue.message} (must be a record with string array values)`;
-      default:
-        return `${fieldName}: ${issue.message}`;
-    }
-  });
 }
 
 /**

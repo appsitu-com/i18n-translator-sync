@@ -1,7 +1,8 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
+import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-const _LOCALE_MAP: Record<string, string> = {
+const langMap: Record<string, string> = {
   // English
   en: 'EN', // generic EN
   'en-US': 'EN-US',
@@ -25,31 +26,11 @@ const _LOCALE_MAP: Record<string, string> = {
   'zh-MO': 'ZH-HANT'
 }
 
-function normalizeForDeepL(locale: string): string {
-  // DeepL expects target like EN-GB/EN-US; other languages uppercase 2-letter, allow ZH, etc.
-  const [lang, region] = locale.split('-')
-  const l = lang.toLowerCase()
-  if (!region) {
-    // e.g., fr -> FR
-    if (l === 'en') return 'EN' // DeepL requires EN, and may specialize via EN-GB/EN-US
-    return l.toUpperCase()
-  }
-  if (l === 'en') return region.toUpperCase() === 'US' ? 'EN-US' : 'EN-GB'
-  if (l === 'pt') return region.toUpperCase() === 'BR' ? 'PT-BR' : 'PT-PT'
-  if (l === 'zh') {
-    const r = region.toUpperCase()
-    if (r in { HANS: 1, HANT: 1 }) return `ZH-${r}`
-    if (r in { CN: 1, SG: 1 }) return 'ZH-HANS'
-    if (r in { TW: 1, HK: 1, MO: 1 }) return 'ZH-HANT'
-  }
-  return l.toUpperCase()
-}
-
 export const DeepLTranslator: Translator = {
   name: 'deepl',
 
   normalizeLocale(locale: string) {
-    return normalizeForDeepL(locale)
+    return normalizeLocaleWithMap(locale, langMap)
   },
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
@@ -65,8 +46,8 @@ export const DeepLTranslator: Translator = {
     if (!authKey) throw new Error(`DeepL: missing 'key'`)
     const headers = { Authorization: `DeepL-Auth-Key ${authKey}` }
 
-    const target = normalizeForDeepL(opts.targetLocale)
-    const source = normalizeForDeepL(opts.sourceLocale)
+    const target = normalizeLocaleWithMap(opts.targetLocale, langMap)
+    const source = normalizeLocaleWithMap(opts.sourceLocale, langMap)
 
     // Group texts by context, because DeepL's 'context' parameter applies to the whole request.
     const groups = new Map<string, number[]>()

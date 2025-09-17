@@ -6,6 +6,8 @@ import { loadContextCsvForJson } from './contextCsv'
 import { bulkTranslateWithEngine } from './bulkTranslate'
 import { pickEngine } from './translators/registry'
 import { resolveEnvDeep } from './core/util/env'
+import { createEngineOverrides } from './core/util/engines'
+import { generateContextCsvWarnings } from './core/util/contextCsvWarnings'
 import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
 import { loadProjectConfig, verifyFilePath } from './config'
 import { getRelativePath, createTargetUri, createBackTranslationUri } from './util/paths'
@@ -121,25 +123,6 @@ function getEngineConfig(engineName: TranslatorEngine): TranslatorApiConfig {
 }
 
 /**
- * Create engine override mapping from configuration
- */
-function createEngineOverrides(overrideCfg: Record<string, string[]>): Record<string, string> {
-  return Object.fromEntries(
-    Object.entries(overrideCfg).flatMap(([engine, localePatterns]) =>
-      localePatterns.flatMap((localePattern) => {
-        const locale = localePattern.trim()
-        return locale.match(/:/)
-          ? [[locale, engine]] // locale is actually fromLocale:toLocale
-          : [
-              [`en:${locale}`, engine],
-              [`${locale}:en`, engine]
-            ]
-      })
-    )
-  )
-}
-
-/**
  * Handle context CSV loading for JSON files
  */
 async function loadJsonContexts(extraction: any, srcUri: vscode.Uri): Promise<(string | null)[]> {
@@ -153,23 +136,8 @@ async function loadJsonContexts(extraction: any, srcUri: vscode.Uri): Promise<(s
   const { map: ctxMap, stats } = await loadContextCsvForJson(srcUri)
   const validPaths = new Set(extraction.paths.map(jsonPathToString))
 
-  // Find any issues with the context data
-  const unknown = Object.keys(ctxMap).filter((k) => !validPaths.has(k))
-  const msgs = []
-
-  if (unknown.length) {
-    msgs.push(`Unknown context path(s): ${unknown.slice(0, 6).join(', ')}${unknown.length > 6 ? ' …' : ''}`)
-  }
-
-  if (stats.duplicates.length) {
-    msgs.push(`Duplicate path(s): ${stats.duplicates.slice(0, 6).join(', ')}${stats.duplicates.length > 6 ? ' …' : ''}`)
-  }
-
-  if (stats.emptyValues.length) {
-    msgs.push(
-      `Empty context value(s): ${stats.emptyValues.slice(0, 6).join(', ')}${stats.emptyValues.length > 6 ? ' …' : ''}`
-    )
-  }
+  // Generate context CSV warning messages
+  const msgs = generateContextCsvWarnings(ctxMap, validPaths, stats)
 
   if (msgs.length) {
     vscode.window.showWarningMessage(

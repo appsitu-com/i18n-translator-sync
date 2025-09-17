@@ -2,6 +2,7 @@ import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 import { randomUUID } from 'crypto'
 import { withRetry } from '../util/retry'
+import { normalizeLocaleWithMap } from '../util/localeNorm'
 
 const langMap: Record<string, string> = {
   'zh-CN': 'zh-Hans',
@@ -23,14 +24,10 @@ const langMap: Record<string, string> = {
   'sr-Latn': 'sr-Latn'
 }
 
-function norm(lang: string): string {
-  return langMap[lang] ?? lang.split('-')[0].toLowerCase()
-}
-
 export const AzureTranslator: Translator = {
   name: 'azure',
   normalizeLocale(locale: string) {
-    return norm(locale)
+    return normalizeLocaleWithMap(locale, langMap)
   },
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
@@ -58,8 +55,8 @@ export const AzureTranslator: Translator = {
     // Azure supports up to 100 items per request
     const batchSize = Math.min(100, Number(opts.apiConfig.batchSize ?? 100))
     const out: string[] = new Array(texts.length)
-    const from = norm(opts.sourceLocale)
-    const to = norm(opts.targetLocale)
+    const from = normalizeLocaleWithMap(opts.sourceLocale, langMap)
+    const to = normalizeLocaleWithMap(opts.targetLocale, langMap)
     let i = 0
 
     while (i < texts.length) {

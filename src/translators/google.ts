@@ -1,6 +1,7 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
+import { normalizeLocaleWithMap } from '../util/localeNorm'
 
 const langMap: Record<string, string> = {
   'zh-CN': 'zh-CN',
@@ -18,10 +19,6 @@ const langMap: Record<string, string> = {
   'pa-Arab': 'pa-Arab'
 }
 
-function norm(lang: string): string {
-  return langMap[lang] ?? lang.split('-')[0].toLowerCase()
-}
-
 // function norm(locale: string): string {
 //   // Google v2 accepts BCP-47; preserve region if present but lowercase language
 //   const [lang, rest] = locale.split('-');
@@ -31,7 +28,7 @@ function norm(lang: string): string {
 export const GoogleTranslator: Translator = {
   name: 'google',
   normalizeLocale(locale: string) {
-    return norm(locale)
+    return normalizeLocaleWithMap(locale, langMap)
   },
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
@@ -47,8 +44,8 @@ export const GoogleTranslator: Translator = {
     const url = `${endpoint}/language/translate/v2?key=${encodeURIComponent(key)}`
     const body: any = {
       q: texts,
-      target: norm(opts.targetLocale),
-      source: norm(opts.sourceLocale),
+      target: normalizeLocaleWithMap(opts.targetLocale, langMap),
+      source: normalizeLocaleWithMap(opts.sourceLocale, langMap),
       format: 'text'
     }
     if (model) body.model = model

@@ -1,6 +1,7 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
+import { normalizeLocaleWithMap } from '../util/localeNorm'
 
 // Language code mapping for Gemini
 // Gemini supports standard language codes but we'll normalize some variants
@@ -20,14 +21,10 @@ const langMap: Record<string, string> = {
   'es-ES': 'es'
 }
 
-function norm(locale: string): string {
-  return langMap[locale] ?? locale.split('-')[0].toLowerCase()
-}
-
 export const GeminiTranslator: Translator = {
   name: 'gemini',
   normalizeLocale(locale: string) {
-    return norm(locale)
+    return normalizeLocaleWithMap(locale, langMap)
   },
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
@@ -57,7 +54,7 @@ export const GeminiTranslator: Translator = {
           const context = batchContexts[idx]
           const contextInfo = context ? `\nContext: ${context}` : ''
 
-          const prompt = `Translate the following text from ${norm(opts.sourceLocale)} to ${norm(opts.targetLocale)}${contextInfo}.\n\nText to translate: "${text}"\n\nTranslation:`
+          const prompt = `Translate the following text from ${normalizeLocaleWithMap(opts.sourceLocale, langMap)} to ${normalizeLocaleWithMap(opts.targetLocale, langMap)}${contextInfo}.\n\nText to translate: "${text}"\n\nTranslation:`
 
           const url = `${endpoint}/models/${model}:generateContent?key=${encodeURIComponent(key)}`
           const body = {
