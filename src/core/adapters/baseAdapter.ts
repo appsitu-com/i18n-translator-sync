@@ -1,5 +1,4 @@
 import * as path from 'path';
-import * as fs from 'fs';
 import { TranslatorManager } from '../translatorManager';
 import { loadProjectConfig } from '../config';
 import { Logger } from '../util/logger';

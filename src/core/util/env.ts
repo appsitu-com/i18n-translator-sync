@@ -161,11 +161,7 @@ export function resolveEnvString(v: unknown, logger: Logger): unknown {
   if (typeof v !== 'string') return v
   const envRef = /^env:([A-Z0-9_]+)$/i.exec(v)
   if (envRef) {
-    try {
-      return getEnv(envRef[1], logger)
-    } catch (error) {
-      throw error
-    }
+    return getEnv(envRef[1], logger)
   }
   return v.replace(/\$\{([A-Z0-9_]+)\}/gi, (_m, name) => getEnv(name, logger))
 }

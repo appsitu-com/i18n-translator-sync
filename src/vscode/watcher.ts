@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { FileWatcher, WorkspaceWatcher, Disposable, FileRenameEvent, FileWatcherListeners } from '../core/util/watcher';
 import { VSCodeUri, VSCodeFileSystem } from './filesystem';
-import { IUri } from '../core/util/fs';
 
 /**
  * VSCode file watcher implementation

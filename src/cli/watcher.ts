@@ -1,7 +1,7 @@
 import * as chokidar from 'chokidar';
 import * as path from 'path';
 import { Logger } from '../core/util/logger';
-import { FileSystem, IUri } from '../core/util/fs';
+import { FileSystem } from '../core/util/fs';
 import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable, FileRenameEvent, FileWatcherListeners } from '../core/util/watcher';
 
 /**
