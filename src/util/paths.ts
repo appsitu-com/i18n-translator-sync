@@ -164,20 +164,37 @@ export function createBackTranslationUri(
   ws: vscode.WorkspaceFolder,
   locale: string,
   rel: string,
-  config: TranslateProjectConfig
+  config: TranslateProjectConfig,
+  sourcePath?: string
 ): vscode.Uri {
   if (!ws || !ws.uri) {
     throw new Error(`Invalid or missing workspace folder`);
   }
 
+  // Determine if source is file-based by checking if sourcePath has extension
+  const isSourcePathFile = sourcePath ? path.extname(sourcePath) !== '' : false;
+
   // If target directory is configured, use it for back-translation as well
   if (config.targetDir) {
     const targetBasePath = path.join(ws.uri.fsPath, config.targetDir);
-    return vscode.Uri.file(path.join(targetBasePath, 'i18n', `${locale}_en`, rel));
+
+    if (isSourcePathFile) {
+      // For file sources: i18n/{locale}_en.json
+      return vscode.Uri.file(path.join(targetBasePath, 'i18n', `${locale}_en.json`));
+    } else {
+      // For directory sources: i18n/{locale}_en/{relativePath}
+      return vscode.Uri.file(path.join(targetBasePath, 'i18n', `${locale}_en`, rel));
+    }
   }
 
   // Default behavior
-  return vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en`, rel);
+  if (isSourcePathFile) {
+    // For file sources: i18n/{locale}_en.json
+    return vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en.json`);
+  } else {
+    // For directory sources: i18n/{locale}_en/{relativePath}
+    return vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en`, rel);
+  }
 }
 
 /**

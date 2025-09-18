@@ -182,12 +182,14 @@ describe('File Watcher Integration Tests', () => {
     onAddOrChangeSpy.mockClear();
 
     // Create a new file in the watched directory
-    const newFilePath = path.join(tempDir, 'i18n', 'en', 'newfile.json');
+    const newFileDir = path.join(tempDir, 'i18n', 'en');
+    const newFilePath = path.join(newFileDir, 'newfile.json');
     const newFileContent = JSON.stringify({
       newMessage: 'This is a new message',
       anotherKey: 'Another value'
     }, null, 2);
 
+    await fs.mkdir(newFileDir, { recursive: true });
     await fs.writeFile(newFilePath, newFileContent);
 
     // Wait for file system events to propagate

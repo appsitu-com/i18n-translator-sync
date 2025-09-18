@@ -10,7 +10,7 @@ import { createEngineOverrides } from './core/util/engines'
 import { generateContextCsvWarnings } from './core/util/contextCsvWarnings'
 import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
 import { loadProjectConfig, verifyFilePath } from './config'
-import { getRelativePath, createTargetUri, createBackTranslationUri } from './util/paths'
+import { getRelativePath, createTargetUri, createBackTranslationUri, findSourcePathForFile } from './util/paths'
 import { VSCodeLogger } from './vscode/logger'
 
 /**
@@ -54,11 +54,14 @@ function outUri(ws: vscode.WorkspaceFolder, locale: string, rel: string): vscode
 /**
  * Create URI for back-translation output file
  */
-function backOutUri(ws: vscode.WorkspaceFolder, locale: string, rel: string): vscode.Uri {
+function backOutUri(ws: vscode.WorkspaceFolder, locale: string, rel: string, srcUri?: vscode.Uri): vscode.Uri {
   validateWorkspace(ws)
   const config = loadProjectConfig(ws)
 
-  return createBackTranslationUri(ws, locale, rel, config)
+  // Get source path if srcUri is provided
+  const sourcePath = srcUri ? findSourcePathForFile(srcUri, config) : undefined
+
+  return createBackTranslationUri(ws, locale, rel, config, sourcePath || undefined)
 }
 /**
  * Ensure directory exists for a file
@@ -257,7 +260,7 @@ export async function processFileForLocales(
           : await translateSegments(fwd, contexts, backEngine, targetLocale, sourceLocale, cache)
 
       // Write back translation output
-      await writeText(backOutUri(ws, targetLocale, rel), extraction.rebuild(back))
+      await writeText(backOutUri(ws, targetLocale, rel, srcUri), extraction.rebuild(back))
     }
   }
 }
@@ -278,7 +281,7 @@ export async function removeFileForLocales(srcUri: vscode.Uri, locales?: string[
   for (const locale of targetLocales) {
     // Get URIs for forward and back translation files
     const fwd = outUri(ws, locale, rel)
-    const bwd = backOutUri(ws, locale, rel)
+    const bwd = backOutUri(ws, locale, rel, srcUri)
 
     // Delete translation files
     try {

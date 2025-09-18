@@ -4,17 +4,17 @@ import { Logger } from './util/logger'
 import { TranslationCache } from './cache/sqlite'
 import { extractForFile, jsonPathToString } from '../extractors/index'
 import { loadContextCsvForJson } from './contextCsv'
-import { bulkTranslateWithEngine } from '../bulkTranslate'
 import { pickEngine } from '../translators/registry'
-import { resolveEnvDeep } from './util/env'
 import { generateContextCsvWarnings } from './util/contextCsvWarnings'
-import { TranslatorApiConfig, TranslatorEngine } from '../translators/types'
 import { TranslateProjectConfig } from './config'
 import {
   getRelativePath,
   createTargetUri,
-  createBackTranslationUri
+  createBackTranslationUri,
+  findSourcePathForFile
 } from './util/paths'
+import { ITranslationExecutor } from './translationExecutor'
+import { DefaultTranslationExecutor } from './defaultTranslationExecutor'
 
 /**
  * Core translator pipeline service
@@ -23,28 +23,13 @@ export class TranslatorPipeline {
   private fileSystem: FileSystem
   private logger: Logger
   private cache: TranslationCache
+  private executor: ITranslationExecutor
 
-  constructor(fileSystem: FileSystem, logger: Logger, cache: TranslationCache) {
+  constructor(fileSystem: FileSystem, logger: Logger, cache: TranslationCache, executor?: ITranslationExecutor) {
     this.fileSystem = fileSystem
     this.logger = logger
     this.cache = cache
-  }
-
-  /**
-   * Get engine configuration for the given engine name
-   */
-  private getEngineConfig(
-    engineName: TranslatorEngine,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T }
-  ): TranslatorApiConfig {
-    const rawConfig = configProvider.get(engineName)
-
-    if (!rawConfig) {
-      throw new Error(`Missing configuration for translation engine '${engineName}'`)
-    }
-
-    // Resolve environment variables in configuration
-    return resolveEnvDeep(rawConfig, this.logger) as TranslatorApiConfig
+    this.executor = executor || new DefaultTranslationExecutor(fileSystem, logger, cache)
   }
 
   /**
@@ -74,19 +59,6 @@ export class TranslatorPipeline {
       await this.fileSystem.createDirectory(this.fileSystem.joinPath(file, '..'))
     } catch (error) {
       this.logger.error(`Failed to create directory for ${file.fsPath}: ${error}`)
-      throw error
-    }
-  }
-
-  /**
-   * Write text content to a file, ensuring its directory exists
-   */
-  private async writeText(uri: IUri, text: string): Promise<void> {
-    await this.ensureDirFor(uri)
-    try {
-      await this.fileSystem.writeFile(uri, text)
-    } catch (error) {
-      this.logger.error(`Failed to write file ${uri.fsPath}: ${error}`)
       throw error
     }
   }
@@ -126,29 +98,6 @@ export class TranslatorPipeline {
   /**
    * Translate segments using specified engine
    */
-  private async translateSegments(
-    segments: string[],
-    contexts: (string | null)[],
-    engineName: TranslatorEngine,
-    sourceLocale: string,
-    targetLocale: string,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T }
-  ): Promise<string[]> {
-    // Get engine configuration and translate (even for copy engine)
-    const apiConfig = this.getEngineConfig(engineName, configProvider)
-    return await bulkTranslateWithEngine(
-      segments,
-      contexts,
-      engineName,
-      {
-        source: sourceLocale,
-        target: targetLocale,
-        apiConfig
-      },
-      this.cache
-    )
-  }
-
   /**
    * Check if a target file needs to be translated by comparing timestamps
    * @returns true if target needs to be translated (doesn't exist or is older than source)
@@ -269,29 +218,35 @@ export class TranslatorPipeline {
       // Simple, concise logging with just one line per file translation
       this.logger.info(`Translating: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}] (${engineName})`)
 
-      // Translate the segments
-      const fwd = await this.translateSegments(
+      // Translate the segments using the executor
+      const fwd = await this.executor.translateSegments(
         extraction.segments,
         contexts,
         engineName,
         sourceLocale,
         targetLocale,
-        configProvider
+        configProvider,
+        srcUri.fsPath,
+        false
       )
 
-      // Write forward translation output
-      await this.writeText(targetUri, extraction.rebuild(fwd))
+      // Write forward translation output using the executor
+      await this.executor.writeTranslation(targetUri, extraction.rebuild(fwd), srcUri.fsPath, false)
       // No additional logging after writing the file
 
       // Handle back translation if enabled
       if (enableBackTranslation) {
+        // Get source path to determine if it's file-based or directory-based
+        const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
+
         // Create back-translation URI
         const backUri = createBackTranslationUri(
           this.fileSystem,
           workspacePath,
           targetLocale,
           rel,
-          config
+          config,
+          sourcePath || undefined
         )
 
         // Check if back-translation is needed
@@ -319,17 +274,19 @@ export class TranslatorPipeline {
         const back =
           engineName === 'copy'
             ? fwd.slice()
-            : await this.translateSegments(
+            : await this.executor.translateSegments(
                 fwd,
                 contexts,
                 backEngine,
                 targetLocale,
                 sourceLocale,
-                configProvider
+                configProvider,
+                srcUri.fsPath,
+                true
               )
 
-        // Write back translation output
-        await this.writeText(backUri, extraction.rebuild(back))
+        // Write back translation output using the executor
+        await this.executor.writeTranslation(backUri, extraction.rebuild(back), srcUri.fsPath, true)
         // No additional logging after writing the file
       }
     }
@@ -371,6 +328,9 @@ export class TranslatorPipeline {
     const rel = getRelativePath(srcUri.fsPath, workspacePath, config)
 
     for (const locale of targetLocales) {
+      // Get source path to determine if it's file-based or directory-based
+      const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
+
       // Get URIs for forward and back translation files
       const fwd = createTargetUri(
         this.fileSystem,
@@ -386,7 +346,8 @@ export class TranslatorPipeline {
         workspacePath,
         locale,
         rel,
-        config
+        config,
+        sourcePath || undefined
       )
 
       // Delete translation files

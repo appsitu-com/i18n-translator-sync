@@ -22,6 +22,9 @@ export function findSourcePathForFile(
     normalizePath(path.join(workspacePath, config.sourceDir)) :
     normalizePath(workspacePath);
 
+  let bestMatch: string | null = null;
+  let bestMatchLength = 0;
+
   for (const sourcePath of config.sourcePaths) {
     // Normalize the full source path
     const fullSourcePath = normalizePath(path.join(basePath, sourcePath))
@@ -32,29 +35,36 @@ export function findSourcePathForFile(
         continue;
       }
 
-      return sourcePath
+      // Check if this is a more specific match (longer path)
+      if (fullSourcePath.length > bestMatchLength) {
+        bestMatch = sourcePath;
+        bestMatchLength = fullSourcePath.length;
+      }
     }
   }
 
-  return null
+  console.log(`DEBUG findSourcePathForFile: filePath=${filePath}, bestMatch=${bestMatch}`);
+  return bestMatch;
 }
 
 /**
  * Calculate the base path for source files
  */
 export function getSourceBasePath(workspacePath: string, config: TranslateProjectConfig): string {
-  return config.sourceDir ?
+  const result = config.sourceDir ?
     path.join(workspacePath, config.sourceDir) :
     workspacePath;
+  return result.replace(/\\/g, '/');
 }
 
 /**
  * Calculate the base path for target files
  */
 export function getTargetBasePath(workspacePath: string, config: TranslateProjectConfig): string {
-  return config.targetDir ?
+  const result = config.targetDir ?
     path.join(workspacePath, config.targetDir) :
     workspacePath;
+  return result.replace(/\\/g, '/');
 }
 
 /**
@@ -74,10 +84,23 @@ export function getRelativePath(
   // Get base path including sourceDir if specified
   const basePath = getSourceBasePath(workspacePath, config);
 
-  // Get source folder path
-  const sourceFolderPath = path.join(basePath, sourcePath);
+  // Check if the source path is a specific file (has extension) or a directory
+  const isSourcePathFile = path.extname(sourcePath) !== '';
 
-  return path.relative(sourceFolderPath, filePath);
+  console.log(`DEBUG getRelativePath: filePath=${filePath}, sourcePath=${sourcePath}, isSourcePathFile=${isSourcePathFile}`);
+
+  if (isSourcePathFile) {
+    // If source path is a file, return just the filename
+    const result = path.basename(filePath);
+    console.log(`DEBUG getRelativePath: returning filename=${result}`);
+    return result;
+  } else {
+    // If source path is a directory, calculate relative path from that directory
+    const sourceFolderPath = path.join(basePath, sourcePath);
+    const result = path.relative(sourceFolderPath, filePath);
+    console.log(`DEBUG getRelativePath: returning relative path=${result}`);
+    return result.replace(/\\/g, '/');
+  }
 }
 
 /**
@@ -95,8 +118,20 @@ export function createTargetPath(
     throw new Error(`Target locale "${targetLocale}" is the same as source locale "${sourceLocale}". This would overwrite source files.`);
   }
 
-  // Determine the source path pattern
-  const sourcePath = config.sourcePaths.find(sp => containsLocale(sp, sourceLocale));
+  // Determine the source path pattern - find the most specific match like findSourcePathForFile does
+  let sourcePath: string | undefined;
+  let bestMatchLength = 0;
+
+  for (const sp of config.sourcePaths) {
+    if (containsLocale(sp, sourceLocale)) {
+      // For createTargetPath, we want to find the most specific pattern that could match
+      // This logic should be similar to findSourcePathForFile
+      if (sp.length > bestMatchLength) {
+        sourcePath = sp;
+        bestMatchLength = sp.length;
+      }
+    }
+  }
 
   // Default target path (legacy behavior)
   if (!sourcePath) {
@@ -120,8 +155,22 @@ export function createTargetPath(
   // Determine base path for target
   const basePath = getTargetBasePath(workspacePath, config);
 
-  // Join the base path with the modified target path and relative path
-  return path.join(basePath, targetPath, relativePath);
+  // Check if the source path is a file (has extension)
+  const isSourcePathFile = path.extname(sourcePath) !== '';
+
+  console.log(`DEBUG createTargetPath: sourcePath=${sourcePath}, targetPath=${targetPath}, isSourcePathFile=${isSourcePathFile}, extension=${path.extname(sourcePath)}`);
+
+  if (isSourcePathFile) {
+    // For file source paths, the target path already includes the filename
+    const result = path.join(basePath, targetPath);
+    console.log(`DEBUG createTargetPath: file source path, returning: ${result}`);
+    return result.replace(/\\/g, '/');
+  } else {
+    // For directory source paths, append the relative path
+    const result = path.join(basePath, targetPath, relativePath);
+    console.log(`DEBUG createTargetPath: directory source path, returning: ${result}`);
+    return result.replace(/\\/g, '/');
+  }
 }
 
 /**
@@ -131,16 +180,37 @@ export function createBackTranslationPath(
   workspacePath: string,
   locale: string,
   relativePath: string,
-  config: TranslateProjectConfig
+  config: TranslateProjectConfig,
+  sourcePath?: string
 ): string {
+  // Determine if source is file-based by checking if sourcePath has extension
+  const isSourcePathFile = sourcePath ? path.extname(sourcePath) !== '' : false;
+
   // If target directory is configured, use it for back-translation as well
   if (config.targetDir) {
     const targetBasePath = path.join(workspacePath, config.targetDir);
-    return path.join(targetBasePath, 'i18n', `${locale}_en`, relativePath);
+
+    if (isSourcePathFile) {
+      // For file sources: i18n/{locale}_en.json
+      const result = path.join(targetBasePath, 'i18n', `${locale}_en.json`);
+      return result.replace(/\\/g, '/');
+    } else {
+      // For directory sources: i18n/{locale}_en/{relativePath}
+      const result = path.join(targetBasePath, 'i18n', `${locale}_en`, relativePath);
+      return result.replace(/\\/g, '/');
+    }
   }
 
   // Default behavior
-  return path.join(workspacePath, 'i18n', `${locale}_en`, relativePath);
+  if (isSourcePathFile) {
+    // For file sources: i18n/{locale}_en.json
+    const result = path.join(workspacePath, 'i18n', `${locale}_en.json`);
+    return result.replace(/\\/g, '/');
+  } else {
+    // For directory sources: i18n/{locale}_en/{relativePath}
+    const result = path.join(workspacePath, 'i18n', `${locale}_en`, relativePath);
+    return result.replace(/\\/g, '/');
+  }
 }
 
 /**
@@ -173,13 +243,15 @@ export function createBackTranslationUri(
   workspacePath: string,
   locale: string,
   relativePath: string,
-  config: TranslateProjectConfig
+  config: TranslateProjectConfig,
+  sourcePath?: string
 ): IUri {
   const backTranslationPath = createBackTranslationPath(
     workspacePath,
     locale,
     relativePath,
-    config
+    config,
+    sourcePath
   );
 
   return fs.createUri(backTranslationPath);

@@ -5,6 +5,7 @@ import { Disposable, FileRenameEvent, WorkspaceWatcher } from './util/watcher';
 import { TranslateProjectConfig, ConfigProvider } from './config';
 import { TranslatorPipeline } from './pipeline';
 import { MateCatService, MateCatSettings } from './matecat';
+import { ITranslationExecutor } from './translationExecutor';
 import * as path from 'path';
 
 /**
@@ -23,10 +24,11 @@ export class TranslatorManager {
     cache: TranslationCache,
     private workspacePath: string,
     private workspaceWatcher: WorkspaceWatcher,
-    private configProvider: ConfigProvider
+    private configProvider: ConfigProvider,
+    executor?: ITranslationExecutor
   ) {
     this.cache = cache;
-    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache);
+    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, executor);
 
     // Initialize MateCat integration
     this.initializeMateCat();
