@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import vscode from './mocks/vscode'
 import * as extension from '../src/extension'
-import * as matecate from '../src/matecate'
+import { MateCatService } from '../src/core/matecat'
 
 /**
  * Error Handling Tests
@@ -15,10 +15,12 @@ import * as matecate from '../src/matecate'
  * to mock internal functions.
  */
 
-// Mock matecate module
-vi.mock('../src/matecate', () => ({
-  pushCacheToMateCat: vi.fn(),
-  pullReviewedFromMateCat: vi.fn()
+// Mock MateCatService module
+vi.mock('../src/core/matecat', () => ({
+  MateCatService: vi.fn().mockImplementation(() => ({
+    pushCacheToMateCat: vi.fn(),
+    pullReviewedFromMateCat: vi.fn()
+  }))
 }));
 
 describe('Error Handling', () => {
@@ -69,12 +71,14 @@ describe('Error Handling', () => {
     // Test that errors in MateCat push operations are properly displayed to users
     const expectedError = new Error('MateCat connection failed')
 
-    // Mock the matecate pushCacheToMateCat function to throw the error
-    vi.spyOn(matecate, 'pushCacheToMateCat').mockRejectedValueOnce(expectedError)
+    // Create a MateCatService instance with mocked methods
+    const mateCatService = new MateCatService({} as any)
+    // Add the method and then spy on it
+    mateCatService.pushCacheToMateCat = vi.fn().mockRejectedValueOnce(expectedError)
 
     // Directly simulate the error handling in pushToMateCat
     try {
-      await matecate.pushCacheToMateCat({} as any)
+      await mateCatService.pushCacheToMateCat({} as any, {} as any)
     } catch (err) {
       vscode.window.showErrorMessage(`MateCat push failed: ${(err as Error).message}`)
     }
@@ -87,12 +91,14 @@ describe('Error Handling', () => {
     // Test that errors in MateCat pull operations are properly displayed to users
     const expectedError = new Error('MateCat connection failed')
 
-    // Mock the matecate pullReviewedFromMateCat function to throw the error
-    vi.spyOn(matecate, 'pullReviewedFromMateCat').mockRejectedValueOnce(expectedError)
+    // Create a MateCatService instance with mocked methods
+    const mateCatService = new MateCatService({} as any)
+    // Add the method and then spy on it
+    mateCatService.pullReviewedFromMateCat = vi.fn().mockRejectedValueOnce(expectedError)
 
     // Directly simulate the error handling in pullFromMateCat
     try {
-      await matecate.pullReviewedFromMateCat({} as any)
+      await mateCatService.pullReviewedFromMateCat({} as any, {} as any)
     } catch (err) {
       vscode.window.showErrorMessage(`MateCat pull failed: ${(err as Error).message}`)
     }

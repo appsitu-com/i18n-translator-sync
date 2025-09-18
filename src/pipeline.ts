@@ -10,7 +10,7 @@ import { createEngineOverrides } from './core/util/engines'
 import { generateContextCsvWarnings } from './core/util/contextCsvWarnings'
 import { TranslatorApiConfig, TranslatorEngine } from './translators/types'
 import { loadProjectConfig, verifyFilePath } from './config'
-import { getRelativePath, createTargetUri, createBackTranslationUri, findSourcePathForFile } from './util/paths'
+import { getRelativePath, createTargetUri, createBackTranslationUri, findSourcePathForFile, containsLocale } from './util/paths'
 import { VSCodeLogger } from './vscode/logger'
 
 /**
@@ -48,7 +48,11 @@ function outUri(ws: vscode.WorkspaceFolder, locale: string, rel: string): vscode
   validateWorkspace(ws)
   const config = loadProjectConfig(ws)
 
-  return createTargetUri(ws, config.sourceLocale, locale, rel, config)
+  // For backward compatibility, we need to determine the source path
+  // Since this old interface doesn't have srcUri, we'll try to find the best match
+  const sourcePath = config.sourcePaths.find(sp => containsLocale(sp, config.sourceLocale)) || config.sourcePaths[0] || 'i18n/en'
+
+  return createTargetUri(ws, config.sourceLocale, locale, rel, config, sourcePath)
 }
 
 /**

@@ -293,7 +293,7 @@ describe('createTargetUri', () => {
     const ws = mockWorkspaceFolder('C:/workspace')
     const config = createTestConfig()
 
-    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config)
+    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config, 'i18n/en')
     expect(result.fsPath).toContain(path.join('C:/workspace', 'i18n/fr', 'test.json'))
   })
 
@@ -304,7 +304,7 @@ describe('createTargetUri', () => {
       targetDir: 'dist'
     })
 
-    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config)
+    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config, 'i18n/en')
     expect(result.fsPath).toContain(path.join('C:/workspace', 'dist/i18n/fr', 'test.json'))
   })
 
@@ -312,7 +312,7 @@ describe('createTargetUri', () => {
     const ws = mockWorkspaceFolder('C:/workspace')
     const config = createTestConfig()
 
-    expect(() => createTargetUri(ws, 'en', 'EN', 'test.json', config)).toThrow(
+    expect(() => createTargetUri(ws, 'en', 'EN', 'test.json', config, 'i18n/en')).toThrow(
       'Target locale "EN" is the same as source locale "en". This would overwrite source files.'
     )
   })
@@ -327,7 +327,7 @@ describe('createTargetUri', () => {
     })
 
     // It should fall back to the default i18n/{locale} structure
-    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config)
+    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config, 'content/resources')
     expect(result.fsPath).toContain(path.join('C:/workspace', 'i18n/fr', 'test.json'))
   })
 
@@ -335,7 +335,7 @@ describe('createTargetUri', () => {
     const config = createTestConfig()
 
     expect(() =>
-      createTargetUri(undefined as unknown as vscode.WorkspaceFolder, 'en', 'fr', 'test.json', config)
+      createTargetUri(undefined as unknown as vscode.WorkspaceFolder, 'en', 'fr', 'test.json', config, 'i18n/en')
     ).toThrow('Invalid or missing workspace folder')
   })
 
@@ -349,7 +349,7 @@ describe('createTargetUri', () => {
       sourceLocale: 'en'
     })
 
-    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config)
+    const result = createTargetUri(ws, 'en', 'fr', 'test.json', config, 'content/english')
     expect(result.fsPath).toContain(path.join('C:/workspace', 'i18n/fr', 'test.json'))
   })
 })

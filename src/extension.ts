@@ -8,16 +8,33 @@ export let outputChannel: vscode.OutputChannel
 export let vsCodeAdapter: VSCodeTranslatorAdapter | null = null
 
 /**
+ * Get or create the singleton output channel
+ */
+function getOutputChannel(): vscode.OutputChannel {
+  if (!outputChannel) {
+    outputChannel = vscode.window.createOutputChannel('i18n Translator');
+  }
+  return outputChannel;
+}
+
+/**
+ * Get or create the singleton VSCode adapter
+ */
+function getVSCodeAdapter(): VSCodeTranslatorAdapter {
+  if (!vsCodeAdapter) {
+    vsCodeAdapter = new VSCodeTranslatorAdapter(getOutputChannel());
+  }
+  return vsCodeAdapter;
+}
+
+/**
  * Start the translator with auto-start prompt
  */
 export async function onStartTranslator(context: vscode.ExtensionContext): Promise<void> {
   try {
-    // Try to start the translator
-    if (!vsCodeAdapter) {
-      vsCodeAdapter = new VSCodeTranslatorAdapter();
-    }
-
-    await vsCodeAdapter.startWithContext(context);
+    // Get the singleton adapter
+    const adapter = getVSCodeAdapter();
+    await adapter.startWithContext(context);
 
     // When manually started, ask if user wants to enable auto-start
     const response = await vscode.window.showInformationMessage(
@@ -78,77 +95,61 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
  * Stop the translator
  */
 export function stopTranslator(): void {
-  if (vsCodeAdapter) {
-    vsCodeAdapter.stop();
-  } else {
-    vscode.window.showInformationMessage('Translator not running');
-  }
+  const adapter = getVSCodeAdapter();
+  adapter.stop();
 }
 
 /**
  * Restart the translator
  */
 export async function restartTranslator(context: vscode.ExtensionContext): Promise<void> {
-  if (vsCodeAdapter) {
-    await vsCodeAdapter.restartWithContext(context);
-  } else {
-    vsCodeAdapter = new VSCodeTranslatorAdapter();
-    await vsCodeAdapter.startWithContext(context);
-  }
+  const adapter = getVSCodeAdapter();
+  await adapter.restartWithContext(context);
 }
 
 /**
  * Push translations to MateCat
  */
 export async function pushToMateCat(): Promise<void> {
-  if (!vsCodeAdapter) {
-    vsCodeAdapter = new VSCodeTranslatorAdapter();
-  }
-
-  await vsCodeAdapter.pushToMateCat();
+  const adapter = getVSCodeAdapter();
+  await adapter.pushToMateCat();
 }
 
 /**
  * Pull translations from MateCat
  */
 export async function pullFromMateCat(): Promise<void> {
-  if (!vsCodeAdapter) {
-    vsCodeAdapter = new VSCodeTranslatorAdapter();
-  }
-
-  await vsCodeAdapter.pullFromMateCat();
+  const adapter = getVSCodeAdapter();
+  await adapter.pullFromMateCat();
 }
 
 /**
  * Show the output channel
  */
 export function onShowOutput(): void {
-  if (!vsCodeAdapter) {
-    vsCodeAdapter = new VSCodeTranslatorAdapter();
-  }
-
-  vsCodeAdapter.showOutput();
+  const adapter = getVSCodeAdapter();
+  adapter.showOutput();
 }
 
 /**
  * Activate the extension
  */
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  // Create the adapter
-  vsCodeAdapter = new VSCodeTranslatorAdapter();
+  // Get or create output channel
+  const channel = getOutputChannel();
+  context.subscriptions.push(channel);
 
-  // Create output channel
-  outputChannel = vscode.window.createOutputChannel('i18n Translator');
-  context.subscriptions.push(outputChannel);
+  // Create the adapter with shared output channel
+  vsCodeAdapter = new VSCodeTranslatorAdapter(channel);
 
   // Log activation
-  outputChannel.appendLine('i18n Translator extension activated');
-  outputChannel.appendLine(`Activation time: ${new Date().toISOString()}`);
-  outputChannel.appendLine('To see this output, run the command "Translator: Show Output"');
+  channel.appendLine('i18n Translator extension activated');
+  channel.appendLine(`Activation time: ${new Date().toISOString()}`);
+  channel.appendLine('To see this output, run the command "Translator: Show Output"');
 
   // Show the output channel during development
   if (process.env.VSCODE_DEBUG_MODE === '1' || process.env.NODE_ENV === 'development') {
-    outputChannel.show();
+    channel.show();
   }
 
   // Register commands

@@ -97,11 +97,17 @@ export const initTranslatorEnv = async (
     const translatorEnvFile = path.join(rootDir, '.translator.env')
     const gitignoreFile = path.join(rootDir, '.gitignore')
 
+    // Log the environment file path being checked
+    logger.info(`Checking for environment file: ${translatorEnvFile}`)
+
     // Create .translator.env if it doesn't exist
     const envFileExists = await fileSystem.fileExists(fileSystem.createUri(translatorEnvFile))
 
     if (!envFileExists) {
+      logger.info(`Environment file not found, creating: ${translatorEnvFile}`)
       await createDefaultTranslatorEnvFile(translatorEnvFile, gitignoreFile, logger, fileSystem, openDocument)
+    } else {
+      logger.info(`Loading environment from: ${translatorEnvFile}`)
     }
 
     // Load environment variables from .translator.env in the workspace

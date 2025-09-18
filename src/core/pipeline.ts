@@ -188,6 +188,12 @@ export class TranslatorPipeline {
 
     // Process each target locale
     for (const targetLocale of targetLocales) {
+      // Get source path to determine which path this file matched
+      const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
+      if (!sourcePath) {
+        throw new Error(`File ${srcUri.fsPath} is not in any of the configured source paths`)
+      }
+
       // Create target URI
       const targetUri = createTargetUri(
         this.fileSystem,
@@ -195,7 +201,8 @@ export class TranslatorPipeline {
         sourceLocale,
         targetLocale,
         rel,
-        config
+        config,
+        sourcePath
       )
 
       // Check if translation is needed based on file timestamps
@@ -338,7 +345,8 @@ export class TranslatorPipeline {
         config.sourceLocale,
         locale,
         rel,
-        config
+        config,
+        sourcePath || 'i18n/en' // fallback if sourcePath is null
       )
 
       const bwd = createBackTranslationUri(

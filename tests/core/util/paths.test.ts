@@ -139,7 +139,7 @@ describe('Core Paths Module', () => {
       const relativePath = 'nested/messages.json'
       const config = createTestConfig({ sourcePaths: ['i18n/en'] })
 
-      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config)
+      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en')
       expect(result).toBe('/workspace/i18n/fr/nested/messages.json')
     })
 
@@ -150,7 +150,7 @@ describe('Core Paths Module', () => {
       const relativePath = 'en.json'
       const config = createTestConfig({ sourcePaths: ['i18n/en.json'] })
 
-      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config)
+      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en.json')
       expect(result).toBe('/workspace/i18n/fr.json')
     })
 
@@ -161,7 +161,7 @@ describe('Core Paths Module', () => {
       const relativePath = 'en.json'
       const config = createTestConfig({ sourcePaths: ['i18n/en.json'] })
 
-      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config)
+      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en.json')
 
       // Should NOT append the relative path for file sources
       expect(result).toBe('C:/workspace/i18n/es.json')
@@ -178,7 +178,7 @@ describe('Core Paths Module', () => {
         targetDir: 'dist'
       })
 
-      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config)
+      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en.json')
       expect(result).toBe('/workspace/dist/i18n/fr.json')
     })
 
@@ -192,7 +192,7 @@ describe('Core Paths Module', () => {
         targetDir: 'dist'
       })
 
-      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config)
+      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en')
       expect(result).toBe('/workspace/dist/i18n/fr/messages.json')
     })
 
@@ -203,7 +203,7 @@ describe('Core Paths Module', () => {
       const relativePath = 'en.json'
       const config = createTestConfig({ sourcePaths: ['i18n/en.json'] })
 
-      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config)
+      const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en.json')
       expect(result).toBe('C:/workspace/i18n/fr.json')
     })
   })

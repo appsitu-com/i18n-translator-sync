@@ -76,12 +76,6 @@ const defaultProjectConfig: TranslateProjectConfig = {
   engineOverrides: {}
 };
 
-// Mock for MateCat module
-vi.mock('../../src/matecate', () => ({
-  pushCacheToMateCat: vi.fn(),
-  pullReviewedFromMateCat: vi.fn()
-}));
-
 describe('TranslatorManager', () => {
   let fileSystem: FileSystem;
   let logger: Logger;
@@ -101,14 +95,6 @@ describe('TranslatorManager', () => {
 
     // Setup mock workspace watcher
     vi.mocked(workspaceWatcher.createFileSystemWatcher).mockReturnValue(mockFileWatcher);
-
-    // Setup mock import
-    vi.mock('../../src/matecate', async () => {
-      return {
-        pushCacheToMateCat: vi.fn(),
-        pullReviewedFromMateCat: vi.fn()
-      };
-    });
 
     translatorManager = new TranslatorManager(
       fileSystem,

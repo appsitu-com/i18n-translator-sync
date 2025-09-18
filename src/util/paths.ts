@@ -115,7 +115,8 @@ export function createTargetUri(
   sourceLocale: string,
   targetLocale: string,
   rel: string,
-  config: TranslateProjectConfig
+  config: TranslateProjectConfig,
+  sourcePath: string
 ): vscode.Uri {
   if (!ws || !ws.uri) {
     throw new Error(`Invalid or missing workspace folder`);
@@ -126,13 +127,12 @@ export function createTargetUri(
     throw new Error(`Target locale "${targetLocale}" is the same as source locale "${sourceLocale}". This would overwrite source files.`);
   }
 
-  // Determine the source path pattern
-  const sourcePath = config.sourcePaths.find(sp => containsLocale(sp, sourceLocale));
-
-  // Default target path (legacy behavior)
-  if (!sourcePath) {
-    // If no specific pattern is found, use the default i18n/{locale} structure
-    return vscode.Uri.joinPath(ws.uri, 'i18n', targetLocale, rel);
+  // Check if source path contains the locale
+  if (!containsLocale(sourcePath, sourceLocale)) {
+    // If source path doesn't contain locale, fall back to default i18n/{locale} structure
+    const basePath = getTargetBasePath(ws.uri.fsPath, config);
+    const fullPath = path.join(basePath, 'i18n', targetLocale, rel);
+    return vscode.Uri.file(fullPath);
   }
 
   // Replace source locale with target locale in the path
@@ -143,18 +143,21 @@ export function createTargetUri(
     throw new Error(`Target path "${targetPath}" is the same as source path "${sourcePath}". This would overwrite source files.`);
   }
 
-  // Also check any non-matching paths for problems - they should contain a locale to be valid
-  if (!containsLocale(sourcePath, sourceLocale)) {
-    throw new Error(`Source path "${sourcePath}" doesn't contain the source locale "${sourceLocale}". Unable to determine proper target path.`);
-  }
-
   // Determine base path for target
   const basePath = getTargetBasePath(ws.uri.fsPath, config);
 
-  // Join the base path with the modified target path and relative path
-  const fullPath = path.join(basePath, targetPath, rel);
+  // Check if the source path is a file (has extension)
+  const isSourcePathFile = path.extname(sourcePath) !== '';
 
-  return vscode.Uri.file(fullPath);
+  if (isSourcePathFile) {
+    // For file source paths, the target path already includes the filename
+    const fullPath = path.join(basePath, targetPath);
+    return vscode.Uri.file(fullPath);
+  } else {
+    // For directory source paths, append the relative path
+    const fullPath = path.join(basePath, targetPath, rel);
+    return vscode.Uri.file(fullPath);
+  }
 }
 
 /**

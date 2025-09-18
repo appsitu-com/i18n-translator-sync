@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { pushCacheToMateCat, pullReviewedFromMateCat } from '../src/matecate'
-import { workspace } from './mocks/vscode'
+import { MateCatService, MateCatSettings } from '../src/core/matecat'
+import { ConsoleLogger } from '../src/core/util/logger'
 import * as path from 'path'
 
 // Create mock modules before importing
@@ -19,23 +19,22 @@ class FakeCache {
   importCSV = vi.fn(async (_p: string) => 2)
 }
 
-describe('matecat', () => {
+describe('MateCatService', () => {
   const originalFetch = globalThis.fetch as any
+  let mateCatService: MateCatService
+  let logger: ConsoleLogger
+  let settings: MateCatSettings
 
   beforeEach(() => {
-    ;(workspace.getConfiguration as any).mockReturnValue({
-      get: (k: string, d: any) => {
-        const m: any = {
-          matecat: {
-            pushUrl: 'https://example.test/api/projects/{projectId}/files',
-            pullUrl: 'https://example.test/api/projects/{projectId}/files/reviewed',
-            apiKey: 'TESTKEY',
-            projectId: 'P1'
-          }
-        }
-        return m[k] ?? d
-      }
-    })
+    logger = new ConsoleLogger()
+    mateCatService = new MateCatService(logger)
+
+    settings = {
+      pushUrl: 'https://example.test/api/projects/{projectId}/files',
+      pullUrl: 'https://example.test/api/projects/{projectId}/files/reviewed',
+      apiKey: 'TESTKEY',
+      projectId: 'P1'
+    }
   })
 
   it('pushCacheToMateCat posts multipart and reports success', async () => {
@@ -49,7 +48,7 @@ describe('matecat', () => {
       }
     })
 
-    await expect(pushCacheToMateCat(cache as any)).resolves.toBeUndefined()
+    await expect(mateCatService.pushCacheToMateCat(cache as any, settings)).resolves.toBeUndefined()
     expect(fetch).toHaveBeenCalledOnce()
   })
 
@@ -64,7 +63,7 @@ describe('matecat', () => {
       }
     })
 
-    const n = await pullReviewedFromMateCat(cache as any)
+    const n = await mateCatService.pullReviewedFromMateCat(cache as any, settings)
     expect(n).toBe(2)
     expect(cache.importCSV).toHaveBeenCalledOnce()
     // restore

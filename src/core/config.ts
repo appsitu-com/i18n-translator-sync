@@ -108,6 +108,9 @@ export async function loadProjectConfig(
   const configPath = path.join(rootPath, '.translate.json')
   let projectConfig: Partial<TranslateProjectConfig> = {}
 
+  // Log the configuration file path being checked
+  logger.info(`Checking for configuration file: ${configPath}`)
+
   try {
     // Check if config file exists before attempting to read it
     const configExists = fileSystem
@@ -115,6 +118,8 @@ export async function loadProjectConfig(
       : fs.existsSync(configPath)
 
     if (configExists) {
+      logger.info(`Loading configuration from: ${configPath}`)
+
       // Read the config file
       const configContent = fileSystem
         ? await fileSystem.readFile(fileSystem.createUri(configPath))

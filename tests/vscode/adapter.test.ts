@@ -111,8 +111,15 @@ describe('VSCodeTranslatorAdapter', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Create adapter instance
-    adapter = new VSCodeTranslatorAdapter();
+    // Create a mock output channel
+    const mockOutputChannel = {
+      appendLine: vi.fn(),
+      show: vi.fn(),
+      dispose: vi.fn()
+    } as any;
+
+    // Create adapter instance with mock output channel
+    adapter = new VSCodeTranslatorAdapter(mockOutputChannel);
 
     // Mock startWithContext method for testing
     adapter.startWithContext = vi.fn().mockImplementation(async () => {

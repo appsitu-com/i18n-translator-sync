@@ -17,9 +17,8 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   private vsCodeFileSystem: VSCodeFileSystem;
   private vsCodeConfigProvider: VsCodeConfigProvider;
 
-  constructor() {
-    // Create platform-specific components
-    const outputChannel = vscode.window.createOutputChannel('i18n Translator');
+  constructor(outputChannel: vscode.OutputChannel) {
+    // Create platform-specific components using the provided output channel
     const logger = new VSCodeLogger(outputChannel);
     const fileSystem = new VSCodeFileSystem();
     const configProvider = new VsCodeConfigProvider();
@@ -62,6 +61,9 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * VSCode-specific initialization
    */
   async initializeVSCode(): Promise<void> {
+    // Load configuration from .translate.json
+    await this.vsCodeConfigProvider.load();
+
     // Initialize environment
     await initTranslatorEnv(
       this.workspacePath,
