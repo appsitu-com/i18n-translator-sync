@@ -16,8 +16,8 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     private cache: TranslationCache
   ) {}
 
-  /**
-   * Translate text segments using the specified engine
+    /**
+   * Translate segments using actual translation service
    */
   async translateSegments(
     segments: string[],
@@ -29,6 +29,11 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     _sourceFile: string,
     _isBackTranslation: boolean
   ): Promise<string[]> {
+    // If using copy engine, just return original segments
+    if (engineName === 'copy') {
+      return segments.slice()
+    }
+
     // Get engine configuration
     const apiConfig = this.getEngineConfig(engineName, configProvider)
 
