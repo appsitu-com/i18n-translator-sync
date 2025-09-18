@@ -184,6 +184,7 @@
     "cli": "yarn build && node ./dist/cli/index.js test-project",
     "cli:force": "yarn build && node ./dist/cli/index.js test-project --force",
     "cli:debug": "yarn build && node --inspect ./dist/cli/index.js test-project",
+    "cli:clean": "cd test-project && find i18n -maxdepth 1 \\( -name '*.json' ! -name 'en.json' \\) -o \\( -type d ! -name 'en' ! -name 'i18n' \\) | xargs rm -rf",
     "test": "vitest run",
     "test:watch": "vitest",
     "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
