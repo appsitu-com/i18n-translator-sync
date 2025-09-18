@@ -1,9 +1,9 @@
 import * as path from 'path'
 import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest'
-import { TranslatorPipeline } from '../src/core/pipeline'
-import { MockTranslationExecutor } from '../src/core/mockTranslationExecutor'
-import { TranslateProjectConfig } from '../src/core/config'
-import { registerAllTranslators } from '../src/translators'
+import { TranslatorPipeline } from '../../src/core/pipeline'
+import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
+import { TranslateProjectConfig } from '../../src/core/config'
+import { registerAllTranslators } from '../../src/translators'
 
 describe('TranslatorPipeline', () => {
   let pipeline: TranslatorPipeline

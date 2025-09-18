@@ -176,13 +176,7 @@ describe('File Watcher Integration Tests', () => {
     await translatorManager.startWatching(config);
 
     // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    // Start watching
-    await translatorManager.startWatching(config);
-
-    // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 400));
 
     // Clear any initial calls from existing files being processed
     onAddOrChangeSpy.mockClear();
@@ -219,7 +213,7 @@ describe('File Watcher Integration Tests', () => {
     await translatorManager.startWatching(config);
 
     // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 400));
 
     // Clear any initial calls from existing files being processed
     onAddOrChangeSpy.mockClear();
@@ -258,7 +252,7 @@ describe('File Watcher Integration Tests', () => {
     await translatorManager.startWatching(config);
 
     // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 400));
 
     // Clear any initial calls
     onDeleteSpy.mockClear();

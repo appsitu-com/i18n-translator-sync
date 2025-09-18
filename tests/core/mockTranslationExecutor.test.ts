@@ -1,15 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { MockTranslationExecutor } from '../src/core/mockTranslationExecutor'
-import { TranslatorPipeline } from '../src/core/pipeline'
-import { TranslatorManager } from '../src/core/translatorManager'
-import { enhancedFileSystemMock } from './mocks/filesystem'
-import { Logger } from '../src/core/util/logger'
-import { TranslationCache } from '../src/core/cache/sqlite'
-import { TranslateProjectConfig, ConfigProvider } from '../src/core/config'
+import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
+import { TranslatorPipeline } from '../../src/core/pipeline'
+import { TranslatorManager } from '../../src/core/translatorManager'
+import { enhancedFileSystemMock } from '../mocks/filesystem'
+import { Logger } from '../../src/core/util/logger'
+import { TranslationCache } from '../../src/core/cache/sqlite'
+import { TranslateProjectConfig, ConfigProvider } from '../../src/core/config'
 
 // Mock dependencies
-vi.mock('../src/core/cache/sqlite')
-vi.mock('../src/core/util/watcher')
+vi.mock('../../src/core/cache/sqlite')
+vi.mock('../../src/core/util/watcher')
 
 describe('MockTranslationExecutor - Dry Run Functionality', () => {
   let mockExecutor: MockTranslationExecutor
