@@ -2,14 +2,106 @@
   "name": "i18n-translator-vscode",
   "description": "Extension for translating Markdown and JSON files using AI translation services",
   "displayName": "i18n Translator",
-  "publisher": "your-publisher",
-  "version": "0.1.2",
+  "publisher": "appsitu.com",
+  "preview": true,
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.103.0"
   },
+  "keywords": [
+    "i18n",
+    "translation",
+    "localization",
+    "azure",
+    "google",
+    "deepl",
+    "gemini",
+    "markdown",
+    "json"
+  ],
+  "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tohagan/vscode-i18n-translator-ext.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tohagan/vscode-i18n-translator-ext/issues"
+  },
+  "author": {
+    "name": "Tony O'Hagan"
+  },
+  "license": "MIT",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#0078d4",
+    "theme": "dark"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "Formatters"
+  ],
   "main": "./dist/extension.js",
   "bin": {
     "i18n-translator": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p ./",
+    "watch": "tsc -w -p ./",
+    "build:cli": "tsc -p ./",
+    "cli": "yarn build && node ./dist/cli/index.js test-project",
+    "cli:force": "yarn build && node ./dist/cli/index.js test-project --force",
+    "cli:debug": "yarn build && node --inspect ./dist/cli/index.js test-project",
+    "cli:clean": "cd test-project && find i18n -maxdepth 1 \\( -name '*.json' ! -name 'en.json' \\) -o \\( -type d ! -name 'en' ! -name 'i18n' \\) | xargs rm -rf",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
+    "rebuild:sqlite:electron": "node ./scripts/rebuild-sqlite.js --electron",
+    "rebuild:sqlite:electron:quick": "node ./scripts/rebuild-sqlite.js --electron --skip-if-unchanged",
+    "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
+    "pretest": "npm run rebuild:sqlite",
+    "vscode:prepublish": "npm run rebuild:sqlite:electron && npm run build",
+    "package": "node scripts/package-extension.js",
+    "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
+    "package:quick": "npx @vscode/vsce package",
+    "test:cov": "vitest run --coverage",
+    "version:update": "node scripts/update-version.js",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "vsce": {
+    "dependencies": [
+      "better-sqlite3"
+    ]
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^24.3.1",
+    "@types/vscode": "^1.103.0",
+    "@typescript-eslint/eslint-plugin": "^8.44.0",
+    "@typescript-eslint/parser": "^8.44.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "electron-rebuild": "^3.2.9",
+    "eslint": "^9.35.0",
+    "eslint-plugin-unused-imports": "^4.2.0",
+    "sharp": "^0.34.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "chokidar": "^4.0.3",
+    "commander": "^14.0.1",
+    "dotenv": "^17.2.1",
+    "js-yaml": "^4.1.0",
+    "minimatch": "^10.0.3",
+    "remark": "^15.0.1",
+    "remark-frontmatter": "^5.0.0",
+    "remark-mdx": "^3.1.1",
+    "remark-stringify": "^11.0.0",
+    "unist-util-visit": "^5.0.0",
+    "zod": "^4.1.5"
   },
   "contributes": {
     "commands": [
@@ -176,97 +268,5 @@
         }
       }
     }
-  },
-  "scripts": {
-    "build": "tsc -p ./",
-    "watch": "tsc -w -p ./",
-    "build:cli": "tsc -p ./",
-    "cli": "yarn build && node ./dist/cli/index.js test-project",
-    "cli:force": "yarn build && node ./dist/cli/index.js test-project --force",
-    "cli:debug": "yarn build && node --inspect ./dist/cli/index.js test-project",
-    "cli:clean": "cd test-project && find i18n -maxdepth 1 \\( -name '*.json' ! -name 'en.json' \\) -o \\( -type d ! -name 'en' ! -name 'i18n' \\) | xargs rm -rf",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
-    "rebuild:sqlite:electron": "node ./scripts/rebuild-sqlite.js --electron",
-    "rebuild:sqlite:electron:quick": "node ./scripts/rebuild-sqlite.js --electron --skip-if-unchanged",
-    "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
-    "pretest": "npm run rebuild:sqlite",
-    "vscode:prepublish": "npm run rebuild:sqlite:electron && npm run build",
-    "package": "node scripts/package-extension.js",
-    "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
-    "package:quick": "npx @vscode/vsce package",
-    "test:cov": "vitest run --coverage",
-    "version:update": "node scripts/update-version.js",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix"
-  },
-  "vsce": {
-    "dependencies": [
-      "better-sqlite3"
-    ]
-  },
-  "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/js-yaml": "^4.0.9",
-    "@types/node": "^24.3.1",
-    "@types/vscode": "^1.103.0",
-    "@typescript-eslint/eslint-plugin": "^8.44.0",
-    "@typescript-eslint/parser": "^8.44.0",
-    "@vitest/coverage-v8": "^3.2.4",
-    "electron-rebuild": "^3.2.9",
-    "eslint": "^9.35.0",
-    "eslint-plugin-unused-imports": "^4.2.0",
-    "sharp": "^0.34.3",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
-  },
-  "dependencies": {
-    "better-sqlite3": "^12.2.0",
-    "chokidar": "^4.0.3",
-    "commander": "^14.0.1",
-    "dotenv": "^17.2.1",
-    "js-yaml": "^4.1.0",
-    "minimatch": "^10.0.3",
-    "remark": "^15.0.1",
-    "remark-frontmatter": "^5.0.0",
-    "remark-mdx": "^3.1.1",
-    "remark-stringify": "^11.0.0",
-    "unist-util-visit": "^5.0.0",
-    "zod": "^4.1.5"
-  },
-  "keywords": [
-    "i18n",
-    "translation",
-    "localization",
-    "azure",
-    "google",
-    "deepl",
-    "gemini",
-    "markdown",
-    "json"
-  ],
-  "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/tohagan/vscode-i18n-translator-ext.git"
-  },
-  "bugs": {
-    "url": "https://github.com/tohagan/vscode-i18n-translator-ext/issues"
-  },
-  "author": {
-    "name": "Tony O'Hagan"
-  },
-  "license": "MIT",
-  "icon": "images/icon.png",
-  "galleryBanner": {
-    "color": "#0078d4",
-    "theme": "dark"
-  },
-  "categories": [
-    "Other",
-    "Machine Learning",
-    "Formatters"
-  ],
-  "preview": true
+  }
 }
