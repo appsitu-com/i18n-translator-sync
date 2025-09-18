@@ -24,7 +24,7 @@
       "label": "yarn: prepare-debug",
       "type": "shell",
       "command": "yarn",
-      "args": ["rebuild:sqlite:electron:quick"],
+      "args": ["rebuild:sqlite:electron"],
       "dependsOn": ["yarn: build"],
       "presentation": {
         "reveal": "silent",
