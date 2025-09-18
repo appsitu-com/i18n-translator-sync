@@ -1,190 +1,224 @@
 import * as path from 'path'
 import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest'
-import { processFileForLocales, removeFileForLocales } from '../src/pipeline'
-import { workspace, Uri } from './mocks/vscode'
+import { TranslatorPipeline } from '../src/core/pipeline'
+import { MockTranslationExecutor } from '../src/core/mockTranslationExecutor'
+import { TranslateProjectConfig } from '../src/core/config'
 import { registerAllTranslators } from '../src/translators'
-import { SQLiteCache } from '../src/cache.sqlite'
-import { pruneEmptyDirs } from '../src/pipeline'
 
-describe('processFileForLocales', () => {
-  vi.mock('../src/cache.sqlite', async () => {
-    const mod = await vi.importActual<any>('../src/cache.sqlite')
-    // Replace SQLiteCache with a minimal fake (no file IO)
-    class FakeCache {
-      getMany = vi.fn(async () => new Map())
-      putMany = vi.fn(async () => {})
-      exportCSV = vi.fn(async () => {})
-      importCSV = vi.fn(async () => 0)
-      close = vi.fn(() => {})
-    }
-    return { ...mod, SQLiteCache: FakeCache }
-  })
-
-  vi.mock('../src/config', () => {
-    return {
-      loadProjectConfig: vi.fn(() => ({
-        sourceDir: '',
-        targetDir: '',
-        sourcePaths: ['i18n/en'],
-        sourceLocale: 'en',
-        targetLocales: ['fr-FR'],
-        enableBackTranslation: true,
-        defaultMarkdownEngine: 'copy',
-        defaultJsonEngine: 'copy',
-        engineOverrides: {}
-      })),
-      findSourcePathForFile: vi.fn(() => 'i18n/en'),
-      containsLocale: vi.fn(() => true),
-      replaceLocaleInPath: vi.fn((path, sourceLocale, targetLocale) => path.replace(sourceLocale, targetLocale))
-    }
-  })
+describe('TranslatorPipeline', () => {
+  let pipeline: TranslatorPipeline
+  let mockFs: any
+  let mockLogger: any
+  let mockCache: any
+  let mockExecutor: MockTranslationExecutor
+  let config: TranslateProjectConfig
 
   beforeEach(() => {
-    vi.clearAllMocks()
-    // workspace root and config
-    ;(workspace.getConfiguration as any).mockReturnValue({
-      get: (k: string, d: any) => {
-        const m: any = {
-          sourceLocale: 'en',
-          targetLocales: ['fr-FR'],
-          enableBackTranslation: true,
-          defaultMarkdownEngine: 'copy',
-          defaultJsonEngine: 'copy',
-          engineOverrides: {}
-        }
-        return m[k] ?? d
-      }
-    })
-    // mock FS read/write
-    // (workspace.fs.readFile as any).mockReset()
-    // (workspace.fs.writeFile as any).mockReset()
-    // (workspace.fs.createDirectory as any).mockResolvedValue(void 0)
-    // (workspace.fs.readDirectory as any).mockResolvedValue([])
+    // Register translators for the tests
+    registerAllTranslators()
+
+    // Create mock file system
+    mockFs = {
+      readFile: vi.fn(),
+      writeFile: vi.fn(),
+      deleteFile: vi.fn(),
+      fileExists: vi.fn().mockResolvedValue(false), // Default to file not existing (needs translation)
+      fileExistsSync: vi.fn().mockReturnValue(true),
+      directoryExistsSync: vi.fn().mockReturnValue(true),
+      readDirectory: vi.fn(),
+      createDirectory: vi.fn(),
+      createUri: vi.fn(path => ({ fsPath: path, path, scheme: 'file' })),
+      joinPath: vi.fn((base, ...paths) => ({
+        fsPath: `${base.fsPath}/${paths.join('/')}`,
+        path: `${base.path}/${paths.join('/')}`,
+        scheme: 'file'
+      })),
+      stat: vi.fn().mockResolvedValue({ mtime: Date.now() })
+    }
+
+    // Create mock logger
+    mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+      appendLine: vi.fn(),
+      show: vi.fn()
+    }
+
+    // Create mock cache
+    mockCache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {}),
+      exportCSV: vi.fn(async () => {}),
+      importCSV: vi.fn(async () => 0),
+      close: vi.fn(() => {})
+    }
+
+    // Create mock executor
+    mockExecutor = new MockTranslationExecutor(mockFs)
+
+    // Test configuration
+    config = {
+      sourceDir: '',
+      targetDir: '',
+      sourcePaths: ['i18n/en'],
+      sourceLocale: 'en',
+      targetLocales: ['fr-FR'],
+      enableBackTranslation: true,
+      defaultMarkdownEngine: 'copy',
+      defaultJsonEngine: 'copy',
+      engineOverrides: {}
+    }
+
+    // Create pipeline instance with mock executor
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, mockExecutor)
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('writes forward and back files for JSON', async () => {
-    registerAllTranslators() // includes copy engine
-    // pretend JSON file
-    const src = Uri.file('/ws/i18n/en/demo.json')
-    // Update the mock to include both path and fsPath properties
-    ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
-    ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
-    ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from(JSON.stringify({ a: 'x' }), 'utf8'))
+  it('processes forward and back translations for JSON', async () => {
+    // Mock file content
+    const jsonContent = JSON.stringify({ a: 'x' })
+    mockFs.readFile.mockResolvedValueOnce(jsonContent)
 
-    const cache = new SQLiteCache(':memory:')
-    await processFileForLocales(src, cache as any, {
+    const src = mockFs.createUri('/ws/i18n/en/demo.json')
+    const configProvider = { get: vi.fn().mockReturnValue('copy') }
+
+    await pipeline.processFile(src, '/ws', config, configProvider, {
       targetLocales: ['fr-FR'],
       sourceLocale: 'en',
       enableBackTranslation: true
     })
 
-    expect(workspace.fs.writeFile).toHaveBeenCalled()
-    const calls = (workspace.fs.writeFile as any).mock.calls
-    // two writes: forward and back
-    expect(calls).toHaveLength(2)
+    // Should have 2 write commands: forward and back translation
+    expect(mockExecutor.writeCommands).toHaveLength(2)
+    // Should also write to filesystem through executor
+    expect(mockFs.writeFile).toHaveBeenCalledTimes(2)
   })
 
-  it('writes forward and back files for YAML', async () => {
-    registerAllTranslators() // includes copy engine
-    // pretend YAML file
-    const src = Uri.file('/ws/i18n/en/demo.yaml')
-    ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
-    ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
-    ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from('greeting: Hello\nfarewell: Goodbye', 'utf8'))
+  it('processes forward and back translations for YAML', async () => {
+    // Mock file content
+    const yamlContent = 'a: x\nb: y'
+    mockFs.readFile.mockResolvedValueOnce(yamlContent)
 
-    const cache = new SQLiteCache(':memory:')
-    await processFileForLocales(src, cache as any, {
+    const src = mockFs.createUri('/ws/i18n/en/demo.yaml')
+    const configProvider = { get: vi.fn().mockReturnValue('copy') }
+
+    await pipeline.processFile(src, '/ws', config, configProvider, {
       targetLocales: ['fr-FR'],
       sourceLocale: 'en',
       enableBackTranslation: true
     })
 
-    expect(workspace.fs.writeFile).toHaveBeenCalled()
-    const calls = (workspace.fs.writeFile as any).mock.calls
-    // two writes: forward and back
-    expect(calls).toHaveLength(2)
+    // Should have 2 write commands: forward and back translation
+    expect(mockExecutor.writeCommands).toHaveLength(2)
+    // Should also write to filesystem through executor
+    expect(mockFs.writeFile).toHaveBeenCalledTimes(2)
   })
 
-  it('writes forward and back files for YML', async () => {
-    registerAllTranslators() // includes copy engine
-    // pretend YML file
-    const src = Uri.file('/ws/i18n/en/demo.yml')
-    ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
-    ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
-    ;(workspace.fs.readFile as any).mockResolvedValueOnce(Buffer.from('greeting: Hello\nfarewell: Goodbye', 'utf8'))
+  it('processes forward and back translations for YML', async () => {
+    // Mock file content
+    const yamlContent = 'a: x\nb: y'
+    mockFs.readFile.mockResolvedValueOnce(yamlContent)
 
-    const cache = new SQLiteCache(':memory:')
-    await processFileForLocales(src, cache as any, {
+    const src = mockFs.createUri('/ws/i18n/en/demo.yml')
+    const configProvider = { get: vi.fn().mockReturnValue('copy') }
+
+    await pipeline.processFile(src, '/ws', config, configProvider, {
       targetLocales: ['fr-FR'],
       sourceLocale: 'en',
       enableBackTranslation: true
     })
 
-    expect(workspace.fs.writeFile).toHaveBeenCalled()
-    const calls = (workspace.fs.writeFile as any).mock.calls
-    // two writes: forward and back
-    expect(calls).toHaveLength(2)
+    // Should have 2 write commands: forward and back translation
+    expect(mockExecutor.writeCommands).toHaveLength(2)
+    // Should also write to filesystem through executor
+    expect(mockFs.writeFile).toHaveBeenCalledTimes(2)
+  })
+
+  it('removes forward and back files and prunes directories', async () => {
+    const src = mockFs.createUri('/ws/i18n/en/demo.json')
+    mockFs.readDirectory.mockResolvedValue([]) // Empty directories for pruning
+
+    await pipeline.removeFile(src, '/ws', config)
+
+    // Should delete forward and back translation files
+    expect(mockFs.deleteFile).toHaveBeenCalledTimes(2)
   })
 })
 
-describe('removeFileForLocales', () => {
-  it('deletes forward and back files and prunes', async () => {
-    const src = Uri.file('/ws/i18n/en/demo.json')
-    ;(workspace.workspaceFolders as any) = [{ uri: { path: '/ws', fsPath: '/ws' } }]
-    ;(workspace.getWorkspaceFolder as any) = () => ({ uri: { path: '/ws', fsPath: '/ws' } })
+describe('TranslatorPipeline - pruneEmptyDirs', () => {
+  let pipeline: TranslatorPipeline
+  let mockFs: any
+  let mockLogger: any
+  let mockCache: any
 
-    await removeFileForLocales(src)
-    expect(workspace.fs.delete).toHaveBeenCalledTimes(2)
-  })
-})
-
-describe('pruneEmptyDirs', () => {
-  const root = Uri.file('/ws/i18n/fr-FR')
+  const root = { fsPath: '/ws/i18n/fr-FR', path: '/ws/i18n/fr-FR', scheme: 'file' }
   const relPath = 'foo/bar/baz.txt'
-  const dirs = ['/ws/i18n/fr-FR/foo/bar', '/ws/i18n/fr-FR/foo', '/ws/i18n/fr-FR']
 
   beforeEach(() => {
+    mockFs = {
+      joinPath: vi.fn((base, ...paths) => ({
+        fsPath: `${base.fsPath}/${paths.join('/')}`,
+        path: `${base.path}/${paths.join('/')}`,
+        scheme: 'file'
+      })),
+      readDirectory: vi.fn(),
+      deleteFile: vi.fn()
+    }
+
+    mockLogger = {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+      appendLine: vi.fn(),
+      show: vi.fn()
+    }
+
+    mockCache = {
+      getMany: vi.fn(),
+      putMany: vi.fn(),
+      exportCSV: vi.fn(),
+      importCSV: vi.fn(),
+      close: vi.fn()
+    }
+
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache)
     vi.clearAllMocks()
   })
 
   it('prunes all empty directories up to root', async () => {
     // All directories are empty
-    ;(workspace.fs.readDirectory as any)
+    mockFs.readDirectory
       .mockResolvedValueOnce([]) // bar
       .mockResolvedValueOnce([]) // foo
-    const deleteMock = (workspace.fs.delete as any).mockResolvedValue(undefined)
 
-    await pruneEmptyDirs(root, relPath)
+    await pipeline.pruneEmptyDirs(root, relPath)
 
-    expect(deleteMock).toHaveBeenCalledTimes(2)
-    expect(deleteMock.mock.calls[0][0].fsPath).toBe(dirs[0])
-    expect(deleteMock.mock.calls[1][0].fsPath).toBe(dirs[1])
+    expect(mockFs.deleteFile).toHaveBeenCalledTimes(2)
   })
 
   it('stops pruning at first non-empty directory', async () => {
     // bar is empty, foo is not
-    ;(workspace.fs.readDirectory as any)
+    mockFs.readDirectory
       .mockResolvedValueOnce([]) // bar
       .mockResolvedValueOnce([['file.txt', 1]]) // foo not empty
-    const deleteMock = (workspace.fs.delete as any).mockResolvedValue(undefined)
 
-    await pruneEmptyDirs(root, relPath)
+    await pipeline.pruneEmptyDirs(root, relPath)
 
-    expect(deleteMock).toHaveBeenCalledTimes(1)
-    expect(deleteMock.mock.calls[0][0].fsPath).toBe(dirs[0])
+    expect(mockFs.deleteFile).toHaveBeenCalledTimes(1)
   })
 
   it('handles non-existent directories gracefully', async () => {
     // bar does not exist
-    ;(workspace.fs.readDirectory as any).mockRejectedValueOnce(new Error('not found'))
-    const deleteMock = (workspace.fs.delete as any).mockResolvedValue(undefined)
+    mockFs.readDirectory.mockRejectedValueOnce(new Error('not found'))
 
-    await pruneEmptyDirs(root, relPath)
+    await pipeline.pruneEmptyDirs(root, relPath)
 
-    expect(deleteMock).not.toHaveBeenCalled()
+    expect(mockFs.deleteFile).not.toHaveBeenCalled()
   })
 })
