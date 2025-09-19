@@ -45,6 +45,9 @@
   "bin": {
     "i18n-translator": "./dist/cli/cliMain.js"
   },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "scripts": {
     "build": "tsc -p ./",
     "watch": "tsc -w -p ./",
@@ -134,9 +137,10 @@
       "title": "Markdown & JSON Translator",
       "properties": {
         "translator.autoStart": {
-          "type": "boolean",
-          "default": false,
-          "description": "Automatically start the translator when opening a workspace"
+          "type": "string",
+          "enum": ["true", "false", "ask"],
+          "default": "ask",
+          "description": "Automatically start the translator when opening a workspace ('ask' to prompt once)"
         },
         "translator.sourceLocale": {
           "type": "string",

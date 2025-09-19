@@ -73,15 +73,19 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
     // Update status bar to reflect running state
     updateStatusBar();
 
-    // When manually started, ask if user wants to enable auto-start
-    const response = await vscode.window.showInformationMessage(
-      'Do you want to automatically start the translator whenever you open this workspace?',
-      'Yes',
-      'No'
-    )
+    // When manually started, check if we need to ask about auto-start
+    const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask');
 
-    if (response === 'Yes') {
-      await vscode.workspace.getConfiguration('translator').update('autoStart', true, vscode.ConfigurationTarget.Workspace);
+    // Only prompt if the setting is still 'ask'
+    if (autoStartSetting === 'ask') {
+      const response = await vscode.window.showInformationMessage(
+        'Do you want to automatically start the translator whenever you open this workspace?',
+        'Yes',
+        'No'
+      );
+
+      const autoStart = response === 'Yes' ? 'true' : 'false';
+      await vscode.workspace.getConfiguration('translator').update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace);
     }
 
     // Also inform about API keys
@@ -302,8 +306,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   // Check if auto-start is enabled for this workspace
-  const autoStart = vscode.workspace.getConfiguration('translator').get<boolean>('autoStart', false);
-  if (autoStart) {
+  const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask');
+  if (autoStartSetting === 'true') {
     await onStartTranslator(context);
   }
 
