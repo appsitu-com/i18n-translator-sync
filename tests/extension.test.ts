@@ -428,6 +428,32 @@ describe('extension.ts', () => {
       // The function should be callable without throwing (it's async, so we need to await it)
       await expect(contextMenuCall![1]()).resolves.not.toThrow();
     })
+
+    it('should handle start-stop-start cycle without errors', async () => {
+      await extension.activate(ctx);
+
+      // Start translator for the first time
+      await extension.onStartTranslator(ctx);
+
+      // Stop translator
+      extension.stopTranslator();
+
+      // Try to start again - this should not throw the "manager not initialized" error
+      await expect(extension.onStartTranslator(ctx)).resolves.not.toThrow();
+    })
+
+    it('should handle restart-stop-restart cycle without errors', async () => {
+      await extension.activate(ctx);
+
+      // Restart translator for the first time
+      await extension.restartTranslator(ctx);
+
+      // Stop translator
+      extension.stopTranslator();
+
+      // Try to restart again - this should not throw the "manager not initialized" error
+      await expect(extension.restartTranslator(ctx)).resolves.not.toThrow();
+    })
   })
 
   describe('File Watching & Event Handling', () => {

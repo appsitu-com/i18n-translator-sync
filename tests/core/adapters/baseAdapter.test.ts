@@ -83,8 +83,8 @@ class TestTranslatorAdapter extends TranslatorAdapter {
   }
 
   // Expose protected methods for testing
-  public testGetCache(): SQLiteCache | undefined {
-    return this.getCache();
+  public async testGetCache(): Promise<SQLiteCache | undefined> {
+    return await this.getCache();
   }
 
   public testHandleFileOpen(path: string): Promise<void> {
@@ -196,8 +196,9 @@ describe('TranslatorAdapter', () => {
       expect(translatorManager?.startWatching).toHaveBeenCalledTimes(1); // Only called once
     });
 
-    it('should throw error if not initialized', async () => {
-      await expect(adapter.start()).rejects.toThrow('not initialized');
+    it('should auto-initialize on start if not initialized', async () => {
+      await expect(adapter.start()).resolves.toBeUndefined();
+      expect(adapter.isRunning()).toBe(true);
     });
   });
 
