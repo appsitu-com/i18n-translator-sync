@@ -1,6 +1,7 @@
 import { getTranslator } from './translators/registry'
 import type { TranslationCache } from './cache.sqlite'
 import { TranslatorApiConfig } from './translators/types'
+import { normalizeLocaleWithMap } from './util/localeNorm'
 
 export async function bulkTranslateWithEngine(
   texts: string[],
@@ -12,8 +13,9 @@ export async function bulkTranslateWithEngine(
   if (!texts.length) return []
 
   const engine = getTranslator(engineName)
-  const srcNorm = engine.normalizeLocale(opts.source)
-  const tgtNorm = engine.normalizeLocale(opts.target)
+  const langMap = opts.apiConfig.langMap || {}
+  const srcNorm = normalizeLocaleWithMap(opts.source, langMap)
+  const tgtNorm = normalizeLocaleWithMap(opts.target, langMap)
 
   const uniq: Array<{ t: string; c: string }> = []
   const seen = new Set<string>()

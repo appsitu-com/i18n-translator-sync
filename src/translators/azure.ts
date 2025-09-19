@@ -4,31 +4,8 @@ import { randomUUID } from 'crypto'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-const langMap: Record<string, string> = {
-  'zh-CN': 'zh-Hans',
-  'zh-Hans': 'zh-Hans',
-  'zh-TW': 'zh-Hant',
-  'zh-HK': 'zh-Hant',
-  'zh-Hant': 'zh-Hant',
-  'fr-ca': 'fr-ca',
-  'fr-CA': 'fr-ca',
-  'iu-Latn': 'iu-Latn',
-  mn: 'mn-Cyrl',
-  'mn-Cyrl': 'mn-Cyrl',
-  'mn-Mong': 'mn-Mong',
-  'pt-PT': 'pt-PT',
-  pt: 'pt-BR',
-  'pt-BR': 'pt-BR',
-  sr: 'sr-Cyrl',
-  'sr-Cyrl': 'sr-Cyrl',
-  'sr-Latn': 'sr-Latn'
-}
-
 export const AzureTranslator: Translator = {
   name: 'azure',
-  normalizeLocale(locale: string) {
-    return normalizeLocaleWithMap(locale, langMap)
-  },
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
     const endpoint =
@@ -41,6 +18,9 @@ export const AzureTranslator: Translator = {
     // const textType = (opts.apiConfig.textType as string | undefined) ?? 'plain'
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
     const retry = opts.apiConfig.retry
+
+    // Use langMap from config, fallback to no mapping if not provided
+    const langMap = opts.apiConfig.langMap || {}
 
     if (!key) throw new Error(`Azure Translator: missing 'key'`)
     if (!region) throw new Error(`Azure Translator: missing 'region'`)

@@ -17,6 +17,9 @@ This file provides guidance for LLM (Large Language Model) engines and AI agents
 - Tests are in the `tests/` directory and use Vitest.
 - Native modules must be rebuilt for the Electron version used by VS Code (see CONTRIBUTING.md for instructions).
 
+## Scripts
+- Use 'yarn' for running package.json scripts
+
 ## Coding Guidelines
 - TypeScript strict mode is enabled. Use strong typing and avoid `any` where possible.
 - Prefer small, composable modules and pure functions.

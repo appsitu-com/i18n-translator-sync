@@ -6,6 +6,9 @@ export interface TranslatorApiConfig {
   timeoutMs?: number
   retry?: RetryOptions
 
+  // Language mapping configuration
+  langMap?: Record<string, string>
+
   // engine: 'azure'
   region?: string
 
@@ -27,11 +30,15 @@ export interface TranslatorApiConfig {
   temperature?: number
   maxOutputTokens?: number
 
+  // engine: 'openrouter'
+  openrouterModel?: string
+  systemPrompt?: string
+
   // engine: 'mymemory'
   email?: string
 }
 
-export type TranslatorEngine = 'azure' | 'google' | 'deepl' | 'mymemory' | 'gemini' | 'copy'
+export type TranslatorEngine = 'azure' | 'google' | 'deepl' | 'mymemory' | 'gemini' | 'openrouter' | 'copy'
 
 export interface BulkTranslateOpts {
   sourceLocale: string
@@ -41,6 +48,5 @@ export interface BulkTranslateOpts {
 
 export interface Translator {
   readonly name: string
-  normalizeLocale(locale: string): string
   translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts): Promise<string[]>
 }

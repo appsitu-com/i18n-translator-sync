@@ -2,36 +2,8 @@ import type { Translator, BulkTranslateOpts } from './types'
 import { postJson } from '../util/http'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-const langMap: Record<string, string> = {
-  // English
-  en: 'EN', // generic EN
-  'en-US': 'EN-US',
-  'en-GB': 'EN-GB',
-
-  // Portuguese
-  pt: 'PT-PT', // fallback if no region
-  'pt-PT': 'PT-PT',
-  'pt-BR': 'PT-BR',
-
-  // Chinese simplified
-  zh: 'ZH-HANS', // fallback if no region
-  'zh-Hans': 'ZH-HANS',
-  'zh-CN': 'ZH-HANS',
-  'zh-SG': 'ZH-HANS',
-
-  // Chinese traditional
-  'zh-Hant': 'ZH-HANT',
-  'zh-TW': 'ZH-HANT',
-  'zh-HK': 'ZH-HANT',
-  'zh-MO': 'ZH-HANT'
-}
-
 export const DeepLTranslator: Translator = {
   name: 'deepl',
-
-  normalizeLocale(locale: string) {
-    return normalizeLocaleWithMap(locale, langMap)
-  },
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
     const authKey = opts.apiConfig.key as string
@@ -42,6 +14,9 @@ export const DeepLTranslator: Translator = {
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
     const formality = opts.apiConfig.formality as string | undefined
     const model_type = opts.apiConfig.deeplModel as string | undefined
+
+    // Use langMap from config, fallback to no mapping if not provided
+    const langMap = opts.apiConfig.langMap || {}
 
     if (!authKey) throw new Error(`DeepL: missing 'key'`)
     const headers = { Authorization: `DeepL-Auth-Key ${authKey}` }

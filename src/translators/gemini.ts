@@ -3,29 +3,8 @@ import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-// Language code mapping for Gemini
-// Gemini supports standard language codes but we'll normalize some variants
-const langMap: Record<string, string> = {
-  'zh-CN': 'zh',
-  'zh-Hans': 'zh',
-  'zh-TW': 'zh-TW',
-  'zh-HK': 'zh-TW',
-  'zh-Hant': 'zh-TW',
-  'fr-CA': 'fr',
-  'fr-FR': 'fr',
-  'pt-PT': 'pt',
-  'pt-BR': 'pt',
-  'en-US': 'en',
-  'en-GB': 'en',
-  'es-419': 'es',
-  'es-ES': 'es'
-}
-
 export const GeminiTranslator: Translator = {
   name: 'gemini',
-  normalizeLocale(locale: string) {
-    return normalizeLocaleWithMap(locale, langMap)
-  },
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
     const key = opts.apiConfig.key as string
@@ -37,6 +16,9 @@ export const GeminiTranslator: Translator = {
     const temperature = opts.apiConfig.temperature ?? 0.1
     const maxOutputTokens = opts.apiConfig.maxOutputTokens ?? 1024
     const retry = opts.apiConfig.retry
+
+    // Use langMap from config, fallback to no mapping if not provided
+    const langMap = opts.apiConfig.langMap || {}
 
     if (!key) throw new Error(`Gemini Translate: missing 'key'`)
 

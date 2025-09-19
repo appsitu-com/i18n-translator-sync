@@ -3,22 +3,6 @@ import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-const langMap: Record<string, string> = {
-  'zh-CN': 'zh-CN',
-  'zh-Hans': 'zh-CN',
-  'zh-TW': 'zh-TW',
-  'zh-HK': 'zh-TW',
-  'zh-Hant': 'zh-TW',
-  'fr-CA': 'fr-ca',
-  'fr-FR': 'fr-FR',
-  'ms-Arab': 'ms-Arab',
-  'mni-Mtei': 'mni-Mtei',
-  'pt-PT': 'pt-PT',
-  pt: 'pt-BR',
-  'pt-BR': 'pt-BR',
-  'pa-Arab': 'pa-Arab'
-}
-
 // function norm(locale: string): string {
 //   // Google v2 accepts BCP-47; preserve region if present but lowercase language
 //   const [lang, rest] = locale.split('-');
@@ -27,9 +11,6 @@ const langMap: Record<string, string> = {
 
 export const GoogleTranslator: Translator = {
   name: 'google',
-  normalizeLocale(locale: string) {
-    return normalizeLocaleWithMap(locale, langMap)
-  },
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
     const key = opts.apiConfig.key as string
@@ -38,6 +19,9 @@ export const GoogleTranslator: Translator = {
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
     const model = opts.apiConfig.googleModel as string | undefined // optional
     const retry = opts.apiConfig.retry
+
+    // Use langMap from config, fallback to no mapping if not provided
+    const langMap = opts.apiConfig.langMap || {}
 
     if (!key) throw new Error(`Google Translate: missing 'key'`)
 

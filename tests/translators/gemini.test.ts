@@ -24,13 +24,6 @@ describe('GeminiTranslator stub', () => {
     vi.restoreAllMocks()
   })
 
-  it('normalizes locale correctly', () => {
-    expect(GeminiTranslator.normalizeLocale('en-US')).toBe('en')
-    expect(GeminiTranslator.normalizeLocale('zh-CN')).toBe('zh')
-    expect(GeminiTranslator.normalizeLocale('fr-CA')).toBe('fr')
-    expect(GeminiTranslator.normalizeLocale('es-419')).toBe('es')
-  })
-
   it('translates text successfully', async () => {
     // Mock successful response
     const mockResponse = {

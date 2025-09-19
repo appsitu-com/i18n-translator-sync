@@ -15,32 +15,44 @@ export enum FileType {
 }
 
 export const window = {
+  showInformationMessage: vi.fn(),
   showWarningMessage: vi.fn(),
   showErrorMessage: vi.fn(),
-  showInformationMessage: vi.fn(),
-  createStatusBarItem: vi.fn().mockReturnValue({
+  createOutputChannel: vi.fn(() => ({
+    show: vi.fn(),
+    appendLine: vi.fn(),
+    dispose: vi.fn()
+  })),
+  createTextEditorDecorationType: vi.fn(),
+  showTextDocument: vi.fn(),
+  createStatusBarItem: vi.fn(() => ({
     text: '',
     tooltip: '',
     command: '',
     show: vi.fn(),
-    dispose: vi.fn()
-  }),
-  createOutputChannel: vi.fn().mockReturnValue({
-    appendLine: vi.fn((msg) => console.log(msg)), // Log to console during tests
-    append: vi.fn((msg) => process.stdout.write(msg)),
-    show: vi.fn(),
     hide: vi.fn(),
-    dispose: vi.fn(),
-    clear: vi.fn()
-  }),
-  createTextEditorDecorationType: vi.fn(),
-  showTextDocument: vi.fn()
+    dispose: vi.fn()
+  }))
 }
 
-import { enhancedFileSystemMock } from './filesystem';
+// Simple mock for workspace.fs - doesn't need to be a full FileSystem implementation
+const simpleFileSystemMock = {
+  readFile: vi.fn(),
+  writeFile: vi.fn(),
+  delete: vi.fn(),
+  stat: vi.fn(),
+  readDirectory: vi.fn(),
+  createDirectory: vi.fn(),
+  fileExistsSync: vi.fn().mockReturnValue(true),
+  directoryExistsSync: vi.fn().mockReturnValue(true),
+  createDirectorySync: vi.fn(),
+  readFileSync: vi.fn().mockReturnValue('{}'),
+  writeFileSync: vi.fn(),
+  deleteFileSync: vi.fn()
+};
 
 export const workspace = {
-  fs: enhancedFileSystemMock,
+  fs: simpleFileSystemMock,
   workspaceFolders: [{
     uri: { fsPath: '/test/workspace' },
     name: 'TestWorkspace',

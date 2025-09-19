@@ -8,5 +8,136 @@
   "engineOverrides": {
     "deepl": ["fr", "de"],
     "azure": ["es:en", "ja:en"]
+  },
+  "translator": {
+    "copy": {},
+    "google": {
+      "apiKey": "${GOOGLE_TRANSLATION_KEY}",
+      "endpoint": "${GOOGLE_TRANSLATION_URL}",
+      "langMap": {
+        "zh-CN": "zh-cn",
+        "zh-TW": "zh-tw",
+        "zh-Hans": "zh-cn",
+        "zh-Hant": "zh-tw"
+      }
+    },
+    "azure": {
+      "apiKey": "${AZURE_TRANSLATION_KEY}",
+      "region": "${AZURE_TRANSLATION_REGION}",
+      "endpoint": "${AZURE_TRANSLATION_URL}",
+      "langMap": {
+        "zh-CN": "zh-Hans",
+        "zh-Hans": "zh-Hans",
+        "zh-TW": "zh-Hant",
+        "zh-HK": "zh-Hant",
+        "zh-Hant": "zh-Hant",
+        "fr-ca": "fr-ca",
+        "fr-CA": "fr-ca",
+        "iu-Latn": "iu-Latn",
+        "mn": "mn-Cyrl",
+        "mn-Cyrl": "mn-Cyrl",
+        "mn-Mong": "mn-Mong",
+        "pt-PT": "pt-PT",
+        "pt": "pt-BR",
+        "pt-BR": "pt-BR",
+        "sr": "sr-Cyrl",
+        "sr-Cyrl": "sr-Cyrl",
+        "sr-Latn": "sr-Latn"
+      }
+    },
+    "deepl": {
+      "apiKey": "${DEEPL_TRANSLATION_KEY}",
+      "endpoint": "${DEEPL_TRANSLATION_URL}",
+      "langMap": {
+        "ar": "AR",
+        "bg": "BG",
+        "cs": "CS",
+        "da": "DA",
+        "de": "DE",
+        "el": "EL",
+        "en": "EN",
+        "es": "ES",
+        "et": "ET",
+        "fi": "FI",
+        "fr": "FR",
+        "hu": "HU",
+        "id": "ID",
+        "it": "IT",
+        "ja": "JA",
+        "ko": "KO",
+        "lt": "LT",
+        "lv": "LV",
+        "nb": "NB",
+        "nl": "NL",
+        "pl": "PL",
+        "pt": "PT",
+        "pt-BR": "PT-BR",
+        "pt-PT": "PT-PT",
+        "ro": "RO",
+        "ru": "RU",
+        "sk": "SK",
+        "sl": "SL",
+        "sv": "SV",
+        "tr": "TR",
+        "uk": "UK",
+        "zh": "ZH"
+      }
+    },
+    "gemini": {
+      "apiKey": "${GEMINI_API_KEY}",
+      "endpoint": "${GEMINI_API_URL}",
+      "langMap": {
+        "ar": "Arabic",
+        "zh-CN": "Chinese (Simplified)",
+        "zh-Hans": "Chinese (Simplified)",
+        "zh-TW": "Chinese (Traditional)",
+        "zh-Hant": "Chinese (Traditional)",
+        "fr": "French",
+        "de": "German",
+        "hi": "Hindi",
+        "it": "Italian",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "pt": "Portuguese",
+        "ru": "Russian",
+        "es": "Spanish"
+      }
+    },
+    "openrouter": {
+      "apiKey": "${OPENROUTER_API_KEY}",
+      "endpoint": "${OPENROUTER_API_URL}",
+      "langMap": {
+        "ar": "Arabic",
+        "da": "Danish",
+        "de": "German",
+        "en-GB": "English (UK)",
+        "en-US": "English",
+        "es-419": "Spanish (Latin America)",
+        "es-ES": "Spanish",
+        "fi": "Finnish",
+        "fr-CA": "French (Canada)",
+        "fr-FR": "French",
+        "hi-Latn-IN": "Hinglish",
+        "hi": "Hindi",
+        "it": "Italian",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "nl": "Dutch",
+        "no": "Norwegian",
+        "pl": "Polish",
+        "pt-BR": "Portuguese (Brazil)",
+        "pt-PT": "Portuguese (Portugal)",
+        "ru": "Russian",
+        "sv": "Swedish",
+        "th": "Thai",
+        "tr": "Turkish",
+        "vi": "Vietnamese",
+        "zh-CN": "Chinese (Simplified)",
+        "zh-Hans": "Chinese (Simplified)",
+        "zh-Hant": "Chinese (Traditional)",
+        "zh-HK": "Chinese (Traditional)",
+        "zh-TW": "Chinese (Traditional)"
+      }
+    }
   }
 }

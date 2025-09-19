@@ -3,8 +3,8 @@ import * as path from 'path'
 import { Logger } from './logger'
 import { FileSystem, nodeFileSystem } from './fs'
 
-// Default env vars
-const defaultEnvContent = `# Azure Translation API configuration
+// Fallback env content if sample file is not available
+const fallbackEnvContent = `# Azure Translation API configuration
 # Get API key from: https://learn.microsoft.com/azure/ai-services/translator/translator-how-to-signup
 AZURE_TRANSLATION_KEY='XXXXXXXXXXXXXXXXX'
 AZURE_TRANSLATION_REGION='westus'
@@ -20,13 +20,49 @@ GOOGLE_TRANSLATION_URL='https://translation.googleapis.com'
 DEEPL_TRANSLATION_KEY='XXXXXXXXXXXXXXXXXXXXX'
 DEEPL_TRANSLATION_URL='https://api-free.deepl.com'
 
+# OpenRouter API configuration
+# Get API key from: https://openrouter.ai/
+OPENROUTER_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
+OPENROUTER_API_URL='https://openrouter.ai/api/v1/chat/completions'
+
 # Gemini AI API configuration
 # Get API key from: https://ai.google.dev/tutorials/setup
 GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
+GEMINI_API_URL='https://generativelanguage.googleapis.com/v1beta'
 
 # You only need to configure keys for the translation services you plan to use
 # See the extension settings to select which service to use for which file type
 `
+
+/**
+ * Get the default env content from sample file or fallback
+ */
+async function getDefaultEnvContent(
+  logger: Logger,
+  fileSystem: FileSystem
+): Promise<string> {
+  try {
+    // Try to find the sample file in the extension directory
+    // This will work in development and when the sample file is packaged with the extension
+    const extensionRoot = path.join(__dirname, '..', '..', '..')
+    const sampleFilePath = path.join(extensionRoot, '.translator.env.sample')
+    const sampleFileUri = fileSystem.createUri(sampleFilePath)
+
+    logger.info(`Looking for sample file at: ${sampleFilePath}`)
+
+    if (await fileSystem.fileExists(sampleFileUri)) {
+      const content = await fileSystem.readFile(sampleFileUri)
+      logger.info('Using content from .translator.env.sample file')
+      return content
+    } else {
+      logger.info('Sample file not found, using fallback content')
+      return fallbackEnvContent
+    }
+  } catch (error) {
+    logger.warn(`Error reading sample file, using fallback content: ${error}`)
+    return fallbackEnvContent
+  }
+}
 
 /**
  * Get the appropriate FileSystem implementation
@@ -39,6 +75,13 @@ function getFileSystem(fs?: FileSystem): FileSystem {
 let isEnvInitialized = false
 
 /**
+ * Reset the initialization flag - used for testing
+ */
+export function resetEnvInitialization(): void {
+  isEnvInitialized = false
+}
+
+/**
  * Creates a default .translator.env file and adds it to .gitignore
  */
 async function createDefaultTranslatorEnvFile(
@@ -49,6 +92,9 @@ async function createDefaultTranslatorEnvFile(
   openDocument?: (path: string) => Promise<void>
 ): Promise<void> {
   logger.info('Creating default .translator.env file in workspace')
+
+  // Get the default content from sample file or fallback
+  const defaultEnvContent = await getDefaultEnvContent(logger, fileSystem)
 
   // Write the file
   await fileSystem.writeFile(fileSystem.createUri(translatorEnvFile), defaultEnvContent)
@@ -148,6 +194,9 @@ export function getEnv(name: string, logger: Logger): string {
       } else if (name.includes('DEEPL')) {
         serviceInfo = 'DeepL'
         docsUrl = 'https://www.deepl.com/pro-api'
+      } else if (name.includes('OPENROUTER')) {
+        serviceInfo = 'OpenRouter'
+        docsUrl = 'https://openrouter.ai/'
       } else if (name.includes('GEMINI')) {
         serviceInfo = 'Gemini AI'
         docsUrl = 'https://ai.google.dev/tutorials/setup'
