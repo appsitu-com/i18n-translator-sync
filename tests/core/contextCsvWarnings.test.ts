@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatItemList, generateContextCsvWarnings, type ContextCsvStats } from '../../../src/core/util/contextCsvWarnings'
+import { formatItemList, generateContextCsvWarnings, type ContextCsvStats } from '../../src/core/contextCsvWarnings'
 
 describe('contextCsvWarnings', () => {
   describe('formatItemList', () => {

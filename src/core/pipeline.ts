@@ -5,7 +5,7 @@ import { TranslationCache } from './cache/sqlite'
 import { extractForFile, jsonPathToString } from '../extractors/extractorRegistry'
 import { loadContextCsvForJson } from './contextCsv'
 import { pickEngine } from '../translators/registry'
-import { generateContextCsvWarnings } from './util/contextCsvWarnings'
+import { generateContextCsvWarnings } from './contextCsvWarnings'
 import { TranslateProjectConfig } from './coreConfig'
 import {
   getRelativePath,

@@ -1,6 +1,6 @@
 import * as path from 'path'
 import * as vscode from 'vscode'
-import { TranslateProjectConfig } from '../projectConfig'
+import { TranslateProjectConfig } from '../core/coreConfig'
 import { normalizePath, containsLocale, replaceLocaleInPath } from '../core/util/pathShared'
 
 // Re-export shared utilities for backward compatibility

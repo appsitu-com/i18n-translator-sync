@@ -14,7 +14,8 @@ import {
   createBackTranslationUri,
   verifyFilePath
 } from '../../src/util/translationPaths'
-import { TranslateProjectConfig } from '../../src/projectConfig'
+
+import { TranslateProjectConfig } from '../../src/core/coreConfig'
 
 // Helper function to create mock URIs
 function mockUri(filePath: string): vscode.Uri {

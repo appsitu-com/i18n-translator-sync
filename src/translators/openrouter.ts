@@ -1,6 +1,4 @@
 import type { Translator, BulkTranslateOpts } from './types'
-import { postJson } from '../util/http'
-import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
 // JSON Schema for enforcing structured output
@@ -27,11 +25,9 @@ export const OpenRouterTranslator: Translator = {
     const endpoint =
       (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') ||
       'https://openrouter.ai/api/v1/chat/completions'
-    const timeout = Number(opts.apiConfig.timeoutMs ?? 60000) // Longer timeout for LLM
     const model = opts.apiConfig.openrouterModel || 'anthropic/claude-3-haiku'
     const temperature = opts.apiConfig.temperature ?? 0.1
     const maxTokens = opts.apiConfig.maxOutputTokens ?? 2048
-    const retry = opts.apiConfig.retry
     const systemPrompt = opts.apiConfig.systemPrompt || 'You are a professional translator that provides accurate, contextually appropriate translations while preserving the original meaning and tone.'
 
     // Use langMap from config, fallback to no mapping if not provided
