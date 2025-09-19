@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { TranslatorEngine } from '../translators/types'
 import { FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
-import { formatZodError } from './util/configUtils'
+import { formatZodError } from './util/formatZodError'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
 
@@ -13,55 +13,21 @@ const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
 
 // Zod schema for validating .translator.json
 export const TranslateConfigSchema = z.object({
-  sourceDir: z.string()
-    .describe('Base directory for source paths (prepended to sourcePaths)')
-    .optional(),
-
-  targetDir: z.string()
-    .describe('Base directory for target paths (prepended to generated target paths)')
-    .optional(),
-
-  sourcePaths: z.array(z.string())
-    .describe('Source language paths to scan for files to translate')
-    .optional(),
-
-  sourceLocale: z.string()
-    .describe('Source locale (e.g., "en")')
-    .optional(),
-
-  targetLocales: z.array(z.string())
-    .describe('Target locales to generate translations for (e.g., ["fr", "es", "de"])')
-    .optional(),
-
-  enableBackTranslation: z.boolean()
-    .describe('Enable back translation')
-    .optional(),
-
-  defaultMarkdownEngine: translatorEngineEnum
-    .describe('Default engine for markdown files')
-    .optional(),
-
-  defaultJsonEngine: translatorEngineEnum
-    .describe('Default engine for JSON files')
-    .optional(),
-
-  engineOverrides: z.record(z.string(), z.array(z.string()))
+  sourceDir: z.string().describe('Base directory for source paths (prepended to sourcePaths)'),
+  targetDir: z.string().describe('Base directory for target paths (prepended to generated target paths)'),
+  sourcePaths: z.array(z.string()).describe('Source language paths to scan for files to translate'),
+  sourceLocale: z.string().describe('Source locale (e.g., "en")'),
+  targetLocales: z.array(z.string()).describe('Target locales to generate translations for (e.g., ["fr", "es", "de"])'),
+  enableBackTranslation: z.boolean().describe('Enable back translation'),
+  defaultMarkdownEngine: translatorEngineEnum.describe('Default engine for markdown files'),
+  defaultJsonEngine: translatorEngineEnum.describe('Default engine for JSON files'),
+  engineOverrides: z
+    .record(z.string(), z.array(z.string()))
     .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns')
-    .optional()
-});
+})
 
 // Infer the type from the schema - should match our interface
-export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema> & {
-  sourceDir: string
-  targetDir: string
-  sourcePaths: string[]
-  sourceLocale: string
-  targetLocales: string[]
-  enableBackTranslation: boolean
-  defaultMarkdownEngine: TranslatorEngine
-  defaultJsonEngine: TranslatorEngine
-  engineOverrides: Record<string, string[]>
-}
+export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema>
 
 // Interface for platform-specific configuration
 export interface ConfigProvider {
@@ -155,22 +121,34 @@ export async function loadProjectConfig(
     sourceDir: projectConfig.sourceDir || defaultConfig.sourceDir,
     targetDir: projectConfig.targetDir || defaultConfig.targetDir,
     sourcePaths: projectConfig.sourcePaths || defaultConfig.sourcePaths,
-    sourceLocale: projectConfig.sourceLocale || configProvider.get<string>('translator.sourceLocale', defaultConfig.sourceLocale),
-    targetLocales: projectConfig.targetLocales || configProvider.get<string[]>('translator.targetLocales', defaultConfig.targetLocales),
-    enableBackTranslation: projectConfig.enableBackTranslation ?? configProvider.get<boolean>('translator.enableBackTranslation', defaultConfig.enableBackTranslation),
-    defaultMarkdownEngine: projectConfig.defaultMarkdownEngine || configProvider.get<TranslatorEngine>('translator.defaultMarkdownEngine', defaultConfig.defaultMarkdownEngine),
-    defaultJsonEngine: projectConfig.defaultJsonEngine || configProvider.get<TranslatorEngine>('translator.defaultJsonEngine', defaultConfig.defaultJsonEngine),
-    engineOverrides: projectConfig.engineOverrides ||
+    sourceLocale:
+      projectConfig.sourceLocale || configProvider.get<string>('translator.sourceLocale', defaultConfig.sourceLocale),
+    targetLocales:
+      projectConfig.targetLocales ||
+      configProvider.get<string[]>('translator.targetLocales', defaultConfig.targetLocales),
+    enableBackTranslation:
+      projectConfig.enableBackTranslation ??
+      configProvider.get<boolean>('translator.enableBackTranslation', defaultConfig.enableBackTranslation),
+    defaultMarkdownEngine:
+      projectConfig.defaultMarkdownEngine ||
+      configProvider.get<TranslatorEngine>('translator.defaultMarkdownEngine', defaultConfig.defaultMarkdownEngine),
+    defaultJsonEngine:
+      projectConfig.defaultJsonEngine ||
+      configProvider.get<TranslatorEngine>('translator.defaultJsonEngine', defaultConfig.defaultJsonEngine),
+    engineOverrides:
+      projectConfig.engineOverrides ||
       // Convert from legacy string format to string[] format
       Object.fromEntries(
-        Object.entries(
-          configProvider.get<Record<string, string | string[]>>('translator.engineOverrides', {})
-        ).map(([engine, localesStr]) => [
-          engine,
-          typeof localesStr === 'string' ?
-            localesStr.split(',').map(s => s.trim()) :
-            Array.isArray(localesStr) ? localesStr : []
-        ])
+        Object.entries(configProvider.get<Record<string, string | string[]>>('translator.engineOverrides', {})).map(
+          ([engine, localesStr]) => [
+            engine,
+            typeof localesStr === 'string'
+              ? localesStr.split(',').map((s) => s.trim())
+              : Array.isArray(localesStr)
+              ? localesStr
+              : []
+          ]
+        )
       )
-  };
+  }
 }
