@@ -18,6 +18,7 @@ export const window = {
   showInformationMessage: vi.fn(),
   showWarningMessage: vi.fn(),
   showErrorMessage: vi.fn(),
+  showQuickPick: vi.fn().mockResolvedValue(undefined),
   createOutputChannel: vi.fn(() => ({
     show: vi.fn(),
     appendLine: vi.fn(),
@@ -85,7 +86,10 @@ export const Uri = {
   parse: vi.fn(uri => ({ fsPath: uri, path: uri, scheme: 'file' }))
 }
 
-export const commands = { registerCommand: vi.fn() }
+export const commands = {
+  registerCommand: vi.fn(),
+  executeCommand: vi.fn().mockResolvedValue(undefined)
+}
 
 export const languages = {
   createDiagnosticCollection: vi.fn()
