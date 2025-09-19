@@ -316,6 +316,30 @@ export abstract class TranslatorAdapter {
   }
 
   /**
+   * Check if the translator is currently running (watching for file changes)
+   */
+  isRunning(): boolean {
+    return this.running;
+  }
+
+  /**
+   * Check if the translator manager is available (indicates initialization is complete)
+   */
+  isReady(): boolean {
+    return this.translatorManager !== undefined;
+  }
+
+  /**
+   * Get the current status of the translator
+   */
+  getStatus(): { initialized: boolean; running: boolean } {
+    return {
+      initialized: this.isReady(),
+      running: this.isRunning()
+    };
+  }
+
+  /**
    * Dispose all resources
    */
   dispose(): void {

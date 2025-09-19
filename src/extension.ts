@@ -18,6 +18,13 @@ function getOutputChannel(): vscode.OutputChannel {
 }
 
 /**
+ * Get the current VSCode adapter instance (without creating a new one)
+ */
+function getCurrentVSCodeAdapter(): VSCodeTranslatorAdapter | null {
+  return vsCodeAdapter;
+}
+
+/**
  * Get or create the singleton VSCode adapter
  */
 function getVSCodeAdapter(): VSCodeTranslatorAdapter {
@@ -95,40 +102,77 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
  * Stop the translator
  */
 export function stopTranslator(): void {
-  const adapter = getVSCodeAdapter();
-  adapter.stop();
+  // Use existing adapter (don't create a new one)
+  const adapter = getCurrentVSCodeAdapter();
+  if (adapter) {
+    adapter.stop();
+  } else {
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+  }
 }
 
 /**
  * Restart the translator
  */
 export async function restartTranslator(context: vscode.ExtensionContext): Promise<void> {
-  const adapter = getVSCodeAdapter();
-  await adapter.restartWithContext(context);
+  // Use existing adapter or get the singleton (this will be the same instance created during activation)
+  const adapter = getCurrentVSCodeAdapter();
+  if (adapter) {
+    await adapter.restartWithContext(context);
+  } else {
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+  }
 }
 
 /**
  * Push translations to MateCat
  */
 export async function pushToMateCat(): Promise<void> {
-  const adapter = getVSCodeAdapter();
-  await adapter.pushToMateCat();
+  // Use existing adapter or get the singleton (this will be the same instance created during activation)
+  const adapter = getCurrentVSCodeAdapter();
+  if (adapter) {
+    await adapter.pushToMateCat();
+  } else {
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+  }
 }
 
 /**
  * Pull translations from MateCat
  */
 export async function pullFromMateCat(): Promise<void> {
-  const adapter = getVSCodeAdapter();
-  await adapter.pullFromMateCat();
+  // Use existing adapter or get the singleton (this will be the same instance created during activation)
+  const adapter = getCurrentVSCodeAdapter();
+  if (adapter) {
+    await adapter.pullFromMateCat();
+  } else {
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+  }
 }
 
 /**
  * Show the output channel
  */
 export function onShowOutput(): void {
-  const adapter = getVSCodeAdapter();
-  adapter.showOutput();
+  // Only show output if adapter already exists (don't create a new one)
+  const adapter = getCurrentVSCodeAdapter();
+  if (adapter) {
+    adapter.showOutput();
+  } else {
+    // If no adapter exists, just show the basic output channel
+    const channel = getOutputChannel();
+    channel.appendLine(`Output channel shown at: ${new Date().toISOString()}`);
+    channel.appendLine("Available commands:");
+    channel.appendLine('- Translator: Start (starts file watching and auto-translation)');
+    channel.appendLine('- Translator: Stop (stops file watching)');
+    channel.appendLine('- Translator: Restart (restart watching)');
+    channel.appendLine('- Translator: Push to MateCat (works without starting)');
+    channel.appendLine('- Translator: Pull from MateCat (works without starting)');
+    channel.appendLine('- Translator: Show Output (this command)');
+    channel.appendLine('');
+    channel.appendLine('Status: Extension not yet activated');
+    channel.show();
+  }
 }
 
 /**
@@ -150,6 +194,15 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Show the output channel during development
   if (process.env.VSCODE_DEBUG_MODE === '1' || process.env.NODE_ENV === 'development') {
     channel.show();
+  }
+
+  // Initialize the adapter during activation so commands can work
+  try {
+    await vsCodeAdapter.initializeOnActivation();
+  } catch (error) {
+    // Don't fail activation if initialization fails - commands can still try to initialize
+    channel.appendLine(`Warning: Failed to initialize translator during activation: ${error}`);
+    channel.appendLine('Commands will attempt to initialize when needed');
   }
 
   // Register commands
