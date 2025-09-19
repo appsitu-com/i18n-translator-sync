@@ -227,20 +227,20 @@ async function ensureAssets() {
     }
 
     // Ensure the sample translation config files exist
-    const translateJsonSample = path.join(ROOT_DIR, '.translate.json.sample');
-    const translateJson = path.join(ROOT_DIR, '.translate.json');
+    const translateJsonSample = path.join(ROOT_DIR, '.translator.json.sample');
+    const translateJson = path.join(ROOT_DIR, '.translator.json');
 
     // Make sure both files exist and are up to date
     if (fs.existsSync(translateJson) && fs.existsSync(translateJsonSample)) {
-      console.log('.translate.json and .translate.json.sample files already exist');
+      console.log('.translator.json and .translator.json.sample files already exist');
     } else if (fs.existsSync(translateJson) && !fs.existsSync(translateJsonSample)) {
-      // Copy from .translate.json to .translate.json.sample
+      // Copy from .translator.json to .translator.json.sample
       fs.copyFileSync(translateJson, translateJsonSample);
-      console.log('Created .translate.json.sample from .translate.json');
+      console.log('Created .translator.json.sample from .translator.json');
     } else if (!fs.existsSync(translateJson) && fs.existsSync(translateJsonSample)) {
-      // Copy from .translate.json.sample to .translate.json
+      // Copy from .translator.json.sample to .translator.json
       fs.copyFileSync(translateJsonSample, translateJson);
-      console.log('Created .translate.json from .translate.json.sample');
+      console.log('Created .translator.json from .translator.json.sample');
     } else {
       // Create a default configuration
       const defaultConfig = {
@@ -259,7 +259,7 @@ async function ensureAssets() {
 
       fs.writeFileSync(translateJson, JSON.stringify(defaultConfig, null, 2), 'utf8');
       fs.writeFileSync(translateJsonSample, JSON.stringify(defaultConfig, null, 2), 'utf8');
-      console.log('Created .translate.json and .translate.json.sample with default configuration');
+      console.log('Created .translator.json and .translator.json.sample with default configuration');
     }
   } catch (error) {
     console.error('Error ensuring assets exist:', error);

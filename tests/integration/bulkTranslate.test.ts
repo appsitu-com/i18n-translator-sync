@@ -114,7 +114,7 @@ describe('Bulk Translation Integration Tests', () => {
     // Create temporary test directory with files
     tempDir = await createTempTestDir();
 
-    // Create a .translate.json file with configuration for the copy engine
+    // Create a .translator.json file with configuration for the copy engine
     const translateConfig = {
       sourceDir: '',
       targetDir: '',
@@ -132,7 +132,7 @@ describe('Bulk Translation Integration Tests', () => {
 
     // Write the config file to the temp directory
     await fs.writeFile(
-      path.join(tempDir, '.translate.json'),
+      path.join(tempDir, '.translator.json'),
       JSON.stringify(translateConfig, null, 2)
     );
 
@@ -141,7 +141,7 @@ describe('Bulk Translation Integration Tests', () => {
     logger = new ConsoleLogger('test');
     cache = new SQLiteCache(':memory:'); // Use in-memory DB for tests
     watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
-    configProvider = new CliConfigProvider(fileSystem, logger, path.join(tempDir, '.translate.json'));
+    configProvider = new CliConfigProvider(fileSystem, logger, path.join(tempDir, '.translator.json'));
 
     // Need to load the config we just created
     await configProvider.load();

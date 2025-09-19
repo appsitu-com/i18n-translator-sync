@@ -27,11 +27,8 @@
       "endpoint": "${AZURE_TRANSLATION_URL}",
       "langMap": {
         "zh-CN": "zh-Hans",
-        "zh-Hans": "zh-Hans",
         "zh-TW": "zh-Hant",
         "zh-HK": "zh-Hant",
-        "zh-Hant": "zh-Hant",
-        "fr-ca": "fr-ca",
         "fr-CA": "fr-ca",
         "iu-Latn": "iu-Latn",
         "mn": "mn-Cyrl",

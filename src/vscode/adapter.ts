@@ -61,7 +61,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * VSCode-specific initialization
    */
   async initializeVSCode(): Promise<void> {
-    // Load configuration from .translate.json
+    // Load configuration from .translator.json
     await this.vsCodeConfigProvider.load();
 
     // Initialize environment

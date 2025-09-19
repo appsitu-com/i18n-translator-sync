@@ -11,7 +11,7 @@ const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
 // Define the schema for validation
 const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
 
-// Zod schema for validating .translate.json
+// Zod schema for validating .translator.json
 export const TranslateConfigSchema = z.object({
   sourceDir: z.string()
     .describe('Base directory for source paths (prepended to sourcePaths)')
@@ -97,7 +97,7 @@ export const defaultConfig: TranslateProjectConfig = {
 }
 
 /**
- * Load project configuration from .translate.json
+ * Load project configuration from .translator.json
  */
 export async function loadProjectConfig(
   rootPath: string,
@@ -105,7 +105,7 @@ export async function loadProjectConfig(
   logger: Logger,
   fileSystem?: FileSystem
 ): Promise<TranslateProjectConfig> {
-  const configPath = path.join(rootPath, '.translate.json')
+  const configPath = path.join(rootPath, '.translator.json')
   let projectConfig: Partial<TranslateProjectConfig> = {}
 
   // Log the configuration file path being checked
@@ -135,7 +135,7 @@ export async function loadProjectConfig(
         const errors = formatZodError(validationResult.error)
 
         // Show error notification
-        const errorMessage = `Invalid .translate.json configuration:\n${errors.join('\n')}`
+        const errorMessage = `Invalid .translator.json configuration:\n${errors.join('\n')}`
         logger.error(errorMessage)
 
         // Still use what we can from the config, even with errors
@@ -146,7 +146,7 @@ export async function loadProjectConfig(
       }
     }
   } catch (error: any) {
-    const errorMessage = `Error loading .translate.json: ${error.message || error}`
+    const errorMessage = `Error loading .translator.json: ${error.message || error}`
     logger.error(errorMessage)
   }
 

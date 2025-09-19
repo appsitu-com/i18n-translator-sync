@@ -32,7 +32,7 @@ async function createTempConfigFile(translator?: { copy: any }) {
     config.translator = translator;
   }
 
-  const configPath = path.join(tempDir, '.translate.json');
+  const configPath = path.join(tempDir, '.translator.json');
   await fs.writeFile(configPath, JSON.stringify(config, null, 2));
 
   return { tempDir, configPath };

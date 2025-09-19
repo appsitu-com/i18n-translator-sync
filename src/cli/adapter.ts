@@ -14,7 +14,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
   /**
    * Create a CLI translator adapter
    * @param workspacePath Path to the project workspace
-   * @param configPath Path to the project's .translate.json file
+   * @param configPath Path to the project's .translator.json file
    */
   constructor(workspacePath: string, configPath: string) {
     const logger = new ConsoleLogger();

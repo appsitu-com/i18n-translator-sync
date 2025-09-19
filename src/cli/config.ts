@@ -6,7 +6,7 @@ import { Logger } from '../core/util/logger';
 
 /**
  * CLI configuration provider
- * Loads configuration from a project-level .translate.json file and provides a VSCode-like interface
+ * Loads configuration from a project-level .translator.json file and provides a VSCode-like interface
  */
 export class CliConfigProvider implements ConfigProvider {
   private config: Record<string, any> = {};
@@ -15,7 +15,7 @@ export class CliConfigProvider implements ConfigProvider {
    * Create a new CLI configuration provider
    * @param fs FileSystem abstraction
    * @param logger Logger interface
-   * @param configPath Path to the project's .translate.json configuration file
+   * @param configPath Path to the project's .translator.json configuration file
    */
   constructor(
     private fs: FileSystem,
@@ -24,7 +24,7 @@ export class CliConfigProvider implements ConfigProvider {
   ) {}
 
   /**
-   * Load configuration from the project's .translate.json file
+   * Load configuration from the project's .translator.json file
    */
   async load(): Promise<void> {
     try {
@@ -34,7 +34,7 @@ export class CliConfigProvider implements ConfigProvider {
         this.logger.debug(`Loaded project configuration from ${this.configPath}`);
       } else {
         this.logger.warn(`Project configuration file not found: ${this.configPath}`);
-        this.logger.warn(`Please create a .translate.json file in your project directory.`);
+        this.logger.warn(`Please create a .translator.json file in your project directory.`);
       }
     } catch (error) {
       this.logger.error(`Error loading project configuration from ${this.configPath}: ${error}`);

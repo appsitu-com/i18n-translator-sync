@@ -10,8 +10,7 @@ ROADMAP.md
 .translator.env
 .env
 .env-example
-.translate.json
-.translate.json.sample
+.translator.json
 **/tsconfig.json
 **/vitest.config.ts
 **/vite.config.js

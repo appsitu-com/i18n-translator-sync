@@ -103,7 +103,7 @@ describe('CLITranslatorAdapter', () => {
     // Create a temporary test directory
     testDir = makeTmpDir();
     testWorkspacePath = testDir;
-    testConfigPath = path.join(testDir, '.translate.json');
+    testConfigPath = path.join(testDir, '.translator.json');
 
     // Create cache directory
     const cacheDir = path.join(testDir, '.i18n-cache');

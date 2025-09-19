@@ -18,8 +18,8 @@ export async function runCli(): Promise<void> {
     .name('i18n-translator')
     .version(packageJson.version)
     .description('I18n Translator CLI for translating JSON and Markdown files')
-    .argument('[workspace]', 'Path to workspace directory containing .translate.json', process.cwd())
-    .option('--config <path>', 'Path to custom configuration file (defaults to <workspace>/.translate.json)')
+    .argument('[workspace]', 'Path to workspace directory containing .translator.json', process.cwd())
+    .option('--config <path>', 'Path to custom configuration file (defaults to <workspace>/.translator.json)')
     .option('--push-matecat', 'Push translations to MateCat')
     .option('--pull-matecat', 'Pull translations from MateCat')
     .option('--bulk-translate', 'Perform bulk translation of all files')
@@ -31,8 +31,8 @@ export async function runCli(): Promise<void> {
   const options = program.opts()
   const workspacePath = program.args[0] || process.cwd()
 
-  // Use .translate.json in the project folder only
-  const configPath = options.config || path.join(workspacePath, '.translate.json')
+  // Use .translator.json in the project folder only
+  const configPath = options.config || path.join(workspacePath, '.translator.json')
 
   console.log(`Starting i18n translator for: ${workspacePath}`)
   console.log(`Using configuration from: ${configPath}`)

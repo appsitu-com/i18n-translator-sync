@@ -54,7 +54,7 @@ See [CLI Documentation](doc/CLI.md) for details on the command-line interface.
   - [W] Automatic purging of unused past translations.
   - [W] Exported/imported to CSV files. CSV exports should be committed to GIT to preserve stable translations and reduce costs.
 - [W] **VS Code commmands**:
-  - **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translate.json` file for your API keys that's excluded from GIT.
+  - **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translator.json` file for your API keys that's excluded from GIT.
   - **Translator: Stop** - Deactivates the "translate on save" feature.
   - **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.
   - **Translator: Push to MateCat** - Exports the local TM database and pushes it to a MateCat project.
@@ -78,11 +78,11 @@ You can reuse your public or private translation memory to maintain consistent t
 
 ## Configuration
 
-The extension supports project-specific configuration through a `.translate.json` file in the root of your workspace or via your user and workspace settings.
+The extension supports project-specific configuration through a `.translator.json` file in the root of your workspace or via your user and workspace settings.
 See [Configuration Documentation](doc/Configuration.md) for details.
 
 Configuration Options:
-- Project translation rules can be configured in a local `.translate.json` file (recommended) or in VSCode Workspace or User settings.
+- Project translation rules can be configured in a local `.translator.json` file (recommended) or in VSCode Workspace or User settings.
 - Optional back-translations and context-aware JSON translations.
 - DeepL supports `en-US` => `en-GB` translations.
 - Back-translation folders `<locale>_en/**`
@@ -136,12 +136,12 @@ GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
 
 ### Configuration Files
 
-- `.translate.json` - This file comes with the extension as a default configuration example. You can modify it directly for your project.
-- `.translate.json.sample` - This is a template file that you can copy and modify for your own configuration.
+- `.translator.json` - This file comes with the extension as a default configuration example. You can modify it directly for your project.
+- `.translator.json.sample` - This is a template file that you can copy and modify for your own configuration.
 
 Both files are included in the extension and can be used as a starting point for your project configuration.
 
-Example `.translate.json`:
+Example `.translator.json`:
 ```json
 {
   "sourcePaths": ["i18n/en", "docs/en"],

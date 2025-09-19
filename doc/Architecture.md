@@ -563,7 +563,7 @@ The extension supports multiple translation engines:
 - Gemini
 - Copy (no translation, just copies the original text)
 
-Each engine can be configured per file type and per locale in the `.translate.json` configuration file.
+Each engine can be configured per file type and per locale in the `.translator.json` configuration file.
 
 ## File Type Support
 

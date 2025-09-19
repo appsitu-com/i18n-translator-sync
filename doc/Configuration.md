@@ -1,8 +1,8 @@
 # Project Configuration
 
-## .translate.json
+## .translator.json
 
-The extension now supports a project-specific configuration file called `.translate.json` in the root of your workspace. This allows you to configure the translator without modifying VSCode settings.
+The extension now supports a project-specific configuration file called `.translator.json` in the root of your workspace. This allows you to configure the translator without modifying VSCode settings.
 
 ### Example Configuration
 
@@ -36,7 +36,7 @@ The extension now supports a project-specific configuration file called `.transl
 
 ## Backward Compatibility
 
-For backward compatibility, the extension will still read from VSCode settings if no `.translate.json` file is found or if certain options are not specified in the file.
+For backward compatibility, the extension will still read from VSCode settings if no `.translator.json` file is found or if certain options are not specified in the file.
 
 ## Engine Overrides
 
