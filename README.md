@@ -158,6 +158,15 @@ Example `.translator.json`:
 }
 ```
 
+## For AI Agents & Contributors
+
+**Important**: If you're an AI agent or developer working on this project, please read [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for essential coding conventions, architectural decisions, and project-specific guidelines.
+
+
+## Contact
+- For questions or issues, refer to the GitHub repository:
+  - https://github.com/tohagan/vscode-i18n-translator-ext
+
 ## License
 MIT
 
