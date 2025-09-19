@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import * as path from 'path'
 import * as vscode from 'vscode'
-import * as pathsModule from '../../src/util/paths'
+import * as pathsModule from '../../src/util/translationPaths'
 import {
   normalizePath,
   containsLocale,
@@ -13,8 +13,8 @@ import {
   createTargetUri,
   createBackTranslationUri,
   verifyFilePath
-} from '../../src/util/paths'
-import { TranslateProjectConfig } from '../../src/config'
+} from '../../src/util/translationPaths'
+import { TranslateProjectConfig } from '../../src/projectConfig'
 
 // Helper function to create mock URIs
 function mockUri(filePath: string): vscode.Uri {

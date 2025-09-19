@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { ConsoleLogger, LogLevel } from '../../../src/core/util/logger';
+import { ConsoleLogger, LogLevel } from '../../../src/core/util/baseLogger';
 
 describe('ConsoleLogger', () => {
   let logger: ConsoleLogger;

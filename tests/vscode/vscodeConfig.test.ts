@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as vscode from 'vscode';
-import { VsCodeConfigProvider } from '../../src/vscode/config';
+import { VsCodeConfigProvider } from '../../src/vscode/vscodeConfig';
 
 // Mock VSCode configuration
 vi.mock('vscode', () => {

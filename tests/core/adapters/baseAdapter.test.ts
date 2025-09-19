@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TranslatorAdapter } from '../../../src/core/adapters/baseAdapter';
-import { Logger } from '../../../src/core/util/logger';
+import { Logger } from '../../../src/core/util/baseLogger';
 import { FileSystem, IUri } from '../../../src/core/util/fs';
-import { ConfigProvider } from '../../../src/core/config';
+import { ConfigProvider } from '../../../src/core/coreConfig';
 import { WorkspaceWatcher } from '../../../src/core/util/watcher';
 import { TranslatorManager } from '../../../src/core/translatorManager';
 import { SQLiteCache } from '../../../src/core/cache/sqlite';

@@ -4,7 +4,7 @@ import * as path from 'path';
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from 'fs';
 import { CliWorkspaceWatcher } from '../../src/cli/watcher';
 import { NodeFileSystem } from '../../src/core/util/fs';
-import { ConsoleLogger } from '../../src/core/util/logger';
+import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import * as chokidar from 'chokidar';
 
 // Mock chokidar

@@ -1,7 +1,7 @@
 import { NodeFileSystem, nodeFileSystem } from '../core/util/fs';
-import { ConsoleLogger, LogLevel } from '../core/util/logger';
+import { ConsoleLogger, LogLevel } from '../core/util/baseLogger';
 import { CliWorkspaceWatcher } from './watcher';
-import { CliConfigProvider } from './config';
+import { CliConfigProvider } from './cliConfig';
 import { TranslatorAdapter } from '../core/adapters/baseAdapter';
 import { WorkspaceWatcher } from '../core/util/watcher';
 

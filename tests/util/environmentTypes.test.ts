@@ -1,5 +1,5 @@
 import { it, expect, describe, beforeEach, vi } from 'vitest';
-import { resolveEnvString, resolveEnvDeep, MissingEnvVarError, getEnv, initTranslatorEnv, resetEnvInitialization } from '../../src/core/util/env';
+import { resolveEnvString, resolveEnvDeep, MissingEnvVarError, getEnv, initTranslatorEnv, resetEnvInitialization } from '../../src/core/util/environmentSetup';
 import { createMockFileSystem } from '../mocks/filesystem';
 
 // Mock logger for tests

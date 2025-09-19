@@ -1,10 +1,10 @@
 import { ITranslationExecutor } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
-import { Logger } from './util/logger'
+import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
 import { TranslatorEngine, TranslatorApiConfig } from '../translators/types'
 import { bulkTranslateWithEngine } from '../bulkTranslate'
-import { resolveEnvDeep } from './util/env'
+import { resolveEnvDeep } from './util/environmentSetup'
 
 /**
  * Default implementation that actually performs translations and writes files

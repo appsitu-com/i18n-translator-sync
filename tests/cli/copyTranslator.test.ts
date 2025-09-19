@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs/promises';
-import { CliConfigProvider } from '../../src/cli/config';
+import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { NodeFileSystem } from '../../src/core/util/fs';
-import { ConsoleLogger } from '../../src/core/util/logger';
+import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { CopyTranslator } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
 import { TranslatorEngine } from '../../src/translators/types';
@@ -117,7 +117,7 @@ describe('CLI Copy Translator Tests', () => {
 
   it('should register copy translator when initializing the CLI adapter', async () => {
     // Create CLI adapter for testing
-    const { CLITranslatorAdapter } = await import('../../src/cli/adapter');
+    const { CLITranslatorAdapter } = await import('../../src/cli/cliAdapter');
 
     // Mock the fileSystem.writeFile method to prevent actually writing files
     vi.spyOn(fileSystem, 'writeFile').mockImplementation(async () => {});

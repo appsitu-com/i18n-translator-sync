@@ -2,7 +2,7 @@ import Database from 'better-sqlite3'
 import * as path from 'path'
 import * as fs from 'fs'
 import { FileSystem } from '../util/fs'
-import { Logger } from '../util/logger'
+import { Logger } from '../util/baseLogger'
 
 export type Pair = { src: string; dst: string; ctx?: string | null }
 

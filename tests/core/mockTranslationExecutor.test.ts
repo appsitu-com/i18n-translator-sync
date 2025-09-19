@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
 import { TranslatorPipeline } from '../../src/core/pipeline'
 import { TranslatorManager } from '../../src/core/translatorManager'
-import { Logger } from '../../src/core/util/logger'
+import { Logger } from '../../src/core/util/baseLogger'
 import { TranslationCache } from '../../src/core/cache/sqlite'
-import { TranslateProjectConfig, ConfigProvider } from '../../src/core/config'
+import { TranslateProjectConfig, ConfigProvider } from '../../src/core/coreConfig'
 
 // Mock dependencies
 vi.mock('../../src/core/cache/sqlite')

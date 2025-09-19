@@ -1,18 +1,18 @@
 import * as path from 'path'
 import { FileSystem, IUri } from './util/fs'
-import { Logger } from './util/logger'
+import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
-import { extractForFile, jsonPathToString } from '../extractors/index'
+import { extractForFile, jsonPathToString } from '../extractors/extractorRegistry'
 import { loadContextCsvForJson } from './contextCsv'
 import { pickEngine } from '../translators/registry'
 import { generateContextCsvWarnings } from './util/contextCsvWarnings'
-import { TranslateProjectConfig } from './config'
+import { TranslateProjectConfig } from './coreConfig'
 import {
   getRelativePath,
   createTargetUri,
   createBackTranslationUri,
   findSourcePathForFile
-} from './util/paths'
+} from './util/pathOperations'
 import { ITranslationExecutor } from './translationExecutor'
 import { DefaultTranslationExecutor } from './defaultTranslationExecutor'
 

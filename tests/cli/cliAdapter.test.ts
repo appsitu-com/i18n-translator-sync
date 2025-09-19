@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { CLITranslatorAdapter } from '../../src/cli/adapter';
+import { CLITranslatorAdapter } from '../../src/cli/cliAdapter';
 import { CliWorkspaceWatcher } from '../../src/cli/watcher';
-import { CliConfigProvider } from '../../src/cli/config';
+import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { NodeFileSystem } from '../../src/core/util/fs';
-import { ConsoleLogger } from '../../src/core/util/logger';
+import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { TranslatorAdapter } from '../../src/core/adapters/baseAdapter';
-import * as env from '../../src/core/util/env';
+import * as env from '../../src/core/util/environmentSetup';
 import * as path from 'path';
 import { tmpdir } from 'os';
 import * as fs from 'fs';
@@ -19,7 +19,7 @@ vi.mock('../../src/cli/watcher', () => ({
   }))
 }));
 
-vi.mock('../../src/cli/config', () => ({
+vi.mock('../../src/cli/cliConfig', () => ({
   CliConfigProvider: vi.fn().mockImplementation(() => ({
     load: vi.fn().mockResolvedValue(undefined),
     get: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock('../../src/cli/config', () => ({
   }))
 }));
 
-vi.mock('../../src/core/util/env', () => ({
+vi.mock('../../src/core/util/environmentSetup', () => ({
   initTranslatorEnv: vi.fn().mockResolvedValue(undefined)
 }));
 

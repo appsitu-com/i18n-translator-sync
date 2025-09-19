@@ -3,7 +3,7 @@ import * as path from 'path'
 import { z } from 'zod'
 import { TranslatorEngine } from '../translators/types'
 import { FileSystem } from './util/fs'
-import { Logger } from './util/logger'
+import { Logger } from './util/baseLogger'
 import { formatZodError } from './util/configUtils'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const

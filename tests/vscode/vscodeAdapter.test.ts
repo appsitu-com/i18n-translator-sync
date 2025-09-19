@@ -20,7 +20,7 @@ vi.mock('../../src/core/adapters/baseAdapter', () => ({
   }))
 }));
 
-vi.mock('../../src/core/util/env', () => ({
+vi.mock('../../src/core/util/environmentSetup', () => ({
   initTranslatorEnv: vi.fn().mockResolvedValue(undefined)
 }));
 
@@ -32,7 +32,7 @@ vi.mock('../../src/vscode/watcher', () => ({
   }))
 }));
 
-vi.mock('../../src/vscode/config', () => ({
+vi.mock('../../src/vscode/vscodeConfig', () => ({
   VsCodeConfigProvider: vi.fn().mockImplementation(() => ({
     load: vi.fn().mockResolvedValue(undefined),
     get: vi.fn(),
@@ -40,7 +40,7 @@ vi.mock('../../src/vscode/config', () => ({
   }))
 }));
 
-vi.mock('../../src/vscode/logger', () => ({
+vi.mock('../../src/vscode/vscodeLogger', () => ({
   VSCodeLogger: vi.fn().mockImplementation(() => ({
     debug: vi.fn(),
     info: vi.fn(),
@@ -68,10 +68,10 @@ vi.mock('../../src/vscode/filesystem', () => ({
 }));
 
 // Now import the modules after all mocks are set up
-import { VSCodeTranslatorAdapter } from '../../src/vscode/adapter';
+import { VSCodeTranslatorAdapter } from '../../src/vscode/vscodeAdapter';
 import { TranslatorAdapter } from '../../src/core/adapters/baseAdapter';
-import { VsCodeConfigProvider } from '../../src/vscode/config';
-import { VSCodeLogger } from '../../src/vscode/logger';
+import { VsCodeConfigProvider } from '../../src/vscode/vscodeConfig';
+import { VSCodeLogger } from '../../src/vscode/vscodeLogger';
 import { VSCodeFileSystem } from '../../src/vscode/filesystem';
 
 describe('VSCodeTranslatorAdapter', () => {

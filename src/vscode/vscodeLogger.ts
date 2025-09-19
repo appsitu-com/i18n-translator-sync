@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Logger, LogLevel } from '../core/util/logger';
+import { Logger, LogLevel } from '../core/util/baseLogger';
 
 /**
  * VSCode logger implementation

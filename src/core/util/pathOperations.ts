@@ -1,6 +1,6 @@
 import * as path from 'path'
 import { FileSystem, IUri } from './fs'
-import { TranslateProjectConfig } from '../config'
+import { TranslateProjectConfig } from '../coreConfig'
 import { normalizePath, containsLocale, replaceLocaleInPath } from './pathShared'
 
 // Re-export shared utilities for backward compatibility

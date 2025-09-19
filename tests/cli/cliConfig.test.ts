@@ -3,9 +3,9 @@ import { tmpdir } from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
-import { CliConfigProvider } from '../../src/cli/config';
+import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { NodeFileSystem } from '../../src/core/util/fs';
-import { ConsoleLogger } from '../../src/core/util/logger';
+import { ConsoleLogger } from '../../src/core/util/baseLogger';
 
 function makeTmpDir(prefix = 'i18n-config-test-') {
   return mkdtempSync(path.join(tmpdir(), prefix));

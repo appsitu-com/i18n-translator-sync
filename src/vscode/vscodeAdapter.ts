@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { TranslatorAdapter } from '../core/adapters/baseAdapter';
 import { WorkspaceWatcher } from '../core/util/watcher';
-import { initTranslatorEnv } from '../core/util/env';
+import { initTranslatorEnv } from '../core/util/environmentSetup';
 import { VSCodeFileSystem } from './filesystem';
-import { VSCodeLogger } from './logger';
+import { VSCodeLogger } from './vscodeLogger';
 import { VSCodeWorkspaceWatcher } from './watcher';
-import { VsCodeConfigProvider } from './config';
+import { VsCodeConfigProvider } from './vscodeConfig'
 
 /**
  * VSCode adapter for the TranslatorManager

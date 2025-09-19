@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ConfigProvider } from '../core/config';
+import { ConfigProvider } from '../core/coreConfig';
 import { FileSystem } from '../core/util/fs';
-import { Logger } from '../core/util/logger';
+import { Logger } from '../core/util/baseLogger';
 
 /**
  * CLI configuration provider

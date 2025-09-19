@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { loadProjectConfig, defaultConfig, TranslateConfigSchema, type ConfigProvider, type TranslateProjectConfig } from '../../src/core/config'
+import { loadProjectConfig, defaultConfig, TranslateConfigSchema, type ConfigProvider, type TranslateProjectConfig } from '../../src/core/coreConfig'
 import { FileSystem, IUri } from '../../src/core/util/fs'
-import { Logger } from '../../src/core/util/logger'
+import { Logger } from '../../src/core/util/baseLogger'
 
 // Mock modules
 vi.mock('fs', () => ({

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { VSCodeLogger } from '../../src/vscode/logger';
-import { LogLevel } from '../../src/core/util/logger';
+import { VSCodeLogger } from '../../src/vscode/vscodeLogger';
+import { LogLevel } from '../../src/core/util/baseLogger';
 
 describe('VSCodeLogger', () => {
   let mockOutputChannel: any;

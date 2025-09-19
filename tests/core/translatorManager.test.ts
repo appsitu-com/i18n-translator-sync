@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TranslatorManager } from '../../src/core/translatorManager';
-import { TranslateProjectConfig } from '../../src/core/config';
+import { TranslateProjectConfig } from '../../src/core/coreConfig';
 import { FileSystem, IUri } from '../../src/core/util/fs';
-import { Logger } from '../../src/core/util/logger';
+import { Logger } from '../../src/core/util/baseLogger';
 import { FileWatcher, WorkspaceWatcher } from '../../src/core/util/watcher';
 
 // Mock dependencies

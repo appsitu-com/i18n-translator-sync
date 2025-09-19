@@ -1,5 +1,5 @@
 // test bootstrap
-import { initTranslatorEnv } from '../src/core/util/env';
+import { initTranslatorEnv } from '../src/core/util/environmentSetup';
 import { nodeFileSystem } from '../src/core/util/fs';
 import * as fs from 'fs';
 import * as path from 'path';

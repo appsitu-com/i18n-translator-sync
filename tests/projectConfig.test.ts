@@ -1,5 +1,5 @@
 import { it, expect, describe, vi, beforeEach } from 'vitest'
-import { TranslateConfigSchema } from '../src/config'
+import { TranslateConfigSchema } from '../src/projectConfig'
 
 describe('TranslateConfigSchema', () => {
   it('validates valid configurations', () => {

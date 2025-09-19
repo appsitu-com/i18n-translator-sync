@@ -1,13 +1,13 @@
 import * as path from 'path';
 import { TranslatorManager } from '../translatorManager';
-import { loadProjectConfig } from '../config';
-import { Logger } from '../util/logger';
+import { loadProjectConfig } from '../coreConfig';
+import { Logger } from '../util/baseLogger';
 import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
 import { SQLiteCache } from '../cache/sqlite';
-import { ConfigProvider } from '../config';
-import { initTranslatorEnv } from '../util/env';
-import { registerAllTranslators } from '../../translators';
+import { ConfigProvider } from '../coreConfig';
+import { initTranslatorEnv } from '../util/environmentSetup';
+import { registerAllTranslators } from '../../translators/translatorRegistry';
 
 /**
  * Base adapter for the TranslatorManager that can be extended for different environments

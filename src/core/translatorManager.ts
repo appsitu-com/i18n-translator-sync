@@ -1,8 +1,8 @@
 import { FileSystem, IUri } from './util/fs';
-import { Logger } from './util/logger';
+import { Logger } from './util/baseLogger';
 import { TranslationCache } from './cache/sqlite';
 import { Disposable, FileRenameEvent, WorkspaceWatcher } from './util/watcher';
-import { TranslateProjectConfig, ConfigProvider } from './config';
+import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
 import { TranslatorPipeline } from './pipeline';
 import { MateCatService, MateCatSettings } from './matecat';
 import { ITranslationExecutor } from './translationExecutor';

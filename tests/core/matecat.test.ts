@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MateCatService, MateCatSettings } from '../../src/core/matecat'
-import { ConsoleLogger } from '../../src/core/util/logger'
+import { ConsoleLogger } from '../../src/core/util/baseLogger'
 import * as path from 'path'
 
 // Create mock modules before importing

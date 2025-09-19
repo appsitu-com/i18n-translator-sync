@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import { z } from 'zod'
 import { TranslatorEngine } from './translators/types'
 import { formatZodError } from './core/util/configUtils'
-import { containsLocale, replaceLocaleInPath, findSourcePathForFile, verifyFilePath as pathsVerifyFilePath } from './util/paths'
+import { containsLocale, replaceLocaleInPath, findSourcePathForFile, verifyFilePath as pathsVerifyFilePath } from './util/translationPaths'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
 

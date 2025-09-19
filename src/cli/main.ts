@@ -2,7 +2,7 @@
 
 import * as path from 'path'
 import * as fs from 'fs'
-import { CLITranslatorAdapter } from './adapter'
+import { CLITranslatorAdapter } from './cliAdapter'
 import { program } from 'commander'
 
 /**

@@ -4,12 +4,12 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 import { TranslatorManager } from '../../src/core/translatorManager';
 import { NodeFileSystem } from '../../src/core/util/fs';
-import { ConsoleLogger } from '../../src/core/util/logger';
+import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { SQLiteCache } from '../../src/cache.sqlite';
 import { WorkspaceWatcher } from '../../src/core/util/watcher';
 import { CliWorkspaceWatcher } from '../../src/cli/watcher';
-import { CliConfigProvider } from '../../src/cli/config';
-import { TranslateProjectConfig } from '../../src/core/config';
+import { CliConfigProvider } from '../../src/cli/cliConfig';
+import { TranslateProjectConfig } from '../../src/core/coreConfig';
 import { CopyTranslator } from '../../src/translators/copy';
 import { registerTranslator } from '../../src/translators/registry';
 

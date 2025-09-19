@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ConfigProvider } from '../core/config';
+import { ConfigProvider } from '../core/coreConfig';
 
 /**
  * VSCode configuration provider implementation

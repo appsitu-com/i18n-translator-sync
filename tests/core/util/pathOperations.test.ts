@@ -7,8 +7,8 @@ import {
   getRelativePath,
   createTargetPath,
   createBackTranslationPath
-} from '../../../src/core/util/paths'
-import { TranslateProjectConfig } from '../../../src/core/config'
+} from '../../../src/core/util/pathOperations'
+import { TranslateProjectConfig } from '../../../src/core/coreConfig'
 
 // Create a sample configuration for tests
 function createTestConfig(overrides: Partial<TranslateProjectConfig> = {}): TranslateProjectConfig {

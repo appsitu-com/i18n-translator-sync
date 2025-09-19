@@ -1,7 +1,7 @@
 import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
-import { VSCodeTranslatorAdapter } from './vscode/adapter'
+import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
