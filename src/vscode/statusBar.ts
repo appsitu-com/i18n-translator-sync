@@ -49,7 +49,7 @@ export class VSCodeStatusBarManager implements StatusBarManager {
       try {
         // Skip creating status bar item in test environments
         if (process.env.NODE_ENV !== 'test' && !process.env.VITEST) {
-          this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+          this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
           this.statusBarItem.command = 'translator.showContextMenu'; // Context menu command
           this.statusBarItem.show();
           this.context.subscriptions.push(this.statusBarItem);
