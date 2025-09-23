@@ -62,6 +62,84 @@ function updateStatusBar(): void {
 }
 
 /**
+ * Check for configuration files and create them from samples if they don't exist
+ */
+function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
+  if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+    return; // No workspace folder available
+  }
+
+  const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+  const configFiles = [
+    {
+      name: '.translator.env',
+      targetPath: path.join(workspacePath, '.translator.env'),
+      samplePath: path.join(context.extensionPath, 'samples', '.translator.env'),
+      message: "A .translator.env file has been created. Please configure your translation API keys.",
+      reminderMessage: "Don't forget to configure your translation API keys in the .translator.env file.",
+      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys'
+    },
+    {
+      name: '.translator.json',
+      targetPath: path.join(workspacePath, '.translator.json'),
+      samplePath: path.join(context.extensionPath, 'samples', '.translator.json'),
+      message: "A .translator.json file has been created. Please configure your translation settings.",
+      reminderMessage: null, // No reminder for JSON file
+      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration'
+    }
+  ];
+
+  for (const config of configFiles) {
+    // Check if the file exists
+    if (!fs.existsSync(config.targetPath)) {
+      // Check if the sample exists
+      if (fs.existsSync(config.samplePath)) {
+        try {
+          // Copy the sample to create the target file
+          fs.copyFileSync(config.samplePath, config.targetPath);
+
+          // Notify the user
+          vscode.window
+            .showInformationMessage(
+              config.message,
+              'Open File',
+              'Documentation'
+            )
+            .then((selection) => {
+              if (selection === 'Open File') {
+                vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
+                  vscode.window.showTextDocument(doc);
+                });
+              } else if (selection === 'Documentation') {
+                vscode.env.openExternal(vscode.Uri.parse(config.docsUrl));
+              }
+            });
+        } catch (error) {
+          vscode.window.showWarningMessage(`Failed to create ${config.name} file: ${error}`);
+        }
+      }
+    } else if (config.reminderMessage) {
+      // If file already exists and we have a reminder message, show it
+      vscode.window
+        .showInformationMessage(
+          config.reminderMessage,
+          'Open File',
+          'Documentation'
+        )
+        .then((selection) => {
+          if (selection === 'Open File') {
+            vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
+              vscode.window.showTextDocument(doc);
+            });
+          } else if (selection === 'Documentation') {
+            vscode.env.openExternal(vscode.Uri.parse(config.docsUrl));
+          }
+        });
+    }
+  }
+}
+
+/**
  * Start the translator with auto-start prompt
  */
 export async function onStartTranslator(context: vscode.ExtensionContext): Promise<void> {
@@ -88,29 +166,8 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
       await vscode.workspace.getConfiguration('translator').update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace);
     }
 
-    // Also inform about API keys
-    if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
-      const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '.translator.env')
-      if (fs.existsSync(envFile)) {
-        vscode.window
-          .showInformationMessage(
-            "Don't forget to configure your translation API keys in the .translator.env file.",
-            'Open File',
-            'Documentation'
-          )
-          .then((selection) => {
-            if (selection === 'Open File') {
-              vscode.workspace.openTextDocument(envFile).then((doc) => {
-                vscode.window.showTextDocument(doc)
-              })
-            } else if (selection === 'Documentation') {
-              vscode.env.openExternal(
-                vscode.Uri.parse('https://github.com/tohagan/vscode-i18n-translator-ext#api-keys')
-              )
-            }
-          })
-      }
-    }
+    // Check and create configuration files if needed
+    checkAndCreateConfigFiles(context);
   } catch (error: any) {
     // Show error and offer to open env file
     vscode.window

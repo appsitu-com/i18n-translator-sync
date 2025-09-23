@@ -162,10 +162,6 @@ async function ensureAssets() {
   <!-- Text inside -->
   <text x="64" y="62" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">i18n</text>
   <text x="64" y="88" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Translator</text>
-
-  <!-- Translation arrows -->
-  <path d="M30 45 L45 45 L42 42 M45 45 L42 48" stroke="white" stroke-width="2" fill="none" />
-  <path d="M98 82 L83 82 L86 79 M83 82 L86 85" stroke="white" stroke-width="2" fill="none" />
 </svg>`;
 
       fs.writeFileSync(ICON_SVG_PATH, svgIcon, 'utf8');
@@ -226,44 +222,68 @@ async function ensureAssets() {
       console.log('Continuing with packaging process despite icon error...');
     }
 
+    // Ensure the samples directory exists
+    const samplesDir = path.join(ROOT_DIR, 'samples');
+    if (!fs.existsSync(samplesDir)) {
+      fs.mkdirSync(samplesDir, { recursive: true });
+      console.log(`Created samples directory: ${samplesDir}`);
+    }
+
     // Ensure the sample translation config files exist
-    const translateJsonSample = path.join(ROOT_DIR, '.translator.json.sample');
+    const translateJsonSample = path.join(samplesDir, '.translator.json');
+    const translateEnvSample = path.join(samplesDir, '.translator.env');
     const translateJson = path.join(ROOT_DIR, '.translator.json');
+    const translateEnv = path.join(ROOT_DIR, '.translator.env');
 
-    // Make sure both files exist and are up to date
-    if (fs.existsSync(translateJson) && fs.existsSync(translateJsonSample)) {
-      console.log('.translator.json and .translator.json.sample files already exist');
-    } else if (fs.existsSync(translateJson) && !fs.existsSync(translateJsonSample)) {
-      // Copy from .translator.json to .translator.json.sample
-      fs.copyFileSync(translateJson, translateJsonSample);
-      console.log('Created .translator.json.sample from .translator.json');
-    } else if (!fs.existsSync(translateJson) && fs.existsSync(translateJsonSample)) {
-      // Copy from .translator.json.sample to .translator.json
-      fs.copyFileSync(translateJsonSample, translateJson);
-      console.log('Created .translator.json from .translator.json.sample');
+    // Check if sample files exist in the samples directory
+    if (!fs.existsSync(translateJsonSample)) {
+      console.log('samples/.translator.json does not exist. Please create it manually.');
     } else {
-      // Create a default configuration
-      const defaultConfig = {
-        "sourcePaths": ["i18n/en", "docs/en"],
-        "sourceLocale": "en",
-        "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
-        "enableBackTranslation": true,
-        "defaultMarkdownEngine": "azure",
-        "defaultJsonEngine": "google",
-        "engineOverrides": {
-          "deepl": ["fr", "de"],
-          "azure": ["es:en", "ja:en"],
-          "gemini": ["zh-CN"]
-        }
-      };
+      console.log('samples/.translator.json already exists');
+    }
 
-      fs.writeFileSync(translateJson, JSON.stringify(defaultConfig, null, 2), 'utf8');
-      fs.writeFileSync(translateJsonSample, JSON.stringify(defaultConfig, null, 2), 'utf8');
-      console.log('Created .translator.json and .translator.json.sample with default configuration');
+    if (!fs.existsSync(translateEnvSample)) {
+      console.log('samples/.translator.env does not exist. Please create it manually.');
+    } else {
+      console.log('samples/.translator.env already exists');
     }
   } catch (error) {
     console.error('Error ensuring assets exist:', error);
     process.exit(1);
+  }
+}
+
+async function copyConfigurationSamples() {
+  console.log('Copying configuration sample files to dist...');
+
+  try {
+    const samplesDir = path.join(ROOT_DIR, 'samples');
+    const sourceEnvSample = path.join(samplesDir, '.translator.env');
+    const sourceJsonSample = path.join(samplesDir, '.translator.json');
+    const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
+
+    // Make sure the dist/samples directory exists
+    if (!fs.existsSync(distSamplesDir)) {
+      fs.mkdirSync(distSamplesDir, { recursive: true });
+      console.log(`Created dist/samples directory: ${distSamplesDir}`);
+    }
+
+    // Copy the sample configuration files to the dist/samples directory
+    if (fs.existsSync(sourceEnvSample)) {
+      fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
+      console.log(`Copied samples/.translator.env to dist/samples folder`);
+    } else {
+      console.error(`samples/.translator.env not found`);
+    }
+
+    if (fs.existsSync(sourceJsonSample)) {
+      fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '.translator.json'));
+      console.log(`Copied samples/.translator.json to dist/samples folder`);
+    } else {
+      console.error(`samples/.translator.json not found`);
+    }
+  } catch (error) {
+    console.error('Error copying configuration samples:', error);
   }
 }
 
@@ -273,6 +293,9 @@ async function buildExtension() {
   try {
     await execPromise('yarn build');
     console.log('Extension built successfully using yarn');
+
+    // Copy configuration sample files after build
+    await copyConfigurationSamples();
   } catch (error) {
     console.error('Error building extension:', error);
     process.exit(1);
@@ -362,12 +385,20 @@ async function main() {
     console.log('Force icon generation flag detected. Will regenerate PNG icon from SVG.');
   }
 
+  // Check if version is provided as command line argument
+  const versionParam = process.argv.find(arg => arg.startsWith('--version='));
+  let providedVersion = null;
+  if (versionParam) {
+    providedVersion = versionParam.split('=')[1];
+    console.log(`Version provided as parameter: ${providedVersion}`);
+  }
+
   try {
     // First ensure all dependencies are installed
     await ensureDependencies();
 
-    // Then update version (this will prompt user for version update type)
-    const newVersion = await updateVersion();
+    // Use provided version or prompt user for version update type
+    const newVersion = providedVersion || await updateVersion();
 
     // Ensure all required assets exist
     await ensureAssets();

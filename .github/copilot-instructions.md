@@ -28,6 +28,9 @@ Key reminders:
 - All tests are in the `tests/` directory and use Vitest.
 
 ## Coding Style
+- Use strict TypeScript typing; avoid `any` type
+- Use static typing and interfaces to define clear contracts and avoid dynamic type checking where possible
+- Prefer small, composable modules and pure functions
 - Functions should be small, ideally under 20 lines.
 - If a function exceeds 40 lines, break it up immediately.
 - Avoid deep nesting of code (more than 3 levels).

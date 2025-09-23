@@ -48,6 +48,10 @@
   "activationEvents": [
     "onStartupFinished"
   ],
+  "files": [
+    "dist/**/*",
+    "samples/**/*"
+  ],
   "scripts": {
     "build": "tsc -p ./",
     "watch": "tsc -w -p ./",
