@@ -5,6 +5,6 @@
     }
   ],
   "settings": {
-    "translator.autoStart": true
+    "translator.autoStart": "true"
   }
 }
