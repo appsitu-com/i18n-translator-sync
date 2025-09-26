@@ -30,7 +30,7 @@ export abstract class TranslatorAdapter {
   /**
    * Abstract method to handle a file being opened
    */
-  protected abstract handleFileOpen(path: string): Promise<void>;
+  protected abstract openDocument(path: string): Promise<void>;
 
   /**
    * Abstract method to create a workspace watcher appropriate for the environment
@@ -80,7 +80,7 @@ export abstract class TranslatorAdapter {
         this.workspacePath,
         this.logger,
         this.fileSystem,
-        this.handleFileOpen?.bind(this)
+        this.openDocument?.bind(this)
       );
 
       // Get cache (using await since it's now async)
@@ -149,6 +149,7 @@ export abstract class TranslatorAdapter {
       // Start watching (guard for test environments where startWatching may be mocked out)
       const mgr: any = this.translatorManager as any;
       if (typeof mgr.startWatching === 'function') {
+        // Start watching for file changes
         await mgr.startWatching(projectConfig);
       } else {
         this.logger.warn('TranslatorManager.startWatching not available. Skipping watcher startup (test/mock environment).');

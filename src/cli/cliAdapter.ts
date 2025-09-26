@@ -35,7 +35,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
    * Implementation of the abstract method to handle file opens in CLI
    * Simply logs the file open since CLI doesn't have a UI to display files
    */
-  protected async handleFileOpen(path: string): Promise<void> {
+  protected async openDocument(path: string): Promise<void> {
     this.logger.info(`File opened: ${path}`);
   }
 
