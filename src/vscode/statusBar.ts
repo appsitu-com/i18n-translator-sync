@@ -66,16 +66,16 @@ export class VSCodeStatusBarManager implements StatusBarManager {
     }
 
     if (state.isRunning) {
-      this.statusBarItem.text = '$(play-circle) Translator: Running';
-      this.statusBarItem.tooltip = 'i18n Translator is actively watching files. Click for menu options.';
+      this.statusBarItem.text = '$(play-circle) Translator';
+      this.statusBarItem.tooltip = 'i18n Translator is auto translating selected files. Click for menu options.';
       this.statusBarItem.command = 'translator.showContextMenu';
     } else if (state.isInitialized) {
-      this.statusBarItem.text = '$(debug-pause) Translator: Stopped';
-      this.statusBarItem.tooltip = 'i18n Translator is ready but not watching files. Click for menu options.';
+      this.statusBarItem.text = '$(debug-pause) Translator';
+      this.statusBarItem.tooltip = 'i18n Translator is Paused. Click for menu options.';
       this.statusBarItem.command = 'translator.showContextMenu';
     } else {
-      this.statusBarItem.text = '$(globe) Start Translator';
-      this.statusBarItem.tooltip = 'i18n Translator is not initialized. Click for menu options.';
+      this.statusBarItem.text = '$(globe) Translator';
+      this.statusBarItem.tooltip = 'i18n Translator not Started. Click for menu options.';
       this.statusBarItem.command = 'translator.showContextMenu';
     }
   }
