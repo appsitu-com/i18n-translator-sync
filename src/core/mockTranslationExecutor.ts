@@ -84,7 +84,8 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     targetLocale: string,
     configProvider: { get: <T>(section: string, defaultValue?: T) => T },
     sourceFile: string,
-    isBackTranslation: boolean
+    isBackTranslation: boolean,
+    _passphrase?: string
   ): Promise<string[]> {
     // Capture the translation command
     this._commands.push({

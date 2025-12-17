@@ -77,7 +77,17 @@ describe('Config', () => {
     })
 
     it('should validate a minimal valid configuration', () => {
-      const minimalConfig = {}
+      const minimalConfig = {
+        sourceDir: '',
+        targetDir: '',
+        sourcePaths: ['i18n/en'],
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        enableBackTranslation: false,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'azure',
+        engineOverrides: {}
+      }
 
       const result = TranslateConfigSchema.safeParse(minimalConfig)
       expect(result.success).toBe(true)

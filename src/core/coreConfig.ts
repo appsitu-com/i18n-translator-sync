@@ -26,6 +26,7 @@ export const TranslateConfigSchema = z.object({
     .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns')
 })
 
+
 // Infer the type from the schema - should match our interface
 export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema>
 
@@ -64,6 +65,11 @@ export const defaultConfig: TranslateProjectConfig = {
 
 /**
  * Load project configuration from .translator.json
+ * @param rootPath The root path of the project
+ * @param configProvider The configuration provider
+ * @param logger The logger instance
+ * @param fileSystem The file system instance
+ * @returns The loaded project configuration
  */
 export async function loadProjectConfig(
   rootPath: string,

@@ -6,6 +6,7 @@ import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
 import { TranslatorPipeline } from './pipeline';
 import { MateCatService, MateCatSettings } from './matecat';
 import { ITranslationExecutor } from './translationExecutor';
+import { IPassphraseManager } from './secrets/passphraseManager';
 import * as path from 'path';
 
 /**
@@ -25,10 +26,11 @@ export class TranslatorManager {
     private workspacePath: string,
     private workspaceWatcher: WorkspaceWatcher,
     private configProvider: ConfigProvider,
-    executor?: ITranslationExecutor
+    executor?: ITranslationExecutor,
+    passphraseManager?: IPassphraseManager
   ) {
     this.cache = cache;
-    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, executor);
+    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, executor, passphraseManager);
 
     // Initialize MateCat integration
     this.initializeMateCat();
@@ -50,6 +52,7 @@ export class TranslatorManager {
 
   /**
    * Start watching for file changes and translate
+   * @param config The project configuration
    */
   async startWatching(config: TranslateProjectConfig): Promise<void> {
     if (this.isWatching) {
@@ -132,8 +135,13 @@ export class TranslatorManager {
 
   /**
    * Handler for file creation or modification
+   * @param uri The URI of the file that changed
+   * @param config The project configuration
    */
-  private async onAddOrChange(uri: IUri, config: TranslateProjectConfig): Promise<void> {
+  private async onAddOrChange(
+    uri: IUri,
+    config: TranslateProjectConfig
+  ): Promise<void> {
     try {
       this.logger.info(`File changed: ${uri.fsPath}`);
 
@@ -177,7 +185,10 @@ export class TranslatorManager {
   /**
    * Handler for file rename events
    */
-  private async onRename(e: FileRenameEvent, config: TranslateProjectConfig): Promise<void> {
+  private async onRename(
+    e: FileRenameEvent,
+    config: TranslateProjectConfig
+  ): Promise<void> {
     for (const file of e.files) {
       try {
         const oldPath = file.oldUri.fsPath.replace(/\\/g, '/');
@@ -338,16 +349,15 @@ export class TranslatorManager {
           this.logger.info(`Bulk translating file ${i + 1}/${totalFiles}: ${fileUri.fsPath}`);
 
           // Process the file using the pipeline
-          await this.pipeline.processFile(
-            fileUri,
-            this.workspacePath,
-            config,
-            this.configProvider,
-            undefined,
-            force // Pass force flag to respect timestamp check
-          );
+              await this.pipeline.processFile(
+                fileUri,
+                this.workspacePath,
+                config,
+                this.configProvider,
+                force // Force translation flag
+              );
 
-          filesProcessed++;
+              filesProcessed++;
         } catch (error) {
           this.logger.error(`Error processing file ${fileUri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
           if (error instanceof Error && error.stack) {
@@ -405,6 +415,7 @@ export class TranslatorManager {
   /**
    * Process all existing source files
    * This is called when the watcher starts to ensure all files are up to date
+   * @param config The project configuration
    */
   private async processExistingSourceFiles(config: TranslateProjectConfig): Promise<void> {
     this.logger.info('Scanning existing source files...');
@@ -588,7 +599,6 @@ export class TranslatorManager {
       this.workspacePath,
       config,
       this.configProvider,
-      undefined,
       force
     );
 

@@ -3,6 +3,7 @@ import * as path from 'path'
 import * as fs from 'fs'
 import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
 import { StatusBarManager, VSCodeStatusBarManager, TranslatorState } from './vscode/statusBar'
+import { VSCodeLogger } from './vscode/vscodeLogger'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
@@ -14,16 +15,16 @@ export let statusBarManager: StatusBarManager | null = null
  */
 function getOutputChannel(): vscode.OutputChannel {
   if (!outputChannel) {
-    outputChannel = vscode.window.createOutputChannel('i18n Translator');
+    outputChannel = vscode.window.createOutputChannel('i18n Translator')
   }
-  return outputChannel;
+  return outputChannel
 }
 
 /**
  * Get the current VSCode adapter instance (without creating a new one)
  */
 function getCurrentVSCodeAdapter(): VSCodeTranslatorAdapter | null {
-  return vsCodeAdapter;
+  return vsCodeAdapter
 }
 
 /**
@@ -31,9 +32,12 @@ function getCurrentVSCodeAdapter(): VSCodeTranslatorAdapter | null {
  */
 function getVSCodeAdapter(): VSCodeTranslatorAdapter {
   if (!vsCodeAdapter) {
-    vsCodeAdapter = new VSCodeTranslatorAdapter(getOutputChannel());
+    const channel = getOutputChannel()
+    const logger = new VSCodeLogger(channel)
+
+    vsCodeAdapter = new VSCodeTranslatorAdapter(logger)
   }
-  return vsCodeAdapter;
+  return vsCodeAdapter
 }
 
 /**
@@ -41,14 +45,14 @@ function getVSCodeAdapter(): VSCodeTranslatorAdapter {
  */
 function getTranslatorState(): TranslatorState {
   if (!vsCodeAdapter) {
-    return { isRunning: false, isInitialized: false };
+    return { isRunning: false, isInitialized: false }
   }
 
-  const status = vsCodeAdapter.getStatus();
+  const status = vsCodeAdapter.getStatus()
   return {
     isRunning: status.running,
     isInitialized: status.initialized
-  };
+  }
 }
 
 /**
@@ -56,8 +60,8 @@ function getTranslatorState(): TranslatorState {
  */
 function updateStatusBar(): void {
   if (statusBarManager) {
-    const state = getTranslatorState();
-    statusBarManager.updateStatus(state);
+    const state = getTranslatorState()
+    statusBarManager.updateStatus(state)
   }
 }
 
@@ -66,16 +70,16 @@ function updateStatusBar(): void {
  */
 function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
   if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-    return; // No workspace folder available
+    return // No workspace folder available
   }
 
-  const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+  const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath
   const configFiles = [
     {
       name: '.translator.env',
       targetPath: path.join(workspacePath, '.translator.env'),
       samplePath: path.join(context.extensionPath, 'samples', '.translator.env'),
-      message: "A .translator.env file has been created. Please configure your translation API keys.",
+      message: 'A .translator.env file has been created. Please configure your translation API keys.',
       reminderMessage: "Don't forget to configure your translation API keys in the .translator.env file.",
       docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys'
     },
@@ -83,11 +87,11 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
       name: '.translator.json',
       targetPath: path.join(workspacePath, '.translator.json'),
       samplePath: path.join(context.extensionPath, 'samples', '.translator.json'),
-      message: "A .translator.json file has been created. Please configure your translation settings.",
+      message: 'A .translator.json file has been created. Please configure your translation settings.',
       reminderMessage: null, // No reminder for JSON file
       docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration'
     }
-  ];
+  ]
 
   for (const config of configFiles) {
     // Check if the file exists
@@ -96,45 +100,33 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
       if (fs.existsSync(config.samplePath)) {
         try {
           // Copy the sample to create the target file
-          fs.copyFileSync(config.samplePath, config.targetPath);
+          fs.copyFileSync(config.samplePath, config.targetPath)
 
           // Notify the user
-          vscode.window
-            .showInformationMessage(
-              config.message,
-              'Open File',
-              'Documentation'
-            )
-            .then((selection) => {
-              if (selection === 'Open File') {
-                vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
-                  vscode.window.showTextDocument(doc);
-                });
-              } else if (selection === 'Documentation') {
-                vscode.env.openExternal(vscode.Uri.parse(config.docsUrl));
-              }
-            });
+          vscode.window.showInformationMessage(config.message, 'Open File', 'Documentation').then((selection) => {
+            if (selection === 'Open File') {
+              vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
+                vscode.window.showTextDocument(doc)
+              })
+            } else if (selection === 'Documentation') {
+              vscode.env.openExternal(vscode.Uri.parse(config.docsUrl))
+            }
+          })
         } catch (error) {
-          vscode.window.showWarningMessage(`Failed to create ${config.name} file: ${error}`);
+          vscode.window.showWarningMessage(`Failed to create ${config.name} file: ${error}`)
         }
       }
     } else if (config.reminderMessage) {
       // If file already exists and we have a reminder message, show it
-      vscode.window
-        .showInformationMessage(
-          config.reminderMessage,
-          'Open File',
-          'Documentation'
-        )
-        .then((selection) => {
-          if (selection === 'Open File') {
-            vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
-              vscode.window.showTextDocument(doc);
-            });
-          } else if (selection === 'Documentation') {
-            vscode.env.openExternal(vscode.Uri.parse(config.docsUrl));
-          }
-        });
+      vscode.window.showInformationMessage(config.reminderMessage, 'Open File', 'Documentation').then((selection) => {
+        if (selection === 'Open File') {
+          vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
+            vscode.window.showTextDocument(doc)
+          })
+        } else if (selection === 'Documentation') {
+          vscode.env.openExternal(vscode.Uri.parse(config.docsUrl))
+        }
+      })
     }
   }
 }
@@ -145,14 +137,14 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
 export async function onStartTranslator(context: vscode.ExtensionContext): Promise<void> {
   try {
     // Get the singleton adapter
-    const adapter = getVSCodeAdapter();
-    await adapter.startWithContext(context);
+    const adapter = getVSCodeAdapter()
+    await adapter.startWithContext(context)
 
     // Update status bar to reflect running state
-    updateStatusBar();
+    updateStatusBar()
 
     // When manually started, check if we need to ask about auto-start
-    const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask');
+    const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
 
     // Only prompt if the setting is still 'ask'
     if (autoStartSetting === 'ask') {
@@ -160,14 +152,16 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
         'Do you want to automatically start the translator whenever you open this workspace?',
         'Yes',
         'No'
-      );
+      )
 
-      const autoStart = response === 'Yes' ? 'true' : 'false';
-      await vscode.workspace.getConfiguration('translator').update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace);
+      const autoStart = response === 'Yes' ? 'true' : 'false'
+      await vscode.workspace
+        .getConfiguration('translator')
+        .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
     }
 
     // Check and create configuration files if needed
-    checkAndCreateConfigFiles(context);
+    checkAndCreateConfigFiles(context)
   } catch (error: any) {
     // Show error and offer to open env file
     vscode.window
@@ -194,13 +188,13 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
  */
 export function stopTranslator(): void {
   // Use existing adapter (don't create a new one)
-  const adapter = getCurrentVSCodeAdapter();
+  const adapter = getCurrentVSCodeAdapter()
   if (adapter) {
-    adapter.stop();
+    adapter.stop()
     // Update status bar to reflect stopped state
-    updateStatusBar();
+    updateStatusBar()
   } else {
-    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
   }
 }
 
@@ -209,13 +203,13 @@ export function stopTranslator(): void {
  */
 export async function restartTranslator(context: vscode.ExtensionContext): Promise<void> {
   // Use existing adapter or get the singleton (this will be the same instance created during activation)
-  const adapter = getCurrentVSCodeAdapter();
+  const adapter = getCurrentVSCodeAdapter()
   if (adapter) {
-    await adapter.restartWithContext(context);
+    await adapter.restartWithContext(context)
     // Update status bar to reflect running state
-    updateStatusBar();
+    updateStatusBar()
   } else {
-    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
   }
 }
 
@@ -224,11 +218,11 @@ export async function restartTranslator(context: vscode.ExtensionContext): Promi
  */
 export async function pushToMateCat(): Promise<void> {
   // Use existing adapter or get the singleton (this will be the same instance created during activation)
-  const adapter = getCurrentVSCodeAdapter();
+  const adapter = getCurrentVSCodeAdapter()
   if (adapter) {
-    await adapter.pushToMateCat();
+    await adapter.pushToMateCat()
   } else {
-    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
   }
 }
 
@@ -237,11 +231,11 @@ export async function pushToMateCat(): Promise<void> {
  */
 export async function pullFromMateCat(): Promise<void> {
   // Use existing adapter or get the singleton (this will be the same instance created during activation)
-  const adapter = getCurrentVSCodeAdapter();
+  const adapter = getCurrentVSCodeAdapter()
   if (adapter) {
-    await adapter.pullFromMateCat();
+    await adapter.pullFromMateCat()
   } else {
-    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.');
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
   }
 }
 
@@ -249,67 +243,103 @@ export async function pullFromMateCat(): Promise<void> {
  * Show the output channel
  */
 export function onShowOutput(): void {
-  // Only show output if adapter already exists (don't create a new one)
-  const adapter = getCurrentVSCodeAdapter();
+  const adapter = getCurrentVSCodeAdapter()
+  const channel = getOutputChannel()
+
+  channel.appendLine(`Output channel shown at: ${new Date().toISOString()}`)
+  channel.appendLine('Available commands:')
+  channel.appendLine('- Translator: Start (starts file watching and auto-translation)')
+  channel.appendLine('- Translator: Stop (stops file watching)')
+  channel.appendLine('- Translator: Restart (restart watching)')
+  channel.appendLine('- Translator: Push to MateCat (works without starting)')
+  channel.appendLine('- Translator: Pull from MateCat (works without starting)')
+  channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
+  channel.appendLine('- Translator: Show Output (this command)')
+  channel.appendLine('')
+
   if (adapter) {
-    adapter.showOutput();
+    if (adapter.isRunning()) {
+      channel.appendLine('Status: Translator is currently RUNNING (watching for file changes)')
+    } else {
+      channel.appendLine('Status: Translator is STOPPED (not watching for file changes)')
+    }
   } else {
-    // If no adapter exists, just show the basic output channel
-    const channel = getOutputChannel();
-    channel.appendLine(`Output channel shown at: ${new Date().toISOString()}`);
-    channel.appendLine("Available commands:");
-    channel.appendLine('- Translator: Start (starts file watching and auto-translation)');
-    channel.appendLine('- Translator: Stop (stops file watching)');
-    channel.appendLine('- Translator: Restart (restart watching)');
-    channel.appendLine('- Translator: Push to MateCat (works without starting)');
-    channel.appendLine('- Translator: Pull from MateCat (works without starting)');
-    channel.appendLine('- Translator: Show Output (this command)');
-    channel.appendLine('');
-    channel.appendLine('Status: Extension not yet activated');
-    channel.show();
+    channel.appendLine('Status: Extension not yet activated')
   }
+
+  channel.show()
 }
 
 /**
  * Show context menu with all available translator commands
  */
 export async function showContextMenu(context: vscode.ExtensionContext): Promise<void> {
-  const state = getTranslatorState();
+  const state = getTranslatorState()
 
   // Create menu items based on current state
-  const items: vscode.QuickPickItem[] = [];
+  const items: vscode.QuickPickItem[] = []
 
   if (state.isRunning) {
     items.push(
-      { label: '$(debug-pause) Stop Translator', description: 'Stop file watching and auto-translation', detail: 'translator.stop' },
-      { label: '$(refresh) Restart Translator', description: 'Restart file watching with fresh configuration', detail: 'translator.restart' }
-    );
+      {
+        label: '$(debug-pause) Stop Translator',
+        description: 'Stop file watching and auto-translation',
+        detail: 'translator.stop'
+      },
+      {
+        label: '$(refresh) Restart Translator',
+        description: 'Restart file watching with fresh configuration',
+        detail: 'translator.restart'
+      }
+    )
   } else if (state.isInitialized) {
     items.push(
-      { label: '$(play-circle) Start Translator', description: 'Start file watching and auto-translation', detail: 'translator.start' },
-      { label: '$(refresh) Restart Translator', description: 'Restart file watching with fresh configuration', detail: 'translator.restart' }
-    );
+      {
+        label: '$(play-circle) Start Translator',
+        description: 'Start file watching and auto-translation',
+        detail: 'translator.start'
+      },
+      {
+        label: '$(refresh) Restart Translator',
+        description: 'Restart file watching with fresh configuration',
+        detail: 'translator.restart'
+      }
+    )
   } else {
-    items.push(
-      { label: '$(play-circle) Start Translator', description: 'Initialize and start file watching', detail: 'translator.start' }
-    );
+    items.push({
+      label: '$(play-circle) Start Translator',
+      description: 'Initialize and start file watching',
+      detail: 'translator.start'
+    })
   }
 
   // Always available commands
   items.push(
-    { label: '$(cloud-upload) Push to MateCat', description: 'Upload source files to MateCat for professional translation', detail: 'translator.push' },
-    { label: '$(cloud-download) Pull from MateCat', description: 'Download completed translations from MateCat', detail: 'translator.pull' },
-    { label: '$(output) Show Output', description: 'Open the translator output channel', detail: 'translator.showOutput' }
-  );
+    {
+      label: '$(cloud-upload) Push to MateCat',
+      description: 'Upload source files to MateCat for professional translation',
+      detail: 'translator.push'
+    },
+    {
+      label: '$(cloud-download) Pull from MateCat',
+      description: 'Download completed translations from MateCat',
+      detail: 'translator.pull'
+    },
+    {
+      label: '$(output) Show Output',
+      description: 'Open the translator output channel',
+      detail: 'translator.showOutput'
+    }
+  )
 
   const selected = await vscode.window.showQuickPick(items, {
     placeHolder: 'Select a translator command',
     title: 'i18n Translator Commands'
-  });
+  })
 
   if (selected && selected.detail) {
     // Execute the selected command
-    await vscode.commands.executeCommand(selected.detail, context);
+    await vscode.commands.executeCommand(selected.detail, context)
   }
 }
 
@@ -318,37 +348,40 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
  */
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   // Get or create output channel
-  const channel = getOutputChannel();
-  context.subscriptions.push(channel);
+  const channel = getOutputChannel()
+  context.subscriptions.push(channel)
+
+  // Create logger bound to the output channel
+  const logger = new VSCodeLogger(channel)
 
   // Create the adapter with shared output channel
-  vsCodeAdapter = new VSCodeTranslatorAdapter(channel);
+  vsCodeAdapter = new VSCodeTranslatorAdapter(logger)
 
   // Create the status bar manager
-  statusBarManager = new VSCodeStatusBarManager(context);
-  statusBarManager.create();
+  statusBarManager = new VSCodeStatusBarManager(context)
+  statusBarManager.create()
 
   // Log activation
-  channel.appendLine('i18n Translator extension activated');
-  channel.appendLine(`Activation time: ${new Date().toISOString()}`);
-  channel.appendLine('To see this output, run the command "Translator: Show Output"');
+  channel.appendLine('i18n Translator extension activated')
+  channel.appendLine(`Activation time: ${new Date().toISOString()}`)
+  channel.appendLine('To see this output, run the command "Translator: Show Output"')
 
   // Show the output channel during development
   if (process.env.VSCODE_DEBUG_MODE === '1' || process.env.NODE_ENV === 'development') {
-    channel.show();
+    channel.show()
   }
 
   // Initialize the adapter during activation so commands can work
   try {
-    await vsCodeAdapter.initializeOnActivation();
+    await vsCodeAdapter.initializeOnActivation()
     // Update status bar after initialization
-    updateStatusBar();
+    updateStatusBar()
   } catch (error) {
     // Don't fail activation if initialization fails - commands can still try to initialize
-    channel.appendLine(`Warning: Failed to initialize translator during activation: ${error}`);
-    channel.appendLine('Commands will attempt to initialize when needed');
+    channel.appendLine(`Warning: Failed to initialize translator during activation: ${error}`)
+    channel.appendLine('Commands will attempt to initialize when needed')
     // Still update status bar to show uninitialized state
-    updateStatusBar();
+    updateStatusBar()
   }
 
   // Register commands
@@ -360,12 +393,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
     vscode.commands.registerCommand('translator.showOutput', () => onShowOutput()),
     vscode.commands.registerCommand('translator.showContextMenu', async () => showContextMenu(context))
-  );
+  )
 
   // Check if auto-start is enabled for this workspace
-  const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask');
+  const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
   if (autoStartSetting === 'true') {
-    await onStartTranslator(context);
+    await onStartTranslator(context)
   }
 
   // Status bar is already created and will be updated by the commands
@@ -376,12 +409,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
  */
 export function deactivate(): void {
   if (statusBarManager) {
-    statusBarManager.dispose();
-    statusBarManager = null;
+    statusBarManager.dispose()
+    statusBarManager = null
   }
 
   if (vsCodeAdapter) {
-    vsCodeAdapter.dispose();
-    vsCodeAdapter = null;
+    vsCodeAdapter.dispose()
+    vsCodeAdapter = null
   }
 }

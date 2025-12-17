@@ -4,12 +4,14 @@ import { CliWorkspaceWatcher } from './watcher';
 import { CliConfigProvider } from './cliConfig';
 import { TranslatorAdapter } from '../core/adapters/baseAdapter';
 import { WorkspaceWatcher } from '../core/util/watcher';
+import { EnvPassphraseManager } from '../core/secrets/envPassphraseManager';
 
 /**
  * CLI adapter for the TranslatorManager
  */
 export class CLITranslatorAdapter extends TranslatorAdapter {
   private cliConfigProvider: CliConfigProvider;
+  private passphraseManager = new EnvPassphraseManager('TRANSLATOR_KEY');
 
   /**
    * Create a CLI translator adapter
@@ -44,6 +46,10 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
    */
   protected createWatcher(): WorkspaceWatcher {
     return new CliWorkspaceWatcher(this.fileSystem, this.logger, this.workspacePath);
+  }
+
+  protected getPassphraseManager() {
+    return this.passphraseManager;
   }
 
   /**

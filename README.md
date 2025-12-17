@@ -53,7 +53,7 @@ See [CLI Documentation](doc/CLI.md) for details on the command-line interface.
   - Ensures translations remain stable as AI engines tend to randomly alter results when retranslating.
   - [W] Automatic purging of unused past translations.
   - [W] Exported/imported to CSV files. CSV exports should be committed to GIT to preserve stable translations and reduce costs.
-- [W] **VS Code commmands**:
+- [W] **VS Code commands**:
   - **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translator.json` file for your API keys that's excluded from GIT.
   - **Translator: Stop** - Deactivates the "translate on save" feature.
   - **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.

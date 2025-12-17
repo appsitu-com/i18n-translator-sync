@@ -8,6 +8,7 @@ import { SQLiteCache } from '../cache/sqlite';
 import { ConfigProvider } from '../coreConfig';
 import { initTranslatorEnv } from '../util/environmentSetup';
 import { registerAllTranslators } from '../../translators/translatorRegistry';
+import { IPassphraseManager } from '../secrets/passphraseManager';
 
 /**
  * Base adapter for the TranslatorManager that can be extended for different environments
@@ -36,6 +37,13 @@ export abstract class TranslatorAdapter {
    * Abstract method to create a workspace watcher appropriate for the environment
    */
   protected abstract createWatcher(): WorkspaceWatcher;
+
+  /**
+   * Optional passphrase manager hook for environments that support encrypted keys
+   */
+  protected getPassphraseManager(): IPassphraseManager | undefined {
+    return undefined;
+  }
 
   /**
    * Get or create the cache
@@ -101,7 +109,9 @@ export abstract class TranslatorAdapter {
           this.cache,
           this.workspacePath,
           watcher,
-          this.configProvider
+          this.configProvider,
+          undefined,
+          this.getPassphraseManager()
         );
       }
     } catch (error: any) {

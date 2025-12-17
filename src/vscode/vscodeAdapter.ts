@@ -1,53 +1,81 @@
-import * as vscode from 'vscode';
-import { TranslatorAdapter } from '../core/adapters/baseAdapter';
-import { WorkspaceWatcher } from '../core/util/watcher';
-import { initTranslatorEnv } from '../core/util/environmentSetup';
-import { VSCodeFileSystem } from './filesystem';
-import { VSCodeLogger } from './vscodeLogger';
-import { VSCodeWorkspaceWatcher } from './watcher';
+import { PassphraseManager } from '../core/secrets/passphraseManager'
+import * as vscode from 'vscode'
+import { TranslatorAdapter } from '../core/adapters/baseAdapter'
+import { WorkspaceWatcher } from '../core/util/watcher'
+import { initTranslatorEnv } from '../core/util/environmentSetup'
+import { VSCodeFileSystem } from './filesystem'
+import { VSCodeWorkspaceWatcher } from './watcher'
 import { VsCodeConfigProvider } from './vscodeConfig'
+import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
+import { Logger } from '../core/util/baseLogger'
 
 /**
  * VSCode adapter for the TranslatorManager
  */
 export class VSCodeTranslatorAdapter extends TranslatorAdapter {
-  private outputChannel: vscode.OutputChannel;
-  private subscriptions: vscode.Disposable[] = [];
-  private vsCodeLogger: VSCodeLogger;
-  private vsCodeFileSystem: VSCodeFileSystem;
-  private vsCodeConfigProvider: VsCodeConfigProvider;
-  private initialized = false;
+  private subscriptions: vscode.Disposable[] = []
+  private initialized = false
+  private passphraseManager: PassphraseManager | null = null
 
-  constructor(outputChannel: vscode.OutputChannel) {
+  constructor(logger: Logger) {
     // Create platform-specific components using the provided output channel
-    const logger = new VSCodeLogger(outputChannel);
-    const fileSystem = new VSCodeFileSystem();
-    const configProvider = new VsCodeConfigProvider();
+    const fileSystem = new VSCodeFileSystem()
+    const configProvider = new VsCodeConfigProvider()
 
     // Get workspace path
-    const ws = vscode.workspace.workspaceFolders?.[0];
+    const ws = vscode.workspace.workspaceFolders?.[0]
     if (!ws) {
-      throw new Error('No workspace folder found');
+      throw new Error('No workspace folder found')
     }
 
-    super(ws.uri.fsPath, logger, fileSystem, configProvider);
+    super(ws.uri.fsPath, logger, fileSystem, configProvider)
+  }
 
-    // Store VSCode-specific components
-    this.outputChannel = outputChannel;
-    this.vsCodeLogger = logger;
-    this.vsCodeFileSystem = fileSystem;
-    this.vsCodeConfigProvider = configProvider;
+  /**
+   * Get the passphrase
+   */
+  private async getPassphrase(): Promise<string | undefined> {
+    if (!this.passphraseManager) {
+      return undefined
+    }
+
+    // If we already have a passphrase, use it
+    if (this.passphraseManager.hasPassphrase()) {
+      return this.passphraseManager.getPassphrase()
+    }
+
+    // Try to load the passphrase
+    await this.passphraseManager.loadPassphrase()
+
+    if (this.passphraseManager.hasPassphrase()) {
+      return this.passphraseManager.getPassphrase()
+    }
+
+    // If no passphrase is stored, ask the user
+    const passphrase = await vscode.window.showInputBox({
+      prompt: 'Enter your encryption passphrase to access API keys',
+      password: true,
+      ignoreFocusOut: true,
+      placeHolder: 'Encryption passphrase'
+    })
+
+    // Save it for future use during this session
+    if (passphrase) {
+      await this.passphraseManager.setPassphrase(passphrase)
+    }
+
+    return passphrase
   }
 
   /**
    * Implementation of the abstract method to handle file opens in VSCode
    */
-  protected async handleFileOpen(path: string): Promise<void> {
+  protected async openDocument(path: string): Promise<void> {
     try {
-      const doc = await vscode.workspace.openTextDocument(path);
-      await vscode.window.showTextDocument(doc);
+      const doc = await vscode.workspace.openTextDocument(path)
+      await vscode.window.showTextDocument(doc)
     } catch (error) {
-      this.logger.error(`Error opening file: ${error}`);
+      this.logger.error(`Error opening file: ${error}`)
     }
   }
 
@@ -55,72 +83,98 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * Implementation of the abstract method to create a workspace watcher for VSCode
    */
   protected createWatcher(): WorkspaceWatcher {
-    return new VSCodeWorkspaceWatcher();
+    return new VSCodeWorkspaceWatcher()
   }
 
   /**
    * Initialize the adapter for use during extension activation
    * This sets up everything needed for commands to work, but doesn't start watching
    */
-  async initializeOnActivation(): Promise<void> {
+  async initializeOnActivation(context?: vscode.ExtensionContext): Promise<void> {
     if (this.initialized) {
-      return;
+      return
     }
 
     try {
-      // Load configuration from .translator.json
-      await this.vsCodeConfigProvider.load();
+      if (context && !this.passphraseManager) {
+        this.passphraseManager = new PassphraseManager(context, this.logger)
+      }
 
-      // Initialize environment
-      await initTranslatorEnv(
-        this.workspacePath,
-        this.logger,
-        this.fileSystem,
-        this.handleFileOpen.bind(this)
-      );
+      await this.initialize()
 
-      // Initialize the base adapter (creates translator manager but doesn't start watching)
-      await this.initialize();
-
-      this.initialized = true;
-      this.logger.info('Translator initialized (not started)');
+      this.initialized = true
+      this.logger.info('Translator initialized (not started)')
     } catch (error: any) {
-      this.logger.error(`Error initializing translator: ${error.message || String(error)}`);
-      throw error;
+      this.logger.error(`Error initializing translator: ${error.message || String(error)}`)
+      throw error
     }
   }
 
-  /**
-   * VSCode-specific initialization
-   */
-  async initializeVSCode(): Promise<void> {
-    // This method is now just an alias for backward compatibility
-    await this.initializeOnActivation();
+  // /**
+  //  * VSCode-specific initialization
+  //  */
+  // async initializeVSCode(): Promise<void> {
+  //   // This method is now just an alias for backward compatibility
+  //   await this.initializeOnActivation();
+  // }
+
+  protected getPassphraseManager(): PassphraseManager | undefined {
+    return this.passphraseManager ?? undefined
   }
 
   /**
    * Start the translator with VSCode-specific initialization
    * @param context VSCode extension context
    */
-  async startWithContext(_context: vscode.ExtensionContext): Promise<void> {
+  async startWithContext(context: vscode.ExtensionContext): Promise<void> {
     // Check if already running
     if (this.running) {
-      vscode.window.showInformationMessage('Translator already running');
-      return;
+      vscode.window.showInformationMessage('Translator already running')
+      return
     }
 
     try {
       // Ensure we're initialized (this is idempotent)
-      await this.initializeOnActivation();
+      await this.initializeOnActivation(context)
 
       // Start watching for file changes and performing translations
-      await this.start();
+      try {
+        // Get the passphrase once - it's already stored in the singleton
+        await this.getPassphrase()
+
+        // Start the translator
+        await this.start()
+      } catch (error) {
+        if (error instanceof EncryptedKeyAccessError) {
+          // Prompt user to set up encryption
+          const action = await vscode.window.showErrorMessage(
+            `Unable to access encrypted API key: ${error.message}`,
+            'Set Up Encryption',
+            'Cancel'
+          )
+
+          if (action === 'Set Up Encryption' && this.passphraseManager) {
+            const setupEncryptionCommand = 'translator.setupEncryption'
+            await vscode.commands.executeCommand(setupEncryptionCommand)
+
+            // Try again after setting up encryption
+            await this.getPassphrase()
+
+            // Start the translator
+            await this.start()
+          } else {
+            throw error // Re-throw if the user cancelled
+          }
+        } else {
+          throw error // Re-throw other errors
+        }
+      }
 
       // Show VSCode-specific success message
-      vscode.window.showInformationMessage('Translator started');
+      vscode.window.showInformationMessage('Translator started')
     } catch (error: any) {
-      vscode.window.showErrorMessage(`Error starting translator: ${error.message || String(error)}`);
-      throw error;
+      vscode.window.showErrorMessage(`Error starting translator: ${error.message || String(error)}`)
+      throw error
     }
   }
 
@@ -128,10 +182,10 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * Override the stop method to show VSCode-specific messages
    */
   stop(): void {
-    super.stop();
+    super.stop()
 
     if (!this.running) {
-      vscode.window.showInformationMessage('Translator stopped');
+      vscode.window.showInformationMessage('Translator stopped')
     }
   }
 
@@ -139,9 +193,9 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * Restart the translator with VSCode context
    * @param context VSCode extension context
    */
-  async restartWithContext(_context: vscode.ExtensionContext): Promise<void> {
-    this.stop();
-    await this.startWithContext(_context);
+  async restartWithContext(context: vscode.ExtensionContext): Promise<void> {
+    this.stop()
+    await this.startWithContext(context)
   }
 
   /**
@@ -149,18 +203,18 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    */
   async pushToMateCat(): Promise<void> {
     // Ensure we're initialized but don't require the translator to be running
-    await this.initializeOnActivation();
+    await this.initializeOnActivation()
 
     if (!this.translatorManager) {
-      vscode.window.showErrorMessage('Translator not initialized properly');
-      return;
+      vscode.window.showErrorMessage('Translator not initialized properly')
+      return
     }
 
     try {
-      await super.pushToMateCat();
-      vscode.window.showInformationMessage('Successfully pushed translations to MateCat');
+      await super.pushToMateCat()
+      vscode.window.showInformationMessage('Successfully pushed translations to MateCat')
     } catch (e: any) {
-      vscode.window.showErrorMessage(`MateCat push failed: ${e.message}`);
+      vscode.window.showErrorMessage(`MateCat push failed: ${e.message}`)
     }
   }
 
@@ -169,81 +223,57 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    */
   async pullFromMateCat(): Promise<void> {
     // Ensure we're initialized but don't require the translator to be running
-    await this.initializeOnActivation();
+    await this.initializeOnActivation()
 
     if (!this.translatorManager) {
-      vscode.window.showErrorMessage('Translator not initialized properly');
-      return;
+      vscode.window.showErrorMessage('Translator not initialized properly')
+      return
     }
 
     try {
-      await super.pullFromMateCat();
-      vscode.window.showInformationMessage('Successfully pulled translations from MateCat');
+      await super.pullFromMateCat()
+      vscode.window.showInformationMessage('Successfully pulled translations from MateCat')
     } catch (e: any) {
-      vscode.window.showErrorMessage(`MateCat pull failed: ${e.message}`);
+      vscode.window.showErrorMessage(`MateCat pull failed: ${e.message}`)
     }
-  }
-
-  /**
-   * Show the output channel
-   */
-  showOutput(): void {
-    this.outputChannel.appendLine(`Output channel shown at: ${new Date().toISOString()}`);
-    this.outputChannel.appendLine("Available commands:");
-    this.outputChannel.appendLine('- Translator: Start (starts file watching and auto-translation)');
-    this.outputChannel.appendLine('- Translator: Stop (stops file watching)');
-    this.outputChannel.appendLine('- Translator: Restart (restart watching)');
-    this.outputChannel.appendLine('- Translator: Push to MateCat (works without starting)');
-    this.outputChannel.appendLine('- Translator: Pull from MateCat (works without starting)');
-    this.outputChannel.appendLine('- Translator: Show Output (this command)');
-
-    if (this.running) {
-      this.outputChannel.appendLine('');
-      this.outputChannel.appendLine('Status: Translator is currently RUNNING (watching for file changes)');
-    } else {
-      this.outputChannel.appendLine('');
-      this.outputChannel.appendLine('Status: Translator is STOPPED (not watching for file changes)');
-    }
-
-    this.outputChannel.show();
   }
 
   /**
    * Check if the adapter has been initialized (separate from ready/running state)
    */
   isInitialized(): boolean {
-    return this.initialized;
+    return this.initialized
   }
 
   /**
    * Get the current status including VSCode-specific initialization state
    */
   getStatus(): { initialized: boolean; ready: boolean; running: boolean } {
-    const baseStatus = super.getStatus();
+    const baseStatus = super.getStatus()
     return {
       initialized: this.initialized,
       ready: baseStatus.initialized,
       running: baseStatus.running
-    };
+    }
   }
 
   /**
    * Check if the adapter is currently running
    */
   isRunning(): boolean {
-    return this.running;
+    return this.running
   }
 
   /**
    * Dispose all resources
    */
   dispose(): void {
-    super.dispose();
+    super.dispose()
 
     for (const subscription of this.subscriptions) {
-      subscription.dispose();
+      subscription.dispose()
     }
 
-    this.subscriptions = [];
+    this.subscriptions = []
   }
 }

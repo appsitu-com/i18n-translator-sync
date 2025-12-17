@@ -4,7 +4,7 @@ import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
 import { TranslatorEngine, TranslatorApiConfig } from '../translators/types'
 import { bulkTranslateWithEngine } from '../bulkTranslate'
-import { resolveEnvDeep } from './util/environmentSetup'
+import { resolveEnvDeep, resolveEnvObjectWithDecryption } from './util/environmentSetup'
 
 /**
  * Default implementation that actually performs translations and writes files
@@ -27,7 +27,8 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     targetLocale: string,
     configProvider: { get: <T>(section: string, defaultValue?: T) => T },
     _sourceFile: string,
-    _isBackTranslation: boolean
+    _isBackTranslation: boolean,
+    passphrase?: string
   ): Promise<string[]> {
     // If using copy engine, just return original segments
     if (engineName === 'copy') {
@@ -35,7 +36,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     }
 
     // Get engine configuration
-    const apiConfig = this.getEngineConfig(engineName, configProvider)
+    const apiConfig = this.getEngineConfig(engineName, configProvider, passphrase)
 
     // Perform actual translation
     return await bulkTranslateWithEngine(
@@ -73,10 +74,16 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
 
   /**
    * Get engine configuration for the given engine name
+   *
+   * @param engineName The name of the translation engine
+   * @param configProvider The configuration provider
+   * @param passphrase Optional passphrase for API key decryption
+   * @returns The resolved API configuration
    */
   private getEngineConfig(
     engineName: TranslatorEngine,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T }
+    configProvider: { get: <T>(section: string, defaultValue?: T) => T },
+    passphrase?: string
   ): TranslatorApiConfig {
     const rawConfig = configProvider.get(engineName)
 
@@ -85,7 +92,16 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     }
 
     // Resolve environment variables in configuration
-    return resolveEnvDeep(rawConfig, this.logger) as TranslatorApiConfig
+    if (passphrase) {
+      // Create a simple passphrase getter function
+      const getPassphrase = () => passphrase;
+
+      // Use version with passphrase for decryption
+      return resolveEnvObjectWithDecryption(rawConfig, this.logger, getPassphrase) as TranslatorApiConfig;
+    } else {
+      // Fallback to synchronous version (may fail for encrypted values)
+      return resolveEnvDeep(rawConfig, this.logger) as TranslatorApiConfig;
+    }
   }
 
   /**

@@ -58,7 +58,7 @@ vi.mock('../src/vscode/adapter', () => {
       mockAdapter.isInitialized.mockReturnValue(true);
       mockAdapter.getStatus.mockReturnValue({ initialized: true, ready: true, running: false });
     }),
-    initializeVSCode: vi.fn().mockResolvedValue(undefined),
+    // initializeVSCode: vi.fn().mockResolvedValue(undefined),
     handleFileOpen: vi.fn().mockResolvedValue(undefined),
     createWatcher: vi.fn().mockReturnValue({
       watch: vi.fn(),

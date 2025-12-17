@@ -5,6 +5,7 @@ import { TranslatorManager } from '../../src/core/translatorManager'
 import { Logger } from '../../src/core/util/baseLogger'
 import { TranslationCache } from '../../src/core/cache/sqlite'
 import { TranslateProjectConfig, ConfigProvider } from '../../src/core/coreConfig'
+import { IPassphraseManager } from '../../src/core/secrets/passphraseManager'
 
 // Mock dependencies
 vi.mock('../../src/core/cache/sqlite')
@@ -15,6 +16,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
   let mockLogger: Logger
   let mockCache: TranslationCache
   let mockFs: any
+  let mockPassphraseManager: IPassphraseManager
   let pipeline: TranslatorPipeline
 
   beforeEach(() => {
@@ -58,7 +60,14 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
     } as unknown as Logger
     mockCache = {} as TranslationCache
 
-    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, mockExecutor)
+    mockPassphraseManager = {
+      loadPassphrase: vi.fn().mockResolvedValue(undefined),
+      setPassphrase: vi.fn(),
+      getPassphrase: vi.fn().mockReturnValue('secret'),
+      hasPassphrase: vi.fn().mockReturnValue(false)
+    }
+
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, mockExecutor, mockPassphraseManager)
   })
 
   describe('Translation Command Capture', () => {
@@ -88,6 +97,8 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
 
       const sourceUri = mockFs.createUri('/workspace/i18n/en/messages.json')
 
+      const translateSpy = vi.spyOn(mockExecutor, 'translateSegments')
+
       // Process the file
       await pipeline.processFile(sourceUri, '/workspace', config, configProvider)
 
@@ -113,6 +124,12 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         isBackTranslation: false,
         sourceFile: sourceUri.fsPath
       })
+
+      // Passphrase should be forwarded to executor calls
+      expect(mockPassphraseManager.loadPassphrase).toHaveBeenCalled()
+      const translateCalls = translateSpy.mock.calls
+      expect(translateCalls[0][8]).toBe('secret')
+      expect(translateCalls[1][8]).toBe('secret')
     })
 
     it('should capture back-translation commands when enabled', async () => {

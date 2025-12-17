@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TranslatorManager } from '../../src/core/translatorManager';
 import { TranslateProjectConfig } from '../../src/core/coreConfig';
-import { FileSystem, IUri } from '../../src/core/util/fs';
+import { FileSystem } from '../../src/core/util/fs';
 import { Logger } from '../../src/core/util/baseLogger';
 import { FileWatcher, WorkspaceWatcher } from '../../src/core/util/watcher';
 
@@ -247,29 +247,23 @@ describe('TranslatorManager', () => {
     });
 
     it('should handle file deletion events', async () => {
-      // Start watching
       await translatorManager.startWatching(defaultProjectConfig);
 
-      // Get the watch method call to extract the listeners
       const watchCall = vi.mocked(mockFileWatcher.watch).mock.calls[0];
       const listeners = watchCall[1];
 
-      // Create a test URI
       const testUri = { fsPath: '/workspace/i18n/en/deleted.json', scheme: 'file', path: '/workspace/i18n/en/deleted.json' };
 
-      // Trigger the delete handler
       if (listeners.onDidDelete) {
         await listeners.onDidDelete(testUri);
       }
 
-      // Should call the pipeline
       expect(mockPipeline.removeFile).toHaveBeenCalledWith(
         testUri,
         '/workspace',
         defaultProjectConfig
       );
 
-      // Should log the action
       expect(logger.info).toHaveBeenCalledWith(`File deleted: ${testUri.fsPath}`);
       expect(logger.info).toHaveBeenCalledWith(`Successfully removed translations for file: ${testUri.fsPath}`);
     });

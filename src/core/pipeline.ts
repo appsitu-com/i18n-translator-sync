@@ -15,6 +15,7 @@ import {
 } from './util/pathOperations'
 import { ITranslationExecutor } from './translationExecutor'
 import { DefaultTranslationExecutor } from './defaultTranslationExecutor'
+import { IPassphraseManager } from './secrets/passphraseManager'
 
 /**
  * Core translator pipeline service
@@ -24,12 +25,20 @@ export class TranslatorPipeline {
   private logger: Logger
   private cache: TranslationCache
   private executor: ITranslationExecutor
+  private passphraseManager?: IPassphraseManager
 
-  constructor(fileSystem: FileSystem, logger: Logger, cache: TranslationCache, executor?: ITranslationExecutor) {
+  constructor(
+    fileSystem: FileSystem,
+    logger: Logger,
+    cache: TranslationCache,
+    executor?: ITranslationExecutor,
+    passphraseManager?: IPassphraseManager
+  ) {
     this.fileSystem = fileSystem
     this.logger = logger
     this.cache = cache
     this.executor = executor || new DefaultTranslationExecutor(fileSystem, logger, cache)
+    this.passphraseManager = passphraseManager
   }
 
   /**
@@ -95,6 +104,18 @@ export class TranslatorPipeline {
     }
   }
 
+  private async resolvePassphrase(): Promise<string | undefined> {
+    if (!this.passphraseManager) {
+      return undefined
+    }
+
+    if (!this.passphraseManager.hasPassphrase()) {
+      await this.passphraseManager.loadPassphrase()
+    }
+
+    return this.passphraseManager.getPassphrase()
+  }
+
   /**
    * Translate segments using specified engine
    */
@@ -153,13 +174,12 @@ export class TranslatorPipeline {
     workspacePath: string,
     config: TranslateProjectConfig,
     configProvider: { get: <T>(section: string, defaultValue?: T) => T },
-    params?: Partial<{ sourceLocale: string; targetLocales: string[]; enableBackTranslation: boolean }>,
     forceTranslation: boolean = false
   ): Promise<void> {
-    // Use provided params or fall back to project config
-    const sourceLocale = params?.sourceLocale ?? config.sourceLocale
-    const targetLocales = params?.targetLocales ?? config.targetLocales
-    const enableBackTranslation = params?.enableBackTranslation ?? config.enableBackTranslation
+    // Use values from config
+    const sourceLocale = config.sourceLocale
+    const targetLocales = config.targetLocales
+    const enableBackTranslation = config.enableBackTranslation
 
     // Get relative path from the source folder
     const rel = getRelativePath(srcUri.fsPath, workspacePath, config)
@@ -185,6 +205,7 @@ export class TranslatorPipeline {
 
     // Load translation contexts for JSON files
     const contexts = await this.loadJsonContexts(extraction, srcUri)
+    const passphrase = await this.resolvePassphrase()
 
     // Process each target locale
     for (const targetLocale of targetLocales) {
@@ -234,7 +255,8 @@ export class TranslatorPipeline {
         targetLocale,
         configProvider,
         srcUri.fsPath,
-        false
+        false,
+        passphrase
       )
 
       // Write forward translation output using the executor
@@ -289,7 +311,8 @@ export class TranslatorPipeline {
                 sourceLocale,
                 configProvider,
                 srcUri.fsPath,
-                true
+                true,
+                passphrase
               )
 
         // Write back translation output using the executor

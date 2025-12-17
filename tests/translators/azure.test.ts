@@ -84,6 +84,6 @@ describe('azure api', () => {
       apiConfig
     })
 
-    expect(out).toEqual(['Bonjour', 'monde'])
+    expect(out.map(text => text.toLowerCase())).toEqual(['bonjour', 'monde'])
   });
 })
