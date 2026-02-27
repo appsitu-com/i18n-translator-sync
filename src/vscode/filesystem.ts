@@ -104,6 +104,16 @@ export class VSCodeFileSystem implements FileSystem {
       throw new Error(`Failed to get file stats for ${uri.fsPath}: ${error}`);
     }
   }
+
+  async isDirectory(uri: IUri): Promise<boolean> {
+    try {
+      const vscodeUri = uri instanceof VSCodeUri ? uri.uri : vscode.Uri.file(uri.fsPath);
+      const stats = await vscode.workspace.fs.stat(vscodeUri);
+      return (stats.type & vscode.FileType.Directory) !== 0;
+    } catch {
+      return false;
+    }
+  }
 }
 
 // Singleton instance for VS Code file system

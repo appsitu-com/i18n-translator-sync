@@ -243,23 +243,9 @@ export class TranslatorManager {
         return false;
       }
 
-      // Try to read as directory
-      try {
-        await this.fileSystem.readDirectory(uri);
-        // If we can read it as a directory, it's not a file
-        return false;
-      } catch {
-        // If we can't read it as a directory but it exists, it's likely a file
-
-        // Check if the file is readable
-        try {
-          await this.fileSystem.readFile(uri);
-          return true;
-        } catch (readError) {
-          this.logger.error(`File exists but cannot be read: ${uri.fsPath}: ${readError instanceof Error ? readError.message : String(readError)}`);
-          return false;
-        }
-      }
+      // Check if it's a directory
+      const isDir = await this.fileSystem.isDirectory(uri);
+      return !isDir;
     } catch (error) {
       this.logger.error(`Error checking if path is file: ${uri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
       return false;

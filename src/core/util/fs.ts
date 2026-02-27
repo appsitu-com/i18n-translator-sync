@@ -91,6 +91,11 @@ export interface FileSystem {
    * Get file stats (size, creation time, modification time)
    */
   stat(uri: IUri): Promise<FileStat>
+
+  /**
+   * Check if a path is a directory
+   */
+  isDirectory(uri: IUri): Promise<boolean>
 }
 
 /**
@@ -181,6 +186,18 @@ export class NodeFileSystem implements FileSystem {
       }
     } catch (error) {
       throw new Error(`Failed to get file stats for ${uri.fsPath}: ${error}`)
+    }
+  }
+
+  /**
+   * Check if path is a directory
+   */
+  async isDirectory(uri: IUri): Promise<boolean> {
+    try {
+      const stats = await fs.stat(uri.fsPath)
+      return stats.isDirectory()
+    } catch {
+      return false
     }
   }
 }

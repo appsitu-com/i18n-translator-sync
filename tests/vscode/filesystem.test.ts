@@ -140,6 +140,33 @@ describe('VSCodeFileSystem', () => {
 
       expect(vscode.workspace.fs.createDirectory).toHaveBeenCalledWith(uri.uri);
     });
+
+    it('should check if path is a directory', async () => {
+      const dirUri = new VSCodeUri(vscode.Uri.file('/dir'));
+      const fileUri = new VSCodeUri(vscode.Uri.file('/file.txt'));
+
+      // Test: path is a directory
+      vi.mocked(vscode.workspace.fs.stat).mockResolvedValue({
+        type: FileType.Directory
+      } as any);
+
+      let isDir = await fileSystem.isDirectory(dirUri);
+      expect(isDir).toBe(true);
+
+      // Test: path is a file
+      vi.mocked(vscode.workspace.fs.stat).mockResolvedValue({
+        type: FileType.File
+      } as any);
+
+      isDir = await fileSystem.isDirectory(fileUri);
+      expect(isDir).toBe(false);
+
+      // Test: path doesn't exist
+      vi.mocked(vscode.workspace.fs.stat).mockRejectedValue(new Error('Not found'));
+
+      isDir = await fileSystem.isDirectory(fileUri);
+      expect(isDir).toBe(false);
+    });
   });
 
   describe('Path operations', () => {

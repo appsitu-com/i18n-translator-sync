@@ -128,6 +128,24 @@ describe('NodeFileSystem', () => {
       expect(entries.find((e: { name: string }) => e.name === 'subDir')).toBeDefined();
       expect(entries.find((e: { name: string; isDirectory: boolean }) => e.name === 'subDir')?.isDirectory).toBe(true);
     });
+
+    it('should check if path is a directory', async () => {
+      const dirPath = path.join(testDir, 'checkDir');
+      const filePath = path.join(testDir, 'checkFile.txt');
+
+      mkdirSync(dirPath);
+      writeFileSync(filePath, 'Test file');
+
+      // Test: path is a directory
+      expect(await fileSystem.isDirectory(fileSystem.createUri(dirPath))).toBe(true);
+
+      // Test: path is a file
+      expect(await fileSystem.isDirectory(fileSystem.createUri(filePath))).toBe(false);
+
+      // Test: path doesn't exist
+      const nonExistentPath = path.join(testDir, 'nonexistent');
+      expect(await fileSystem.isDirectory(fileSystem.createUri(nonExistentPath))).toBe(false);
+    });
   });
 
   // Error handling tests
