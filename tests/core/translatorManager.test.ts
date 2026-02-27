@@ -13,6 +13,7 @@ const createMockFileSystem = () => ({
   fileExists: vi.fn(),
   createDirectory: vi.fn(),
   readDirectory: vi.fn(),
+  isDirectory: vi.fn().mockResolvedValue(false),
   stat: vi.fn().mockResolvedValue({
     isFile: true,
     isDirectory: false,
@@ -102,7 +103,10 @@ describe('TranslatorManager', () => {
       cache,
       '/workspace',
       workspaceWatcher,
-      configProvider
+      configProvider,
+      undefined,
+      undefined,
+      undefined
     );
   });
 
@@ -267,6 +271,60 @@ describe('TranslatorManager', () => {
       expect(logger.info).toHaveBeenCalledWith(`File deleted: ${testUri.fsPath}`);
       expect(logger.info).toHaveBeenCalledWith(`Successfully removed translations for file: ${testUri.fsPath}`);
     });
+
+    it('should skip processing of excluded temporary files (.git)', async () => {
+      // Start watching
+      await translatorManager.startWatching(defaultProjectConfig);
+
+      // Get the watch method call to extract the listeners
+      const watchCall = vi.mocked(mockFileWatcher.watch).mock.calls[0];
+      const listeners = watchCall[1];
+
+      // Create a test URI for a .git temporary file
+      const excludedUri = { fsPath: '/workspace/i18n/en/messages.json.git', scheme: 'file' };
+
+      // Reset the mock to clear previous calls
+      vi.mocked(mockPipeline.processFile).mockClear();
+      vi.mocked(logger.debug).mockClear();
+
+      // Trigger the change handler with a .git file
+      if (listeners.onDidChange) {
+        await listeners.onDidChange(excludedUri);
+      }
+
+      // Should NOT call the pipeline for excluded files
+      expect(mockPipeline.processFile).not.toHaveBeenCalled();
+
+      // Should log that the file was skipped
+      expect(logger.debug).toHaveBeenCalledWith(`Skipping excluded file: ${excludedUri.fsPath}`);
+    });
+
+    it('should skip processing of excluded temporary files (.swp)', async () => {
+      // Start watching
+      await translatorManager.startWatching(defaultProjectConfig);
+
+      // Get the watch method call to extract the listeners
+      const watchCall = vi.mocked(mockFileWatcher.watch).mock.calls[0];
+      const listeners = watchCall[1];
+
+      // Create a test URI for a Vim swap file
+      const excludedUri = { fsPath: '/workspace/i18n/en/.messages.json.swp', scheme: 'file' };
+
+      // Reset the mock
+      vi.mocked(mockPipeline.processFile).mockClear();
+      vi.mocked(logger.debug).mockClear();
+
+      // Trigger the change handler
+      if (listeners.onDidChange) {
+        await listeners.onDidChange(excludedUri);
+      }
+
+      // Should NOT call the pipeline
+      expect(mockPipeline.processFile).not.toHaveBeenCalled();
+
+      // Should log that the file was skipped
+      expect(logger.debug).toHaveBeenCalledWith(`Skipping excluded file: ${excludedUri.fsPath}`);
+    });
   });
 
   describe('dispose', () => {
@@ -282,6 +340,201 @@ describe('TranslatorManager', () => {
 
       // Should close the cache
       expect(cache.close).toHaveBeenCalled();
+    });
+  });
+
+  describe('Configuration file watching', () => {
+    let configChangeCallback: (() => Promise<void>) | undefined;
+
+    beforeEach(() => {
+      // Create a new instance with a mock config change callback
+      configChangeCallback = vi.fn().mockResolvedValue(undefined);
+      translatorManager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        configChangeCallback
+      );
+
+      // Setup mock workspace watcher
+      vi.mocked(workspaceWatcher.createFileSystemWatcher).mockReturnValue(mockFileWatcher);
+    });
+
+    it('should create watchers for .translator.json and .translator.env', async () => {
+      await translatorManager.startWatching(defaultProjectConfig);
+
+      // Should create multiple watchers for source paths + config files
+      expect(workspaceWatcher.createFileSystemWatcher).toHaveBeenCalledTimes(3); // 1 for source + 2 for config files
+
+      // Should set up watch for .translator.json
+      expect(mockFileWatcher.watch).toHaveBeenCalledWith(
+        '.translator.json',
+        expect.objectContaining({
+          onDidCreate: expect.any(Function),
+          onDidChange: expect.any(Function),
+          onDidDelete: expect.any(Function)
+        })
+      );
+
+      // Should set up watch for .translator.env
+      expect(mockFileWatcher.watch).toHaveBeenCalledWith(
+        '.translator.env',
+        expect.objectContaining({
+          onDidCreate: expect.any(Function),
+          onDidChange: expect.any(Function),
+          onDidDelete: expect.any(Function)
+        })
+      );
+
+      // Should log watcher creation
+      expect(logger.info).toHaveBeenCalledWith('Watcher created for configuration file: .translator.json');
+      expect(logger.info).toHaveBeenCalledWith('Watcher created for environment file: .translator.env');
+    });
+
+    it('should call config change callback when .translator.json changes', async () => {
+      await translatorManager.startWatching(defaultProjectConfig);
+
+      // Get the watch call for .translator.json (should be the 2nd watcher for config files)
+      const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
+      // Find the .translator.json watch call
+      const jsonWatchCall = watchCalls.find(call => call[0] === '.translator.json');
+
+      expect(jsonWatchCall).toBeDefined();
+      if (jsonWatchCall) {
+        const listeners = jsonWatchCall[1];
+
+        // Trigger the change handler
+        if (listeners.onDidChange) {
+          await listeners.onDidChange({ fsPath: '/workspace/.translator.json', scheme: 'file' });
+        }
+
+        // Should call the config change callback
+        expect(configChangeCallback).toHaveBeenCalled();
+
+        // Should log the configuration change
+        expect(logger.info).toHaveBeenCalledWith(
+          'Configuration file changed (.translator.json), reloading configuration...'
+        );
+      }
+    });
+
+    it('should call config change callback when .translator.env changes', async () => {
+      await translatorManager.startWatching(defaultProjectConfig);
+
+      // Find the .translator.env watch call
+      const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
+      const envWatchCall = watchCalls.find(call => call[0] === '.translator.env');
+
+      expect(envWatchCall).toBeDefined();
+      if (envWatchCall) {
+        const listeners = envWatchCall[1];
+
+        // Trigger the change handler
+        if (listeners.onDidChange) {
+          await listeners.onDidChange({ fsPath: '/workspace/.translator.env', scheme: 'file' });
+        }
+
+        // Should call the config change callback
+        expect(configChangeCallback).toHaveBeenCalled();
+
+        // Should log the configuration change
+        expect(logger.info).toHaveBeenCalledWith(
+          'Configuration file changed (.translator.env), reloading configuration...'
+        );
+      }
+    });
+
+    it('should warn if config changes but no callback is provided', async () => {
+      // Create manager without callback
+      translatorManager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined // No callback
+      );
+
+      await translatorManager.startWatching(defaultProjectConfig);
+
+      const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
+      const jsonWatchCall = watchCalls.find(call => call[0] === '.translator.json');
+
+      if (jsonWatchCall) {
+        const listeners = jsonWatchCall[1];
+
+        if (listeners.onDidChange) {
+          await listeners.onDidChange({ fsPath: '/workspace/.translator.json', scheme: 'file' });
+        }
+
+        // Should warn that no handler is configured
+        expect(logger.warn).toHaveBeenCalledWith(
+          'Configuration changed but no handler is registered. Please restart the translator.'
+        );
+      }
+    });
+  });
+
+  describe('isExcludedFile', () => {
+    it('should exclude .git temporary files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.json.git')).toBe(true);
+    });
+
+    it('should exclude Vim swap files (.swp)', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/.file.json.swp')).toBe(true);
+    });
+
+    it('should exclude Vim backup files (.swo)', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.json.swo')).toBe(true);
+    });
+
+    it('should exclude Emacs backup files (~)', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.json~')).toBe(true);
+    });
+
+    it('should exclude .tmp temporary files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.tmp')).toBe(true);
+    });
+
+    it('should exclude .temp temporary files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.temp')).toBe(true);
+    });
+
+    it('should exclude .bak backup files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.bak')).toBe(true);
+    });
+
+    it('should exclude .orig original backup files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/file.orig')).toBe(true);
+    });
+
+    it('should not exclude regular JSON files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/messages.json')).toBe(false);
+    });
+
+    it('should not exclude files with git in the middle of the name', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/my-git-config.json')).toBe(false);
+    });
+
+    it('should not exclude .json files', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/config.json')).toBe(false);
+    });
+
+    it('should handle Windows paths correctly', () => {
+      expect((translatorManager as any).isExcludedFile('C:\\Users\\user\\file.json.git')).toBe(true);
+    });
+
+    it('should handle complex file names', () => {
+      expect((translatorManager as any).isExcludedFile('/path/to/messages.en.json.git')).toBe(true);
+      expect((translatorManager as any).isExcludedFile('/path/to/messages.en.json')).toBe(false);
     });
   });
 });

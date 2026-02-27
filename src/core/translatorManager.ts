@@ -18,6 +18,7 @@ export class TranslatorManager {
   private cache: TranslationCache;
   private isWatching: boolean = false;
   private mateCatService: MateCatService | null = null;
+  private onConfigChanged?: () => Promise<void>;
 
   constructor(
     private fileSystem: FileSystem,
@@ -27,10 +28,12 @@ export class TranslatorManager {
     private workspaceWatcher: WorkspaceWatcher,
     private configProvider: ConfigProvider,
     executor?: ITranslationExecutor,
-    passphraseManager?: IPassphraseManager
+    passphraseManager?: IPassphraseManager,
+    onConfigChanged?: () => Promise<void>
   ) {
     this.cache = cache;
     this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, executor, passphraseManager);
+    this.onConfigChanged = onConfigChanged;
 
     // Initialize MateCat integration
     this.initializeMateCat();
@@ -109,6 +112,9 @@ export class TranslatorManager {
     // Set up rename handler
     this.workspaceWatcher.onDidRenameFiles(e => this.onRename(e, config));
 
+    // Watch for configuration file changes
+    this.setupConfigFileWatcher();
+
     this.isWatching = true;
     this.logger.info('Started watching for file changes');
   }
@@ -134,6 +140,86 @@ export class TranslatorManager {
   }
 
   /**
+   * Set up watchers for configuration files (.translator.json and .translator.env)
+   * When either config file changes, notify the adapter to reload and restart
+   * @private
+   */
+  private setupConfigFileWatcher(): void {
+    // Watch for .translator.json changes
+    const jsonWatcher = this.workspaceWatcher.createFileSystemWatcher();
+    jsonWatcher.watch('.translator.json', {
+      onDidCreate: () => this.handleConfigFileChange('.translator.json'),
+      onDidChange: () => this.handleConfigFileChange('.translator.json'),
+      onDidDelete: () => this.handleConfigFileChange('.translator.json')
+    });
+    this.watchers.push(jsonWatcher);
+    this.logger.info('Watcher created for configuration file: .translator.json');
+
+    // Watch for .translator.env changes
+    const envWatcher = this.workspaceWatcher.createFileSystemWatcher();
+    envWatcher.watch('.translator.env', {
+      onDidCreate: () => this.handleConfigFileChange('.translator.env'),
+      onDidChange: () => this.handleConfigFileChange('.translator.env'),
+      onDidDelete: () => this.handleConfigFileChange('.translator.env')
+    });
+    this.watchers.push(envWatcher);
+    this.logger.info('Watcher created for environment file: .translator.env');
+  }
+
+  /**
+   * Handle changes to configuration files (.translator.json or .translator.env)
+   * Triggers a callback to reload configuration and restart watching
+   * @param filename The name of the file that changed
+   * @private
+   */
+  private async handleConfigFileChange(filename: string): Promise<void> {
+    try {
+      this.logger.info(`Configuration file changed (${filename}), reloading configuration...`);
+
+      // Call the callback if provided
+      if (this.onConfigChanged) {
+        await this.onConfigChanged();
+      } else {
+        this.logger.warn('Configuration changed but no handler is registered. Please restart the translator.');
+      }
+    } catch (error) {
+      this.logger.error(`Error handling configuration file change: ${error instanceof Error ? error.message : String(error)}`);
+      if (error instanceof Error && error.stack) {
+        this.logger.debug(error.stack);
+      }
+    }
+  }
+
+  /**
+   * Check if a file should be excluded from processing
+   * Filters out temporary and backup files created by editors and version control
+   * @param filePath The full file path to check
+   * @returns true if the file should be excluded
+   */
+  private isExcludedFile(filePath: string): boolean {
+    const fileName = path.basename(filePath);
+
+    // Exclude temporary and backup files:
+    // - .git files (Git temporary files from merge/rebase)
+    // - .swp, .swo (Vim swap files)
+    // - ~ (Emacs backup)
+    // - .tmp, .temp (Temporary files)
+    // - Hidden files starting with . (except for known config files we handle separately)
+    const excludePatterns = [
+      /\.git$/, // Git temporary files
+      /\.swp$/, // Vim swap
+      /\.swo$/, // Vim swap
+      /~$/, // Emacs backup
+      /\.tmp$/, // Temporary
+      /\.temp$/, // Temporary
+      /\.bak$/, // Backup
+      /\.orig$/ // Original backup
+    ];
+
+    return excludePatterns.some(pattern => pattern.test(fileName));
+  }
+
+  /**
    * Handler for file creation or modification
    * @param uri The URI of the file that changed
    * @param config The project configuration
@@ -144,6 +230,12 @@ export class TranslatorManager {
   ): Promise<void> {
     try {
       this.logger.info(`File changed: ${uri.fsPath}`);
+
+      // Skip processing of temporary and backup files
+      if (this.isExcludedFile(uri.fsPath)) {
+        this.logger.debug(`Skipping excluded file: ${uri.fsPath}`);
+        return;
+      }
 
       // For file change events, we always process the file as the content might have changed
       // The timestamp-based check happens inside the pipeline.processFile method
