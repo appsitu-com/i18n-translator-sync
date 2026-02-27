@@ -66,6 +66,54 @@ function updateStatusBar(): void {
 }
 
 /**
+ * Check if the .translator.env file is properly configured with actual API keys
+ * Returns true if the file has at least one non-empty, non-placeholder API key
+ */
+function isEnvFileConfigured(envFilePath: string): boolean {
+  try {
+    if (!fs.existsSync(envFilePath)) {
+      return false
+    }
+
+    const content = fs.readFileSync(envFilePath, 'utf-8')
+
+    // Skip empty files or files that only have comments/whitespace
+    const lines = content.split('\n').filter(line => {
+      const trimmed = line.trim()
+      return trimmed && !trimmed.startsWith('#')
+    })
+
+    if (lines.length === 0) {
+      return false
+    }
+
+    // Check if any line has a real API key (not a placeholder like TEST_API_KEY=abcdef123456)
+    for (const line of lines) {
+      const [key, ...valueParts] = line.split('=')
+      const value = valueParts.join('=').trim().replace(/^["']|["']$/g, '')
+
+      // Skip if no key or value
+      if (!key?.trim() || !value) {
+        continue
+      }
+
+      // Skip obvious placeholders (the sample key, or values that are too short)
+      if (value === 'abcdef123456' || value.length < 8) {
+        continue
+      }
+
+      // Found a real API key - file is configured
+      return true
+    }
+
+    return false
+  } catch (error) {
+    // If there's any error reading the file, assume it's not properly configured
+    return false
+  }
+}
+
+/**
  * Check for configuration files and create them from samples if they don't exist
  */
 function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
@@ -117,16 +165,19 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
         }
       }
     } else if (config.reminderMessage) {
-      // If file already exists and we have a reminder message, show it
-      vscode.window.showInformationMessage(config.reminderMessage, 'Open File', 'Documentation').then((selection) => {
-        if (selection === 'Open File') {
-          vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
-            vscode.window.showTextDocument(doc)
-          })
-        } else if (selection === 'Documentation') {
-          vscode.env.openExternal(vscode.Uri.parse(config.docsUrl))
-        }
-      })
+      // If file already exists and we have a reminder message, only show it if not properly configured
+      const isConfigured = isEnvFileConfigured(config.targetPath)
+      if (!isConfigured) {
+        vscode.window.showInformationMessage(config.reminderMessage, 'Open File', 'Documentation').then((selection) => {
+          if (selection === 'Open File') {
+            vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
+              vscode.window.showTextDocument(doc)
+            })
+          } else if (selection === 'Documentation') {
+            vscode.env.openExternal(vscode.Uri.parse(config.docsUrl))
+          }
+        })
+      }
     }
   }
 }
