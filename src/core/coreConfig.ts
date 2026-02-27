@@ -13,8 +13,8 @@ const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
 
 // Zod schema for validating .translator.json
 export const TranslateConfigSchema = z.object({
-  sourceDir: z.string().describe('Base directory for source paths (prepended to sourcePaths)'),
-  targetDir: z.string().describe('Base directory for target paths (prepended to generated target paths)'),
+  sourceDir: z.string().optional().default('').describe('Base directory for source paths (prepended to sourcePaths)'),
+  targetDir: z.string().optional().default('').describe('Base directory for target paths (prepended to generated target paths)'),
   sourcePaths: z.array(z.string()).describe('Source language paths to scan for files to translate'),
   sourceLocale: z.string().describe('Source locale (e.g., "en")'),
   targetLocales: z.array(z.string()).describe('Target locales to generate translations for (e.g., ["fr", "es", "de"])'),
