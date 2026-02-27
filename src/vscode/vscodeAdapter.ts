@@ -83,7 +83,13 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    * Implementation of the abstract method to create a workspace watcher for VSCode
    */
   protected createWatcher(): WorkspaceWatcher {
-    return new VSCodeWorkspaceWatcher()
+    // Get the workspace folder for the watcher
+    const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+    if (!workspaceFolder) {
+      throw new Error('No workspace folder found for creating watcher');
+    }
+
+    return new VSCodeWorkspaceWatcher(workspaceFolder);
   }
 
   /**

@@ -8,10 +8,19 @@ import { VSCodeUri, VSCodeFileSystem } from './filesystem';
 class VSCodeFileWatcher implements FileWatcher {
   private disposables: Disposable[] = [];
   private watchers: Map<string, vscode.FileSystemWatcher> = new Map();
+  private workspaceFolder: vscode.WorkspaceFolder;
+
+  constructor(workspaceFolder: vscode.WorkspaceFolder) {
+    this.workspaceFolder = workspaceFolder;
+  }
 
   watch(globPattern: string, listeners: FileWatcherListeners): Disposable {
+    // Create a RelativePattern to ensure VS Code watches relative to the correct workspace folder
+    // This is especially important on Windows and for multi-root workspaces
+    const relativePattern = new vscode.RelativePattern(this.workspaceFolder, globPattern);
+
     // Create VS Code file watcher - don't ignore any events since we always provide all listeners
-    const watcher = vscode.workspace.createFileSystemWatcher(globPattern);
+    const watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
 
     // Set up event listeners
     const subscriptions: vscode.Disposable[] = [];
@@ -67,9 +76,19 @@ class VSCodeFileWatcher implements FileWatcher {
 export class VSCodeWorkspaceWatcher implements WorkspaceWatcher {
   private disposables: Disposable[] = [];
   private fileSystem = new VSCodeFileSystem();
+  private workspaceFolder: vscode.WorkspaceFolder;
+
+  constructor(workspaceFolder?: vscode.WorkspaceFolder) {
+    // Use provided workspace folder or default to first workspace folder
+    this.workspaceFolder = workspaceFolder ?? vscode.workspace.workspaceFolders?.[0]!;
+
+    if (!this.workspaceFolder) {
+      throw new Error('No workspace folder available for file watching');
+    }
+  }
 
   createFileSystemWatcher(): FileWatcher {
-    return new VSCodeFileWatcher();
+    return new VSCodeFileWatcher(this.workspaceFolder);
   }
 
   onDidRenameFiles(listener: (e: FileRenameEvent) => void): Disposable {

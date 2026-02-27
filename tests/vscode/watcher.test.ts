@@ -5,6 +5,17 @@ import { VSCodeUri } from '../../src/vscode/filesystem';
 
 // Mock VSCode APIs
 vi.mock('vscode', () => {
+  const mockWorkspaceFolder = {
+    uri: {
+      fsPath: '/test/workspace',
+      scheme: 'file',
+      path: '/test/workspace',
+      toString: () => 'file:///test/workspace'
+    },
+    name: 'test-workspace',
+    index: 0
+  };
+
   return {
     workspace: {
       createFileSystemWatcher: vi.fn(() => ({
@@ -13,7 +24,8 @@ vi.mock('vscode', () => {
         onDidDelete: vi.fn(),
         dispose: vi.fn()
       })),
-      onDidRenameFiles: vi.fn()
+      onDidRenameFiles: vi.fn(),
+      workspaceFolders: [mockWorkspaceFolder]
     },
     Uri: {
       file: (path: string) => ({
@@ -22,7 +34,12 @@ vi.mock('vscode', () => {
         path: path.replace(/\\/g, '/'),
         toString: () => `file://${path.replace(/\\/g, '/')}`
       })
-    }
+    },
+    RelativePattern: vi.fn((base: any, pattern: string) => ({
+      base,
+      pattern,
+      baseUri: base.uri || base
+    }))
   };
 });
 
