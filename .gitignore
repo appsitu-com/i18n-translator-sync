@@ -4,6 +4,8 @@
 
 .env
 .translator.env
+!samples/.translator.env
+
 node_modules/
 coverage/
 
@@ -14,6 +16,7 @@ tests/.test-temp/
 dist/
 releases/
 *.vsix
+
 
 # Test project folder
 test-project/i18n/*
