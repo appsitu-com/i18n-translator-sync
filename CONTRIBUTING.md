@@ -226,6 +226,14 @@ If you encounter SQLite-related errors:
 3. Check the Output channel for logs
 4. If breakpoints aren't hitting, ensure source maps are enabled in both launch.json and tsconfig.json
 
+**Expected Warnings During Debugging:**
+When debugging, you may see warnings like:
+```
+Cannot register 'translator.targetLocales'. This property is already registered.
+```
+
+These warnings are harmless and expected behavior caused by VS Code's hot-reload mechanism attempting to re-register configuration properties from package.json. They only appear during development and won't affect end users. You can safely ignore them.
+
 ### Common Issues
 
 - **API Keys not working**: Check that `.translator.env` exists and contains the correct keys
