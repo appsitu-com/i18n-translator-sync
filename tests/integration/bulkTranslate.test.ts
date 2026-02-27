@@ -153,7 +153,10 @@ describe('Bulk Translation Integration Tests', () => {
       cache,
       tempDir,
       watcher,
-      configProvider
+      configProvider,
+      undefined,
+      undefined,
+      undefined
     );
 
     // Create test configuration

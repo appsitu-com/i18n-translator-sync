@@ -156,7 +156,10 @@ describe('File Watcher Integration Tests', () => {
       cache,
       tempDir,
       watcher,
-      configProvider
+      configProvider,
+      undefined,
+      undefined,
+      undefined
     );
   });
 
