@@ -346,7 +346,9 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         '/workspace',
         mockWatcher as any,
         configProvider,
-        managerMockExecutor
+        managerMockExecutor,
+        undefined,
+        undefined
       )
 
       const config: TranslateProjectConfig = {

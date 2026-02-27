@@ -15,6 +15,7 @@ vi.mock('../../../src/core/translatorManager', () => {
   return {
     TranslatorManager: vi.fn().mockImplementation(() => ({
       startWatching: vi.fn().mockResolvedValue(undefined),
+      stopWatching: vi.fn().mockResolvedValue(undefined),
       translateSingleFile: vi.fn().mockResolvedValue(undefined),
       bulkTranslate: vi.fn().mockResolvedValue(5),
       pushToMateCat: vi.fn().mockResolvedValue(undefined),
@@ -74,6 +75,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
     if (this.translatorManager) {
       // Add the required methods if they don't exist
       this.translatorManager.startWatching = this.translatorManager.startWatching || vi.fn().mockResolvedValue(undefined);
+      this.translatorManager.stopWatching = this.translatorManager.stopWatching || vi.fn().mockResolvedValue(undefined);
       this.translatorManager.translateSingleFile = this.translatorManager.translateSingleFile || vi.fn().mockResolvedValue(undefined);
       this.translatorManager.bulkTranslate = this.translatorManager.bulkTranslate || vi.fn().mockResolvedValue(5);
       this.translatorManager.pushToMateCat = this.translatorManager.pushToMateCat || vi.fn().mockResolvedValue(undefined);
@@ -343,6 +345,85 @@ describe('TranslatorAdapter', () => {
 
       expect(adapter.isRunning()).toBe(false);
       expect(adapter.getTranslatorManager()).toBeUndefined();
+    });
+  });
+
+  describe('Configuration change handler', () => {
+    it('should create a config change handler that reloads and restarts watching', async () => {
+      // Initialize and start the adapter
+      await adapter.initialize();
+      await adapter.start();
+
+      // Get the translator manager
+      const translatorManager = adapter.getTranslatorManager();
+      expect(translatorManager).toBeDefined();
+
+      // Create the config change handler
+      const configChangeHandler = (adapter as any).createConfigChangeHandler();
+      expect(configChangeHandler).toBeDefined();
+      expect(typeof configChangeHandler).toBe('function');
+
+      // Mock the required methods
+      if (translatorManager) {
+        vi.mocked(translatorManager.stopWatching).mockResolvedValue(undefined);
+        vi.mocked(translatorManager.startWatching).mockResolvedValue(undefined);
+      }
+
+      // Call the handler
+      await configChangeHandler();
+
+      // Verify that watching was stopped and restarted
+      if (translatorManager) {
+        expect(translatorManager.stopWatching).toHaveBeenCalled();
+        expect(translatorManager.startWatching).toHaveBeenCalled();
+      }
+
+      // Verify that the config reload was logged
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Configuration file changed, reloading configuration and environment...'
+      );
+      expect(mockLogger.info).toHaveBeenCalledWith(
+        'Configuration and environment reloaded, translator restarted successfully'
+      );
+    });
+
+    it('should handle errors during config reloading', async () => {
+      await adapter.initialize();
+      await adapter.start();
+
+      const translatorManager = adapter.getTranslatorManager();
+      if (translatorManager) {
+        // Mock stopWatching to throw an error
+        vi.mocked(translatorManager.stopWatching).mockRejectedValueOnce(new Error('Stop watching failed'));
+      }
+
+      const configChangeHandler = (adapter as any).createConfigChangeHandler();
+      await configChangeHandler();
+
+      // Verify error was logged
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error reloading configuration')
+      );
+    });
+
+    it('should not call handler if adapter is not running', async () => {
+      // Initialize but don't start
+      await adapter.initialize();
+
+      const translatorManager = adapter.getTranslatorManager();
+      if (translatorManager) {
+        vi.mocked(translatorManager.stopWatching).mockResolvedValue(undefined);
+        vi.mocked(translatorManager.startWatching).mockResolvedValue(undefined);
+      }
+
+      const configChangeHandler = (adapter as any).createConfigChangeHandler();
+      await configChangeHandler();
+
+      // Should not call stopWatching/startWatching since not running
+      if (translatorManager) {
+        expect(translatorManager.stopWatching).not.toHaveBeenCalled();
+        expect(translatorManager.startWatching).not.toHaveBeenCalled();
+      }
     });
   });
 });

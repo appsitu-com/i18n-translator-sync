@@ -71,6 +71,57 @@ export abstract class TranslatorAdapter {
   }
 
   /**
+   * Create a handler for configuration file changes
+   * Returns a callback that will reload config and restart watching
+   * @protected
+   */
+  protected createConfigChangeHandler(): () => Promise<void> {
+    return async () => {
+      if (!this.translatorManager || !this.running) {
+        return;
+      }
+
+      try {
+        this.logger.info('Configuration file changed, reloading configuration and environment...');
+
+        // Reload the configuration provider (.translator.json)
+        if (this.configProvider.load) {
+          await this.configProvider.load();
+        }
+
+        // Reload environment variables (.translator.env)
+        await initTranslatorEnv(
+          this.workspacePath,
+          this.logger,
+          this.fileSystem,
+          this.openDocument?.bind(this)
+        );
+
+        // Stop current watching
+        await this.translatorManager.stopWatching();
+
+        // Load new project configuration
+        const projectConfig = await loadProjectConfig(
+          this.workspacePath,
+          this.configProvider,
+          this.logger,
+          this.fileSystem
+        );
+
+        // Start watching with new configuration
+        await this.translatorManager.startWatching(projectConfig);
+
+        this.logger.info('Configuration and environment reloaded, translator restarted successfully');
+      } catch (error: any) {
+        this.logger.error(`Error reloading configuration: ${error.message || String(error)}`);
+        if (error instanceof Error && error.stack) {
+          this.logger.debug(error.stack);
+        }
+      }
+    };
+  }
+
+  /**
    * Initialize the translator (load config but don't start watching)
    */
   async initialize(): Promise<void> {
@@ -102,6 +153,9 @@ export abstract class TranslatorAdapter {
         // Create workspace watcher
         const watcher = this.createWatcher();
 
+        // Create callback for when configuration file changes
+        const onConfigChanged = this.createConfigChangeHandler();
+
         // Create translator manager
         this.translatorManager = new TranslatorManager(
           this.fileSystem,
@@ -111,7 +165,8 @@ export abstract class TranslatorAdapter {
           watcher,
           this.configProvider,
           undefined,
-          this.getPassphraseManager()
+          this.getPassphraseManager(),
+          onConfigChanged
         );
       }
     } catch (error: any) {
