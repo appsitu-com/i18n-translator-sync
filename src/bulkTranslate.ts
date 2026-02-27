@@ -89,8 +89,10 @@ export async function bulkTranslateWithEngine(
 
   const translations = texts.map((t, i) => cached.get(`${t}${SEPARATOR}${(contexts[i] ?? '').toString()}`) ?? t)
 
+  // Note: For the copy engine, apiCalls represents the number of "identity mappings" created
+  // though they don't consume API quota. We count them separately for consistency.
   const stats: TranslationStats = {
-    apiCalls: misses.length,
+    apiCalls: engineName === 'copy' ? 0 : misses.length,
     cacheHits: uniq.length - misses.length,
     total: uniq.length
   }

@@ -160,12 +160,13 @@ export class SQLiteCache implements TranslationCache {
     contexts: (string | null | undefined)[]
   }) {
     const out = new Map<string, string>()
+    const SEPARATOR = '::' // Must match the separator in bulkTranslate.ts
     this.db.transaction(() => {
       for (let i = 0; i < texts.length; i++) {
         const t = texts[i]
         const c = (contexts[i] ?? '').toString()
         const row = this.sel.get(engine, source, target, t, c) as any
-        if (row) out.set(`${t}\u0001${c}`, row.translated_text)
+        if (row) out.set(`${t}${SEPARATOR}${c}`, row.translated_text)
       }
     })()
     return out
