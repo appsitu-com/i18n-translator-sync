@@ -2,9 +2,9 @@
   "name": "i18n-translator-vscode",
   "description": "Extension for translating Markdown and JSON files using AI translation services",
   "displayName": "i18n Translator",
-  "publisher": "appsitu.com",
+  "publisher": "appsitu",
   "preview": true,
-  "version": "0.1.0",
+  "version": "0.1.2",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -46,8 +46,10 @@
     "i18n-translator": "./dist/cli/cliMain.js"
   },
   "files": [
-    "dist/**/*",
-    "samples/**/*"
+    "dist/**/*.js",
+    "samples/**/*",
+    "images/**/*",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsc -p ./",
