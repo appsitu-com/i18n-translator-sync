@@ -3,7 +3,7 @@ import { IUri, FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
 import { TranslatorEngine, TranslatorApiConfig } from '../translators/types'
-import { bulkTranslateWithEngine } from '../bulkTranslate'
+import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
 import { resolveEnvDeep, resolveEnvObjectWithDecryption } from './util/environmentSetup'
 
 /**
@@ -29,10 +29,17 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     _sourceFile: string,
     _isBackTranslation: boolean,
     passphrase?: string
-  ): Promise<string[]> {
+  ): Promise<{ translations: string[]; stats: TranslationStats }> {
     // If using copy engine, just return original segments
     if (engineName === 'copy') {
-      return segments.slice()
+      return {
+        translations: segments.slice(),
+        stats: {
+          apiCalls: 0,
+          cacheHits: 0,
+          total: 0
+        }
+      }
     }
 
     // Get engine configuration

@@ -243,11 +243,8 @@ export class TranslatorPipeline {
         fileType
       })
 
-      // Simple, concise logging with just one line per file translation
-      this.logger.info(`Translating: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}] (${engineName})`)
-
       // Translate the segments using the executor
-      const fwd = await this.executor.translateSegments(
+      const fwdResult = await this.executor.translateSegments(
         extraction.segments,
         contexts,
         engineName,
@@ -258,6 +255,14 @@ export class TranslatorPipeline {
         false,
         passphrase
       )
+
+      const fwd = fwdResult.translations
+
+      // Log translation with statistics on same line
+      const statsMsg = fwdResult.stats.total > 0
+        ? ` - API: ${fwdResult.stats.apiCalls}, Cache: ${fwdResult.stats.cacheHits}, Total: ${fwdResult.stats.total}`
+        : ''
+      this.logger.info(`Translating: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}] (${engineName})${statsMsg}`)
 
       // Write forward translation output using the executor
       await this.executor.writeTranslation(targetUri, extraction.rebuild(fwd), srcUri.fsPath, false)
@@ -296,24 +301,34 @@ export class TranslatorPipeline {
           fileType
         })
 
-        // Simple, concise logging with just one line for back-translation
-        this.logger.info(`Back-translating: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}] (${backEngine})`)
-
         // If using copy engine for forward translation, just copy the segments again
-        const back =
-          engineName === 'copy'
-            ? fwd.slice()
-            : await this.executor.translateSegments(
-                fwd,
-                contexts,
-                backEngine,
-                targetLocale,
-                sourceLocale,
-                configProvider,
-                srcUri.fsPath,
-                true,
-                passphrase
-              )
+        let back: string[]
+        let backStatsMsg = ''
+
+        if (engineName === 'copy') {
+          back = fwd.slice()
+        } else {
+          const backResult = await this.executor.translateSegments(
+            fwd,
+            contexts,
+            backEngine,
+            targetLocale,
+            sourceLocale,
+            configProvider,
+            srcUri.fsPath,
+            true,
+            passphrase
+          )
+          back = backResult.translations
+
+          // Prepare statistics message for back-translation
+          if (backResult.stats.total > 0) {
+            backStatsMsg = ` - API: ${backResult.stats.apiCalls}, Cache: ${backResult.stats.cacheHits}, Total: ${backResult.stats.total}`
+          }
+        }
+
+        // Log back-translation with statistics on same line
+        this.logger.info(`Back-translating: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}] (${backEngine})${backStatsMsg}`)
 
         // Write back translation output using the executor
         await this.executor.writeTranslation(backUri, extraction.rebuild(back), srcUri.fsPath, true)

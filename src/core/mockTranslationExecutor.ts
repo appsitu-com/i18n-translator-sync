@@ -1,6 +1,7 @@
 import { ITranslationExecutor, TranslationCommand } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
 import { TranslatorEngine } from '../translators/types'
+import { TranslationStats } from '../bulkTranslate'
 
 /**
  * Mock implementation for testing that captures translation commands instead of executing them
@@ -86,7 +87,7 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     sourceFile: string,
     isBackTranslation: boolean,
     _passphrase?: string
-  ): Promise<string[]> {
+  ): Promise<{ translations: string[]; stats: TranslationStats }> {
     // Capture the translation command
     this._commands.push({
       type: 'translate',
@@ -100,7 +101,15 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     })
 
     // Return mock translated segments (just prefix with [TRANSLATED])
-    return segments.map(segment => `[TRANSLATED:${sourceLocale}->${targetLocale}] ${segment}`)
+    const translations = segments.map(segment => `[TRANSLATED:${sourceLocale}->${targetLocale}] ${segment}`)
+
+    const stats: TranslationStats = {
+      apiCalls: segments.length,
+      cacheHits: 0,
+      total: segments.length
+    }
+
+    return { translations, stats }
   }
 
   /**

@@ -43,7 +43,12 @@ describe('bulkTranslateWithEngine()', () => {
       { source: 'en', target: 'fr', apiConfig: {} },
       cache as any
     )
-    expect(out).toEqual(['A*', '[B]'])
+    expect(out.translations).toEqual(['A*', '[B]'])
+    expect(out.stats).toEqual({
+      apiCalls: 1,
+      cacheHits: 1,
+      total: 2
+    })
     expect(cache.putMany).toHaveBeenCalledTimes(1)
   })
 })

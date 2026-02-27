@@ -3,14 +3,35 @@ import type { TranslationCache } from './cache.sqlite'
 import { TranslatorApiConfig } from './translators/types'
 import { normalizeLocaleWithMap } from './util/localeNorm'
 
+/**
+ * Statistics about a translation operation
+ */
+export interface TranslationStats {
+  /** Number of segments translated via API */
+  apiCalls: number
+  /** Number of segments fetched from cache */
+  cacheHits: number
+  /** Total number of segments processed */
+  total: number
+}
+
 export async function bulkTranslateWithEngine(
   texts: string[],
   contexts: (string | null | undefined)[],
   engineName: string,
   opts: { source: string; target: string; apiConfig: TranslatorApiConfig },
   cache: TranslationCache
-): Promise<string[]> {
-  if (!texts.length) return []
+): Promise<{ translations: string[]; stats: TranslationStats }> {
+  if (!texts.length) {
+    return {
+      translations: [],
+      stats: {
+        apiCalls: 0,
+        cacheHits: 0,
+        total: 0
+      }
+    }
+  }
 
   const engine = getTranslator(engineName)
   const langMap = opts.apiConfig.langMap || {}
@@ -65,5 +86,14 @@ export async function bulkTranslateWithEngine(
 
     misses.forEach((m, i) => cached.set(`${m.t}${SEPARATOR}${m.c}`, translated[i]))
   }
-  return texts.map((t, i) => cached.get(`${t}${SEPARATOR}${(contexts[i] ?? '').toString()}`) ?? t)
+
+  const translations = texts.map((t, i) => cached.get(`${t}${SEPARATOR}${(contexts[i] ?? '').toString()}`) ?? t)
+
+  const stats: TranslationStats = {
+    apiCalls: misses.length,
+    cacheHits: uniq.length - misses.length,
+    total: uniq.length
+  }
+
+  return { translations, stats }
 }

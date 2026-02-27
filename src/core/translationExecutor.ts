@@ -1,6 +1,7 @@
 import { IUri } from './util/fs'
 import { TranslatorEngine } from '../translators/types'
 import { GetPassphraseFunction } from './util/environmentSetup'
+import { TranslationStats } from '../bulkTranslate'
 
 /**
  * Represents a single translation command that would be executed
@@ -45,7 +46,7 @@ export interface ITranslationExecutor {
    * @param sourceFile Source file path for context
    * @param isBackTranslation Whether this is a back-translation
    * @param passphrase Optional passphrase for API key decryption
-   * @returns Translated segments
+   * @returns Object with translated segments and statistics
    */
   translateSegments(
     segments: string[],
@@ -57,7 +58,7 @@ export interface ITranslationExecutor {
     sourceFile: string,
     isBackTranslation: boolean,
     passphrase?: string
-  ): Promise<string[]>
+  ): Promise<{ translations: string[]; stats: TranslationStats }>
 
   /**
    * Write content to a target file
