@@ -7,6 +7,9 @@
 node_modules/
 coverage/
 
+# Test temporary files
+tests/.test-temp/
+
 # Exclude release artifacts
 dist/
 releases/
