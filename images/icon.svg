@@ -12,6 +12,7 @@
   <path d="M88 18 L88 110" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
 
   <!-- Text inside -->
-  <text x="64" y="62" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">i18n</text>
-  <text x="64" y="88" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Translator</text>
+  <text x="64" y="60" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">i18n</text>
+  <text x="64" y="78" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Instant</text>
+  <text x="64" y="92" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Translator</text>
 </svg>
