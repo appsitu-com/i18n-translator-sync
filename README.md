@@ -45,20 +45,24 @@ See [CLI Documentation](doc/CLI.md) for details on the command-line interface.
   - DeepL supports AI translation of English text to US and UK English.
   - Open Router supports almost *any* LLM models via a single API router service.
   - The "Copy" engine is useful when you wish to keep the source file/folder separate from target files/folders and just make a copy when the source and target are the same language.
+
 - [W] **Contextual Translation** (DeepL, Gemini and OpenRouter). Status: *Experimental*. *Current implementation is likely to be revised*.
   - Problem: Translations of short strings common in user interfaces (like button labels) are often poorly translated by AI engines
   - Solution: Configure contextual information for keys in JSON and YAML files that provides contextual information included in prompts to LLM & DeepL APIs.
+
 - [W] **Translation memory** (TM). We use a database of past translations that allows:
   - Faster & cheaper translations as only *new* or *changed* strings (JSON/YAML) or paragraphs (Markdown/MDX) are retranslated.
   - Ensures translations remain stable as AI engines tend to randomly alter results when retranslating.
   - [W] Automatic purging of unused past translations.
   - [W] Exported/imported to CSV files. CSV exports should be committed to GIT to preserve stable translations and reduce costs.
+
 - [W] **VS Code commands**:
-  - **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translator.json` file for your API keys that's excluded from GIT.
-  - **Translator: Stop** - Deactivates the "translate on save" feature.
-  - **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.
-  - **Translator: Push to MateCat** - Exports the local TM database and pushes it to a MateCat project.
-  - **Translator: Pull from MateCat** - Pulls the MateCat project revisions and imports these into the local TM database.
+  - [x] **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translator.json` file for your API keys that's excluded from GIT.
+  - [x] **Translator: Stop** - Deactivates the "translate on save" feature.
+
+  - [ ] **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.
+  - [ ] **Translator: Push to MateCat** - Exports the local TM database and pushes it to a MateCat project.
+  - [ ] **Translator: Pull from MateCat** - Pulls the MateCat project revisions and imports these into the local TM database.
 
 - [W] Configure and test GitHub Actions.
 
