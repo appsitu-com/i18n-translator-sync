@@ -69,6 +69,7 @@
     "vscode:prepublish": "yarn rebuild:sqlite:electron && yarn build",
     "package": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
+    "icon:png": "node scripts/convert-icon.js",
     "package:quick": "npx @vscode/vsce package",
     "test:cov": "vitest run --coverage",
     "version:update": "node scripts/update-version.js",

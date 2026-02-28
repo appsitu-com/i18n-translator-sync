@@ -1,18 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <!-- Background globe -->
-  <circle cx="64" cy="64" r="62" fill="#0078d4" />
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="8 8 112 112">
+  <defs>
+    <linearGradient id="modernGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ef4444;stop-opacity:1" />
+    </linearGradient>
+  </defs>
 
-  <!-- World map stylized grid lines -->
-  <path d="M64 10 A54 54 0 0 1 64 118 A54 54 0 0 1 64 10" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
-  <path d="M15 64 L113 64" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
-  <path d="M26 32 L102 32" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
-  <path d="M26 96 L102 96" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
-  <path d="M40 18 L40 110" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
-  <path d="M88 18 L88 110" stroke="rgba(255,255,255,0.25)" stroke-width="1.5" fill="none" />
+  <!-- Rounded square background -->
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="url(#modernGradient)" />
 
-  <!-- Text inside -->
-  <text x="64" y="60" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">i18n</text>
-  <text x="64" y="78" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Sync</text>
-  <text x="64" y="92" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Translator</text>
+  <!-- Floating layers for depth -->
+  <rect x="16" y="16" width="96" height="96" rx="16" fill="rgba(255,255,255,0.1)" />
+  <rect x="24" y="24" width="80" height="80" rx="12" fill="rgba(255,255,255,0.1)" />
+
+  <!-- Language symbols -->
+  <text x="26" y="48" font-family="Arial, sans-serif" font-size="24" fill="white" opacity="0.6">A</text>
+  <text x="80" y="48" font-family="Arial, sans-serif" font-size="22" fill="white" opacity="0.6">文</text>
+  <text x="26" y="99" font-family="Arial, sans-serif" font-size="28" fill="white" opacity="0.6">א</text>
+  <text x="78" y="99" font-family="Arial, sans-serif" font-size="28" fill="white" opacity="0.6">あ</text>
+
+  <!-- Central icon -->
+  <circle cx="64" cy="64" r="30" fill="rgba(0,0,0,0.2)" />
+  <text x="64" y="68" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">i18n</text>
+  <text x="64" y="82" font-family="Arial, sans-serif" font-size="9" font-weight="normal" fill="white" text-anchor="middle" opacity="0.9">SYNC</text>
 </svg>
