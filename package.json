@@ -16,8 +16,10 @@
     "google",
     "deepl",
     "gemini",
+    "json",
+    "yaml",
     "markdown",
-    "json"
+    "mdx"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {
@@ -33,7 +35,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "galleryBanner": {
-    "color": "#0078d4",
+    "color": "#ef4444",
     "theme": "dark"
   },
   "categories": [
