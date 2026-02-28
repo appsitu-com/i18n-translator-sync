@@ -1,7 +1,7 @@
 {
   "name": "i18n-translator-vscode",
   "description": "Extension for translating Markdown and JSON files using AI translation services",
-  "displayName": "i18n Translator",
+  "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
   "version": "0.1.2",
