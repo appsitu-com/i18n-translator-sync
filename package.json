@@ -4,7 +4,7 @@
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.1.2",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -16,10 +16,8 @@
     "google",
     "deepl",
     "gemini",
-    "json",
-    "yaml",
     "markdown",
-    "mdx"
+    "json"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {
@@ -35,7 +33,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "galleryBanner": {
-    "color": "#ef4444",
+    "color": "#0078d4",
     "theme": "dark"
   },
   "categories": [
@@ -125,16 +123,12 @@
         "title": "Translator: Restart"
       },
       {
-        "command": "translator.push",
-        "title": "Translator: Push translations to MateCat"
-      },
-      {
-        "command": "translator.pull",
-        "title": "Translator: Pull translations from MateCat"
-      },
-      {
         "command": "translator.showOutput",
         "title": "Translator: Show Output"
+      },
+      {
+        "command": "translator.showContextMenu",
+        "title": "Translator: Context Menu"
       }
     ],
     "configuration": {

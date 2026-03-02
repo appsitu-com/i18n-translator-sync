@@ -303,8 +303,8 @@ export function onShowOutput(): void {
   channel.appendLine('- Translator: Start (starts file watching and auto-translation)')
   channel.appendLine('- Translator: Stop (stops file watching)')
   channel.appendLine('- Translator: Restart (restart watching)')
-  channel.appendLine('- Translator: Push to MateCat (works without starting)')
-  channel.appendLine('- Translator: Pull from MateCat (works without starting)')
+  // channel.appendLine('- Translator: Push to MateCat (works without starting)')
+  // channel.appendLine('- Translator: Pull from MateCat (works without starting)')
   channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
   channel.appendLine('- Translator: Show Output (this command)')
   channel.appendLine('')
@@ -367,16 +367,16 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
 
   // Always available commands
   items.push(
-    {
-      label: '$(cloud-upload) Push to MateCat',
-      description: 'Upload source files to MateCat for professional translation',
-      detail: 'translator.push'
-    },
-    {
-      label: '$(cloud-download) Pull from MateCat',
-      description: 'Download completed translations from MateCat',
-      detail: 'translator.pull'
-    },
+    // {
+    //   label: '$(cloud-upload) Push to MateCat',
+    //   description: 'Upload source files to MateCat for professional translation',
+    //   detail: 'translator.push'
+    // },
+    // {
+    //   label: '$(cloud-download) Pull from MateCat',
+    //   description: 'Download completed translations from MateCat',
+    //   detail: 'translator.pull'
+    // },
     {
       label: '$(output) Show Output',
       description: 'Open the translator output channel',
@@ -454,8 +454,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('translator.start', async () => onStartTranslator(context)),
     vscode.commands.registerCommand('translator.stop', () => stopTranslator()),
     vscode.commands.registerCommand('translator.restart', () => restartTranslator(context)),
-    vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
-    vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
+    // vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
+    // vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
     vscode.commands.registerCommand('translator.showOutput', () => onShowOutput()),
     vscode.commands.registerCommand('translator.showContextMenu', async () => showContextMenu(context))
   )
