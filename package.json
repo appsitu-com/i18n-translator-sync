@@ -49,7 +49,7 @@
   },
 
   "scripts": {
-    "build": "tsc -p ./",
+    "build": "tsc -p ./ && node ./scripts/generate-build-info.js",
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
     "cli": "yarn build && node ./dist/cli/cliMain.js test-project",

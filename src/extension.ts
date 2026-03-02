@@ -412,9 +412,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   statusBarManager = new VSCodeStatusBarManager(context)
   statusBarManager.create()
 
-  // Log activation
-  channel.appendLine('i18n Translator extension activated')
+  // Log activation with version and build info
+  const ext = context.extension
+  const version = ext.packageJSON?.version ?? 'unknown'
+  let buildDate = 'unknown'
+  try {
+    const buildInfoPath = path.join(context.extensionPath, 'dist', 'buildInfo.json')
+    if (fs.existsSync(buildInfoPath)) {
+      const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf-8'))
+      buildDate = buildInfo.buildDate ?? 'unknown'
+    }
+  } catch {
+    // ignore - buildInfo.json may not exist in dev
+  }
+  channel.appendLine(`i18n Translator v${version} (built ${buildDate})`)
   channel.appendLine(`Activation time: ${new Date().toISOString()}`)
+  channel.appendLine(`Extension path: ${context.extensionPath}`)
   channel.appendLine('To see this output, run the command "Translator: Show Output"')
 
   // Show the output channel during development
