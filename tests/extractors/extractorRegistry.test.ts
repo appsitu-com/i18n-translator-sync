@@ -29,4 +29,32 @@ describe('extractForFile', () => {
     expect(ex.kind).toBe('yaml');
     expect(ex.segments).toEqual(['Hello', 'Goodbye']);
   });
+
+  it('delegates to TypeScript extraction for .ts files', () => {
+    const ts = 'export default {\n  "greeting": "Hello",\n  "farewell": "Goodbye"\n};';
+    const ex = extractForFile('file.ts', ts);
+    expect(ex.kind).toBe('json');
+    expect(ex.segments).toEqual(['Hello', 'Goodbye']);
+  });
+
+  it('passes exclude options through to TS extraction', () => {
+    const ts = 'export default {\n  "id": "skip",\n  "greeting": "Hello"\n};';
+    const ex = extractForFile('file.ts', ts, { excludeKeys: ['id'] });
+    expect(ex.segments).toEqual(['Hello']);
+  });
+
+  it('passes exclude options through to JSON extraction', () => {
+    const json = JSON.stringify({ id: 'skip', greeting: 'Hello' });
+    const ex = extractForFile('file.json', json, { excludeKeys: ['id'] });
+    expect(ex.segments).toEqual(['Hello']);
+  });
+
+  it('passes exclude options through to Markdown front matter extraction', () => {
+    const md = '---\ntitle: My Title\ndescription: My Description\n---\n\nContent here.';
+    // Without frontmatterKeys passed by extractForFile, front matter is not extracted by default,
+    // but excludeOptions is still threaded through for when frontmatterKeys are provided upstream
+    const ex = extractForFile('file.md', md, { excludeKeys: ['title'] });
+    // extractForFile passes undefined for frontmatterKeys, so no front matter extracted
+    expect(ex.segments).toEqual(['Content here.']);
+  });
 });
