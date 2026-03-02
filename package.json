@@ -47,12 +47,7 @@
   "bin": {
     "i18n-translator": "./dist/cli/cliMain.js"
   },
-  "files": [
-    "dist/**/*.js",
-    "samples/**/*",
-    "images/**/*",
-    "LICENSE"
-  ],
+
   "scripts": {
     "build": "tsc -p ./",
     "watch": "tsc -w -p ./",

@@ -1,0 +1,46 @@
+# Development and source files
+.vscode/**
+.vscode-test/**
+.github/**
+src/**
+tests/**
+scripts/**
+
+# Documentation (not needed in extension)
+doc/**
+CONTRIBUTING.md
+ROADMAP.md
+RENAME_PLAN.md
+TODO.md
+
+# Config and environment files
+.gitignore
+.translator.env
+.env
+.env-example
+.translator.json
+
+# Build config
+**/tsconfig.json
+**/vitest.config.ts
+**/vite.config.js
+**/eslint.config.js
+**/.eslintrc.json
+**/.eslintignore
+
+# Build artifacts and other exclusions
+**/*.map
+**/*.ts
+!**/*.d.ts
+**/*.tgz
+**/*.vsix
+.git/**
+coverage/**
+releases/**
+test-project/**
+
+# Exclude node_modules EXCEPT production dependencies needed at runtime.
+# vsce.dependencies in package.json tells vsce to include better-sqlite3,
+# but only if node_modules is not blanket-excluded here.
+# Instead of excluding all node_modules, we let vsce manage it.
+# vsce automatically excludes devDependencies and only bundles production deps.
