@@ -4,7 +4,7 @@
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -62,7 +62,7 @@
     "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
     "pretest": "pnpm rebuild:sqlite",
     "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
-    "package": "node scripts/package-extension.js",
+    "release": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "icon:png": "node scripts/convert-icon.js",
     "package:quick": "pnpm exec vsce package",
