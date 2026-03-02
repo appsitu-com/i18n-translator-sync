@@ -24,8 +24,8 @@ try {
   if (error.message && error.message.includes('find the module')) {
     console.error('\nThis looks like a binding loading error. The module was not found.');
     console.error('Try rebuilding the module for your environment:');
-    console.error('  - For Node.js: npm run rebuild:sqlite');
-    console.error('  - For Electron/VS Code: npm run rebuild:sqlite:electron');
+    console.error('  - For Node.js: pnpm rebuild:sqlite');
+    console.error('  - For Electron/VS Code: pnpm rebuild:sqlite:electron');
   }
 
   process.exit(1);

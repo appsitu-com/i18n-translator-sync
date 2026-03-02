@@ -21,8 +21,8 @@ Key reminders:
 - Use git commands (not MCP) when instructed to create commits.
 
 ## Key Conventions
-- Use Yarn for dependency management and scripts (see package.json).
-- Use 'yarn' for running package.json scripts (e.g., `yarn build`, `yarn test`).
+- Use pnpm for dependency management and scripts (see package.json).
+- Use 'pnpm' for running package.json scripts (e.g., `pnpm build`, `pnpm test`).
 - Use `tsc` for TypeScript compilation (see tsconfig.json).
 - Use `vitest` for unit testing (see vitest.config.ts).
 - Use `eslint` for linting (see .eslintrc.json).

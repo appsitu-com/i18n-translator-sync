@@ -63,8 +63,8 @@ async function downloadFile(url, dest) {
 
 async function ensureDependencyInstalled() {
   try {
-    console.log('Checking for global @vscode/vsce installation (using npm)...');
-    await execPromise('npm list -g @vscode/vsce || npm install -g @vscode/vsce');
+    console.log('Checking for global @vscode/vsce installation...');
+    await execPromise('pnpm list -g @vscode/vsce || pnpm add -g @vscode/vsce');
     console.log('Global @vscode/vsce is installed via npm.');
   } catch (error) {
     console.error('Error ensuring @vscode/vsce is installed:', error);
@@ -288,11 +288,11 @@ async function copyConfigurationSamples() {
 }
 
 async function buildExtension() {
-  console.log('Building extension with yarn...');
+  console.log('Building extension with pnpm...');
 
   try {
-    await execPromise('yarn build');
-    console.log('Extension built successfully using yarn');
+    await execPromise('pnpm build');
+    console.log('Extension built successfully using pnpm');
 
     // Copy configuration sample files after build
     await copyConfigurationSamples();
@@ -315,14 +315,14 @@ async function packageExtension(newVersion) {
       console.log(`Created releases directory: ${RELEASES_DIR}`);
     }
 
-    // Run prepublish script with yarn (local)
-    console.log('Running prepublish script with yarn...');
-    await execPromise('yarn vscode:prepublish');
+    // Run prepublish script with pnpm (local)
+    console.log('Running prepublish script with pnpm...');
+    await execPromise('pnpm vscode:prepublish');
 
-    // Package with vsce (global npm tool) into the releases directory
-    console.log('Packaging with @vscode/vsce (npm global tool)...');
+    // Package with vsce into the releases directory
+    console.log('Packaging with @vscode/vsce...');
     // Use the proper package command with native dependency handling
-    await execPromise(`npx @vscode/vsce package --out "${RELEASES_DIR}"`);
+    await execPromise(`pnpm exec vsce package --out "${RELEASES_DIR}"`);
 
     const vsixName = `${RELEASES_DIR}/i18n-translator-vscode-${version}.vsix`;
     console.log(`Extension packaged successfully as ${vsixName}`);
@@ -344,7 +344,7 @@ async function ensureDependencies() {
       console.log('sharp is installed');
     } catch (e) {
       console.log('sharp is not installed, installing now...');
-      await execPromise('yarn add sharp --dev');
+      await execPromise('pnpm add -D sharp');
       console.log('sharp installed successfully');
     }
 

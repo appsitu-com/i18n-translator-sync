@@ -51,9 +51,9 @@
     "build": "tsc -p ./ && node ./scripts/generate-build-info.js",
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
-    "cli": "yarn build && node ./dist/cli/cliMain.js test-project",
-    "cli:force": "yarn build && node ./dist/cli/cliMain.js test-project --force",
-    "cli:debug": "yarn build && node --inspect ./dist/cli/cliMain.js test-project",
+    "cli": "pnpm build && node ./dist/cli/cliMain.js test-project",
+    "cli:force": "pnpm build && node ./dist/cli/cliMain.js test-project --force",
+    "cli:debug": "pnpm build && node --inspect ./dist/cli/cliMain.js test-project",
     "cli:clean": "cd test-project && find i18n -maxdepth 1 \\( -name '*.json' ! -name 'en.json' \\) -o \\( -type d ! -name 'en' ! -name 'i18n' \\) | xargs rm -rf",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -62,12 +62,12 @@
     "rebuild:sqlite:electron": "node ./scripts/rebuild-sqlite.js --electron",
     "rebuild:sqlite:electron:quick": "node ./scripts/rebuild-sqlite.js --electron --skip-if-unchanged",
     "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
-    "pretest": "yarn rebuild:sqlite",
-    "vscode:prepublish": "yarn rebuild:sqlite:electron && yarn build",
+    "pretest": "pnpm rebuild:sqlite",
+    "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
     "package": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "icon:png": "node scripts/convert-icon.js",
-    "package:quick": "npx @vscode/vsce package",
+    "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
@@ -78,6 +78,7 @@
     ]
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.1",
@@ -85,7 +86,6 @@
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
     "@vitest/coverage-v8": "^3.2.4",
-    "electron-rebuild": "^3.2.9",
     "eslint": "^9.35.0",
     "eslint-plugin-unused-imports": "^4.2.0",
     "sharp": "^0.34.3",
@@ -280,5 +280,12 @@
         }
       }
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
+    ]
   }
 }

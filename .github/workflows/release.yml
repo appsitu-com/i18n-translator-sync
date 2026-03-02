@@ -9,11 +9,14 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'npm' }
-      - run: npm ci
-      - run: npm run build
-      - run: npm i -g @vscode/vsce && vsce package
+        with: { node-version: '20', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm add -g @vscode/vsce && vsce package
       - uses: softprops/action-gh-release@v2
         with:
           files: |

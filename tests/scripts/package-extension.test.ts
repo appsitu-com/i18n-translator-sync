@@ -269,11 +269,11 @@ describe('package-extension script', () => {
       }
 
       async function buildExtension() {
-        console.log('Building extension with yarn...');
+        console.log('Building extension with pnpm...');
 
         try {
-          await execPromise('yarn build');
-          console.log('Extension built successfully using yarn');
+          await execPromise('pnpm build');
+          console.log('Extension built successfully using pnpm');
 
           // Copy configuration sample files after build
           await copyConfigurationSamples();

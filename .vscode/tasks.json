@@ -2,9 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "yarn: build",
+      "label": "pnpm: build",
       "type": "shell",
-      "command": "yarn",
+      "command": "pnpm",
       "args": ["build"],
       "group": {
         "kind": "build",
@@ -13,19 +13,19 @@
       "problemMatcher": ["$tsc"]
     },
     {
-      "label": "yarn: test",
+      "label": "pnpm: test",
       "type": "shell",
-      "command": "yarn",
+      "command": "pnpm",
       "args": ["test"],
       "group": "test",
       "problemMatcher": []
     },
     {
-      "label": "yarn: prepare-debug",
+      "label": "pnpm: prepare-debug",
       "type": "shell",
-      "command": "yarn",
+      "command": "pnpm",
       "args": ["rebuild:sqlite:electron"],
-      "dependsOn": ["yarn: build"],
+      "dependsOn": ["pnpm: build"],
       "presentation": {
         "reveal": "silent",
         "close": true

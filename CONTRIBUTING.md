@@ -5,7 +5,7 @@ Thanks for helping improve **i18n Translator**! This guide explains how to set u
 ## Prerequisites
 
 - **Node.js 22+**
-- **Yarn** or **npm**
+- **pnpm** (v9+)
 - **VS Code** (latest) with TypeScript support
 
 ## Code Architecture
@@ -36,14 +36,7 @@ For information about the internal architecture of the extension, see [Architect
 
 ## Getting Started
 
-This project uses NPM for global package installs and YARN for project installs.
-
-> **Note about Yarn warning**
-> You may see: `The engine "vscode" appears to be invalid.`
-> This is safe to ignore. `"engines.vscode"` is required for VS Code extensions, but Yarn doesn’t validate it. If you prefer to silence it:
-> ```bash
-> yarn config set ignore-engines true
-> ```
+This project uses **pnpm** for dependency management and running scripts.
 
 ### Install
 
@@ -52,11 +45,11 @@ This project uses NPM for global package installs and YARN for project installs.
 git clone https://github.com/yourname/i18n-translator-vscode.git
 cd i18n-translator-vscode
 
-# Install yarn
-npm install -g yarn
+# Install pnpm (if not already installed)
+npm install -g pnpm
 
 # install packages
-yarn install
+pnpm install
 ```
 
 ### Unit testing
@@ -69,14 +62,14 @@ cp .translator.env.sample .translator.env
 echo .translator.env >> .gitignore
 
 # build & run unit tests
-yarn build
-yarn test
+pnpm build
+pnpm test
 
 # Auto run tests on source code change
-yarn test:watch
+pnpm test:watch
 
 ## Analyze test code coverage
-npm run test:cov
+pnpm test:cov
 
 ```
 
@@ -108,13 +101,13 @@ You need to rebuild the native modules using our scripts:
 
 ```bash
 # For running tests (rebuilds for your current Node.js version)
-yarn rebuild:sqlite
+pnpm rebuild:sqlite
 
 # For running in VS Code (rebuilds for Electron)
-yarn rebuild:sqlite:electron
+pnpm rebuild:sqlite:electron
 
 # Quick rebuild without cleaning (faster but less reliable)
-yarn rebuild:quick
+pnpm rebuild:quick
 ```
 
 These scripts will automatically handle rebuilding the native SQLite module for the appropriate environment.
@@ -134,9 +127,9 @@ The Electron version is automatically detected by our scripts. If you need to kn
 3. You can also check the [VS Code release notes](https://code.visualstudio.com/updates/) for your version.
 
 **Note:** Our configuration handles this automatically:
-- `yarn test` will automatically rebuild SQLite for Node.js
+- `pnpm test` will automatically rebuild SQLite for Node.js
 - When debugging (F5), SQLite will automatically rebuild for Electron if needed
-- `yarn vscode:prepublish` will rebuild for Electron before packaging
+- `pnpm vscode:prepublish` will rebuild for Electron before packaging
 
 In the `package.json` file we have the following rule to ensure that the published version will be auto updated to use the `better-sqlite3` version that matches a user's VSCode version when they install the extension.
 
@@ -203,7 +196,7 @@ Refer to [Configuration.md](./doc/Configuration.md) for details of how to config
 - Create feature branches: `feat/context-csv-validation`, `fix/azure-locale-normalization`
 - Write descriptive commit messages.
 - Add or update tests for your change.
-- Ensure `yarn build` and `yarn test` pass locally.
+- Ensure `pnpm build` and `pnpm test` pass locally.
 - Open a PR with a concise description and screenshots/logs if applicable.
 
 ## CI/CD (Not yet tested!)
@@ -216,9 +209,9 @@ Refer to [Configuration.md](./doc/Configuration.md) for details of how to config
 
 ### SQLite Issues
 If you encounter SQLite-related errors:
-1. Check that you've rebuilt the module for your environment using `yarn rebuild:sqlite`
-2. If test failures persist, try cleaning the node_modules directory and reinstalling: `rm -rf node_modules && yarn install && yarn rebuild:sqlite`
-3. For VS Code runtime issues, ensure you've rebuilt for Electron using `yarn rebuild:sqlite:electron`
+1. Check that you've rebuilt the module for your environment using `pnpm rebuild:sqlite`
+2. If test failures persist, try cleaning the node_modules directory and reinstalling: `rm -rf node_modules && pnpm install && pnpm rebuild:sqlite`
+3. For VS Code runtime issues, ensure you've rebuilt for Electron using `pnpm rebuild:sqlite:electron`
 
 ### Debugging the Extension
 1. Use the "Run Extension with Test Project" configuration in VS Code
