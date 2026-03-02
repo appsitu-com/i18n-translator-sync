@@ -4,6 +4,17 @@
 
 export type ExtractorKind = 'json' | 'yaml' | 'markdown'
 
+/**
+ * Options for excluding keys/paths from translation.
+ * Excluded values are preserved unchanged in rebuild output.
+ */
+export interface ExcludeOptions {
+  /** Key names to exclude at any depth */
+  excludeKeys?: string[]
+  /** Exact dotted paths to exclude (e.g. "meta.version") */
+  excludeKeyPaths?: string[]
+}
+
 export type StructuredDataExtraction = {
   kind: ExtractorKind
   segments: string[]
@@ -29,19 +40,49 @@ export function pathToString(p: (string | number)[]): string {
 }
 
 /**
+ * Check whether a key/path should be excluded from translation.
+ */
+export function isExcluded(
+  currentPath: (string | number)[],
+  excludeKeys: ReadonlySet<string>,
+  excludeKeyPaths: ReadonlySet<string>
+): boolean {
+  // Check last key segment against excludeKeys
+  if (currentPath.length > 0) {
+    const lastKey = currentPath[currentPath.length - 1]
+    if (typeof lastKey === 'string' && excludeKeys.has(lastKey)) {
+      return true
+    }
+  }
+  // Check full dotted path against excludeKeyPaths
+  if (excludeKeyPaths.size > 0 && excludeKeyPaths.has(pathToString(currentPath))) {
+    return true
+  }
+  return false
+}
+
+/**
  * Extract string values from a structured data object (like parsed JSON or YAML)
  * Returns segments, paths, and functions to rebuild and make contexts
  */
 export function extractStructuredData(
   obj: any,
   formatOutput: (obj: any) => string,
-  kind: ExtractorKind = 'json'
+  kind: ExtractorKind = 'json',
+  options?: ExcludeOptions
 ): StructuredDataExtraction {
   const paths: (string | number)[][] = []
   const segments: string[] = []
+  const excludeKeysSet = new Set(options?.excludeKeys ?? [])
+  const excludeKeyPathsSet = new Set(options?.excludeKeyPaths ?? [])
 
   // Custom walker function to extract string values
   const walk = (node: any, path: (string | number)[]) => {
+    // Skip excluded subtrees entirely
+    if (path.length > 0 && isExcluded(path, excludeKeysSet, excludeKeyPathsSet)) {
+      return
+    }
+
     if (typeof node === 'string') {
       // Found a string - add it to our collection
       paths.push([...path])
@@ -78,8 +119,13 @@ export function extractStructuredData(
     let i = 0
     const clone = structuredClone(obj)
 
-    // Custom rebuilder that mirrors the walker
+    // Custom rebuilder that mirrors the walker (must skip excluded paths)
     const rebuildNode = (node: any, path: (string | number)[]) => {
+      // Skip excluded subtrees — they are preserved unchanged in clone
+      if (path.length > 0 && isExcluded(path, excludeKeysSet, excludeKeyPathsSet)) {
+        return
+      }
+
       if (typeof node === 'string') {
         // Update path with translation
         let current: Record<string | number, any> = clone
