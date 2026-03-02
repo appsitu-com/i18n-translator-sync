@@ -81,7 +81,7 @@ async function updatePackageJson() {
     // Ensure required fields exist
     const updates = {
       description: "Extension for translating Markdown and JSON files using AI translation services",
-      keywords: ["i18n", "translation", "localization", "azure", "google", "deepl", "gemini", "markdown", "json"],
+      keywords: ["i18n", "translation", "localization", "azure", "google", "deepl", "gemini", "markdown", "mdx", "json", "yaml"],
       homepage: "https://github.com/tohagan/vscode-i18n-translator-ext",
       repository: {
         type: "git",
@@ -96,7 +96,7 @@ async function updatePackageJson() {
       license: "MIT",
       icon: "images/icon.png",  // Use PNG for best compatibility with the marketplace
       galleryBanner: {
-        color: "#0078d4",  // Match the blue color of the icon
+        color: "#ef4444",  // Match the blue color of the icon
         theme: "dark"
       },
       categories: ["Other", "Machine Learning", "Formatters"],

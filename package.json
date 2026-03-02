@@ -33,7 +33,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "galleryBanner": {
-    "color": "#0078d4",
+    "color": "#ef4444",
     "theme": "dark"
   },
   "categories": [
