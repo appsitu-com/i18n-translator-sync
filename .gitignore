@@ -3,8 +3,8 @@
 *.log
 
 .env
-.translator.env
-!samples/.translator.env
+translator.env
+!samples/translator.env
 
 node_modules/
 coverage/

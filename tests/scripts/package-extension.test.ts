@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
 import { execSync } from 'child_process';
 import { readFileSync } from 'fs';
 
@@ -19,8 +20,8 @@ describe('package-extension script', () => {
     fs.mkdirSync(path.join(TEST_DIR, 'dist'), { recursive: true });
 
     // Create mock sample files
-    fs.writeFileSync(path.join(SAMPLES_DIR, '.translator.json'), JSON.stringify({ testKey: 'testValue' }));
-    fs.writeFileSync(path.join(SAMPLES_DIR, '.translator.env'), 'TEST_KEY=test_value');
+    fs.writeFileSync(path.join(SAMPLES_DIR, TRANSLATOR_JSON), JSON.stringify({ testKey: 'testValue' }));
+    fs.writeFileSync(path.join(SAMPLES_DIR, TRANSLATOR_ENV), 'TEST_KEY=test_value');
   });
 
   // Clean up after tests
@@ -48,8 +49,8 @@ describe('package-extension script', () => {
 
         try {
           const samplesDir = path.join(ROOT_DIR, 'samples');
-          const sourceEnvSample = path.join(samplesDir, '.translator.env');
-          const sourceJsonSample = path.join(samplesDir, '.translator.json');
+          const sourceEnvSample = path.join(samplesDir, '${TRANSLATOR_ENV}');
+          const sourceJsonSample = path.join(samplesDir, '${TRANSLATOR_JSON}');
           const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
 
           // Make sure the dist/samples directory exists
@@ -60,17 +61,17 @@ describe('package-extension script', () => {
 
           // Copy the sample configuration files to the dist/samples directory
           if (fs.existsSync(sourceEnvSample)) {
-            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
-            console.log(\`Copied samples/.translator.env to dist/samples folder\`);
+            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '${TRANSLATOR_ENV}'));
+            console.log(\`Copied samples/translator.env to dist/samples folder\`);
           } else {
-            console.error(\`samples/.translator.env not found\`);
+            console.error(\`samples/translator.env not found\`);
           }
 
           if (fs.existsSync(sourceJsonSample)) {
-            fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '.translator.json'));
-            console.log(\`Copied samples/.translator.json to dist/samples folder\`);
+            fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '${TRANSLATOR_JSON}'));
+            console.log(\`Copied samples/translator.json to dist/samples folder\`);
           } else {
-            console.error(\`samples/.translator.json not found\`);
+            console.error(\`samples/translator.json not found\`);
           }
         } catch (error) {
           console.error('Error copying configuration samples:', error);
@@ -85,23 +86,23 @@ describe('package-extension script', () => {
     execSync(`node "${tempScriptPath}"`, { stdio: 'inherit' });
 
     // Check if files were copied correctly
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.json'))).toBe(true);
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.env'))).toBe(true);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON))).toBe(true);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV))).toBe(true);
 
     // Check if file contents match
-    const originalJson = fs.readFileSync(path.join(SAMPLES_DIR, '.translator.json'), 'utf8');
-    const copiedJson = fs.readFileSync(path.join(DIST_SAMPLES_DIR, '.translator.json'), 'utf8');
+    const originalJson = fs.readFileSync(path.join(SAMPLES_DIR, TRANSLATOR_JSON), 'utf8');
+    const copiedJson = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON), 'utf8');
     expect(copiedJson).toBe(originalJson);
 
-    const originalEnv = fs.readFileSync(path.join(SAMPLES_DIR, '.translator.env'), 'utf8');
-    const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, '.translator.env'), 'utf8');
+    const originalEnv = fs.readFileSync(path.join(SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
+    const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
     expect(copiedEnv).toBe(originalEnv);
   });
 
   it('should handle missing sample files gracefully', () => {
     // Remove the sample files to test error handling
-    fs.unlinkSync(path.join(SAMPLES_DIR, '.translator.json'));
-    fs.unlinkSync(path.join(SAMPLES_DIR, '.translator.env'));
+    fs.unlinkSync(path.join(SAMPLES_DIR, TRANSLATOR_JSON));
+    fs.unlinkSync(path.join(SAMPLES_DIR, TRANSLATOR_ENV));
 
     // Create a temporary JS file that imports and runs just the copyConfigurationSamples function
     const tempScriptPath = path.join(TEST_DIR, 'run-copy-samples.js');
@@ -117,8 +118,8 @@ describe('package-extension script', () => {
 
         try {
           const samplesDir = path.join(ROOT_DIR, 'samples');
-          const sourceEnvSample = path.join(samplesDir, '.translator.env');
-          const sourceJsonSample = path.join(samplesDir, '.translator.json');
+          const sourceEnvSample = path.join(samplesDir, '${TRANSLATOR_ENV}');
+          const sourceJsonSample = path.join(samplesDir, '${TRANSLATOR_JSON}');
           const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
 
           // Make sure the dist/samples directory exists
@@ -129,11 +130,11 @@ describe('package-extension script', () => {
 
           // Copy the sample configuration files to the dist/samples directory
           if (fs.existsSync(sourceEnvSample)) {
-            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
-            console.log(\`Copied samples/.translator.env to dist/samples folder\`);
+            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '${TRANSLATOR_ENV}'));
+            console.log(\`Copied samples/translator.env to dist/samples folder\`);
             return true;
           } else {
-            console.error(\`samples/.translator.env not found\`);
+            console.error(\`samples/translator.env not found\`);
             return false;
           }
         } catch (error) {
@@ -150,8 +151,8 @@ describe('package-extension script', () => {
     execSync(`node "${tempScriptPath}"`);
 
     // Verify that no files were created in dist/samples directory
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.json'))).toBe(false);
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.env'))).toBe(false);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON))).toBe(false);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV))).toBe(false);
   });
 
   // Test that verifies the actual script by creating a controlled environment
@@ -170,8 +171,8 @@ describe('package-extension script', () => {
 
         try {
           const samplesDir = path.join(ROOT_DIR, 'samples');
-          const sourceEnvSample = path.join(samplesDir, '.translator.env');
-          const sourceJsonSample = path.join(samplesDir, '.translator.json');
+          const sourceEnvSample = path.join(samplesDir, '${TRANSLATOR_ENV}');
+          const sourceJsonSample = path.join(samplesDir, '${TRANSLATOR_JSON}');
           const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
 
           // Make sure the dist/samples directory exists
@@ -182,17 +183,17 @@ describe('package-extension script', () => {
 
           // Copy the sample configuration files to the dist/samples directory
           if (fs.existsSync(sourceEnvSample)) {
-            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
-            console.log(\`Copied samples/.translator.env to dist/samples folder\`);
+            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '${TRANSLATOR_ENV}'));
+            console.log(\`Copied samples/translator.env to dist/samples folder\`);
           } else {
-            console.error(\`samples/.translator.env not found\`);
+            console.error(\`samples/translator.env not found\`);
           }
 
           if (fs.existsSync(sourceJsonSample)) {
-            fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '.translator.json'));
-            console.log(\`Copied samples/.translator.json to dist/samples folder\`);
+            fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '${TRANSLATOR_JSON}'));
+            console.log(\`Copied samples/translator.json to dist/samples folder\`);
           } else {
-            console.error(\`samples/.translator.json not found\`);
+            console.error(\`samples/translator.json not found\`);
           }
         } catch (error) {
           console.error('Error copying configuration samples:', error);
@@ -206,16 +207,16 @@ describe('package-extension script', () => {
     execSync(`node "${actualScriptPath}"`);
 
     // Check if files were copied correctly
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.json'))).toBe(true);
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.env'))).toBe(true);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON))).toBe(true);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV))).toBe(true);
 
     // Check content matches
-    const originalJson = fs.readFileSync(path.join(SAMPLES_DIR, '.translator.json'), 'utf8');
-    const copiedJson = fs.readFileSync(path.join(DIST_SAMPLES_DIR, '.translator.json'), 'utf8');
+    const originalJson = fs.readFileSync(path.join(SAMPLES_DIR, TRANSLATOR_JSON), 'utf8');
+    const copiedJson = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON), 'utf8');
     expect(copiedJson).toBe(originalJson);
 
-    const originalEnv = fs.readFileSync(path.join(SAMPLES_DIR, '.translator.env'), 'utf8');
-    const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, '.translator.env'), 'utf8');
+    const originalEnv = fs.readFileSync(path.join(SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
+    const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
     expect(copiedEnv).toBe(originalEnv);
   });
 
@@ -241,8 +242,8 @@ describe('package-extension script', () => {
 
         try {
           const samplesDir = path.join(ROOT_DIR, 'samples');
-          const sourceEnvSample = path.join(samplesDir, '.translator.env');
-          const sourceJsonSample = path.join(samplesDir, '.translator.json');
+          const sourceEnvSample = path.join(samplesDir, '${TRANSLATOR_ENV}');
+          const sourceJsonSample = path.join(samplesDir, '${TRANSLATOR_JSON}');
           const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
 
           // Make sure the dist/samples directory exists
@@ -253,15 +254,15 @@ describe('package-extension script', () => {
 
           // Copy the sample configuration files to the dist/samples directory
           if (fs.existsSync(sourceEnvSample)) {
-            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
-            console.log(\`Copied samples/.translator.env to dist/samples folder\`);
+            fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '${TRANSLATOR_ENV}'));
+            console.log(\`Copied samples/translator.env to dist/samples folder\`);
             // Create a marker file to verify this function was called
             fs.writeFileSync(path.join(distSamplesDir, '.copy-verification'), 'copyConfigurationSamples was called');
           }
 
           if (fs.existsSync(sourceJsonSample)) {
-            fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '.translator.json'));
-            console.log(\`Copied samples/.translator.json to dist/samples folder\`);
+            fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '${TRANSLATOR_JSON}'));
+            console.log(\`Copied samples/translator.json to dist/samples folder\`);
           }
         } catch (error) {
           console.error('Error copying configuration samples:', error);
@@ -325,16 +326,16 @@ describe('package-extension script', () => {
     execSync(`node "${extractedScriptPath}"`);
 
     // Verify files were copied correctly
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.json'))).toBe(true);
-    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, '.translator.env'))).toBe(true);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON))).toBe(true);
+    expect(fs.existsSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV))).toBe(true);
 
     // Check content matches
-    const originalJson = fs.readFileSync(path.join(SAMPLES_DIR, '.translator.json'), 'utf8');
-    const copiedJson = fs.readFileSync(path.join(DIST_SAMPLES_DIR, '.translator.json'), 'utf8');
+    const originalJson = fs.readFileSync(path.join(SAMPLES_DIR, TRANSLATOR_JSON), 'utf8');
+    const copiedJson = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON), 'utf8');
     expect(copiedJson).toBe(originalJson);
 
-    const originalEnv = fs.readFileSync(path.join(SAMPLES_DIR, '.translator.env'), 'utf8');
-    const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, '.translator.env'), 'utf8');
+    const originalEnv = fs.readFileSync(path.join(SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
+    const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
     expect(copiedEnv).toBe(originalEnv);
   });
 });

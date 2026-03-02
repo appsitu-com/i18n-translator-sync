@@ -1,8 +1,8 @@
 # Project Configuration
 
-## .translator.json
+## translator.json
 
-The extension now supports a project-specific configuration file called `.translator.json` in the root of your workspace. This allows you to configure the translator without modifying VSCode settings.
+The extension now supports a project-specific configuration file called `translator.json` in the root of your workspace. This allows you to configure the translator without modifying VSCode settings.
 
 ### Example Configuration
 
@@ -42,7 +42,7 @@ The extension now supports a project-specific configuration file called `.transl
 
 ## Backward Compatibility
 
-For backward compatibility, the extension will still read from VSCode settings if no `.translator.json` file is found or if certain options are not specified in the file.
+For backward compatibility, the extension will still read from VSCode settings if no `translator.json` file is found or if certain options are not specified in the file.
 
 ## Engine Overrides
 
@@ -83,7 +83,7 @@ You can exclude specific keys from translation so their values are copied unchan
 - **`excludeKeys`**: Key names to exclude at any nesting depth. For example, `["_comment"]` excludes every key named `_comment` regardless of where it appears.
 - **`excludeKeyPaths`**: Exact dotted key paths to exclude. For example, `["meta.version"]` excludes only the `version` key inside `meta`, not a `version` key elsewhere.
 
-These settings apply to JSON, YAML, and TypeScript files. They are configured in `.translator.json` only.
+These settings apply to JSON, YAML, and TypeScript files. They are configured in `translator.json` only.
 
 ```json
 {

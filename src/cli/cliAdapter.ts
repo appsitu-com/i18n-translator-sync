@@ -16,7 +16,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
   /**
    * Create a CLI translator adapter
    * @param workspacePath Path to the project workspace
-   * @param configPath Path to the project's .translator.json file
+   * @param configPath Path to the project's translator.json file
    */
   constructor(workspacePath: string, configPath: string) {
     const logger = new ConsoleLogger();
@@ -61,7 +61,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
       // Load CLI configuration
       await this.cliConfigProvider.load();
 
-      // Call the base class initialize which now handles loading .translator.env
+      // Call the base class initialize which now handles loading translator.env
       await super.initialize();
     } catch (error: any) {
       this.logger.error(`Error initializing translator: ${error.message || String(error)}`);

@@ -230,22 +230,22 @@ async function ensureAssets() {
     }
 
     // Ensure the sample translation config files exist
-    const translateJsonSample = path.join(samplesDir, '.translator.json');
-    const translateEnvSample = path.join(samplesDir, '.translator.env');
-    const translateJson = path.join(ROOT_DIR, '.translator.json');
-    const translateEnv = path.join(ROOT_DIR, '.translator.env');
+    const translateJsonSample = path.join(samplesDir, 'translator.json');
+    const translateEnvSample = path.join(samplesDir, 'translator.env');
+    const translateJson = path.join(ROOT_DIR, 'translator.json');
+    const translateEnv = path.join(ROOT_DIR, 'translator.env');
 
     // Check if sample files exist in the samples directory
     if (!fs.existsSync(translateJsonSample)) {
-      console.log('samples/.translator.json does not exist. Please create it manually.');
+      console.log('samples/translator.json does not exist. Please create it manually.');
     } else {
-      console.log('samples/.translator.json already exists');
+      console.log('samples/translator.json already exists');
     }
 
     if (!fs.existsSync(translateEnvSample)) {
-      console.log('samples/.translator.env does not exist. Please create it manually.');
+      console.log('samples/translator.env does not exist. Please create it manually.');
     } else {
-      console.log('samples/.translator.env already exists');
+      console.log('samples/translator.env already exists');
     }
   } catch (error) {
     console.error('Error ensuring assets exist:', error);
@@ -258,8 +258,8 @@ async function copyConfigurationSamples() {
 
   try {
     const samplesDir = path.join(ROOT_DIR, 'samples');
-    const sourceEnvSample = path.join(samplesDir, '.translator.env');
-    const sourceJsonSample = path.join(samplesDir, '.translator.json');
+    const sourceEnvSample = path.join(samplesDir, 'translator.env');
+    const sourceJsonSample = path.join(samplesDir, 'translator.json');
     const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
 
     // Make sure the dist/samples directory exists
@@ -270,17 +270,17 @@ async function copyConfigurationSamples() {
 
     // Copy the sample configuration files to the dist/samples directory
     if (fs.existsSync(sourceEnvSample)) {
-      fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
-      console.log(`Copied samples/.translator.env to dist/samples folder`);
+      fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, 'translator.env'));
+      console.log(`Copied samples/translator.env to dist/samples folder`);
     } else {
-      console.error(`samples/.translator.env not found`);
+      console.error(`samples/translator.env not found`);
     }
 
     if (fs.existsSync(sourceJsonSample)) {
-      fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '.translator.json'));
-      console.log(`Copied samples/.translator.json to dist/samples folder`);
+      fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, 'translator.json'));
+      console.log(`Copied samples/translator.json to dist/samples folder`);
     } else {
-      console.error(`samples/.translator.json not found`);
+      console.error(`samples/translator.json not found`);
     }
   } catch (error) {
     console.error('Error copying configuration samples:', error);

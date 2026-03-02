@@ -7,5 +7,6 @@ export default [
   { code: 'ja', name: 'Japanese', native: '日本語' },
   { code: 'ru', name: 'Russian', native: 'Русский' },
   { code: 'ar', name: 'Arabic', native: 'العربية' },
-  { code: 'pt', name: 'Portuguese', native: 'Português' }
+  { code: 'pt', name: 'Portuguese', native: 'Português' },
+  { code: 'hi', name: 'Hindi', native: 'हिन्दी' }
 ] as const

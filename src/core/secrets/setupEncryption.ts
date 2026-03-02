@@ -5,9 +5,10 @@ import * as dotenv from 'dotenv';
 import { PassphraseManager } from './passphraseManager';
 import { encryptApiKey, isEncrypted } from './keyEncryption';
 import { Logger } from '../util/baseLogger';
+import { TRANSLATOR_ENV } from '../constants';
 
 /**
- * VSCode UI option to setup encryption key for API keys stored in .translator.env
+ * VSCode UI option to setup encryption key for API keys stored in translator.env
  */
 export async function setupEncryption(
   context: vscode.ExtensionContext,
@@ -62,8 +63,8 @@ export async function setupEncryption(
       return;
     }
 
-    // Look for .translator.env file
-    const envPath = path.join(workspaceRoot, '.translator.env');
+    // Look for translator.env file
+    const envPath = path.join(workspaceRoot, TRANSLATOR_ENV);
     if (!fs.existsSync(envPath)) {
       vscode.window.showInformationMessage('No existing API keys found. Keys will be encrypted when entered.');
       return;
@@ -71,7 +72,7 @@ export async function setupEncryption(
 
     // Ask if user wants to encrypt existing keys
     const shouldEncrypt = await vscode.window.showQuickPick(['Yes', 'No'], {
-      placeHolder: 'Do you want to encrypt existing API keys in .translator.env?',
+      placeHolder: 'Do you want to encrypt existing API keys in translator.env?',
       ignoreFocusOut: true
     });
 

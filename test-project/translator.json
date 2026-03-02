@@ -1,7 +1,7 @@
 {
   "sourcePaths": ["i18n/en", "i18n/en.json"],
   "sourceLocale": "en",
-  "targetLocales": ["en-US", "es", "fr", "de", "zh-CN"],
+  "targetLocales": ["en-US", "es", "fr", "hi", "ur", "de", "zh-CN"],
   "enableBackTranslation": true,
   "defaultMarkdownEngine": "google",
   "defaultJsonEngine": "google",

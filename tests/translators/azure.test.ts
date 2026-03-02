@@ -43,22 +43,22 @@ describe('azure stub', () => {
   })
 })
 
-// Tests using real Azure API keys from .translator.env
+// Tests using real Azure API keys from translator.env
 describe('azure api', () => {
   let apiConfig: any;
 
   beforeEach(() => {
-    // Explicitly load .translator.env file before each test
+    // Explicitly load translator.env file before each test
     const dotenv = require('dotenv');
     const path = require('path');
     const fs = require('fs');
 
-    const envPath = path.resolve(process.cwd(), 'test-project/.translator.env');
+    const envPath = path.resolve(process.cwd(), 'test-project/translator.env');
     if (fs.existsSync(envPath)) {
       console.log('Loading environment from:', envPath);
       const result = dotenv.config({ path: envPath, override: true });
       if (result.error) {
-        console.error('Error loading .translator.env:', result.error);
+        console.error('Error loading translator.env:', result.error);
       }
     }
 
@@ -66,7 +66,7 @@ describe('azure api', () => {
     const key = process.env.AZURE_TRANSLATION_KEY;
     console.log('Azure API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
     if (!key || key === 'test-azure-key') {
-      throw new Error('Real Azure API key required in .translator.env for this test suite');
+      throw new Error('Real Azure API key required in translator.env for this test suite');
     }
 
     apiConfig = {

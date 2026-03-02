@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Logger } from '../util/baseLogger';
 
 /**
- * Key used to encrypt/decrypt API keys in .translator.json
+ * Key used to encrypt/decrypt API keys in translator.env
  * Adds a prefix to encrypted keys
  */
 const TRANSLATOR_KEY = 'translator-key';

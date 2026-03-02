@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
 
 // Path constants
 const ROOT_DIR = path.resolve(__dirname, '../..');
@@ -12,10 +13,10 @@ describe('sample files copying functionality', () => {
   // Mock files for testing
   const TEST_JSON_CONTENT = '{\n  "test": "config"\n}';
   const TEST_ENV_CONTENT = 'TEST_API_KEY=abcdef123456';
-  const TEST_SAMPLE_JSON = path.join(SAMPLES_DIR, '.translator.json');
-  const TEST_SAMPLE_ENV = path.join(SAMPLES_DIR, '.translator.env');
-  const TEST_DIST_JSON = path.join(DIST_SAMPLES_DIR, '.translator.json');
-  const TEST_DIST_ENV = path.join(DIST_SAMPLES_DIR, '.translator.env');
+  const TEST_SAMPLE_JSON = path.join(SAMPLES_DIR, TRANSLATOR_JSON);
+  const TEST_SAMPLE_ENV = path.join(SAMPLES_DIR, TRANSLATOR_ENV);
+  const TEST_DIST_JSON = path.join(DIST_SAMPLES_DIR, TRANSLATOR_JSON);
+  const TEST_DIST_ENV = path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV);
 
   // Original file contents to restore later
   let originalJsonExists = false;

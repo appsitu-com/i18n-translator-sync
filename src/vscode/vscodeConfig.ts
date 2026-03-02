@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ConfigProvider } from '../core/coreConfig';
+import { TRANSLATOR_JSON } from '../core/constants';
 
 /**
  * VSCode configuration provider implementation
@@ -10,7 +11,7 @@ export class VsCodeConfigProvider implements ConfigProvider {
   private config: Record<string, any> = {};
 
   /**
-   * Load configuration from .translator.json file in the workspace
+   * Load configuration from translator.json file in the workspace
    */
   async load(): Promise<void> {
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
@@ -18,7 +19,7 @@ export class VsCodeConfigProvider implements ConfigProvider {
       return;
     }
 
-    const configPath = path.join(workspaceFolder.uri.fsPath, '.translator.json');
+    const configPath = path.join(workspaceFolder.uri.fsPath, TRANSLATOR_JSON);
 
     try {
       if (fs.existsSync(configPath)) {
@@ -27,7 +28,7 @@ export class VsCodeConfigProvider implements ConfigProvider {
         console.log(`Loaded VSCode configuration from: ${configPath}`);
       }
     } catch (error) {
-      console.error(`Error loading .translator.json configuration: ${error}`);
+      console.error(`Error loading translator.json configuration: ${error}`);
     }
   }
 
@@ -75,16 +76,16 @@ export class VsCodeConfigProvider implements ConfigProvider {
         engineConfig = { ...engineConfig, ...translatorConfigs[section] };
       }
 
-      console.log(`Loaded ${section} translator config from .translator.json and environment variables`);
+      console.log(`Loaded ${section} translator config from translator.json and environment variables`);
 
       return engineConfig as T;
     }
 
     const parts = section.split('.');
 
-    // Handle special case for translator settings - check .translator.json first
+    // Handle special case for translator settings - check translator.json first
     if (parts[0] === 'translator' && parts.length > 1) {
-      // Check .translator.json config first
+      // Check translator.json config first
       const translatorSection = parts.slice(1).join('.');
       let current = this.config;
       for (const part of parts) {
@@ -103,7 +104,7 @@ export class VsCodeConfigProvider implements ConfigProvider {
       return config.get<T>(translatorSection, defaultValue as T);
     }
 
-    // Handle other settings - check .translator.json first
+    // Handle other settings - check translator.json first
     if (section.includes('.')) {
       const parts = section.split('.');
       let current: any = this.config;

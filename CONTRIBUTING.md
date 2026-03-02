@@ -54,12 +54,12 @@ pnpm install
 
 ### Unit testing
 
-For each cloud service you plan to test, create accounts and configured API keys in `.translator.env`.
+For each cloud service you plan to test, create accounts and configured API keys in `translator.env`.
 Never commit your API key files to GIT.
 
 ```bash
-cp .translator.env.sample .translator.env
-echo .translator.env >> .gitignore
+cp translator.env.sample translator.env
+echo translator.env >> .gitignore
 
 # build & run unit tests
 pnpm build
@@ -84,8 +84,8 @@ The debug configuration automatically:
 2. Rebuilds the better-sqlite3 module for Electron if needed
 3. Launches the extension in debug mode
 
-Copy your API keys from `.translator.env` into `test-project/.translator.env` for use during manual testing.
-Make sure that `test-project/.gitignore` includes `.translator.env` - *so you don't accidentally commit your keys into GIT!*
+Copy your API keys from `translator.env` into `test-project/translator.env` for use during manual testing.
+Make sure that `test-project/.gitignore` includes `translator.env` - *so you don't accidentally commit your keys into GIT!*
 
 ## Native Modules: better-sqlite3 and Electron
 
@@ -229,7 +229,7 @@ These warnings are harmless and expected behavior caused by VS Code's hot-reload
 
 ### Common Issues
 
-- **API Keys not working**: Check that `.translator.env` exists and contains the correct keys
+- **API Keys not working**: Check that `translator.env` exists and contains the correct keys
 - **Files not being translated**: Verify that the file paths match your configured source paths
 - **Watcher not detecting changes**: Try restarting the translator and check logs for glob pattern issues
 - **SQLite version mismatch**: Use the rebuild scripts mentioned above

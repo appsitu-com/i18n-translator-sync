@@ -4,6 +4,7 @@ import { TranslateProjectConfig } from '../../src/core/coreConfig';
 import { FileSystem } from '../../src/core/util/fs';
 import { Logger } from '../../src/core/util/baseLogger';
 import { FileWatcher, WorkspaceWatcher } from '../../src/core/util/watcher';
+import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
 
 // Mock dependencies
 const createMockFileSystem = () => ({
@@ -365,15 +366,15 @@ describe('TranslatorManager', () => {
       vi.mocked(workspaceWatcher.createFileSystemWatcher).mockReturnValue(mockFileWatcher);
     });
 
-    it('should create watchers for .translator.json and .translator.env', async () => {
+    it('should create watchers for translator.json and translator.env', async () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
       // Should create multiple watchers for source paths + config files
       expect(workspaceWatcher.createFileSystemWatcher).toHaveBeenCalledTimes(3); // 1 for source + 2 for config files
 
-      // Should set up watch for .translator.json
+      // Should set up watch for translator.json
       expect(mockFileWatcher.watch).toHaveBeenCalledWith(
-        '.translator.json',
+        TRANSLATOR_JSON,
         expect.objectContaining({
           onDidCreate: expect.any(Function),
           onDidChange: expect.any(Function),
@@ -381,9 +382,9 @@ describe('TranslatorManager', () => {
         })
       );
 
-      // Should set up watch for .translator.env
+      // Should set up watch for translator.env
       expect(mockFileWatcher.watch).toHaveBeenCalledWith(
-        '.translator.env',
+        TRANSLATOR_ENV,
         expect.objectContaining({
           onDidCreate: expect.any(Function),
           onDidChange: expect.any(Function),
@@ -392,17 +393,17 @@ describe('TranslatorManager', () => {
       );
 
       // Should log watcher creation
-      expect(logger.info).toHaveBeenCalledWith('Watcher created for configuration file: .translator.json');
-      expect(logger.info).toHaveBeenCalledWith('Watcher created for environment file: .translator.env');
+      expect(logger.info).toHaveBeenCalledWith(`Watcher created for configuration file: ${TRANSLATOR_JSON}`);
+      expect(logger.info).toHaveBeenCalledWith(`Watcher created for environment file: ${TRANSLATOR_ENV}`);
     });
 
-    it('should call config change callback when .translator.json changes', async () => {
+    it('should call config change callback when translator.json changes', async () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
-      // Get the watch call for .translator.json (should be the 2nd watcher for config files)
+      // Get the watch call for translator.json (should be the 2nd watcher for config files)
       const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
-      // Find the .translator.json watch call
-      const jsonWatchCall = watchCalls.find(call => call[0] === '.translator.json');
+      // Find the translator.json watch call
+      const jsonWatchCall = watchCalls.find(call => call[0] === TRANSLATOR_JSON);
 
       expect(jsonWatchCall).toBeDefined();
       if (jsonWatchCall) {
@@ -410,7 +411,7 @@ describe('TranslatorManager', () => {
 
         // Trigger the change handler
         if (listeners.onDidChange) {
-          await listeners.onDidChange({ fsPath: '/workspace/.translator.json', scheme: 'file' });
+          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_JSON}`, scheme: 'file' });
         }
 
         // Should call the config change callback
@@ -418,17 +419,17 @@ describe('TranslatorManager', () => {
 
         // Should log the configuration change
         expect(logger.info).toHaveBeenCalledWith(
-          'Configuration file changed (.translator.json), reloading configuration...'
+          `Configuration file changed (${TRANSLATOR_JSON}), reloading configuration...`
         );
       }
     });
 
-    it('should call config change callback when .translator.env changes', async () => {
+    it('should call config change callback when translator.env changes', async () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
-      // Find the .translator.env watch call
+      // Find the translator.env watch call
       const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
-      const envWatchCall = watchCalls.find(call => call[0] === '.translator.env');
+      const envWatchCall = watchCalls.find(call => call[0] === TRANSLATOR_ENV);
 
       expect(envWatchCall).toBeDefined();
       if (envWatchCall) {
@@ -436,7 +437,7 @@ describe('TranslatorManager', () => {
 
         // Trigger the change handler
         if (listeners.onDidChange) {
-          await listeners.onDidChange({ fsPath: '/workspace/.translator.env', scheme: 'file' });
+          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_ENV}`, scheme: 'file' });
         }
 
         // Should call the config change callback
@@ -444,7 +445,7 @@ describe('TranslatorManager', () => {
 
         // Should log the configuration change
         expect(logger.info).toHaveBeenCalledWith(
-          'Configuration file changed (.translator.env), reloading configuration...'
+          `Configuration file changed (${TRANSLATOR_ENV}), reloading configuration...`
         );
       }
     });
@@ -466,13 +467,13 @@ describe('TranslatorManager', () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
       const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
-      const jsonWatchCall = watchCalls.find(call => call[0] === '.translator.json');
+      const jsonWatchCall = watchCalls.find(call => call[0] === TRANSLATOR_JSON);
 
       if (jsonWatchCall) {
         const listeners = jsonWatchCall[1];
 
         if (listeners.onDidChange) {
-          await listeners.onDidChange({ fsPath: '/workspace/.translator.json', scheme: 'file' });
+          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_JSON}`, scheme: 'file' });
         }
 
         // Should warn that no handler is configured

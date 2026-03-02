@@ -38,22 +38,22 @@ describe('google stub', () => {
   })
 })
 
-// Tests using real Google API keys from .translator.env
+// Tests using real Google API keys from translator.env
 describe('google api', () => {
   let apiConfig: any;
 
   beforeEach(() => {
-    // Explicitly load .translator.env file before each test
+    // Explicitly load translator.env file before each test
     const dotenv = require('dotenv');
     const path = require('path');
     const fs = require('fs');
 
-    const envPath = path.resolve(process.cwd(), 'test-project/.translator.env');
+    const envPath = path.resolve(process.cwd(), 'test-project/translator.env');
     if (fs.existsSync(envPath)) {
       console.log('Loading environment from:', envPath);
       const result = dotenv.config({ path: envPath, override: true });
       if (result.error) {
-        console.error('Error loading .translator.env:', result.error);
+        console.error('Error loading translator.env:', result.error);
       }
     }
 
@@ -61,7 +61,7 @@ describe('google api', () => {
     const key = process.env.GOOGLE_TRANSLATION_KEY;
     console.log('Google API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
     if (!key || key === 'test-google-key') {
-      throw new Error('Real Google API key required in .translator.env for this test suite');
+      throw new Error('Real Google API key required in translator.env for this test suite');
     }
 
     apiConfig = {

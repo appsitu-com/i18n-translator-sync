@@ -47,22 +47,22 @@ describe('deepl stub', () => {
   })
 })
 
-// Tests using real DeepL API keys from .translator.env
+// Tests using real DeepL API keys from translator.env
 describe('deepl api', () => {
   let apiConfig: any;
 
   beforeEach(() => {
-    // Explicitly load .translator.env file before each test
+    // Explicitly load translator.env file before each test
     const dotenv = require('dotenv');
     const path = require('path');
     const fs = require('fs');
 
-    const envPath = path.resolve(process.cwd(), 'test-project/.translator.env');
+    const envPath = path.resolve(process.cwd(), 'test-project/translator.env');
     if (fs.existsSync(envPath)) {
       console.log('Loading environment from:', envPath);
       const result = dotenv.config({ path: envPath, override: true });
       if (result.error) {
-        console.error('Error loading .translator.env:', result.error);
+        console.error('Error loading translator.env:', result.error);
       }
     }
 
@@ -70,7 +70,7 @@ describe('deepl api', () => {
     const key = process.env.DEEPL_TRANSLATION_KEY;
     console.log('DeepL API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
     if (!key || key === 'test-deepl-key') {
-      throw new Error('Real DeepL API key required in .translator.env for this test suite');
+      throw new Error('Real DeepL API key required in translator.env for this test suite');
     }
 
     apiConfig = {

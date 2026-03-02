@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
+import { TRANSLATOR_ENV } from '../src/core/constants'
 import * as os from 'os'
 
 /**
  * Test the isEnvFileConfigured logic
- * This tests that the reminder message will not appear for properly configured .translator.env files
+ * This tests that the reminder message will not appear for properly configured translator.env files
  */
 describe('Environment File Configuration Detection', () => {
   let tempDir: string
@@ -68,18 +69,18 @@ describe('Environment File Configuration Detection', () => {
   }
 
   it('should return false for non-existent file', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     expect(isEnvFileConfigured(envPath)).toBe(false)
   })
 
   it('should return false for empty file', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, '')
     expect(isEnvFileConfigured(envPath)).toBe(false)
   })
 
   it('should return false for file with only comments', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(
       envPath,
       `# This is a comment
@@ -91,37 +92,37 @@ describe('Environment File Configuration Detection', () => {
   })
 
   it('should return false for file with only placeholder keys', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, 'TEST_API_KEY=abcdef123456\n')
     expect(isEnvFileConfigured(envPath)).toBe(false)
   })
 
   it('should return false for file with whitespace-only values', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, 'SOME_KEY=   \n')
     expect(isEnvFileConfigured(envPath)).toBe(false)
   })
 
   it('should return false for file with too-short values', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, 'SHORT_KEY=abc123\n')
     expect(isEnvFileConfigured(envPath)).toBe(false)
   })
 
   it('should return true for file with real Azure key', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, "AZURE_TRANSLATION_KEY='2f04626f92914d7885503d4d03d018b8'\n")
     expect(isEnvFileConfigured(envPath)).toBe(true)
   })
 
   it('should return true for file with real Google key', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, "GOOGLE_TRANSLATION_KEY='AIzaSyAJKfmNaexRLapyt0AQQY-Dy1bJ_I_TNXY'\n")
     expect(isEnvFileConfigured(envPath)).toBe(true)
   })
 
   it('should return true for file with multiple keys and comments', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(
       envPath,
       `# Azure configuration
@@ -136,13 +137,13 @@ GOOGLE_TRANSLATION_KEY='AIzaSyAJKfmNaexRLapyt0AQQY-Dy1bJ_I_TNXY'
   })
 
   it('should return true for file with DeepL key', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, "DEEPL_TRANSLATION_KEY='d57b625a-a8ef-4fdb-a6ff-9d442477dea9:fx'\n")
     expect(isEnvFileConfigured(envPath)).toBe(true)
   })
 
   it('should return true for file with OpenRouter key', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(
       envPath,
       "OPENROUTER_API_KEY='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'\n"
@@ -151,19 +152,19 @@ GOOGLE_TRANSLATION_KEY='AIzaSyAJKfmNaexRLapyt0AQQY-Dy1bJ_I_TNXY'
   })
 
   it('should return true for file with quoted values', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, 'API_KEY="some-very-long-api-key-here-12345678"\n')
     expect(isEnvFileConfigured(envPath)).toBe(true)
   })
 
   it('should return true for file with unquoted values', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(envPath, 'API_KEY=some-very-long-api-key-here-12345678\n')
     expect(isEnvFileConfigured(envPath)).toBe(true)
   })
 
   it('should handle files with empty lines and real keys', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(
       envPath,
       `
@@ -176,7 +177,7 @@ GOOGLE_TRANSLATION_KEY='AIzaSyAJKfmNaexRLapyt0AQQY-Dy1bJ_I_TNXY'
   })
 
   it('should ignore lines with key but no equals sign', () => {
-    const envPath = path.join(tempDir, '.translator.env')
+    const envPath = path.join(tempDir, TRANSLATOR_ENV)
     fs.writeFileSync(
       envPath,
       `INVALID_LINE_NO_EQUALS

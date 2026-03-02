@@ -6,6 +6,7 @@ import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
 import { TranslatorPipeline } from './pipeline';
 import { MateCatService, MateCatSettings } from './matecat';
 import { ITranslationExecutor } from './translationExecutor';
+import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
 import { IPassphraseManager } from './secrets/passphraseManager';
 import * as path from 'path';
 
@@ -140,34 +141,34 @@ export class TranslatorManager {
   }
 
   /**
-   * Set up watchers for configuration files (.translator.json and .translator.env)
+   * Set up watchers for configuration files (translator.json and translator.env)
    * When either config file changes, notify the adapter to reload and restart
    * @private
    */
   private setupConfigFileWatcher(): void {
-    // Watch for .translator.json changes
+    // Watch for translator.json changes
     const jsonWatcher = this.workspaceWatcher.createFileSystemWatcher();
-    jsonWatcher.watch('.translator.json', {
-      onDidCreate: () => this.handleConfigFileChange('.translator.json'),
-      onDidChange: () => this.handleConfigFileChange('.translator.json'),
-      onDidDelete: () => this.handleConfigFileChange('.translator.json')
+    jsonWatcher.watch(TRANSLATOR_JSON, {
+      onDidCreate: () => this.handleConfigFileChange(TRANSLATOR_JSON),
+      onDidChange: () => this.handleConfigFileChange(TRANSLATOR_JSON),
+      onDidDelete: () => this.handleConfigFileChange(TRANSLATOR_JSON)
     });
     this.watchers.push(jsonWatcher);
-    this.logger.info('Watcher created for configuration file: .translator.json');
+    this.logger.info(`Watcher created for configuration file: ${TRANSLATOR_JSON}`);
 
-    // Watch for .translator.env changes
+    // Watch for translator.env changes
     const envWatcher = this.workspaceWatcher.createFileSystemWatcher();
-    envWatcher.watch('.translator.env', {
-      onDidCreate: () => this.handleConfigFileChange('.translator.env'),
-      onDidChange: () => this.handleConfigFileChange('.translator.env'),
-      onDidDelete: () => this.handleConfigFileChange('.translator.env')
+    envWatcher.watch(TRANSLATOR_ENV, {
+      onDidCreate: () => this.handleConfigFileChange(TRANSLATOR_ENV),
+      onDidChange: () => this.handleConfigFileChange(TRANSLATOR_ENV),
+      onDidDelete: () => this.handleConfigFileChange(TRANSLATOR_ENV)
     });
     this.watchers.push(envWatcher);
-    this.logger.info('Watcher created for environment file: .translator.env');
+    this.logger.info(`Watcher created for environment file: ${TRANSLATOR_ENV}`);
   }
 
   /**
-   * Handle changes to configuration files (.translator.json or .translator.env)
+   * Handle changes to configuration files (translator.json or translator.env)
    * Triggers a callback to reload configuration and restart watching
    * @param filename The name of the file that changed
    * @private

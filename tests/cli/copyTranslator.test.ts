@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as path from 'path';
+import { TRANSLATOR_JSON } from '../../src/core/constants';
 import * as os from 'os';
 import * as fs from 'fs/promises';
 import { CliConfigProvider } from '../../src/cli/cliConfig';
@@ -32,7 +33,7 @@ async function createTempConfigFile(translator?: { copy: any }) {
     config.translator = translator;
   }
 
-  const configPath = path.join(tempDir, '.translator.json');
+  const configPath = path.join(tempDir, TRANSLATOR_JSON);
   await fs.writeFile(configPath, JSON.stringify(config, null, 2));
 
   return { tempDir, configPath };

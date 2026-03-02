@@ -58,7 +58,7 @@ See [CLI Documentation](doc/CLI.md) for details on the command-line interface.
   - [W] Exported/imported to CSV files. CSV exports should be committed to GIT to preserve stable translations and reduce costs.
 
 - [W] **VS Code commands**:
-  - [x] **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `.translator.json` file for your API keys that's excluded from GIT.
+  - [x] **Translator: Start or Restart** - Activates the Translate on Save service. 1st time it creates an initial `translator.json` file for your API keys that's excluded from GIT.
   - [x] **Translator: Stop** - Deactivates the "translate on save" feature.
 
   - [ ] **Translator: Retranslate** - Manually retranslate without activating the Translate on Save service.
@@ -83,11 +83,11 @@ You can reuse your public or private translation memory to maintain consistent t
 
 ## Configuration
 
-The extension supports project-specific configuration through a `.translator.json` file in the root of your workspace or via your user and workspace settings.
+The extension supports project-specific configuration through a `translator.json` file in the root of your workspace or via your user and workspace settings.
 See [Configuration Documentation](doc/Configuration.md) for details.
 
 Configuration Options:
-- Project translation rules can be configured in a local `.translator.json` file (recommended) or in VSCode Workspace or User settings.
+- Project translation rules can be configured in a local `translator.json` file (recommended) or in VSCode Workspace or User settings.
 - Optional back-translations and context-aware JSON translations.
 - DeepL supports `en-US` => `en-GB` translations.
 - Back-translation folders `<locale>_en/**`
@@ -105,18 +105,18 @@ Configuration Options:
 
 ## API Keys
 
-API keys for translation services are configured via environment variables that you can specify in `.translate.env` or in your operating system.
+API keys for translation services are configured via environment variables that you can specify in `translator.env` or in your operating system.
 We avoiding using `.env.*` files so we don't interfere with your local project environment.
-Ensure that the `.translate.env` file is excluded from GIT via your `.gitignore` file.
+Ensure that the `translator.env` file is excluded from GIT via your `.gitignore` file.
 
-The first time you run the `Translator: Start` in a project, `.translate.env` will be created with placeholder text for your API keys.
+The first time you run the `Translator: Start` in a project, `translator.env` will be created with placeholder text for your API keys.
 It's name is also added to your project `.gitignore` file.
 
 You only need to configure keys for the AI translation engines you plan to use.
 You'll be warned if any required keys are missing or invalid.
 See the configurations settings that select which AI services to use for each file type.
 
-Example `.translate.env` file:
+Example `translator.env` file:
 
 ```ini
 # Azure Translation API configuration
@@ -143,12 +143,12 @@ GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
 
 ### Configuration Files
 
-- `.translator.json` - This file comes with the extension as a default configuration example. You can modify it directly for your project.
-- `.translator.json.sample` - This is a template file that you can copy and modify for your own configuration.
+- `translator.json` - This file comes with the extension as a default configuration example. You can modify it directly for your project.
+- `translator.json.sample` - This is a template file that you can copy and modify for your own configuration.
 
 Both files are included in the extension and can be used as a starting point for your project configuration.
 
-Example `.translator.json`:
+Example `translator.json`:
 ```json
 {
   "sourcePaths": ["i18n/en", "docs/en"],

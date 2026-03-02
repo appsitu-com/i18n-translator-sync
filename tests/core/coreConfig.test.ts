@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { TRANSLATOR_JSON } from '../../src/core/constants'
 import { loadProjectConfig, defaultConfig, TranslateConfigSchema, type ConfigProvider, type TranslateProjectConfig } from '../../src/core/coreConfig'
 import { FileSystem, IUri } from '../../src/core/util/fs'
 import { Logger } from '../../src/core/util/baseLogger'
@@ -140,7 +141,7 @@ describe('Config', () => {
 
   describe('loadProjectConfig', () => {
     const rootPath = '/test/project'
-    const configPath = '/test/project/.translator.json'
+    const configPath = '/test/project/translator.json'
 
     it('should load valid configuration from file', async () => {
       const configContent = {
@@ -157,10 +158,10 @@ describe('Config', () => {
       const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
 
       expect(mockFileSystem.fileExists).toHaveBeenCalledWith(expect.objectContaining({
-        fsPath: expect.stringContaining('.translator.json')
+        fsPath: expect.stringContaining(TRANSLATOR_JSON)
       }))
       expect(mockFileSystem.readFile).toHaveBeenCalledWith(expect.objectContaining({
-        fsPath: expect.stringContaining('.translator.json')
+        fsPath: expect.stringContaining(TRANSLATOR_JSON)
       }))
       expect(result.sourceDir).toBe('src/locales')
       expect(result.targetDir).toBe('dist/locales')
@@ -186,7 +187,7 @@ describe('Config', () => {
       const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error loading .translator.json')
+        expect.stringContaining('Error loading translator.json')
       )
       expect(result).toMatchObject(defaultConfig)
     })
@@ -203,7 +204,7 @@ describe('Config', () => {
       const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid .translator.json configuration')
+        expect.stringContaining('Invalid translator.json configuration')
       )
       // Should still return some config (with invalid parts used as-is since they're truthy)
       expect(result.sourceLocale).toBe(123) // uses the invalid value from parsed config since it's truthy
@@ -237,7 +238,7 @@ describe('Config', () => {
       const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
 
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error loading .translator.json')
+        expect.stringContaining('Error loading translator.json')
       )
       expect(result).toMatchObject(defaultConfig)
     })

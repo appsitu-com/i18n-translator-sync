@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as path from 'path';
+import { TRANSLATOR_JSON } from '../../src/core/constants';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import { TranslatorManager } from '../../src/core/translatorManager';
@@ -114,7 +115,7 @@ describe('Bulk Translation Integration Tests', () => {
     // Create temporary test directory with files
     tempDir = await createTempTestDir();
 
-    // Create a .translator.json file with configuration for the copy engine
+    // Create a translator.json file with configuration for the copy engine
     const translateConfig = {
       sourceDir: '',
       targetDir: '',
@@ -132,7 +133,7 @@ describe('Bulk Translation Integration Tests', () => {
 
     // Write the config file to the temp directory
     await fs.writeFile(
-      path.join(tempDir, '.translator.json'),
+      path.join(tempDir, TRANSLATOR_JSON),
       JSON.stringify(translateConfig, null, 2)
     );
 
@@ -141,7 +142,7 @@ describe('Bulk Translation Integration Tests', () => {
     logger = new ConsoleLogger('test');
     cache = new SQLiteCache(':memory:'); // Use in-memory DB for tests
     watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
-    configProvider = new CliConfigProvider(fileSystem, logger, path.join(tempDir, '.translator.json'));
+    configProvider = new CliConfigProvider(fileSystem, logger, path.join(tempDir, TRANSLATOR_JSON));
 
     // Need to load the config we just created
     await configProvider.load();

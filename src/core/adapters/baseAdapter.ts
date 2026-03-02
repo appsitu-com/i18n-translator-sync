@@ -84,12 +84,12 @@ export abstract class TranslatorAdapter {
       try {
         this.logger.info('Configuration file changed, reloading configuration and environment...');
 
-        // Reload the configuration provider (.translator.json)
+        // Reload the configuration provider (translator.json)
         if (this.configProvider.load) {
           await this.configProvider.load();
         }
 
-        // Reload environment variables (.translator.env)
+        // Reload environment variables (translator.env)
         await initTranslatorEnv(
           this.workspacePath,
           this.logger,
@@ -134,7 +134,7 @@ export abstract class TranslatorAdapter {
         await this.configProvider.load();
       }
 
-      // Initialize environment (loads .translator.env file)
+      // Initialize environment (loads translator.env file)
       await initTranslatorEnv(
         this.workspacePath,
         this.logger,

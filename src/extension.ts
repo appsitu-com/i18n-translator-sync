@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
 import { StatusBarManager, VSCodeStatusBarManager, TranslatorState } from './vscode/statusBar'
 import { VSCodeLogger } from './vscode/vscodeLogger'
+import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './core/constants'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
@@ -66,7 +67,7 @@ function updateStatusBar(): void {
 }
 
 /**
- * Check if the .translator.env file is properly configured with actual API keys
+ * Check if the translator.env file is properly configured with actual API keys
  * Returns true if the file has at least one non-empty, non-placeholder API key
  */
 function isEnvFileConfigured(envFilePath: string): boolean {
@@ -124,18 +125,18 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
   const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath
   const configFiles = [
     {
-      name: '.translator.env',
-      targetPath: path.join(workspacePath, '.translator.env'),
-      samplePath: path.join(context.extensionPath, 'samples', '.translator.env'),
-      message: 'A .translator.env file has been created. Please configure your translation API keys.',
-      reminderMessage: "Don't forget to configure your translation API keys in the .translator.env file.",
+      name: TRANSLATOR_ENV,
+      targetPath: path.join(workspacePath, TRANSLATOR_ENV),
+      samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_ENV),
+      message: 'A translator.env file has been created. Please configure your translation API keys.',
+      reminderMessage: "Don't forget to configure your translation API keys in the translator.env file.",
       docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys'
     },
     {
-      name: '.translator.json',
-      targetPath: path.join(workspacePath, '.translator.json'),
-      samplePath: path.join(context.extensionPath, 'samples', '.translator.json'),
-      message: 'A .translator.json file has been created. Please configure your translation settings.',
+      name: TRANSLATOR_JSON,
+      targetPath: path.join(workspacePath, TRANSLATOR_JSON),
+      samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_JSON),
+      message: 'A translator.json file has been created. Please configure your translation settings.',
       reminderMessage: null, // No reminder for JSON file
       docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration'
     }
@@ -223,7 +224,7 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
           vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0
         ) {
-          const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '.translator.env')
+          const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, TRANSLATOR_ENV)
           if (fs.existsSync(envFile)) {
             vscode.workspace.openTextDocument(envFile).then((doc) => {
               vscode.window.showTextDocument(doc)
