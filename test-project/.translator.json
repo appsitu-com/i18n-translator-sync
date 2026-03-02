@@ -5,6 +5,9 @@
   "enableBackTranslation": true,
   "defaultMarkdownEngine": "google",
   "defaultJsonEngine": "google",
+  "excludeKeys": ["native", "code"],
+  "excludeKeyPaths": [],
+  "copyOnlyFiles": ["index.ts"],
   "engineOverrides": {
     "copy": ["en-US"],
     "google": ["fr", "de", "zh-CN"],

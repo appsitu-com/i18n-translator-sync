@@ -9,12 +9,16 @@ Key reminders:
 - Use small, prefer composable modules and pure functions or interfaces and classes where appropriate
 
 ## Project Overview
-- This is a VS Code extension for translating Markdown, JSON, and YAML files using AI translation services (draft/MVP) and professional translation services (final).
+- This is a VS Code extension for translating Markdown, JSON, YAML, and TypeScript files using AI translation services (draft/MVP) and professional translation services (final).
 - It supports multiple translation engines.
   - Translation engines include Azure, Google, DeepL, OpenRouter, Gemini, and a 'Copy' which is a non-translating engine.
 - Some engines support context aware translations.
 - The extension is written in TypeScript and uses native modules (better-sqlite3) for caching.
 - It supports translating both directory structures and individual files, with flexible source path configuration.
+
+## MCP
+
+- Use git commands (not MCP) when instructed to create commits.
 
 ## Key Conventions
 - Use Yarn for dependency management and scripts (see package.json).

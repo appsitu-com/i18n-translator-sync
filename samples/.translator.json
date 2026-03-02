@@ -9,6 +9,9 @@
     "deepl": ["fr", "de"],
     "azure": ["es:en", "ja:en"]
   },
+  "excludeKeys": [],
+  "excludeKeyPaths": [],
+  "copyOnlyFiles": [],
   "translator": {
     "copy": {},
     "google": {

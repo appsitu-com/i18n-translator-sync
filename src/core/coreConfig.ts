@@ -23,7 +23,22 @@ export const TranslateConfigSchema = z.object({
   defaultJsonEngine: translatorEngineEnum.describe('Default engine for JSON files'),
   engineOverrides: z
     .record(z.string(), z.array(z.string()))
-    .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns')
+    .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns'),
+  excludeKeys: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('Key names to exclude from translation (copied unchanged). Matches at any depth.'),
+  excludeKeyPaths: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('Exact dotted key paths to exclude from translation (e.g. "meta.version").'),
+  copyOnlyFiles: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('File names (not paths) to copy verbatim instead of translating (e.g. "index.ts").')
 })
 
 
@@ -60,7 +75,10 @@ export const defaultConfig: TranslateProjectConfig = {
   enableBackTranslation: false,
   defaultMarkdownEngine: 'azure',
   defaultJsonEngine: 'google',
-  engineOverrides: {} as Record<string, string[]>
+  engineOverrides: {} as Record<string, string[]>,
+  excludeKeys: [] as string[],
+  excludeKeyPaths: [] as string[],
+  copyOnlyFiles: [] as string[]
 }
 
 /**
@@ -155,6 +173,10 @@ export async function loadProjectConfig(
               : []
           ]
         )
-      )
+      ),
+    // These fields are .translator.json-only (no VS Code settings fallback)
+    excludeKeys: projectConfig.excludeKeys ?? defaultConfig.excludeKeys,
+    excludeKeyPaths: projectConfig.excludeKeyPaths ?? defaultConfig.excludeKeyPaths,
+    copyOnlyFiles: projectConfig.copyOnlyFiles ?? defaultConfig.copyOnlyFiles
   }
 }

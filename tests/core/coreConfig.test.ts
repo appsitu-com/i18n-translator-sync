@@ -72,7 +72,12 @@ describe('Config', () => {
       const result = TranslateConfigSchema.safeParse(validConfig)
       expect(result.success).toBe(true)
       if (result.success) {
-        expect(result.data).toEqual(validConfig)
+        expect(result.data).toEqual({
+          ...validConfig,
+          excludeKeys: [],
+          excludeKeyPaths: [],
+          copyOnlyFiles: []
+        })
       }
     })
 
@@ -125,7 +130,10 @@ describe('Config', () => {
         enableBackTranslation: false,
         defaultMarkdownEngine: 'azure',
         defaultJsonEngine: 'google',
-        engineOverrides: {}
+        engineOverrides: {},
+        excludeKeys: [],
+        excludeKeyPaths: [],
+        copyOnlyFiles: []
       })
     })
   })

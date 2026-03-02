@@ -6,6 +6,7 @@ import remarkMdx from 'remark-mdx';
 import yaml from 'js-yaml'
 
 import { visit } from 'unist-util-visit'
+import { ExcludeOptions } from './structured'
 
 export type MarkdownExtraction = {
   kind: 'markdown';
@@ -18,8 +19,13 @@ export type MarkdownExtraction = {
  * Extract text segments to be translated from Markdown or MDX content.
  * @param markdown Markdown or MDX content
  * @param frontmatterKeys Frontmatter keys to be translated
+ * @param excludeOptions Keys/paths to exclude from front matter translation
  */
-export function extractMarkdownOrMDX(markdown: string, frontmatterKeys?: string[]): MarkdownExtraction {
+export function extractMarkdownOrMDX(
+  markdown: string,
+  frontmatterKeys?: string[],
+  excludeOptions?: ExcludeOptions
+): MarkdownExtraction {
   const processor = remark().use(frontmatter, ['yaml']).use(remarkMdx).use(stringify, { bullet: '-' });
 
     // Parse markdown to an AST model
@@ -27,12 +33,12 @@ export function extractMarkdownOrMDX(markdown: string, frontmatterKeys?: string[
     // console.log('ast>>', JSON.stringify(ast, null, 2)) // KEEP
 
     // Extract text segments to be translated
-    const segments = extractFromAST(ast, frontmatterKeys)
+    const segments = extractFromAST(ast, frontmatterKeys, excludeOptions)
 
     const rebuild = (translations: string[]) => {
       // Update AST with a copy of the translated texts
       // traverse in same order to pop from the end of the array
-      updateASTWithTranslations(ast, translations.slice(), frontmatterKeys)
+      updateASTWithTranslations(ast, translations.slice(), frontmatterKeys, excludeOptions)
       const result = processor.stringify(ast) // Convert AST back to markdown
       return (!markdown.endsWith('\n') && result.endsWith('\n')) ? result.slice(0, -1) : result
     }
@@ -40,14 +46,14 @@ export function extractMarkdownOrMDX(markdown: string, frontmatterKeys?: string[
     return { kind: 'markdown', segments, rebuild }
 }
 
-function extractFromAST(tree: any, frontmatterKeys?: string[]): string[] {
+function extractFromAST(tree: any, frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): string[] {
   const segments: string[] = []
   visit(tree, (node) => {
     for (const attr of translateMarkdownAttributes(node.type)) {
       const val = node[attr]
       if (val && typeof val === 'string') {
         if (node.type === 'yaml') {
-            extractFromFrontMatter(node.value, segments, frontmatterKeys)
+            extractFromFrontMatter(node.value, segments, frontmatterKeys, excludeOptions)
           } else {
             segments.push(val)
           }
@@ -58,13 +64,13 @@ function extractFromAST(tree: any, frontmatterKeys?: string[]): string[] {
     return segments
   }
 
-  function updateASTWithTranslations(tree: any, translations: string[], frontmatterKeys?: string[]): void {
+  function updateASTWithTranslations(tree: any, translations: string[], frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): void {
     visit(tree, (node) => {
       for (const attr of translateMarkdownAttributes(node.type)) {
         const val = node[attr]
         if (val && typeof val === 'string') {
           if (node.type === 'yaml') {
-            node[attr] = updateFrontmatterWithTranslations(node[attr], translations, frontmatterKeys)
+            node[attr] = updateFrontmatterWithTranslations(node[attr], translations, frontmatterKeys, excludeOptions)
           } else {
             node[attr] = translations.shift()
           }
@@ -93,10 +99,12 @@ function translateMarkdownAttributes(nodeType: string): string[] {
     }
   }
 
-  function extractFromFrontMatter(value: string, segments: string[], frontmatterKeys?: string[]): void {
+  function extractFromFrontMatter(value: string, segments: string[], frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): void {
     if (!frontmatterKeys || frontmatterKeys.length === 0) return
     const frontmatter = yaml.load(value) as Record<string, any> // parse frontmatter as YAML
-    const keys = Object.keys(frontmatter).filter(k => frontmatterKeys.includes(k))
+    const keys = Object.keys(frontmatter)
+      .filter(k => frontmatterKeys.includes(k))
+      .filter(k => !isFrontmatterKeyExcluded(k, excludeOptions))
     for (const key of keys) {
       const val = frontmatter[key]
       if (val && typeof val === 'string') {
@@ -105,11 +113,13 @@ function translateMarkdownAttributes(nodeType: string): string[] {
     }
   }
 
- function updateFrontmatterWithTranslations(value: string, translations: string[], frontmatterKeys?: string[]): string {
+ function updateFrontmatterWithTranslations(value: string, translations: string[], frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): string {
     if (!frontmatterKeys || frontmatterKeys.length === 0) return value
 
     const frontmatter = yaml.load(value) as Record<string, any> // parse frontmatter as YAML
-    const keys = Object.keys(frontmatter).filter(k => frontmatterKeys.includes(k))
+    const keys = Object.keys(frontmatter)
+      .filter(k => frontmatterKeys.includes(k))
+      .filter(k => !isFrontmatterKeyExcluded(k, excludeOptions))
     for (const key of keys) {
       const val = frontmatter[key]
       if (val && typeof val === 'string') {
@@ -122,3 +132,13 @@ function translateMarkdownAttributes(nodeType: string): string[] {
 
     return yaml.dump(frontmatter)
   }
+
+/** Check if a front matter key should be excluded from translation. */
+function isFrontmatterKeyExcluded(key: string, options?: ExcludeOptions): boolean {
+  if (!options) return false
+  const excludeKeys = options.excludeKeys ?? []
+  const excludeKeyPaths = options.excludeKeyPaths ?? []
+  if (excludeKeys.includes(key)) return true
+  if (excludeKeyPaths.includes(key)) return true
+  return false
+}

@@ -26,6 +26,7 @@ See [CLI Documentation](doc/CLI.md) for details on the command-line interface.
 - [x] **Translate on Save** *as you save* source file it is instantly translated into a file for each target language.
   - [x] Markdown & MDX files
   - [x] JSON & YAML files
+  - [x] TypeScript files (`export default { ... }` pattern)
   - [ ] Can convert translated JSON to a JavaScript or TypeScript file.
 - [x] **Back translation** from each target file back to a new file in the source language. This allow you to:
   - Check which source text was likely mistranslated by an AI engine - even when you can't read the target language.
@@ -96,6 +97,8 @@ Configuration Options:
   - Default translation engines for different file types
   - Language-specific engine selection
 - Context-aware translations per JSON path (e.g. informs engine that translation is for a button label, menu text etc)
+- Exclude specific keys or key paths from translation (copied unchanged)
+- Copy-only files that are mirrored verbatim without translation
 - Translation cache DB with CSV import/export
   - Optimizes translation speed, reduces AI translation costs and removes AI translation "drift".
 - Future: Integration with Volunteer/ Pro translation team
@@ -158,7 +161,10 @@ Example `.translator.json`:
     "deepl": ["fr", "de"],
     "azure": ["es:en", "ja:en"],
     "gemini": ["zh-CN"]
-  }
+  },
+  "excludeKeys": ["_comment"],
+  "excludeKeyPaths": ["meta.version"],
+  "copyOnlyFiles": ["index.ts"]
 }
 ```
 

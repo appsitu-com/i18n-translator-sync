@@ -73,6 +73,51 @@ export class TranslatorPipeline {
   }
 
   /**
+   * Copy a file verbatim to all target locale paths (copy-only mode).
+   * Also copies to back-translation paths when enabled.
+   */
+  private async copyFileToTargets(
+    srcUri: IUri,
+    workspacePath: string,
+    config: TranslateProjectConfig,
+    forceTranslation: boolean
+  ): Promise<void> {
+    const content = await this.fileSystem.readFile(srcUri)
+    const rel = getRelativePath(srcUri.fsPath, workspacePath, config)
+    const sourceLocale = config.sourceLocale
+
+    for (const targetLocale of config.targetLocales) {
+      const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
+      if (!sourcePath) {
+        throw new Error(`File ${srcUri.fsPath} is not in any configured source path`)
+      }
+
+      const targetUri = createTargetUri(
+        this.fileSystem, workspacePath, sourceLocale, targetLocale, rel, config, sourcePath
+      )
+
+      const copyNeeded = forceTranslation || await this.needsTranslation(srcUri, targetUri)
+      if (!copyNeeded) {
+        this.logger.info(`Skipping up-to-date copy-only file: ${path.basename(srcUri.fsPath)} [${targetLocale}]`)
+        continue
+      }
+
+      await this.ensureDirFor(targetUri)
+      await this.fileSystem.writeFile(targetUri, content)
+      this.logger.info(`Copied (copy-only): ${path.basename(srcUri.fsPath)} → ${targetLocale}`)
+
+      if (config.enableBackTranslation) {
+        const backUri = createBackTranslationUri(
+          this.fileSystem, workspacePath, targetLocale, rel, config, sourcePath
+        )
+        await this.ensureDirFor(backUri)
+        await this.fileSystem.writeFile(backUri, content)
+        this.logger.info(`Copied (copy-only back): ${path.basename(srcUri.fsPath)} → ${targetLocale}_${sourceLocale}`)
+      }
+    }
+  }
+
+  /**
    * Handle context CSV loading for JSON files
    */
   private async loadJsonContexts(extraction: any, srcUri: IUri): Promise<(string | null)[]> {
@@ -156,12 +201,9 @@ export class TranslatorPipeline {
     if (lowerPath.endsWith('.yml') || lowerPath.endsWith('.yaml')) {
       return 'yaml';
     }
-    // if (lowerPath.endsWith('.txt')) {
-    //   return 'txt';
-    // }
-    // if (lowerPath.endsWith('.html') || lowerPath.endsWith('.htm')) {
-    //   return 'html';
-    // }
+    if (lowerPath.endsWith('.ts')) {
+      return 'json'; // TS default-export files use JSON engine selection
+    }
 
     throw new Error(`Unsupported file type for path: ${filePath}`);
   }
@@ -188,7 +230,22 @@ export class TranslatorPipeline {
     // Read and process file content
     const filename = srcUri.fsPath.replace(/\\/g, '/').toLowerCase()
     const content = await this.fileSystem.readFile(srcUri)
-    const extraction = extractForFile(filename, content)
+
+    // Check if this file is in the copy-only list
+    const baseName = path.basename(srcUri.fsPath)
+    const copyOnlyFiles = config.copyOnlyFiles ?? []
+    if (copyOnlyFiles.includes(baseName)) {
+      await this.copyFileToTargets(srcUri, workspacePath, config, forceTranslation)
+      return
+    }
+
+    // Build exclusion options from config
+    const excludeOptions = {
+      excludeKeys: config.excludeKeys ?? [],
+      excludeKeyPaths: config.excludeKeyPaths ?? []
+    }
+
+    const extraction = extractForFile(filename, content, excludeOptions)
 
     // Determine file type
     const fileType = this.getFileType(filename);

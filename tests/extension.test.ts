@@ -84,7 +84,13 @@ describe('extension.ts', () => {
 
     const subscriptionMock = (name: string) => ({ dispose: () => console.log(`${name} disposed`) })
 
-    ctx = { subscriptions: [] }
+    ctx = {
+      subscriptions: [],
+      extensionPath: '/mock/extension/path',
+      extension: {
+        packageJSON: { version: '0.0.0-test' }
+      }
+    }
     registerCommandSpy = vi
       .spyOn(vscode.commands, 'registerCommand')
       .mockImplementation((cmd, cb) => subscriptionMock(cmd))
