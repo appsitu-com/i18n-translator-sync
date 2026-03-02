@@ -4,7 +4,7 @@
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.1.2",
+  "version": "0.2.1",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -16,10 +16,8 @@
     "google",
     "deepl",
     "gemini",
-    "json",
-    "yaml",
     "markdown",
-    "mdx"
+    "json"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {
@@ -35,7 +33,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "galleryBanner": {
-    "color": "#ef4444",
+    "color": "#0078d4",
     "theme": "dark"
   },
   "categories": [
@@ -47,33 +45,27 @@
   "bin": {
     "i18n-translator": "./dist/cli/cliMain.js"
   },
-  "files": [
-    "dist/**/*.js",
-    "samples/**/*",
-    "images/**/*",
-    "LICENSE"
-  ],
   "scripts": {
-    "build": "tsc -p ./",
+    "build": "tsc -p ./ && node ./scripts/generate-build-info.js",
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
-    "cli": "yarn build && node ./dist/cli/cliMain.js test-project",
-    "cli:force": "yarn build && node ./dist/cli/cliMain.js test-project --force",
-    "cli:debug": "yarn build && node --inspect ./dist/cli/cliMain.js test-project",
+    "cli": "pnpm build && node ./dist/cli/cliMain.js test-project",
+    "cli:force": "pnpm build && node ./dist/cli/cliMain.js test-project --force",
+    "cli:debug": "pnpm build && node --inspect ./dist/cli/cliMain.js test-project",
     "cli:clean": "cd test-project && find i18n -maxdepth 1 \\( -name '*.json' ! -name 'en.json' \\) -o \\( -type d ! -name 'en' ! -name 'i18n' \\) | xargs rm -rf",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:cov": "vitest run --coverage",
     "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
     "rebuild:sqlite:electron": "node ./scripts/rebuild-sqlite.js --electron",
     "rebuild:sqlite:electron:quick": "node ./scripts/rebuild-sqlite.js --electron --skip-if-unchanged",
     "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
-    "pretest": "yarn rebuild:sqlite",
-    "vscode:prepublish": "yarn rebuild:sqlite:electron && yarn build",
-    "package": "node scripts/package-extension.js",
+    "pretest": "pnpm rebuild:sqlite",
+    "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
+    "release": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "icon:png": "node scripts/convert-icon.js",
-    "package:quick": "npx @vscode/vsce package",
-    "test:cov": "vitest run --coverage",
+    "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix"
@@ -84,6 +76,7 @@
     ]
   },
   "devDependencies": {
+    "@electron/rebuild": "^4.0.3",
     "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.1",
@@ -91,7 +84,6 @@
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
     "@vitest/coverage-v8": "^3.2.4",
-    "electron-rebuild": "^3.2.9",
     "eslint": "^9.35.0",
     "eslint-plugin-unused-imports": "^4.2.0",
     "sharp": "^0.34.3",
@@ -99,11 +91,12 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "better-sqlite3": "^12.2.0",
+    "better-sqlite3": "^12.6.2",
     "chokidar": "^4.0.3",
     "commander": "^14.0.1",
     "dotenv": "^17.2.1",
     "js-yaml": "^4.1.0",
+    "json5": "^2.2.3",
     "minimatch": "^10.0.3",
     "remark": "^15.0.1",
     "remark-frontmatter": "^5.0.0",
@@ -130,16 +123,12 @@
         "title": "Translator: Restart"
       },
       {
-        "command": "translator.push",
-        "title": "Translator: Push translations to MateCat"
-      },
-      {
-        "command": "translator.pull",
-        "title": "Translator: Pull translations from MateCat"
-      },
-      {
         "command": "translator.showOutput",
         "title": "Translator: Show Output"
+      },
+      {
+        "command": "translator.showContextMenu",
+        "title": "Translator: Context Menu"
       }
     ],
     "configuration": {
@@ -285,5 +274,12 @@
         }
       }
     }
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
+    ]
   }
 }

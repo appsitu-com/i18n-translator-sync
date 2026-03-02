@@ -15,19 +15,19 @@ const testLogger = {
   show: () => {} // no-op for tests
 };
 
-// Load environment variables from test-project/.translator.env before running tests
-const testProjectEnvFile = path.resolve(__dirname, '../test-project/.translator.env');
+// Load environment variables from test-project/translator.env before running tests
+const testProjectEnvFile = path.resolve(__dirname, '../test-project/translator.env');
 if (fs.existsSync(testProjectEnvFile)) {
   // console.log('Loading environment variables from:', testProjectEnvFile);
   const result = dotenv.config({ path: testProjectEnvFile, override: true });
   if (result.error) {
-    console.error('Error loading test-project/.translator.env:', result.error);
+    console.error('Error loading test-project/translator.env:', result.error);
   } else {
-    // console.log('Successfully loaded API keys from test-project/.translator.env');
+    // console.log('Successfully loaded API keys from test-project/translator.env');
   }
 } else {
-  console.warn('test-project/.translator.env not found, using fallback initialization');
-  // Initialize the environment from .translator.env in current directory as fallback
+  console.warn('test-project/translator.env not found, using fallback initialization');
+  // Initialize the environment from translator.env in current directory as fallback
   const rootDir = path.resolve(__dirname, '..');
   initTranslatorEnv(rootDir, testLogger, nodeFileSystem);
 }
@@ -38,5 +38,5 @@ const betterSqlitePath = path.resolve(__dirname, '../node_modules/better-sqlite3
 // Check if we need to rebuild SQLite
 if (!fs.existsSync(betterSqlitePath) || !fs.existsSync(path.join(betterSqlitePath, 'build/Release'))) {
   console.warn('SQLite module may not be properly built for the current Node.js version.');
-  console.warn('If tests fail with SQLite errors, run: yarn rebuild:sqlite');
+  console.warn('If tests fail with SQLite errors, run: pnpm rebuild:sqlite');
 }

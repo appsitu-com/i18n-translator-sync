@@ -13,7 +13,7 @@
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
-      "preLaunchTask": "yarn: prepare-debug",
+      "preLaunchTask": "pnpm: prepare-debug",
       "trace": true,
       "smartStep": false,
       "skipFiles": [
@@ -40,7 +40,7 @@
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
-      "preLaunchTask": "yarn: prepare-debug",
+      "preLaunchTask": "pnpm: prepare-debug",
       "trace": true,
       "smartStep": false,
       "skipFiles": [
@@ -56,7 +56,7 @@
       "name": "Debug Vitest Tests",
       "type": "node",
       "request": "launch",
-      "runtimeExecutable": "yarn",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["test:watch", "--"],
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal",
@@ -70,7 +70,7 @@
       "args": [
         "${workspaceFolder}/test-project",
         "--config",
-        "${workspaceFolder}/test-project/.translator.json",
+        "${workspaceFolder}/test-project/translator.json",
         "--watch"
       ],
       "outFiles": [
@@ -78,7 +78,7 @@
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
-      "preLaunchTask": "yarn: build",
+      "preLaunchTask": "pnpm: build",
       "smartStep": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
@@ -99,7 +99,7 @@
       "args": [
         "${workspaceFolder}/test-project",
         "--config",
-        "${workspaceFolder}/test-project/.translator.json",
+        "${workspaceFolder}/test-project/translator.json",
         "--bulk-translate",
         "--no-watch"
       ],
@@ -108,7 +108,7 @@
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
-      "preLaunchTask": "yarn: build",
+      "preLaunchTask": "pnpm: build",
       "smartStep": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",

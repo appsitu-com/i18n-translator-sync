@@ -16,7 +16,7 @@ The `engineOverrides` configuration has been updated to use string arrays instea
 
 ## Migration
 
-If you're using the `.translator.json` file, update your engine overrides from:
+If you're using the `translator.json` file, update your engine overrides from:
 
 ```json
 "engineOverrides": {

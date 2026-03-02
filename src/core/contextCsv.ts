@@ -9,8 +9,8 @@ export async function loadContextCsvForJson(
   fileSystem: FileSystem,
   jsonUri: IUri
 ): Promise<ContextCsv> {
-  // Create CSV URI by replacing .json extension with .csv
-  const csvPath = jsonUri.fsPath.replace(/\.json$/i, '.csv')
+  // Create CSV URI by replacing .json or .ts extension with .csv
+  const csvPath = jsonUri.fsPath.replace(/\.(json|ts)$/i, '.csv')
   const csvUri = fileSystem.createUri(csvPath)
 
   const empty: ContextCsv = {

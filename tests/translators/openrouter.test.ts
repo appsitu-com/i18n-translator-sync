@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { TRANSLATOR_ENV } from '../../src/core/constants'
 import { OpenRouterTranslator } from '../../src/translators/openrouter'
 import type { BulkTranslateOpts } from '../../src/translators/types'
 
@@ -307,7 +308,7 @@ describe('OpenRouterTranslator', () => {
   })
 })
 
-// Tests using real OpenRouter API keys from .translator.env
+// Tests using real OpenRouter API keys from translator.env
 describe('openrouter api', () => {
   let apiConfig: any;
 
@@ -315,17 +316,17 @@ describe('openrouter api', () => {
     // Restore real fetch for integration tests
     vi.unstubAllGlobals()
 
-    // Explicitly load .translator.env file before each test
+    // Explicitly load translator.env file before each test
     const dotenv = require('dotenv');
     const path = require('path');
     const fs = require('fs');
 
-    const envPath = path.resolve(process.cwd(), '.translator.env');
+    const envPath = path.resolve(process.cwd(), TRANSLATOR_ENV);
     if (fs.existsSync(envPath)) {
       console.log('Loading environment from:', envPath);
       const result = dotenv.config({ path: envPath, override: true });
       if (result.error) {
-        console.error('Error loading .translator.env:', result.error);
+        console.error('Error loading translator.env:', result.error);
       }
     }
 
@@ -333,7 +334,7 @@ describe('openrouter api', () => {
     const key = process.env.OPENROUTER_API_KEY;
     console.log('OpenRouter API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
     if (!key || key === 'test-openrouter-key') {
-      throw new Error('Real OpenRouter API key required in .translator.env for this test suite');
+      throw new Error('Real OpenRouter API key required in translator.env for this test suite');
     }
 
     apiConfig = {

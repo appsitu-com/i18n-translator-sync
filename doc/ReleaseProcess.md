@@ -1,14 +1,13 @@
 # Publishing a new release
 
 The extension uses:
-- Yarn for local project dependencies
-- npm for global tools (like @vscode/vsce)
+- pnpm for dependency management
 
 To create a VSIX package with version management:
 
 ```bash
 # Run the packaging script with interactive version selection
-yarn package
+pnpm package
 ```
 
 This will:
@@ -25,7 +24,7 @@ This will:
 You can also update the version independently:
 ```bash
 # Update version only (without packaging)
-yarn version:update
+pnpm version:update
 ```
 
 ## Tagging Releases
@@ -57,11 +56,11 @@ This approach is the recommended way to handle native dependencies in VS Code ex
 For development iterations, you can create a quick package without updating the version:
 ```bash
 # Create package without version selection
-yarn package:quick
+pnpm package:quick
 ```
 
 If you need to regenerate the extension icon:
 ```bash
 # Regenerate the PNG icon from SVG
-yarn package:regenerate-icon
+pnpm package:regenerate-icon
 ```

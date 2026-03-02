@@ -9,16 +9,20 @@ Key reminders:
 - Use small, prefer composable modules and pure functions or interfaces and classes where appropriate
 
 ## Project Overview
-- This is a VS Code extension for translating Markdown, JSON, and YAML files using AI translation services (draft/MVP) and professional translation services (final).
+- This is a VS Code extension for translating Markdown, JSON, YAML, and TypeScript files using AI translation services (draft/MVP) and professional translation services (final).
 - It supports multiple translation engines.
   - Translation engines include Azure, Google, DeepL, OpenRouter, Gemini, and a 'Copy' which is a non-translating engine.
 - Some engines support context aware translations.
 - The extension is written in TypeScript and uses native modules (better-sqlite3) for caching.
 - It supports translating both directory structures and individual files, with flexible source path configuration.
 
+## MCP
+
+- Use git commands (not MCP) when instructed to create commits.
+
 ## Key Conventions
-- Use Yarn for dependency management and scripts (see package.json).
-- Use 'yarn' for running package.json scripts (e.g., `yarn build`, `yarn test`).
+- Use pnpm for dependency management and scripts (see package.json).
+- Use 'pnpm' for running package.json scripts (e.g., `pnpm build`, `pnpm test`).
 - Use `tsc` for TypeScript compilation (see tsconfig.json).
 - Use `vitest` for unit testing (see vitest.config.ts).
 - Use `eslint` for linting (see .eslintrc.json).
@@ -104,7 +108,7 @@ Key reminders:
 - Translation engine adapters are in `src/translators/`.
 - Context CSV handling is in `src/contextCsv.ts`.
 - Shared logic for structured data (JSON/YAML) is in `src/extractors/structured.ts`.
-- Configuration is loaded from `.translator.json` or VS Code settings (see `src/config.ts`).
+- Configuration is loaded from `translator.json` or VS Code settings (see `src/config.ts`).
 - The translation cache uses SQLite via better-sqlite3 (see `src/cache.ts
 - Maintain language neutrality in code - don't assume English (or any specific language) is always the source language
 
@@ -120,7 +124,7 @@ Key reminders:
 ## Documentation
 - Documentation is in README.md, CONTRIBUTING.md and doc/*.md files.
 - Features, usage, and configuration are described in README.md and doc/Configuration.md.
-- The configuration allows flexible source path setup via `.translator.json`:
+- The configuration allows flexible source path setup via `translator.json`:
   - Directory paths (e.g., "i18n/en") for translating entire directory structures
   - Individual file paths (e.g., "i18n/en.json") for single file translation to sibling files
 - Native module and development environment setup is described in CONTRIBUTING.md.

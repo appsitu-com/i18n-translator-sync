@@ -100,10 +100,29 @@ if (msbuildPathOverride) {
 function runCommand(command, args, options = {}) {
   console.log(`> ${command} ${args.join(' ')}`);
 
+  // When spawning npm from pnpm (or yarn), strip injected npm_config_* env vars
+  // that npm 10+ doesn't recognize, to suppress "Unknown env config" warnings.
+  let env = options.env || process.env;
+  if (command === 'npm') {
+    env = { ...env };
+    const knownNpmConfigs = new Set([
+      'npm_config_registry', 'npm_config_cache', 'npm_config_prefix',
+      'npm_config_user_agent', 'npm_config_globalconfig', 'npm_config_userconfig',
+      'npm_config_init_module', 'npm_config_loglevel', 'npm_config_global_prefix',
+      'npm_config_local_prefix', 'npm_config_node_gyp'
+    ]);
+    for (const key of Object.keys(env)) {
+      if (key.startsWith('npm_config_') && !knownNpmConfigs.has(key)) {
+        delete env[key];
+      }
+    }
+  }
+
   const result = spawnSync(command, args, {
     stdio: 'inherit',
     shell: true,
-    ...options
+    ...options,
+    env
   });
 
   if (result.error) {
@@ -211,12 +230,12 @@ function rebuildForElectron() {
       console.error('Or set environment variables (PowerShell):');
       console.error('  $env:GYP_MSVS_VERSION = "17.0"');
       console.error('  $env:npm_config_msbuild_path = "C:\\path\\to\\MSBuild.exe"');
-      console.error('  yarn rebuild:sqlite:electron');
+      console.error('  pnpm rebuild:sqlite:electron');
       console.error('');
       console.error('Or in cmd.exe:');
       console.error('  set GYP_MSVS_VERSION=17.0');
       console.error('  set npm_config_msbuild_path=C:\\path\\to\\MSBuild.exe');
-      console.error('  yarn rebuild:sqlite:electron');
+      console.error('  pnpm rebuild:sqlite:electron');
       process.exit(1);
     }
   }
@@ -323,16 +342,16 @@ npx ${electronRebuildArgs.join(' ')}
       console.error('2. Try setting environment variables manually (PowerShell):');
       console.error(`   $env:GYP_MSVS_VERSION = "${vsConfig.version || '17.0'}"`);
       console.error(`   $env:npm_config_msbuild_path = "${vsConfig.msbuildPath || 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe'}"`);
-      console.error('   yarn rebuild:sqlite:electron');
+      console.error('   pnpm rebuild:sqlite:electron');
       console.error('');
       console.error('   Or in cmd.exe:');
       console.error(`   set GYP_MSVS_VERSION=${vsConfig.version || '17.0'}`);
       console.error(`   set npm_config_msbuild_path=${vsConfig.msbuildPath || 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe'}`);
-      console.error('   yarn rebuild:sqlite:electron');
+      console.error('   pnpm rebuild:sqlite:electron');
       console.error('');
       console.error('3. For more debug info, run with:');
       console.error('   $env:DEBUG = "electron-rebuild"');
-      console.error('   yarn rebuild:sqlite:electron --verbose');
+      console.error('   pnpm rebuild:sqlite:electron --verbose');
       process.exit(result.status);
     }
 

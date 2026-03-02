@@ -12,10 +12,10 @@ To install the CLI globally:
 npm install -g i18n-translator-vscode
 ```
 
-Or using yarn:
+Or using pnpm:
 
 ```bash
-yarn global add i18n-translator-vscode
+pnpm add -g i18n-translator-vscode
 ```
 
 ### Local Installation
@@ -26,10 +26,10 @@ To install in your project:
 npm install --save-dev i18n-translator-vscode
 ```
 
-Or using yarn:
+Or using pnpm:
 
 ```bash
-yarn add --dev i18n-translator-vscode
+pnpm add -D i18n-translator-vscode
 ```
 
 ## Usage
@@ -45,7 +45,7 @@ i18n-translator start [options]
 ```
 
 Options:
-- `-c, --config <path>`: Path to config file (.translator.json) (default: ".translator.json")
+- `-c, --config <path>`: Path to config file (translator.json) (default: "translator.json")
 - `-w, --workspace <path>`: Path to workspace root (default: current directory)
 - `-v, --verbose`: Enable verbose logging
 
@@ -60,7 +60,7 @@ i18n-translator push [options]
 ```
 
 Options:
-- `-c, --config <path>`: Path to config file (.translator.json) (default: ".translator.json")
+- `-c, --config <path>`: Path to config file (translator.json) (default: "translator.json")
 - `-w, --workspace <path>`: Path to workspace root (default: current directory)
 - `-v, --verbose`: Enable verbose logging
 
@@ -73,13 +73,13 @@ i18n-translator pull [options]
 ```
 
 Options:
-- `-c, --config <path>`: Path to config file (.translator.json) (default: ".translator.json")
+- `-c, --config <path>`: Path to config file (translator.json) (default: "translator.json")
 - `-w, --workspace <path>`: Path to workspace root (default: current directory)
 - `-v, --verbose`: Enable verbose logging
 
 ## Configuration
 
-The CLI uses the same configuration as the VSCode extension. You need to create a `.translator.json` file in your project root with the following structure:
+The CLI uses the same configuration as the VSCode extension. You need to create a `translator.json` file in your project root with the following structure:
 
 ```json
 {
@@ -97,7 +97,7 @@ The CLI uses the same configuration as the VSCode extension. You need to create 
 }
 ```
 
-You also need to set up your API keys in a `.translator.env` file:
+You also need to set up your API keys in a `translator.env` file:
 
 ```ini
 # Azure Translation API configuration
@@ -164,10 +164,10 @@ npm run translate:push
 npm run translate:pull
 ```
 
-Or with yarn:
+Or with pnpm:
 
 ```bash
-yarn translate:watch
-yarn translate:push
-yarn translate:pull
+pnpm translate:watch
+pnpm translate:push
+pnpm translate:pull
 ```

@@ -7,6 +7,7 @@ import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { TranslatorAdapter } from '../../src/core/adapters/baseAdapter';
 import * as env from '../../src/core/util/environmentSetup';
 import * as path from 'path';
+import { TRANSLATOR_JSON } from '../../src/core/constants';
 import { tmpdir } from 'os';
 import * as fs from 'fs';
 
@@ -103,7 +104,7 @@ describe('CLITranslatorAdapter', () => {
     // Create a temporary test directory
     testDir = makeTmpDir();
     testWorkspacePath = testDir;
-    testConfigPath = path.join(testDir, '.translator.json');
+    testConfigPath = path.join(testDir, TRANSLATOR_JSON);
 
     // Create cache directory
     const cacheDir = path.join(testDir, '.i18n-cache');

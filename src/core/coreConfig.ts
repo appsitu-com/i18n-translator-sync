@@ -5,13 +5,14 @@ import { TranslatorEngine } from '../translators/types'
 import { FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
 import { formatZodError } from './util/formatZodError'
+import { TRANSLATOR_JSON } from './constants'
 
 const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
 
 // Define the schema for validation
 const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
 
-// Zod schema for validating .translator.json
+// Zod schema for validating translator.json
 export const TranslateConfigSchema = z.object({
   sourceDir: z.string().optional().default('').describe('Base directory for source paths (prepended to sourcePaths)'),
   targetDir: z.string().optional().default('').describe('Base directory for target paths (prepended to generated target paths)'),
@@ -23,7 +24,22 @@ export const TranslateConfigSchema = z.object({
   defaultJsonEngine: translatorEngineEnum.describe('Default engine for JSON files'),
   engineOverrides: z
     .record(z.string(), z.array(z.string()))
-    .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns')
+    .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns'),
+  excludeKeys: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('Key names to exclude from translation (copied unchanged). Matches at any depth.'),
+  excludeKeyPaths: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('Exact dotted key paths to exclude from translation (e.g. "meta.version").'),
+  copyOnlyFiles: z
+    .array(z.string())
+    .optional()
+    .default([])
+    .describe('File names (not paths) to copy verbatim instead of translating (e.g. "index.ts").')
 })
 
 
@@ -60,11 +76,14 @@ export const defaultConfig: TranslateProjectConfig = {
   enableBackTranslation: false,
   defaultMarkdownEngine: 'azure',
   defaultJsonEngine: 'google',
-  engineOverrides: {} as Record<string, string[]>
+  engineOverrides: {} as Record<string, string[]>,
+  excludeKeys: [] as string[],
+  excludeKeyPaths: [] as string[],
+  copyOnlyFiles: [] as string[]
 }
 
 /**
- * Load project configuration from .translator.json
+ * Load project configuration from translator.json
  * @param rootPath The root path of the project
  * @param configProvider The configuration provider
  * @param logger The logger instance
@@ -77,7 +96,7 @@ export async function loadProjectConfig(
   logger: Logger,
   fileSystem?: FileSystem
 ): Promise<TranslateProjectConfig> {
-  const configPath = path.join(rootPath, '.translator.json')
+  const configPath = path.join(rootPath, TRANSLATOR_JSON)
   let projectConfig: Partial<TranslateProjectConfig> = {}
 
   // Log the configuration file path being checked
@@ -107,7 +126,7 @@ export async function loadProjectConfig(
         const errors = formatZodError(validationResult.error)
 
         // Show error notification
-        const errorMessage = `Invalid .translator.json configuration:\n${errors.join('\n')}`
+        const errorMessage = `Invalid translator.json configuration:\n${errors.join('\n')}`
         logger.error(errorMessage)
 
         // Still use what we can from the config, even with errors
@@ -118,7 +137,7 @@ export async function loadProjectConfig(
       }
     }
   } catch (error: any) {
-    const errorMessage = `Error loading .translator.json: ${error.message || error}`
+    const errorMessage = `Error loading translator.json: ${error.message || error}`
     logger.error(errorMessage)
   }
 
@@ -155,6 +174,10 @@ export async function loadProjectConfig(
               : []
           ]
         )
-      )
+      ),
+    // These fields are translator.json-only (no VS Code settings fallback)
+    excludeKeys: projectConfig.excludeKeys ?? defaultConfig.excludeKeys,
+    excludeKeyPaths: projectConfig.excludeKeyPaths ?? defaultConfig.excludeKeyPaths,
+    copyOnlyFiles: projectConfig.copyOnlyFiles ?? defaultConfig.copyOnlyFiles
   }
 }

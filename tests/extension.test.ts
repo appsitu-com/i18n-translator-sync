@@ -84,7 +84,13 @@ describe('extension.ts', () => {
 
     const subscriptionMock = (name: string) => ({ dispose: () => console.log(`${name} disposed`) })
 
-    ctx = { subscriptions: [] }
+    ctx = {
+      subscriptions: [],
+      extensionPath: '/mock/extension/path',
+      extension: {
+        packageJSON: { version: '0.0.0-test' }
+      }
+    }
     registerCommandSpy = vi
       .spyOn(vscode.commands, 'registerCommand')
       .mockImplementation((cmd, cb) => subscriptionMock(cmd))
@@ -213,8 +219,8 @@ describe('extension.ts', () => {
         'translator.start',
         'translator.stop',
         'translator.restart',
-        'translator.push',
-        'translator.pull',
+        // 'translator.push',
+        // 'translator.pull',
         'translator.showOutput'
       ]
       for (const cmd of expectedCommands) {
@@ -320,8 +326,8 @@ describe('extension.ts', () => {
 
       // Verify commands were registered
       const commandNames = registerCommandSpy.mock.calls.map((call: any[]) => call[0]);
-      expect(commandNames).toContain('translator.push');
-      expect(commandNames).toContain('translator.pull');
+      // expect(commandNames).toContain('translator.push');
+      // expect(commandNames).toContain('translator.pull');
       expect(commandNames).toContain('translator.showOutput');
 
       // The fact that these commands are registered and the extension activated

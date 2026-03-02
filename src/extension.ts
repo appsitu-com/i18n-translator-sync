@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
 import { StatusBarManager, VSCodeStatusBarManager, TranslatorState } from './vscode/statusBar'
 import { VSCodeLogger } from './vscode/vscodeLogger'
+import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './core/constants'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
@@ -66,7 +67,7 @@ function updateStatusBar(): void {
 }
 
 /**
- * Check if the .translator.env file is properly configured with actual API keys
+ * Check if the translator.env file is properly configured with actual API keys
  * Returns true if the file has at least one non-empty, non-placeholder API key
  */
 function isEnvFileConfigured(envFilePath: string): boolean {
@@ -124,18 +125,18 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
   const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath
   const configFiles = [
     {
-      name: '.translator.env',
-      targetPath: path.join(workspacePath, '.translator.env'),
-      samplePath: path.join(context.extensionPath, 'samples', '.translator.env'),
-      message: 'A .translator.env file has been created. Please configure your translation API keys.',
-      reminderMessage: "Don't forget to configure your translation API keys in the .translator.env file.",
+      name: TRANSLATOR_ENV,
+      targetPath: path.join(workspacePath, TRANSLATOR_ENV),
+      samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_ENV),
+      message: 'A translator.env file has been created. Please configure your translation API keys.',
+      reminderMessage: "Don't forget to configure your translation API keys in the translator.env file.",
       docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys'
     },
     {
-      name: '.translator.json',
-      targetPath: path.join(workspacePath, '.translator.json'),
-      samplePath: path.join(context.extensionPath, 'samples', '.translator.json'),
-      message: 'A .translator.json file has been created. Please configure your translation settings.',
+      name: TRANSLATOR_JSON,
+      targetPath: path.join(workspacePath, TRANSLATOR_JSON),
+      samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_JSON),
+      message: 'A translator.json file has been created. Please configure your translation settings.',
       reminderMessage: null, // No reminder for JSON file
       docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration'
     }
@@ -223,7 +224,7 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
           vscode.workspace.workspaceFolders &&
           vscode.workspace.workspaceFolders.length > 0
         ) {
-          const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, '.translator.env')
+          const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, TRANSLATOR_ENV)
           if (fs.existsSync(envFile)) {
             vscode.workspace.openTextDocument(envFile).then((doc) => {
               vscode.window.showTextDocument(doc)
@@ -302,8 +303,8 @@ export function onShowOutput(): void {
   channel.appendLine('- Translator: Start (starts file watching and auto-translation)')
   channel.appendLine('- Translator: Stop (stops file watching)')
   channel.appendLine('- Translator: Restart (restart watching)')
-  channel.appendLine('- Translator: Push to MateCat (works without starting)')
-  channel.appendLine('- Translator: Pull from MateCat (works without starting)')
+  // channel.appendLine('- Translator: Push to MateCat (works without starting)')
+  // channel.appendLine('- Translator: Pull from MateCat (works without starting)')
   channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
   channel.appendLine('- Translator: Show Output (this command)')
   channel.appendLine('')
@@ -366,16 +367,16 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
 
   // Always available commands
   items.push(
-    {
-      label: '$(cloud-upload) Push to MateCat',
-      description: 'Upload source files to MateCat for professional translation',
-      detail: 'translator.push'
-    },
-    {
-      label: '$(cloud-download) Pull from MateCat',
-      description: 'Download completed translations from MateCat',
-      detail: 'translator.pull'
-    },
+    // {
+    //   label: '$(cloud-upload) Push to MateCat',
+    //   description: 'Upload source files to MateCat for professional translation',
+    //   detail: 'translator.push'
+    // },
+    // {
+    //   label: '$(cloud-download) Pull from MateCat',
+    //   description: 'Download completed translations from MateCat',
+    //   detail: 'translator.pull'
+    // },
     {
       label: '$(output) Show Output',
       description: 'Open the translator output channel',
@@ -412,9 +413,22 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   statusBarManager = new VSCodeStatusBarManager(context)
   statusBarManager.create()
 
-  // Log activation
-  channel.appendLine('i18n Translator extension activated')
+  // Log activation with version and build info
+  const ext = context.extension
+  const version = ext.packageJSON?.version ?? 'unknown'
+  let buildDate = 'unknown'
+  try {
+    const buildInfoPath = path.join(context.extensionPath, 'dist', 'buildInfo.json')
+    if (fs.existsSync(buildInfoPath)) {
+      const buildInfo = JSON.parse(fs.readFileSync(buildInfoPath, 'utf-8'))
+      buildDate = buildInfo.buildDate ?? 'unknown'
+    }
+  } catch {
+    // ignore - buildInfo.json may not exist in dev
+  }
+  channel.appendLine(`i18n Translator v${version} (built ${buildDate})`)
   channel.appendLine(`Activation time: ${new Date().toISOString()}`)
+  channel.appendLine(`Extension path: ${context.extensionPath}`)
   channel.appendLine('To see this output, run the command "Translator: Show Output"')
 
   // Show the output channel during development
@@ -440,8 +454,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('translator.start', async () => onStartTranslator(context)),
     vscode.commands.registerCommand('translator.stop', () => stopTranslator()),
     vscode.commands.registerCommand('translator.restart', () => restartTranslator(context)),
-    vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
-    vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
+    // vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
+    // vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
     vscode.commands.registerCommand('translator.showOutput', () => onShowOutput()),
     vscode.commands.registerCommand('translator.showContextMenu', async () => showContextMenu(context))
   )

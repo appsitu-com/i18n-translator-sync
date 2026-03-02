@@ -33,9 +33,9 @@ For better security, use environment variables:
 }
 ```
 
-### In .translator.json
+### In translator.json
 
-You can also configure the Gemini translator in your project's `.translator.json` file:
+You can also configure the Gemini translator in your project's `translator.json` file:
 
 ```json
 {

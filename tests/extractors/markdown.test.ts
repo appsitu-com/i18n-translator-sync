@@ -263,3 +263,88 @@ Content after frontmatter.`
     ])
   })
 })
+
+describe('extractMarkdownOrMDX front matter key exclusion', () => {
+  it('excludes front matter keys by name', () => {
+    const md = [
+      '---',
+      'title: My Title',
+      'description: My Description',
+      'draft: true',
+      '---',
+      '',
+      'Content here.'
+    ].join('\n')
+
+    const ex = extractMarkdownOrMDX(md, ['title', 'description'], { excludeKeys: ['description'] })
+    expect(ex.segments).toEqual(['My Title', 'Content here.'])
+  })
+
+  it('excludes front matter keys by path', () => {
+    const md = [
+      '---',
+      'title: My Title',
+      'description: My Description',
+      '---',
+      '',
+      'Content here.'
+    ].join('\n')
+
+    const ex = extractMarkdownOrMDX(md, ['title', 'description'], { excludeKeyPaths: ['title'] })
+    expect(ex.segments).toEqual(['My Description', 'Content here.'])
+  })
+
+  it('preserves excluded front matter values in rebuild', () => {
+    const md = [
+      '---',
+      'title: My Title',
+      'description: My Description',
+      '---',
+      '',
+      'Content here.'
+    ].join('\n')
+
+    const ex = extractMarkdownOrMDX(md, ['title', 'description'], { excludeKeys: ['description'] })
+    expect(ex.segments).toEqual(['My Title', 'Content here.'])
+
+    const rebuilt = ex.rebuild(['Mi Título', 'Contenido aquí.'])
+    expect(rebuilt).toContain('title: Mi Título')
+    expect(rebuilt).toContain('description: My Description')
+    expect(rebuilt).toContain('Contenido aquí.')
+  })
+
+  it('excludes multiple keys with combined excludeKeys and excludeKeyPaths', () => {
+    const md = [
+      '---',
+      'title: My Title',
+      'description: My Description',
+      'author: Jane Doe',
+      '---',
+      '',
+      'Content here.'
+    ].join('\n')
+
+    const ex = extractMarkdownOrMDX(
+      md,
+      ['title', 'description', 'author'],
+      { excludeKeys: ['author'], excludeKeyPaths: ['description'] }
+    )
+    expect(ex.segments).toEqual(['My Title', 'Content here.'])
+  })
+
+  it('does not affect body text extraction', () => {
+    const md = [
+      '---',
+      'title: My Title',
+      '---',
+      '',
+      'Body paragraph one.',
+      '',
+      'Body paragraph two.'
+    ].join('\n')
+
+    const ex = extractMarkdownOrMDX(md, ['title'], { excludeKeys: ['title'] })
+    // title excluded, only body text remains
+    expect(ex.segments).toEqual(['Body paragraph one.', 'Body paragraph two.'])
+  })
+})

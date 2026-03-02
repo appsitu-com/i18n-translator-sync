@@ -8,15 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-      - run: npm ci
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
       - name: Prepare native deps
         run: sudo apt-get update && sudo apt-get install -y build-essential python3
-      - run: npm run build
-      - run: npm run test:cov
+      - run: pnpm build
+      - run: pnpm test:cov
       - name: Upload coverage to Codecov
         if: ${{ secrets.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v4

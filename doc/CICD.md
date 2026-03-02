@@ -39,8 +39,8 @@ Add secrets: **Settings → Secrets and Variables → Actions → New repository
 
 ## 5) Local Packaging
 ```bash
-npm i -g @vscode/vsce
-npm run build
+pnpm add -g @vscode/vsce
+pnpm build
 vsce package            # produces .vsix
 ```
 

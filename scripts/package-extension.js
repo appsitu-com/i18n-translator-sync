@@ -63,8 +63,8 @@ async function downloadFile(url, dest) {
 
 async function ensureDependencyInstalled() {
   try {
-    console.log('Checking for global @vscode/vsce installation (using npm)...');
-    await execPromise('npm list -g @vscode/vsce || npm install -g @vscode/vsce');
+    console.log('Checking for global @vscode/vsce installation...');
+    await execPromise('pnpm list -g @vscode/vsce || pnpm add -g @vscode/vsce');
     console.log('Global @vscode/vsce is installed via npm.');
   } catch (error) {
     console.error('Error ensuring @vscode/vsce is installed:', error);
@@ -230,22 +230,22 @@ async function ensureAssets() {
     }
 
     // Ensure the sample translation config files exist
-    const translateJsonSample = path.join(samplesDir, '.translator.json');
-    const translateEnvSample = path.join(samplesDir, '.translator.env');
-    const translateJson = path.join(ROOT_DIR, '.translator.json');
-    const translateEnv = path.join(ROOT_DIR, '.translator.env');
+    const translateJsonSample = path.join(samplesDir, 'translator.json');
+    const translateEnvSample = path.join(samplesDir, 'translator.env');
+    const translateJson = path.join(ROOT_DIR, 'translator.json');
+    const translateEnv = path.join(ROOT_DIR, 'translator.env');
 
     // Check if sample files exist in the samples directory
     if (!fs.existsSync(translateJsonSample)) {
-      console.log('samples/.translator.json does not exist. Please create it manually.');
+      console.log('samples/translator.json does not exist. Please create it manually.');
     } else {
-      console.log('samples/.translator.json already exists');
+      console.log('samples/translator.json already exists');
     }
 
     if (!fs.existsSync(translateEnvSample)) {
-      console.log('samples/.translator.env does not exist. Please create it manually.');
+      console.log('samples/translator.env does not exist. Please create it manually.');
     } else {
-      console.log('samples/.translator.env already exists');
+      console.log('samples/translator.env already exists');
     }
   } catch (error) {
     console.error('Error ensuring assets exist:', error);
@@ -258,8 +258,8 @@ async function copyConfigurationSamples() {
 
   try {
     const samplesDir = path.join(ROOT_DIR, 'samples');
-    const sourceEnvSample = path.join(samplesDir, '.translator.env');
-    const sourceJsonSample = path.join(samplesDir, '.translator.json');
+    const sourceEnvSample = path.join(samplesDir, 'translator.env');
+    const sourceJsonSample = path.join(samplesDir, 'translator.json');
     const distSamplesDir = path.join(ROOT_DIR, 'dist', 'samples');
 
     // Make sure the dist/samples directory exists
@@ -270,17 +270,17 @@ async function copyConfigurationSamples() {
 
     // Copy the sample configuration files to the dist/samples directory
     if (fs.existsSync(sourceEnvSample)) {
-      fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, '.translator.env'));
-      console.log(`Copied samples/.translator.env to dist/samples folder`);
+      fs.copyFileSync(sourceEnvSample, path.join(distSamplesDir, 'translator.env'));
+      console.log(`Copied samples/translator.env to dist/samples folder`);
     } else {
-      console.error(`samples/.translator.env not found`);
+      console.error(`samples/translator.env not found`);
     }
 
     if (fs.existsSync(sourceJsonSample)) {
-      fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, '.translator.json'));
-      console.log(`Copied samples/.translator.json to dist/samples folder`);
+      fs.copyFileSync(sourceJsonSample, path.join(distSamplesDir, 'translator.json'));
+      console.log(`Copied samples/translator.json to dist/samples folder`);
     } else {
-      console.error(`samples/.translator.json not found`);
+      console.error(`samples/translator.json not found`);
     }
   } catch (error) {
     console.error('Error copying configuration samples:', error);
@@ -288,11 +288,11 @@ async function copyConfigurationSamples() {
 }
 
 async function buildExtension() {
-  console.log('Building extension with yarn...');
+  console.log('Building extension with pnpm...');
 
   try {
-    await execPromise('yarn build');
-    console.log('Extension built successfully using yarn');
+    await execPromise('pnpm build');
+    console.log('Extension built successfully using pnpm');
 
     // Copy configuration sample files after build
     await copyConfigurationSamples();
@@ -315,14 +315,14 @@ async function packageExtension(newVersion) {
       console.log(`Created releases directory: ${RELEASES_DIR}`);
     }
 
-    // Run prepublish script with yarn (local)
-    console.log('Running prepublish script with yarn...');
-    await execPromise('yarn vscode:prepublish');
+    // Run prepublish script with pnpm (local)
+    console.log('Running prepublish script with pnpm...');
+    await execPromise('pnpm vscode:prepublish');
 
-    // Package with vsce (global npm tool) into the releases directory
-    console.log('Packaging with @vscode/vsce (npm global tool)...');
+    // Package with vsce into the releases directory
+    console.log('Packaging with @vscode/vsce...');
     // Use the proper package command with native dependency handling
-    await execPromise(`npx @vscode/vsce package --out "${RELEASES_DIR}"`);
+    await execPromise(`pnpm exec vsce package --out "${RELEASES_DIR}"`);
 
     const vsixName = `${RELEASES_DIR}/i18n-translator-vscode-${version}.vsix`;
     console.log(`Extension packaged successfully as ${vsixName}`);
@@ -344,7 +344,7 @@ async function ensureDependencies() {
       console.log('sharp is installed');
     } catch (e) {
       console.log('sharp is not installed, installing now...');
-      await execPromise('yarn add sharp --dev');
+      await execPromise('pnpm add -D sharp');
       console.log('sharp installed successfully');
     }
 

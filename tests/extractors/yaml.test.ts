@@ -79,3 +79,72 @@ colors:
     expect(output).toContain('- azul')
   })
 })
+
+describe('YAML Extractor key exclusion', () => {
+  it('excludes keys by name at any depth', () => {
+    const input = `
+id: skip-me
+greeting: Hello
+nested:
+  id: skip-nested
+  label: Label
+`
+    const extraction = extractYAML(input, { excludeKeys: ['id'] })
+    expect(extraction.segments).toEqual(['Hello', 'Label'])
+  })
+
+  it('excludes by exact dotted key path', () => {
+    const input = `
+meta:
+  version: "1.0"
+  label: Meta Label
+greeting: Hello
+`
+    const extraction = extractYAML(input, { excludeKeyPaths: ['meta.version'] })
+    expect(extraction.segments).toEqual(['Meta Label', 'Hello'])
+  })
+
+  it('preserves excluded values in rebuild', () => {
+    const input = `
+id: keep-this
+greeting: Hello
+farewell: Goodbye
+`
+    const extraction = extractYAML(input, { excludeKeys: ['id'] })
+    expect(extraction.segments).toEqual(['Hello', 'Goodbye'])
+    const output = extraction.rebuild(['Hola', 'Adiós'])
+    expect(output).toContain('id: keep-this')
+    expect(output).toContain('greeting: Hola')
+    expect(output).toContain('farewell: Adiós')
+  })
+
+  it('preserves excluded subtree in rebuild', () => {
+    const input = `
+meta:
+  version: "1.0"
+  author: Test
+greeting: Hello
+`
+    const extraction = extractYAML(input, { excludeKeys: ['meta'] })
+    expect(extraction.segments).toEqual(['Hello'])
+    const output = extraction.rebuild(['Hola'])
+    expect(output).toContain('greeting: Hola')
+    expect(output).toContain('version: "1.0"')
+    expect(output).toContain('author: Test')
+  })
+
+  it('preserves excluded path value in rebuild', () => {
+    const input = `
+meta:
+  version: "1.0"
+  label: Meta Label
+greeting: Hello
+`
+    const extraction = extractYAML(input, { excludeKeyPaths: ['meta.version'] })
+    expect(extraction.segments).toEqual(['Meta Label', 'Hello'])
+    const output = extraction.rebuild(['Étiquette', 'Bonjour'])
+    expect(output).toContain('version: "1.0"')
+    expect(output).toContain('label: Étiquette')
+    expect(output).toContain('greeting: Bonjour')
+  })
+})

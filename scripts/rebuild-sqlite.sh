@@ -6,8 +6,8 @@
 
 # Clean install deps
 rm -rf node_modules
-yarn install --frozen-lockfile
-npx electron-rebuild -f -w better-sqlite3 --version 37.3.1
+pnpm install --frozen-lockfile
+pnpm exec electron-rebuild -f -w better-sqlite3 --version 37.3.1
 
 # Rebuild specifically for VS Code's Electron
 # export npm_config_runtime=electron

@@ -1,8 +1,8 @@
 # Project Configuration
 
-## .translator.json
+## translator.json
 
-The extension now supports a project-specific configuration file called `.translator.json` in the root of your workspace. This allows you to configure the translator without modifying VSCode settings.
+The extension now supports a project-specific configuration file called `translator.json` in the root of your workspace. This allows you to configure the translator without modifying VSCode settings.
 
 ### Example Configuration
 
@@ -18,7 +18,10 @@ The extension now supports a project-specific configuration file called `.transl
     "deepl": ["fr", "de"],
     "azure": ["es:en", "ja:en"],
     "gemini": ["zh-CN"]
-  }
+  },
+  "excludeKeys": ["_comment", "$schema"],
+  "excludeKeyPaths": ["meta.version", "build.timestamp"],
+  "copyOnlyFiles": ["index.ts"]
 }
 ```
 
@@ -33,10 +36,13 @@ The extension now supports a project-specific configuration file called `.transl
 | `defaultMarkdownEngine` | `string` | Default engine for markdown files (azure, google, deepl, gemini, copy) | `"azure"` |
 | `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy) | `"google"` |
 | `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales | `{"deepl": ["fr", "de"]}` |
+| `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `[]` |
+| `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation (e.g. `"meta.version"`). | `[]` |
+| `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating (e.g. `"index.ts"`). | `[]` |
 
 ## Backward Compatibility
 
-For backward compatibility, the extension will still read from VSCode settings if no `.translator.json` file is found or if certain options are not specified in the file.
+For backward compatibility, the extension will still read from VSCode settings if no `translator.json` file is found or if certain options are not specified in the file.
 
 ## Engine Overrides
 
@@ -54,3 +60,48 @@ Example:
 Each locale pattern can be either:
 - A single locale code (e.g., "fr") - this will be used for both translations to and from the source locale
 - A locale pair (e.g., "es:en") - this specifies a specific translation direction (Spanish to English)
+
+## TypeScript File Support
+
+The extension supports TypeScript i18n files that use the `export default { ... }` pattern:
+
+```ts
+export default {
+  greeting: "Hello",
+  farewell: "Goodbye"
+};
+```
+
+TypeScript files are extracted by stripping the `export default` wrapper, processing the inner object as JSON, and restoring the wrapper on rebuild. The `as const` suffix is also preserved if present.
+
+TypeScript files use the `defaultJsonEngine` setting for translation engine selection.
+
+## Excluding Keys from Translation
+
+You can exclude specific keys from translation so their values are copied unchanged. This is useful for metadata, version strings, or keys that should not be translated.
+
+- **`excludeKeys`**: Key names to exclude at any nesting depth. For example, `["_comment"]` excludes every key named `_comment` regardless of where it appears.
+- **`excludeKeyPaths`**: Exact dotted key paths to exclude. For example, `["meta.version"]` excludes only the `version` key inside `meta`, not a `version` key elsewhere.
+
+These settings apply to JSON, YAML, and TypeScript files. They are configured in `translator.json` only.
+
+```json
+{
+  "excludeKeys": ["_comment", "$schema"],
+  "excludeKeyPaths": ["meta.version", "build.timestamp"]
+}
+```
+
+## Copy-Only Files
+
+You can configure specific file names to be copied verbatim to all target locale directories without translation. This is useful for barrel files (`index.ts`), configuration files, or any file that should be identical across locales.
+
+Specify file names (not paths) in `copyOnlyFiles`:
+
+```json
+{
+  "copyOnlyFiles": ["index.ts", "constants.json"]
+}
+```
+
+When a file matches a name in `copyOnlyFiles`, it is copied to all target locale directories (and back-translation directories if enabled) without any translation processing.

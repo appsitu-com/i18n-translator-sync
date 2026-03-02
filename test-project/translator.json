@@ -1,10 +1,13 @@
 {
   "sourcePaths": ["i18n/en", "i18n/en.json"],
   "sourceLocale": "en",
-  "targetLocales": ["en-US", "es", "fr", "de", "zh-CN"],
+  "targetLocales": ["en-US", "es", "fr", "hi", "ur", "de", "zh-CN"],
   "enableBackTranslation": true,
   "defaultMarkdownEngine": "google",
   "defaultJsonEngine": "google",
+  "excludeKeys": ["native", "code"],
+  "excludeKeyPaths": [],
+  "copyOnlyFiles": ["index.ts"],
   "engineOverrides": {
     "copy": ["en-US"],
     "google": ["fr", "de", "zh-CN"],

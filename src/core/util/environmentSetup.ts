@@ -3,6 +3,7 @@ import * as path from 'path'
 import { Logger } from './baseLogger'
 import { FileSystem, nodeFileSystem } from './fs'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
+import { TRANSLATOR_ENV } from '../constants'
 
 
 /**
@@ -26,14 +27,14 @@ async function getDefaultEnvContent(
     // Try to find the sample file in the extension directory
     // This will work in development and when the sample file is packaged with the extension
     const extensionRoot = path.join(__dirname, '..', '..', '..')
-    const sampleFilePath = path.join(extensionRoot, '.translator.env.sample')
+    const sampleFilePath = path.join(extensionRoot, 'translator.env.sample')
     const sampleFileUri = fileSystem.createUri(sampleFilePath)
 
     logger.info(`Looking for sample file at: ${sampleFilePath}`)
 
     if (await fileSystem.fileExists(sampleFileUri)) {
       const content = await fileSystem.readFile(sampleFileUri)
-      logger.info('Using content from .translator.env.sample file')
+      logger.info('Using content from translator.env.sample file')
       return content
     } else {
       logger.info('Sample file not found')
@@ -63,7 +64,7 @@ export function resetEnvInitialization(): void {
 }
 
 /**
- * Creates a default .translator.env file and adds it to .gitignore
+ * Creates a default translator.env file and adds it to .gitignore
  */
 async function createDefaultTranslatorEnvFile(
   translatorEnvFile: string,
@@ -72,7 +73,7 @@ async function createDefaultTranslatorEnvFile(
   fileSystem: FileSystem,
   openDocument?: (path: string) => Promise<void>
 ): Promise<void> {
-  logger.info('Creating default .translator.env file in workspace')
+  logger.info('Creating default translator.env file in workspace')
 
   // Get the default content from sample file or fallback
   const defaultEnvContent = await getDefaultEnvContent(logger, fileSystem)
@@ -87,11 +88,11 @@ async function createDefaultTranslatorEnvFile(
   if (gitignoreExists) {
     const gitignoreContent = await fileSystem.readFile(gitignoreUri)
 
-    if (!gitignoreContent.split('\n').some((line: string) => line.trim() === '.translator.env')) {
-      await fileSystem.writeFile(gitignoreUri, gitignoreContent + '\n.translator.env\n')
+    if (!gitignoreContent.split('\n').some((line: string) => line.trim() === TRANSLATOR_ENV)) {
+      await fileSystem.writeFile(gitignoreUri, gitignoreContent + `\n${TRANSLATOR_ENV}\n`)
     }
   } else {
-    await fileSystem.writeFile(gitignoreUri, '.translator.env\n')
+    await fileSystem.writeFile(gitignoreUri, `${TRANSLATOR_ENV}\n`)
   }
 
   // Open the file if a handler is provided
@@ -99,10 +100,10 @@ async function createDefaultTranslatorEnvFile(
     await openDocument(translatorEnvFile)
   }
 
-  logger.info('Created default .translator.env file in your workspace. Please update it with your API keys.')
+  logger.info('Created default translator.env file in your workspace. Please update it with your API keys.')
 }
 
-// Initialize environment from .translator.env file
+// Initialize environment from translator.env file
 export const initTranslatorEnv = async (
   rootDir: string,
   logger: Logger,
@@ -121,13 +122,13 @@ export const initTranslatorEnv = async (
     }
 
     const fileSystem = getFileSystem(fs)
-    const translatorEnvFile = path.join(rootDir, '.translator.env')
+    const translatorEnvFile = path.join(rootDir, TRANSLATOR_ENV)
     const gitignoreFile = path.join(rootDir, '.gitignore')
 
     // Log the environment file path being checked
     logger.info(`Checking for environment file: ${translatorEnvFile}`)
 
-    // Create .translator.env if it doesn't exist
+    // Create translator.env if it doesn't exist
     const envFileExists = await fileSystem.fileExists(fileSystem.createUri(translatorEnvFile))
 
     if (!envFileExists) {
@@ -137,7 +138,7 @@ export const initTranslatorEnv = async (
       logger.info(`Loading environment from: ${translatorEnvFile}`)
     }
 
-    // Load environment variables from .translator.env in the workspace
+    // Load environment variables from translator.env in the workspace
     dotenv.config({ path: translatorEnvFile, quiet: true })
   } catch (error) {
     logger.error(`Error initializing environment: ${error}`)
@@ -207,7 +208,7 @@ export function getEnvWithDecryption(
       }
 
       logger.error(
-        `${serviceInfo} API key missing. Configure "${name}" in your .translator.env file. Refer to ${docsUrl} for setup instructions.`
+        `${serviceInfo} API key missing. Configure "${name}" in your translator.env file. Refer to ${docsUrl} for setup instructions.`
       )
     }
     throw new MissingEnvVarError(name)
@@ -275,7 +276,7 @@ export function getEnv(name: string, logger: Logger): string {
 
       // In test environment, skip the UI part
       logger.error(
-        `${serviceInfo} API key missing. Configure "${name}" in your .translator.env file. Refer to ${docsUrl} for setup instructions.`
+        `${serviceInfo} API key missing. Configure "${name}" in your translator.env file. Refer to ${docsUrl} for setup instructions.`
       )
     }
     throw new MissingEnvVarError(name)
