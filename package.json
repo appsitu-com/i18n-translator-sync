@@ -49,6 +49,8 @@
     "build": "tsc -p ./ && node ./scripts/generate-build-info.js",
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "cli": "pnpm build && node ./dist/cli/cliMain.js test-project",
     "cli:force": "pnpm build && node ./dist/cli/cliMain.js test-project --force",
     "cli:debug": "pnpm build && node --inspect ./dist/cli/cliMain.js test-project",
@@ -64,11 +66,9 @@
     "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
     "release": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
-    "icon:png": "node scripts/convert-icon.js",
     "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix"
+    "icon:png": "node scripts/convert-icon.js"
   },
   "vsce": {
     "dependencies": [
