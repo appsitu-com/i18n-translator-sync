@@ -80,7 +80,7 @@ async function updatePackageJson() {
 
     // Ensure required fields exist
     const updates = {
-      description: "Extension for translating Markdown and JSON files using AI translation services",
+      description: "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
       keywords: ["i18n", "translation", "localization", "azure", "google", "deepl", "gemini", "markdown", "mdx", "json", "yaml"],
       homepage: "https://github.com/tohagan/vscode-i18n-translator-ext",
       repository: {
