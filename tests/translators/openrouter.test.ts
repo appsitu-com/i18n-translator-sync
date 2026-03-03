@@ -301,7 +301,7 @@ describe('OpenRouterTranslator', () => {
       expect(options.headers).toMatchObject({
         'Authorization': 'Bearer test-api-key',
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://github.com/tohagan/vscode-i18n-translator-ext',
+        'HTTP-Referer': 'https://github.com/tohagan/i18n-translator-sync-vscode-ext',
         'X-Title': 'VSCode i18n Translator Extension'
       })
     })

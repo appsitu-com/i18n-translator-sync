@@ -152,7 +152,7 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
       samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_ENV),
       message: 'A translator.env file has been created. Please configure your translation API keys.',
       reminderMessage: "Don't forget to configure your translation API keys in the translator.env file.",
-      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys',
+      docsUrl: 'https://github.com/tohagan/i18n-translator-sync-vscode-ext#api-keys',
       gitignoreEntry: TRANSLATOR_ENV // Ensure translator.env is git-ignored (contains secrets)
     },
     {
@@ -161,7 +161,7 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
       samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_JSON),
       message: 'A translator.json file has been created. Please configure your translation settings.',
       reminderMessage: null, // No reminder for JSON file
-      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration',
+      docsUrl: 'https://github.com/tohagan/i18n-translator-sync-vscode-ext#configuration',
       gitignoreEntry: null
     }
   ]

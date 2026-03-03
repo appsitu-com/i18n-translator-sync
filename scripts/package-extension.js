@@ -82,13 +82,13 @@ async function updatePackageJson() {
     const updates = {
       description: "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
       keywords: ["i18n", "translation", "localization", "azure", "google", "deepl", "gemini", "markdown", "mdx", "json", "yaml"],
-      homepage: "https://github.com/tohagan/vscode-i18n-translator-ext",
+      homepage: "https://github.com/tohagan/i18n-translator-sync-vscode-ext.git",
       repository: {
         type: "git",
-        url: "https://github.com/tohagan/vscode-i18n-translator-ext.git"
+        url: "https://github.com/tohagan/i18n-translator-sync-vscode-ext.git.git"
       },
       bugs: {
-        url: "https://github.com/tohagan/vscode-i18n-translator-ext/issues"
+        url: "https://github.com/tohagan/i18n-translator-sync-vscode-ext.git/issues"
       },
       author: {
         name: "Tony O'Hagan"

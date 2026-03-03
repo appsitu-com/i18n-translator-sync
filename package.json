@@ -1,5 +1,5 @@
 {
-  "name": "i18n-translator-vscode",
+  "name": "i18n-translator-sync",
   "description": "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
@@ -21,13 +21,13 @@
     "json",
     "yaml"
   ],
-  "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
+  "homepage": "https://github.com/tohagan/i18n-translator-sync-vscode-ext",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tohagan/vscode-i18n-translator-ext.git"
+    "url": "https://github.com/tohagan/i18n-translator-sync-vscode-ext.git"
   },
   "bugs": {
-    "url": "https://github.com/tohagan/vscode-i18n-translator-ext/issues"
+    "url": "https://github.com/tohagan/i18n-translator-sync-vscode-ext/issues"
   },
   "author": {
     "name": "Tony O'Hagan"
