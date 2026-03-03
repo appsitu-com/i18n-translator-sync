@@ -1,10 +1,10 @@
 {
   "name": "i18n-translator-vscode",
-  "description": "Extension for translating Markdown and JSON files using AI translation services",
+  "description": "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -17,7 +17,9 @@
     "deepl",
     "gemini",
     "markdown",
-    "json"
+    "mdx",
+    "json",
+    "yaml"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {
