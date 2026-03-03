@@ -75,6 +75,8 @@ pnpm test:cov
 
 ### Debugging
 
+> **⚠️ Important:** If you have this extension installed from the marketplace (or a `.vsix`), **uninstall the extension before launching the debugger**. Having both the installed extension and the debug instance running simultaneously causes conflicts — duplicate commands, file watcher collisions, and unexpected behavior. To uninstall it, go to the Extensions view (`Ctrl+Shift+X`), find "i18n Sync Translator", click the gear icon, and select **Uninstall**.
+
 Use the "Run Extension with Test Project" in VS Code Debug panel.
 This will launch a new instance of VS Code and open the `test-project` subfolder.
 The test project contains a `.vscode/settings.json` file with `"translator.autoStart": true` that should auto start the extension server.

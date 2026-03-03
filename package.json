@@ -1,10 +1,10 @@
 {
   "name": "i18n-translator-vscode",
-  "description": "Extension for translating Markdown and JSON files using AI translation services",
+  "description": "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.2.1",
+  "version": "0.2.2",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -17,7 +17,9 @@
     "deepl",
     "gemini",
     "markdown",
-    "json"
+    "mdx",
+    "json",
+    "yaml"
   ],
   "homepage": "https://github.com/tohagan/vscode-i18n-translator-ext",
   "repository": {
@@ -33,7 +35,7 @@
   "license": "MIT",
   "icon": "images/icon.png",
   "galleryBanner": {
-    "color": "#0078d4",
+    "color": "#ef4444",
     "theme": "dark"
   },
   "categories": [
@@ -49,6 +51,8 @@
     "build": "tsc -p ./ && node ./scripts/generate-build-info.js",
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "cli": "pnpm build && node ./dist/cli/cliMain.js test-project",
     "cli:force": "pnpm build && node ./dist/cli/cliMain.js test-project --force",
     "cli:debug": "pnpm build && node --inspect ./dist/cli/cliMain.js test-project",
@@ -64,11 +68,9 @@
     "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
     "release": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
-    "icon:png": "node scripts/convert-icon.js",
     "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix"
+    "icon:png": "node scripts/convert-icon.js"
   },
   "vsce": {
     "dependencies": [

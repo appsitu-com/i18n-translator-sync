@@ -7,46 +7,6 @@ import { TRANSLATOR_ENV } from '../constants'
 
 
 /**
- * Get the default env content from sample file or fallback
- */
-async function getDefaultEnvContent(
-  logger: Logger,
-  fileSystem: FileSystem
-): Promise<string> {
-  const fallbackEnvContent = [
-    '# Translator API keys',
-    'AZURE_TRANSLATION_KEY=',
-    'GOOGLE_TRANSLATION_KEY=',
-    'DEEPL_API_KEY=',
-    'OPENROUTER_API_KEY=',
-    'GEMINI_API_KEY=',
-    '# You only need to configure keys for the engines you use.',
-    ''
-  ].join('\n')
-  try {
-    // Try to find the sample file in the extension directory
-    // This will work in development and when the sample file is packaged with the extension
-    const extensionRoot = path.join(__dirname, '..', '..', '..')
-    const sampleFilePath = path.join(extensionRoot, 'translator.env.sample')
-    const sampleFileUri = fileSystem.createUri(sampleFilePath)
-
-    logger.info(`Looking for sample file at: ${sampleFilePath}`)
-
-    if (await fileSystem.fileExists(sampleFileUri)) {
-      const content = await fileSystem.readFile(sampleFileUri)
-      logger.info('Using content from translator.env.sample file')
-      return content
-    } else {
-      logger.info('Sample file not found')
-      return fallbackEnvContent
-    }
-  } catch (error) {
-    logger.warn(`Error reading sample file, using fallback content: ${error}`)
-    return fallbackEnvContent
-  }
-}
-
-/**
  * Get the appropriate FileSystem implementation
  */
 function getFileSystem(fs?: FileSystem): FileSystem {
@@ -64,51 +24,14 @@ export function resetEnvInitialization(): void {
 }
 
 /**
- * Creates a default translator.env file and adds it to .gitignore
+ * Load environment variables from translator.env file.
+ * The translator.env file is created from samples/ by checkAndCreateConfigFiles()
+ * in extension.ts during Translator Start — this function only loads it.
  */
-async function createDefaultTranslatorEnvFile(
-  translatorEnvFile: string,
-  gitignoreFile: string,
-  logger: Logger,
-  fileSystem: FileSystem,
-  openDocument?: (path: string) => Promise<void>
-): Promise<void> {
-  logger.info('Creating default translator.env file in workspace')
-
-  // Get the default content from sample file or fallback
-  const defaultEnvContent = await getDefaultEnvContent(logger, fileSystem)
-
-  // Write the file
-  await fileSystem.writeFile(fileSystem.createUri(translatorEnvFile), defaultEnvContent)
-
-  // Add to .gitignore if it's not already there
-  const gitignoreUri = fileSystem.createUri(gitignoreFile)
-  const gitignoreExists = await fileSystem.fileExists(gitignoreUri)
-
-  if (gitignoreExists) {
-    const gitignoreContent = await fileSystem.readFile(gitignoreUri)
-
-    if (!gitignoreContent.split('\n').some((line: string) => line.trim() === TRANSLATOR_ENV)) {
-      await fileSystem.writeFile(gitignoreUri, gitignoreContent + `\n${TRANSLATOR_ENV}\n`)
-    }
-  } else {
-    await fileSystem.writeFile(gitignoreUri, `${TRANSLATOR_ENV}\n`)
-  }
-
-  // Open the file if a handler is provided
-  if (openDocument) {
-    await openDocument(translatorEnvFile)
-  }
-
-  logger.info('Created default translator.env file in your workspace. Please update it with your API keys.')
-}
-
-// Initialize environment from translator.env file
 export const initTranslatorEnv = async (
   rootDir: string,
   logger: Logger,
-  fs?: FileSystem,
-  openDocument?: (path: string) => Promise<void>
+  fs?: FileSystem
 ): Promise<void> => {
   // Skip if already initialized
   if (isEnvInitialized) {
@@ -123,23 +46,19 @@ export const initTranslatorEnv = async (
 
     const fileSystem = getFileSystem(fs)
     const translatorEnvFile = path.join(rootDir, TRANSLATOR_ENV)
-    const gitignoreFile = path.join(rootDir, '.gitignore')
 
     // Log the environment file path being checked
     logger.info(`Checking for environment file: ${translatorEnvFile}`)
 
-    // Create translator.env if it doesn't exist
     const envFileExists = await fileSystem.fileExists(fileSystem.createUri(translatorEnvFile))
 
     if (!envFileExists) {
-      logger.info(`Environment file not found, creating: ${translatorEnvFile}`)
-      await createDefaultTranslatorEnvFile(translatorEnvFile, gitignoreFile, logger, fileSystem, openDocument)
+      logger.warn(`Environment file not found: ${translatorEnvFile}. Run "Translator: Start" to create it.`)
     } else {
       logger.info(`Loading environment from: ${translatorEnvFile}`)
+      // Load environment variables from translator.env in the workspace
+      dotenv.config({ path: translatorEnvFile, quiet: true })
     }
-
-    // Load environment variables from translator.env in the workspace
-    dotenv.config({ path: translatorEnvFile, quiet: true })
   } catch (error) {
     logger.error(`Error initializing environment: ${error}`)
   }

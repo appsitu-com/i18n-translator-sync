@@ -15,10 +15,10 @@ TODO.md
 
 # Config and environment files
 .gitignore
-translator.env
+/translator.env
 .env
 .env-example
-translator.json
+/translator.json
 
 # Build config
 **/tsconfig.json

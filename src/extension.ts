@@ -115,9 +115,31 @@ function isEnvFileConfigured(envFilePath: string): boolean {
 }
 
 /**
- * Check for configuration files and create them from samples if they don't exist
+ * Ensure a line exists in the workspace .gitignore file.
+ * Creates the file if it doesn't exist.
  */
-function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
+function ensureGitignoreEntry(workspacePath: string, entry: string): void {
+  const gitignorePath = path.join(workspacePath, '.gitignore')
+  try {
+    if (fs.existsSync(gitignorePath)) {
+      const content = fs.readFileSync(gitignorePath, 'utf-8')
+      if (!content.split('\n').some((line) => line.trim() === entry)) {
+        fs.appendFileSync(gitignorePath, `\n${entry}\n`)
+      }
+    } else {
+      fs.writeFileSync(gitignorePath, `${entry}\n`)
+    }
+  } catch (error) {
+    // Non-critical — log but don't block startup
+    console.warn(`Failed to update .gitignore with "${entry}": ${error}`)
+  }
+}
+
+/**
+ * Check for configuration files and create them from samples if they don't exist.
+ * Newly created files are automatically opened in the editor.
+ */
+async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Promise<void> {
   if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
     return // No workspace folder available
   }
@@ -130,7 +152,8 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
       samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_ENV),
       message: 'A translator.env file has been created. Please configure your translation API keys.',
       reminderMessage: "Don't forget to configure your translation API keys in the translator.env file.",
-      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys'
+      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#api-keys',
+      gitignoreEntry: TRANSLATOR_ENV // Ensure translator.env is git-ignored (contains secrets)
     },
     {
       name: TRANSLATOR_JSON,
@@ -138,7 +161,8 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
       samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_JSON),
       message: 'A translator.json file has been created. Please configure your translation settings.',
       reminderMessage: null, // No reminder for JSON file
-      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration'
+      docsUrl: 'https://github.com/tohagan/vscode-i18n-translator-ext#configuration',
+      gitignoreEntry: null
     }
   ]
 
@@ -151,13 +175,18 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
           // Copy the sample to create the target file
           fs.copyFileSync(config.samplePath, config.targetPath)
 
-          // Notify the user
-          vscode.window.showInformationMessage(config.message, 'Open File', 'Documentation').then((selection) => {
-            if (selection === 'Open File') {
-              vscode.workspace.openTextDocument(config.targetPath).then((doc) => {
-                vscode.window.showTextDocument(doc)
-              })
-            } else if (selection === 'Documentation') {
+          // Ensure the file is listed in .gitignore (e.g. translator.env contains secrets)
+          if (config.gitignoreEntry) {
+            ensureGitignoreEntry(workspacePath, config.gitignoreEntry)
+          }
+
+          // Auto-open the newly created file in a pinned (non-preview) editor tab
+          const doc = await vscode.workspace.openTextDocument(config.targetPath)
+          await vscode.window.showTextDocument(doc, { preview: false })
+
+          // Notify the user with documentation link
+          vscode.window.showInformationMessage(config.message, 'Documentation').then((selection) => {
+            if (selection === 'Documentation') {
               vscode.env.openExternal(vscode.Uri.parse(config.docsUrl))
             }
           })
@@ -188,6 +217,9 @@ function checkAndCreateConfigFiles(context: vscode.ExtensionContext): void {
  */
 export async function onStartTranslator(context: vscode.ExtensionContext): Promise<void> {
   try {
+    // Ensure configuration files exist before starting the server
+    await checkAndCreateConfigFiles(context)
+
     // Get the singleton adapter
     const adapter = getVSCodeAdapter()
     await adapter.startWithContext(context)
@@ -211,9 +243,6 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
         .getConfiguration('translator')
         .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
     }
-
-    // Check and create configuration files if needed
-    checkAndCreateConfigFiles(context)
   } catch (error: any) {
     // Show error and offer to open env file
     vscode.window
