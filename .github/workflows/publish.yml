@@ -11,7 +11,7 @@ jobs:
         with:
           version: 9
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm add -g @vscode/vsce ovsx && vsce package

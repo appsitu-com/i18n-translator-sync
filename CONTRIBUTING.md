@@ -42,7 +42,7 @@ This project uses **pnpm** for dependency management and running scripts.
 
 ```bash
 # clone
-git clone https://github.com/yourname/i18n-translator-vscode.git
+git clone https://github.com/appsitu-com/i18n-translator-sync.git
 cd i18n-translator-vscode
 
 # Install pnpm (if not already installed)

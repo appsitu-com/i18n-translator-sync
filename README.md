@@ -1,8 +1,8 @@
 # i18n Translator - VS Code extension and CLI tool for instant file translation. Supports many AI engines + a professional CAT service.
 
-<!-- [![CI](https://github.com/yourname/i18n-translator-sync-vscode-ext/actions/workflows/ci.yml/badge.svg)](https://github.com/yourname/i18n-translator-sync-vscode-ext/actions/workflows/ci.yml)
-[![Release](https://github.com/yourname/i18n-translator-sync-vscode-ext/actions/workflows/release.yml/badge.svg)](https://github.com/yourname/i18n-translator-sync-vscode-ext/actions/workflows/release.yml)
-[![Publish](https://github.com/yourname/i18n-translator-sync-vscode-ext/actions/workflows/publish.yml/badge.svg)](https://github.com/yourname/i18n-translator-sync-vscode-ext/actions/workflows/publish.yml) -->
+<!-- [![CI](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/ci.yml)
+[![Release](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml)
+[![Publish](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml) -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Status**: *Alpha*. Not yet ready for production use.
@@ -175,7 +175,7 @@ Example `translator.json`:
 
 ## Contact
 - For questions or issues, refer to the GitHub repository:
-  - https://github.com/tohagan/i18n-translator-sync-vscode-ext
+  - https://github.com/appsitu-com/i18n-translator-sync
 
 ## License
 MIT

@@ -41,7 +41,7 @@ export const OpenRouterTranslator: Translator = {
     const headers = {
       'Authorization': `Bearer ${key}`,
       'Content-Type': 'application/json',
-      'HTTP-Referer': 'https://github.com/tohagan/i18n-translator-sync-vscode-ext',
+      'HTTP-Referer': 'https://github.com/appsitu-com/i18n-translator-sync',
       'X-Title': 'VSCode i18n Translator Extension'
     }
 
