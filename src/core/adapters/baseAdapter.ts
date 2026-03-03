@@ -93,8 +93,7 @@ export abstract class TranslatorAdapter {
         await initTranslatorEnv(
           this.workspacePath,
           this.logger,
-          this.fileSystem,
-          this.openDocument?.bind(this)
+          this.fileSystem
         );
 
         // Stop current watching
@@ -134,12 +133,11 @@ export abstract class TranslatorAdapter {
         await this.configProvider.load();
       }
 
-      // Initialize environment (loads translator.env file)
+      // Load environment variables from translator.env (file is created by extension.ts on Start)
       await initTranslatorEnv(
         this.workspacePath,
         this.logger,
-        this.fileSystem,
-        this.openDocument?.bind(this)
+        this.fileSystem
       );
 
       // Get cache (using await since it's now async)

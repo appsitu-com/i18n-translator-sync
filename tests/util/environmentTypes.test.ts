@@ -86,107 +86,63 @@ describe('initTranslatorEnv', () => {
     resetEnvInitialization();
   });
 
-  it('creates translator.env file when it does not exist', async () => {
+  it('warns when translator.env file does not exist (does not create it)', async () => {
     resetEnvInitialization();
     const files: Record<string, string> = {};
     const mockFs = createMockFileSystem(files);
 
     await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
 
-    // Verify the file was created
-    expect(mockFs.writeFile).toHaveBeenCalled();
-    const writeCall = (mockFs.writeFile as any).mock.calls[0];
-    // Normalize path for cross-platform compatibility
-    const normalizedPath = writeCall[0].path.replace(/\\/g, '/');
-    expect(normalizedPath).toBe('/test/workspace/translator.env');
-    expect(writeCall[1]).toContain('AZURE_TRANSLATION_KEY');
-    expect(writeCall[1]).toContain('OPENROUTER_API_KEY');
-    expect(writeCall[1]).toContain('GEMINI_API_KEY');
-  });
-
-  it('uses sample file content when available', async () => {
-    resetEnvInitialization();
-    const sampleContent = `# Sample content
-AZURE_TRANSLATION_KEY='from-sample'
-OPENROUTER_API_KEY='from-sample'
-`;
-
-    const files: Record<string, string> = {};
-    // Add the sample file to the mock filesystem - simulate finding it in extension root
-    const mockFs = createMockFileSystem(files);
-
-    // Mock the sample file exists and has content
-    (mockFs.fileExists as any).mockImplementation((uri: any) => {
-      if (uri.path.includes('translator.env.sample')) {
-        return Promise.resolve(true);
-      }
-      return Promise.resolve(files.hasOwnProperty(uri.path));
-    });
-
-    (mockFs.readFile as any).mockImplementation((uri: any) => {
-      if (uri.path.includes('translator.env.sample')) {
-        return Promise.resolve(sampleContent);
-      }
-      return Promise.resolve(files[uri.path] || '');
-    });
-
-    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
-
-    // Verify the file was created with sample content
-    expect(mockFs.writeFile).toHaveBeenCalled();
-    const writeCall = (mockFs.writeFile as any).mock.calls[0];
-    expect(writeCall[1]).toBe(sampleContent);
-  });
-
-  it('uses fallback content when sample file is not available', async () => {
-    resetEnvInitialization();
-    const files: Record<string, string> = {};
-    const mockFs = createMockFileSystem(files);
-
-    // Mock that sample file doesn't exist
-    (mockFs.fileExists as any).mockImplementation((uri: any) => {
-      return Promise.resolve(files.hasOwnProperty(uri.path));
-    });
-
-    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
-
-    // Verify the file was created with fallback content
-    expect(mockFs.writeFile).toHaveBeenCalled();
-    const writeCall = (mockFs.writeFile as any).mock.calls[0];
-    expect(writeCall[1]).toContain('AZURE_TRANSLATION_KEY');
-    expect(writeCall[1]).toContain('OPENROUTER_API_KEY');
-    expect(writeCall[1]).toContain('# You only need to configure keys');
-  });
-
-  it('does not create file when it already exists', async () => {
-    resetEnvInitialization();
-    const files: Record<string, string> = {
-      [`/test/workspace/${TRANSLATOR_ENV}`]: 'existing content'
-    };
-    const mockFs = createMockFileSystem(files);
-
-    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
-
-    // Verify the translator.env file was not written (but .gitignore might still be written)
-    const writeCalls = (mockFs.writeFile as any).mock.calls;
-    const envFileCalls = writeCalls.filter((call: any) => call[0].path.endsWith(TRANSLATOR_ENV));
-    expect(envFileCalls).toHaveLength(0);
-  });
-
-  it('adds translator.env to .gitignore', async () => {
-    resetEnvInitialization();
-    const files: Record<string, string> = {
-      '/test/workspace/.gitignore': 'node_modules\n'
-    };
-    const mockFs = createMockFileSystem(files);
-
-    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
-
-    // Verify .gitignore was updated
-    expect(mockFs.writeFile).toHaveBeenCalled();
-    const writeCall = (mockFs.writeFile as any).mock.calls.find((call: any) =>
-      call[0].path.includes('.gitignore')
+    // Verify no files were written — initTranslatorEnv no longer creates the env file
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    // Should log a warning that the file is missing
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Environment file not found')
     );
-    expect(writeCall[1]).toContain(TRANSLATOR_ENV);
+  });
+
+  it('loads environment when translator.env file exists', async () => {
+    resetEnvInitialization();
+    const files: Record<string, string> = {
+      [`/test/workspace/${TRANSLATOR_ENV}`]: 'SOME_KEY=some-value'
+    };
+    const mockFs = createMockFileSystem(files);
+
+    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
+
+    // Should not write any files
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    // Should log that it's loading the file
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      expect.stringContaining('Loading environment from')
+    );
+  });
+
+  it('skips initialization when already initialized', async () => {
+    resetEnvInitialization();
+    const files: Record<string, string> = {
+      [`/test/workspace/${TRANSLATOR_ENV}`]: 'SOME_KEY=some-value'
+    };
+    const mockFs = createMockFileSystem(files);
+
+    // First call
+    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
+    vi.clearAllMocks();
+
+    // Second call should skip
+    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
+
+    expect(mockFs.fileExists).not.toHaveBeenCalled();
+  });
+
+  it('warns when rootDir is empty', async () => {
+    resetEnvInitialization();
+    const mockFs = createMockFileSystem({});
+
+    await initTranslatorEnv('', mockLogger, mockFs);
+
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Could not determine workspace directory')
+    );
   });
 });
