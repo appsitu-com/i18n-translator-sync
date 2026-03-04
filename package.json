@@ -4,7 +4,7 @@
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.2.5",
+  "version": "0.2.6",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -70,7 +70,7 @@
     "package": "node scripts/package-extension.js",
     "package:ci": "node scripts/package-extension.js --ci",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
-    "package:quick": "pnpm exec vsce package",
+    "package:quick": "vsce package",
     "version:update": "node scripts/update-version.js",
     "icon:png": "node scripts/convert-icon.js"
   },
