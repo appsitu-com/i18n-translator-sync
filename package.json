@@ -67,7 +67,7 @@
     "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
     "pretest": "pnpm rebuild:sqlite",
     "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
-    "release": "node scripts/package-extension.js",
+    "package": "node scripts/package-extension.js",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",
