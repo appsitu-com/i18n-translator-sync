@@ -32,7 +32,7 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 4. Click Install
 
 **Requirements:**
-- VS Code version 1.103.0 or higher
+- VS Code version 1.109.5 or higher
 
 # Features
 
