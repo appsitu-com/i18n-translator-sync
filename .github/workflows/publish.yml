@@ -5,6 +5,9 @@ on:
 jobs:
   publish-marketplaces:
     runs-on: ubuntu-latest
+    env:
+      VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -16,12 +19,7 @@ jobs:
       - run: pnpm build
       - run: pnpm add -g @vscode/vsce ovsx && vsce package
       - name: Publish to VS Code Marketplace
-        if: env.VSCE_PAT != ''
         run: vsce publish --packagePath *.vsix --pat $VSCE_PAT
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Publish to Open VSX
-        if: env.OVSX_TOKEN != ''
+        if: false
         run: ovsx publish *.vsix -p $OVSX_TOKEN
-        env:
-          OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
