@@ -70,7 +70,7 @@
     "package": "node scripts/package-extension.js",
     "package:ci": "node scripts/package-extension.js --ci",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
-    "package:quick": "vsce package",
+    "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",
     "icon:png": "node scripts/convert-icon.js"
   },
@@ -88,6 +88,7 @@
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
     "@vitest/coverage-v8": "^3.2.4",
+    "@vscode/vsce": "^3.5.7",
     "eslint": "^9.35.0",
     "eslint-plugin-unused-imports": "^4.2.0",
     "sharp": "^0.34.3",
@@ -284,6 +285,10 @@
       "better-sqlite3",
       "esbuild",
       "sharp"
+    ],
+    "ignoredBuiltDependencies": [
+      "@vscode/vsce-sign",
+      "keytar"
     ]
   }
 }

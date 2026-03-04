@@ -69,17 +69,6 @@ async function downloadFile(url, dest) {
   });
 }
 
-async function ensureDependencyInstalled() {
-  try {
-    console.log('Checking for global @vscode/vsce installation...');
-    await execPromise('pnpm list -g @vscode/vsce || pnpm add -g @vscode/vsce');
-    console.log('Global @vscode/vsce is installed via npm.');
-  } catch (error) {
-    console.error('Error ensuring @vscode/vsce is installed:', error);
-    process.exit(1);
-  }
-}
-
 async function updatePackageJson() {
   console.log('Updating package.json with required metadata...');
 
@@ -328,8 +317,8 @@ async function packageExtension(newVersion) {
 
     // Package with vsce into the releases directory
     console.log('Packaging with @vscode/vsce...');
-    // Use the globally installed vsce command
-    await execPromise(`vsce package --out "${RELEASES_DIR}"`);
+    // Use vsce from devDependencies via pnpm exec
+    await execPromise(`pnpm exec vsce package --out "${RELEASES_DIR}"`);
 
     const vsixName = `${RELEASES_DIR}/i18n-translator-vscode-${version}.vsix`;
     console.log(`Extension packaged successfully as ${vsixName}`);
@@ -355,8 +344,8 @@ async function ensureDependencies() {
       console.log('sharp installed successfully');
     }
 
-    // Check for global @vscode/vsce
-    await ensureDependencyInstalled();
+    // Note: @vscode/vsce is now in devDependencies, no need to install globally
+    console.log('@vscode/vsce will be available via pnpm exec');
   } catch (error) {
     console.error('Error ensuring dependencies:', error);
     throw error;
