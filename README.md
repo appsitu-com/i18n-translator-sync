@@ -1,58 +1,111 @@
-# i18n Translator SYNC - VS Code extension for instant file translation. Many AI engines & highly configurable.
+# i18n Translator Sync
+
+**Instant file translation with AI - multiple engines, smart caching, professional workflow**
+
+<!-- TODO: Update MARKETPLACE_URL_PLACEHOLDER after publishing -->
+[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code%20Marketplace-Install-blue.svg)](MARKETPLACE_URL_PLACEHOLDER)
+[![Preview](https://img.shields.io/badge/Status-Preview-orange.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 <!-- [![CI](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/ci.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/ci.yml)
 [![Release](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml)
 [![Publish](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml) -->
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-*Can't wait to get started?*  Jump to the [Getting Started](#getting-started) section.
+Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save. Your translations stay in sync automatically with smart folder mirroring, translation memory, and support for Azure, Google, DeepL, and Gemini AI engines.
+
+<!-- TODO: Add demo GIF here showing translation in action -->
+
+*Can't wait to get started?* Jump to the [Getting Started](#getting-started) section.
+
+## Installation
+
+⚠️ **This extension is currently in Preview** - Features and configuration may change as we refine the user experience based on feedback.
+
+**From VS Code Marketplace:**
+<!-- TODO: Update MARKETPLACE_URL_PLACEHOLDER after publishing -->
+[Install from VS Code Marketplace](MARKETPLACE_URL_PLACEHOLDER)
+
+**From VS Code:**
+1. Open VS Code
+2. Press `Ctrl+Shift+X` (Windows/Linux) or `Cmd+Shift+X` (Mac) to open Extensions
+3. Search for "i18n Translator Sync"
+4. Click Install
+
+**Requirements:**
+- VS Code version 1.103.0 or higher
 
 # Features
 
-## Instant translation to over 135 languages
+**Quick Feature Overview:**
+- ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
+- ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, and copy-only mode
+- ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
+- ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
+- ✅ **Back translations** - Translate target languages back to source to verify quality
+- ✅ **Language-specific engines** - Override default engine per language for optimal results
 
-You can instantly translate Markdown/MDX, JSON, YAML/YML files and specific kinds of TypeScript files. Translation is triggered whenever you save a source language file so all your translated files remain "in sync" as you code.
+## Instant Translation to Over 135 Languages
 
-- Use any of the languages support by Google Translate, Azure Translate, DeepL or Gemini LLM.
+<!-- TODO: Add screenshot of multi-language translation in action -->
+
+You can instantly translate **Markdown, MDX, JSON, YAML, YML, and TypeScript** files. Translation is triggered whenever you save a source language file so all your translated files remain "in sync" as you code.
+
+- Use any of the languages supported by Google Translate, Azure Translate, DeepL or Gemini LLM
 - Set a default translation engine for JSON/YAML/TS files or Markdown/MDX files
-- Override your default engine by setting different engines for each locale.
+- Override your default engine by setting different engines for each locale
 
-We found that Google Translate is often better at short text strings typically found in JSON/YAML/TS whereas Azure is often better at paragraphs and sentences found in Markdown/MDX files. DeepL is also best for European languages and supports `en-US` => `en-UK` translation.
+We found that Google Translate is often better at short text strings typically found in JSON/YAML/TS whereas Azure is often better at paragraphs and sentences found in Markdown/MDX files. DeepL is also best for European languages and supports `en-US` ⇒ `en-GB` translation.
 
-## Source language neutral
+## Source Language Neutral
 
-You can choose to make any language your source language - it does not need to be English.  However, be aware that many Translation APIs have been trained to translate best from English and may in fact translate from your source language to English and then to a target language.  Some of the newer engines don't suffer this issue.
+You can choose to make any language your source language - it does not need to be English. However, be aware that many Translation APIs have been trained to translate best from English and may in fact translate from your source language to English and then to your target language. Some of the newer engines don't suffer from this issue.
 
-## Target naming
+## Target Naming
 
-Source files and folder names must contain the source locale code (e.g "en" for English).
+Source files and folder names must contain the source locale code (e.g., "en" for English).
 To compute the file path for each target locale, the source file path must contain the target locale code.
 
-Examples - Replacing 'en' (English) with 'fr' (French)
-  - File: **en**-msg.json => **fr**-msg.json`
-  - Folder: **en**/messages.json => **fr**/messages.json`
+Examples - Replacing 'en' (English) with 'fr' (French):
+  - File: **en**-msg.json ⇒ **fr**-msg.json
+  - Folder: **en**/messages.json ⇒ **fr**/messages.json
 
-## Multiple source language files and folders
+## Multiple Source Language Files and Folders
 
 You can configure multiple source language files and folders. The translation service will attempt to translate all supported file types in all source language folders. This is very handy for mono-repo projects that need translated content in many places.
 
-Source folders should normally only contain files you intend to translate with one exception - See [TypeScript](#TypeScript) below.
+Source folders should normally only contain files you intend to translate with one exception - See [TypeScript i18n file translation](#typescript-i18n-file-translation) below.
 
-## Smart Folding syncing
+## Smart Folder Syncing
 
-Translated folders are kept "in sync" so if you rename or delete files in a source folder, the corresponding files will be renamed and deleted in all target folders. This is **major time saver** when maintaining translated content and key reason we developed this tool.
+Translated folders are kept "in sync" so if you rename or delete files in a source folder, the corresponding files will be renamed and deleted in all target folders. This is a **major time saver** when maintaining translated content and a key reason we developed this tool.
 
-## Back translations!
+## Back Translations!
 
 You can enable back translation of each target language back to the source language. Now adjust your input source text and instantly check the back translations to assess translation quality. Add a developer mode switch to load back translations into your app.
 
 AI translations are admittedly "draft" translations but this feature can significantly improve your early MVP translation quality.
 
-## Translation memory
+<!-- TODO: Add screenshot showing back translation comparison -->
 
-The i18 Translator remembers past translations and only calls AI Translation for new text values. This reduces AI translation costs and most importantly prevents constant changes as AI engines tend to return different results each time.
+## Translation Memory
 
-## Locale code mapping
+The i18n Translator uses a **SQLite-based translation memory database** for professional translation workflows. This is not just a performance cache - it's a foundational feature for managing translations over time.
+
+**Current capabilities:**
+- **Reduces AI costs** - Only translates new or changed content
+- **Prevents translation drift** - AI engines return different results each time; translation memory ensures consistency
+- **Fast lookups** - Instant retrieval of previously translated content
+- **Persistent storage** - Translations survive across sessions and project updates
+
+**Planned enhancements** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
+- CSV import/export for version control and team collaboration
+- Integration with Computer-Assisted Translation (CAT) tools like MateCat
+- Translation memory sharing across projects
+- Automatic cleanup of unused translations
+
+<!-- TODO: Add diagram showing translation memory workflow -->
+
+## Locale Code Mapping
 
 AI translation engines may use different locale codes so we support mapping your preferred locale code to the API's required codes.
 
@@ -68,14 +121,14 @@ See the "translators" > "langMap" in [translator.json](https://github.com/appsit
 
 _Did we get all the engine code mappings correct?_ If not, submit a PR with the correct mappings.
 
-## Exclude translation
+## Exclude Translation
 
 You can exclude specific file names, keys or key paths from translation.
 The next section on TypeScript translation demonstrates these features.
 
-## TypeScript i18n file translation
+## TypeScript i18n File Translation
 
-We support translation of TypeScript files that follow a specific format that almost a JSON file. The `as const` is optional.
+We support translation of TypeScript files that follow a specific format that is almost a JSON file. The `as const` is optional.
 
 ```ts
 export default {
@@ -133,27 +186,30 @@ Our [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROAD
 
 # Getting Started
 
-1. Install the VSCode extension
+1. Install the VSCode extension (see [Installation](#installation) above)
 2. Run the Command `Translator: Start`
 
-The first time you do this on project, it will make these changes in the root folder of your project:
+The first time you do this on a project, it will make these changes in the root folder of your project:
 - Creates an example `translator.json` file that configures files & folders to be translated, languages & AI translation engine preferences
 - Creates an example `translator.env` to configure your translation API keys. Contains instructions for getting API keys.
-- Adds `translator.env` to `.gitignore` to exclude it from git.  Creates `.gitignore` if it does not exist.
+- Adds `translator.env` to `.gitignore` to exclude it from git. Creates `.gitignore` if it does not exist.
 
-It will also open `translator.json` and `translator.env` so you can edit them.
+It will also open `translator.json` and `translator.env` so you can edit them:
 - `translator.env` => Contains instructions and links to videos to help you setup your translation keys
-- `translator.json` => See the [Configuration](#Configuration) section below to learn how to configure this file
+- `translator.json` => See the [Configuration](#configuration) section below to learn how to configure this file
 
-When the Translator service is running ..
-- Whenever you update either `translator.json` and `translator.env`, the Translator will auto restart and load your new settings.
-- Whenever you save a change to a source language file, the Translator will auto translate and sync changes to all target languages.
-- If configured, it will also create "back translations" that translate each target file back to the original source language.
+⚠️ **Important: If the server fails to start after editing config files**
 
-## Diagnosing configuration issues
+The Translator may fail to auto-start if it finds invalid or missing values in `translator.json` or `translator.env`. If this happens:
 
-The Translator may fail to auto start if it find invalid or missing values in the `translator.json` and `translator.env` files. To diagnose restart issues:
-- VSCode `Terminal` > `Output` > Select `i18n Translator` on the drop down list to view server logs.
+1. Check the server logs: **VS Code Terminal** → **Output** → Select **"i18n Translator"** from the dropdown
+2. Look for error messages about invalid JSON, missing required fields, or invalid API keys
+3. See the [Troubleshooting](#troubleshooting) section below for common issues and solutions
+
+**When the Translator service is running:**
+- Whenever you update either `translator.json` or `translator.env`, the Translator will auto-restart and load your new settings
+- Whenever you save a change to a source language file, the Translator will auto-translate and sync changes to all target languages
+- If configured, it will also create "back translations" that translate each target file back to the original source language
 
 ## `translator.json` Configuration
 
@@ -170,10 +226,10 @@ See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator
 | `enableBackTranslation` | `boolean` | Enable back translation | `false` |
 | `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy) | `"azure"` |
 | `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy) | `"google"` |
-| `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales | `{"deepl": ["fr", "de"]}` |
-| `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `[]` |
-| `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation (e.g. `"meta.version"`). | `[]` |
-| `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating (e.g. `"index.ts"`). | `[]` |
+| `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales. | `{"deepl": ["fr", "de"]}` |
+| `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]` |
+| `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation. | `["meta.version"]` |
+| `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating. | `["index.ts"]` |
 
 
 Example `translator.json`:
@@ -232,10 +288,83 @@ GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
 
 ```
 
+## Troubleshooting
+
+### Server Won't Start or Keeps Restarting
+
+**How to check logs:**
+1. Open VS Code Terminal
+2. Click the **Output** tab
+3. Select **"i18n Translator"** from the dropdown menu on the right
+4. Review log messages for errors
+
+**Common issues:**
+
+**Invalid JSON in config files**
+- Error: `Unexpected token` or `JSON parse error`
+- Solution: Validate your `translator.json` file syntax. Use VS Code's built-in JSON validator or an online JSON formatter
+- Common mistakes: Missing commas, trailing commas, unquoted keys
+
+**Missing required configuration**
+- Error: `sourcePaths is required` or `sourceLocale is required`
+- Solution: Ensure `translator.json` includes all required fields: `sourcePaths`, `sourceLocale`, `targetLocales`
+
+**Invalid API keys**
+- Error: `Authentication failed` or `Invalid API key`
+- Solution: Check your `translator.env` file and verify:
+  - API keys are copied correctly (no extra spaces or quotes)
+  - URLs are correct for your service tier (e.g., DeepL free vs pro)
+  - API keys are active and have quota remaining
+
+**Invalid locale codes**
+- Error: `Unsupported language code`
+- Solution: Different engines support different locale codes. Check your engine's documentation or use locale mapping in `translator.json`
+
+### File Watcher Not Triggering Translations
+
+**Files not translating when saved:**
+- Verify the Translator service is running (check Output logs)
+- Ensure the file is in a configured `sourcePaths` directory
+- Check file extension is supported (`.md`, `.mdx`, `.json`, `.yaml`, `.yml`, `.ts`)
+- For TypeScript files, verify the file matches the `export default { ... }` pattern
+
+### Translation Quality Issues
+
+**Poor translations for short strings:**
+- Try different engines - Google and Azure often work better for UI strings than Gemini
+- Consider using DeepL for European languages
+
+**Translations keep changing:**
+- This indicates translation memory isn't working
+- Check the cache database is being created (look for `.sqlite` files)
+- Verify file permissions allow writing to the cache directory
+
+### Need More Help?
+
+- Check the [Configuration Documentation](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/Configuration.md)
+- Review the [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md) for known limitations
+- Search or create an issue on [GitHub Issues](https://github.com/appsitu-com/i18n-translator-sync/issues)
+
 ## For AI Agents & Contributors
 
 **Important**: If you're an AI agent or developer working on this project, please read [`.github/copilot-instructions.md`](https://github.com/appsitu-com/i18n-translator-sync/blob/main/.github/copilot-instructions.md) for essential coding conventions, architectural decisions, and project-specific guidelines.
 
+## Contributing
+
+We welcome contributions! Whether you're fixing bugs, improving documentation, or adding new features, your help is appreciated.
+
+**Getting started:**
+- Read [CONTRIBUTING.md](https://github.com/appsitu-com/i18n-translator-sync/blob/main/CONTRIBUTING.md) for development setup and guidelines
+- Review [`.github/copilot-instructions.md`](https://github.com/appsitu-com/i18n-translator-sync/blob/main/.github/copilot-instructions.md) for coding conventions
+- Check [GitHub Issues](https://github.com/appsitu-com/i18n-translator-sync/issues) for open tasks
+- See the [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md) for planned features
+
+**Types of contributions we need:**
+- Bug fixes and issue reports
+- Documentation improvements
+- New translation engine integrations
+- Performance optimizations
+- Feature suggestions and implementations
 
 ## Contact
 - For questions or issues, refer to the GitHub repository:

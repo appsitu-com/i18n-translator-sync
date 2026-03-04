@@ -44,6 +44,15 @@
   - [ ] **Translator: Push to MateCat** - Exports the local TM database and pushes it to a MateCat project.
   - [ ] **Translator: Pull from MateCat** - Pulls the MateCat project revisions and imports these into the local TM database.
 
+- [ ] **CLI Application / npm Package**
+  - [x] CLI code is complete (see `doc/CLI.md`)
+  - [x] Commands implemented: `start` (watch mode), `push`, `pull`
+  - [x] Supports all configuration options from `translator.json`
+  - [ ] **Publish to npmjs.org** - Make CLI available via `npm install -g i18n-translator-sync`
+  - [ ] Test global installation and CLI commands
+  - [ ] Document CLI in README.md after npm publication
+  - The CLI enables use in CI/CD pipelines, build scripts, and automation workflows outside of VS Code
+
 - [W] Configure and test GitHub Actions.
 
 - [W] *Export & Push* your local TM database to a CAT service (like MateCat) and later *Pull & Import* the revisions back into you local project.
