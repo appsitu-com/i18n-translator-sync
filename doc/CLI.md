@@ -9,13 +9,13 @@ The i18n Translator package can be used both as a VSCode extension and as a comm
 To install the CLI globally:
 
 ```bash
-npm install -g i18n-translator-vscode
+npm install -g i18n-translator-sync
 ```
 
 Or using pnpm:
 
 ```bash
-pnpm add -g i18n-translator-vscode
+pnpm add -g i18n-translator-sync
 ```
 
 ### Local Installation
@@ -23,13 +23,13 @@ pnpm add -g i18n-translator-vscode
 To install in your project:
 
 ```bash
-npm install --save-dev i18n-translator-vscode
+npm install --save-dev i18n-translator-sync
 ```
 
 Or using pnpm:
 
 ```bash
-pnpm add -D i18n-translator-vscode
+pnpm add -D i18n-translator-sync
 ```
 
 ## Usage
