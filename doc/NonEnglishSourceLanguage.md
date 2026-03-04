@@ -129,50 +129,9 @@ Pivoting helps when:
 
 ---
 
-# Implication for Your Translation System
-
-Since you are building a **translation validation system with back-translation drift detection**, pivoting can introduce artifacts:
-
-```
-Source → English → Target → English → Source
-```
-
-This can exaggerate drift.
-
-Better pipelines today:
-
-**Option 1 (Best)**
-Use multilingual LLMs directly:
-
-```
-Source → Target
-Target → Source
-```
-
-**Option 2 (Hybrid ranking)**
-Generate multiple candidates:
-
-* DeepL
-* Google
-* Gemini
-* LLM
-
-Then use semantic scoring to pick the best.
-
----
-
 # A Subtle Issue: Hidden English Bias
 
 Even when not pivoting, many models are **English-centric** because training corpora are heavily English-aligned.
 
 Meaning English still acts as a **latent semantic anchor**.
 
----
-
-✅ If you're building a **multi-engine translator (like your VSCode tool)** I can also show you:
-
-* which engines currently support the **most direct language pairs**
-* which engines produce the **least semantic drift**
-* a **ranking strategy used by professional MT pipelines**
-
-That part becomes important once you're comparing **100+ language outputs automatically.**
