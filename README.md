@@ -83,9 +83,11 @@ Translated folders are kept "in sync" so if you rename or delete files in a sour
 
 ## Back Translations!
 
-You can enable back translation of each target language back to the source language. Now adjust your input source text and instantly check the back translations to assess translation quality. Add a developer mode switch to load back translations into your app.
-
 AI translations are admittedly "draft" translations but this feature can significantly improve your early MVP translation quality.
+
+When you enable "back translation", each target language is translated back to the source language. This creates an additional translation file or folder per target locale that you can review to assess translation quality. You might even wish to add a developer mode switch in your apps, to view back translations inside your app.
+
+Often tweaking your input source text can improve resulting translations. Using this feature, you can repeatedly adjust your input source text and instantly check back translations to assess resulting translation quality accross all your taregt languages.
 
 <!-- TODO: Add screenshot showing back translation comparison -->
 
