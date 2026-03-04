@@ -4,7 +4,7 @@
   "displayName": "i18n Sync Translator",
   "publisher": "appsitu",
   "preview": true,
-  "version": "0.2.3",
+  "version": "0.2.4",
   "engines": {
     "vscode": "^1.103.0"
   },
@@ -21,13 +21,13 @@
     "json",
     "yaml"
   ],
-  "homepage": "https://github.com/appsitu-com/i18n-translator-sync",
+  "homepage": "https://github.com/appsitu-com/i18n-translator-sync.git",
   "repository": {
     "type": "git",
-    "url": "https://github.com/appsitu-com/i18n-translator-sync.git"
+    "url": "https://github.com/appsitu-com/i18n-translator-sync.git.git"
   },
   "bugs": {
-    "url": "https://github.com/appsitu-com/i18n-translator-sync/issues"
+    "url": "https://github.com/appsitu-com/i18n-translator-sync.git/issues"
   },
   "author": {
     "name": "Tony O'Hagan"
@@ -68,6 +68,7 @@
     "pretest": "pnpm rebuild:sqlite",
     "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
     "package": "node scripts/package-extension.js",
+    "package:ci": "node scripts/package-extension.js --ci",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
     "package:quick": "pnpm exec vsce package",
     "version:update": "node scripts/update-version.js",

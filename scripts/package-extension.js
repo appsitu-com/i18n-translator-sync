@@ -16,7 +16,7 @@ const fs = require('fs');
 const path = require('path');
 const { exec } = require('child_process');
 const https = require('https');
-const { updateVersion } = require('./update-version');
+const { updateVersion, getCurrentVersion } = require('./update-version');
 
 // Constants
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -315,9 +315,8 @@ async function packageExtension(newVersion) {
       console.log(`Created releases directory: ${RELEASES_DIR}`);
     }
 
-    // Run prepublish script with pnpm (local)
-    console.log('Running prepublish script with pnpm...');
-    await execPromise('pnpm vscode:prepublish');
+    // Note: vsce package will automatically trigger vscode:prepublish hook
+    // No need to run it explicitly here
 
     // Package with vsce into the releases directory
     console.log('Packaging with @vscode/vsce...');
@@ -385,6 +384,12 @@ async function main() {
     console.log('Force icon generation flag detected. Will regenerate PNG icon from SVG.');
   }
 
+  // Check for CI mode flag
+  const ciMode = process.argv.includes('--ci');
+  if (ciMode) {
+    console.log('CI mode enabled. Will skip interactive prompts and git tagging instructions.');
+  }
+
   // Check if version is provided as command line argument
   const versionParam = process.argv.find(arg => arg.startsWith('--version='));
   let providedVersion = null;
@@ -397,8 +402,28 @@ async function main() {
     // First ensure all dependencies are installed
     await ensureDependencies();
 
-    // Use provided version or prompt user for version update type
-    const newVersion = providedVersion || await updateVersion();
+    // Determine the version to use
+    let newVersion;
+    if (ciMode) {
+      // In CI mode, read version from package.json
+      const currentVersion = await getCurrentVersion();
+      console.log(`Current version from package.json: ${currentVersion}`);
+
+      if (providedVersion) {
+        // Validate that provided version matches package.json
+        if (providedVersion !== currentVersion) {
+          console.error(`ERROR: Provided version (${providedVersion}) does not match package.json version (${currentVersion})`);
+          console.error('This likely means the git tag does not match the version in package.json.');
+          console.error('Please ensure the git tag matches the version in package.json before creating a release.');
+          process.exit(1);
+        }
+        console.log(`Version validation passed: ${providedVersion} matches package.json`);
+      }
+      newVersion = currentVersion;
+    } else {
+      // Interactive mode: use provided version or prompt user
+      newVersion = providedVersion || await updateVersion();
+    }
 
     // Ensure all required assets exist
     await ensureAssets();
@@ -416,8 +441,10 @@ async function main() {
     console.log(`VSIX file created: ${vsixPath}`);
     console.log(`Version: ${newVersion}`);
 
-    // Display git tagging commands for the new version
-    displayGitTaggingCommand(newVersion);
+    // Display git tagging commands for the new version (skip in CI mode)
+    if (!ciMode) {
+      displayGitTaggingCommand(newVersion);
+    }
   } catch (error) {
     console.error('Extension packaging failed:', error);
     process.exit(1);

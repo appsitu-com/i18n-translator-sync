@@ -13,13 +13,16 @@ jobs:
         with:
           version: 9
       - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
+        with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm add -g @vscode/vsce && vsce package
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Package extension
+        run: pnpm package --version=${{ steps.version.outputs.VERSION }} --ci
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            *.vsix
+            releases/*.vsix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

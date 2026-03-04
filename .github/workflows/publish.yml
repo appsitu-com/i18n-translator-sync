@@ -5,9 +5,6 @@ on:
 jobs:
   publish-marketplaces:
     runs-on: ubuntu-latest
-    env:
-      VSCE_PAT: ${{ secrets.VSCE_PAT }}
-      OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -16,10 +13,17 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm add -g @vscode/vsce ovsx && vsce package
+      - name: Extract version from release tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+      - name: Package extension
+        run: pnpm package --version=${{ steps.version.outputs.VERSION }} --ci
+      - name: Install publishing tools
+        run: pnpm add -g @vscode/vsce ovsx
       - name: Publish to VS Code Marketplace
-        run: vsce publish --packagePath *.vsix --pat $VSCE_PAT
+        run: vsce publish --packagePath releases/*.vsix --pat ${{ secrets.VSCE_PAT }}
       - name: Publish to Open VSX
         if: false
-        run: ovsx publish *.vsix -p $OVSX_TOKEN
+        env:
+          OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
+        run: ovsx publish releases/*.vsix -p $OVSX_TOKEN
