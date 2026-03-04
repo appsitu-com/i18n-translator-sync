@@ -32,13 +32,21 @@ function execPromise(command) {
   return new Promise((resolve, reject) => {
     console.log(`Executing: ${command}`);
     exec(command, { cwd: ROOT_DIR }, (error, stdout, stderr) => {
+      // Always log stdout and stderr for debugging
+      if (stdout) {
+        console.log(`stdout: ${stdout}`);
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+      }
+
       if (error) {
         console.error(`Error: ${error.message}`);
-        console.error(`stderr: ${stderr}`);
+        console.error(`Exit code: ${error.code}`);
         reject(error);
         return;
       }
-      console.log(`stdout: ${stdout}`);
+
       resolve(stdout);
     });
   });
