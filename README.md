@@ -60,6 +60,8 @@ We found that Google Translate is often better at short text strings typically f
 
 You can choose to make any language your source language - it does not need to be English. However, be aware that many Translation APIs have been trained to translate best from English and may in fact translate from your source language to English and then to your target language. Some of the newer engines don't suffer from this issue.
 
+See related info on [English and Translation Engines](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/NonEnglishSourceLanguage.md) .
+
 ## Target Naming
 
 Source files and folder names must contain the source locale code (e.g., "en" for English).
@@ -128,7 +130,7 @@ The next section on TypeScript translation demonstrates these features.
 
 ## TypeScript i18n File Translation
 
-We support translation of TypeScript files that follow a specific format that is almost a JSON file. The `as const` is optional.
+We support translation of TypeScript files that follow this specific format that is almost a JSON file. The `as const` is optional. We use the [JSON5](https://github.com/json5/json5) parser which accepts comments and strings with single or double quotes.
 
 ```ts
 export default {
@@ -137,7 +139,7 @@ export default {
 ```
 
 In this example, we translate a folder of TypeScript files that are merged together using an `index.ts` in the same folder.
-We want to copy the `index.ts` file into each target folder but avoid it being translated.
+We want to copy the `index.ts` file into each target folder - avoiding it being translated.
 For a fully working example see our [test project](https://github.com/appsitu-com/i18n-translator-sync/blob/main/test-project).
 
 `i18n/en/index.ts`
@@ -171,9 +173,9 @@ export default [
 
 `translator.json`
 ```json
-"sourcePaths": ["i18n/en", "i18n/en.json"],
- "sourceLocale": "en",
- "targetLocales": ["en-US", "es", "fr", "hi", "ur", "de", "zh-CN"],
+"sourcePaths": ["i18n/en"],  <<< translate files in the i18n/en/ folder
+ "sourceLocale": "en",       <<< Translate from English
+ "targetLocales": ["en-US", "es", "fr", "hi", "ur", "de", "zh-CN"], <<< Translate to folders: i18n/en-US/, i18n/es/ ... i18n/zh-CN/
   ...
  "excludeKeys": ["native", "code"],  <<< Don't translate 'code' or 'native' values in locales.ts
  "copyOnlyFiles": ["index.ts"], <<< Don't translate the index.ts file
