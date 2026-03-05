@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import { TranslatorManager } from '../translatorManager';
 import { loadProjectConfig } from '../coreConfig';
 import { Logger } from '../util/baseLogger';
@@ -6,6 +7,7 @@ import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
 import { SQLiteCache } from '../cache/sqlite';
 import { ConfigProvider } from '../coreConfig';
+import { TRANSLATOR_DIR } from '../constants';
 import { initTranslatorEnv } from '../util/environmentSetup';
 import { registerAllTranslators } from '../../translators/translatorRegistry';
 import { IPassphraseManager } from '../secrets/passphraseManager';
@@ -49,7 +51,7 @@ export abstract class TranslatorAdapter {
    * Get or create the cache
    */
   protected async getCache(dbMustExist = false): Promise<SQLiteCache | undefined> {
-    const dbPath = path.join(this.workspacePath, '.i18n-cache', 'translation.db');
+    const dbPath = path.join(this.workspacePath, TRANSLATOR_DIR, 'translation.db');
 
     // Check if the database file exists (for dbMustExist mode)
     if (dbMustExist) {
@@ -396,6 +398,20 @@ export abstract class TranslatorAdapter {
       const filesProcessed = await this.translatorManager.bulkTranslate(projectConfig, progressCallback, force);
       this.logger.info(`Bulk translation completed: ${filesProcessed} files processed`);
 
+      const shouldAutoExport = projectConfig.autoExport ?? true;
+      const csvExportPath = projectConfig.csvExportPath || 'translator.csv';
+      if (shouldAutoExport && this.cache) {
+        const csvPath = path.isAbsolute(csvExportPath)
+          ? csvExportPath
+          : path.join(this.workspacePath, csvExportPath);
+        try {
+          await this.cache.exportCSV(csvPath);
+          this.logger.info(`Auto-exported cache to ${csvPath}`);
+        } catch (exportError: any) {
+          this.logger.warn(`Auto-export failed: ${exportError?.message || String(exportError)}`);
+        }
+      }
+
       return filesProcessed;
     } catch (e: any) {
       this.logger.error(`Bulk translation failed: ${e.message}`);
@@ -403,6 +419,77 @@ export abstract class TranslatorAdapter {
         this.logger.debug(e.stack);
       }
       return 0;
+    }
+  }
+
+  /**
+   * Purge unused translations from the cache using mark-and-sweep algorithm
+   * @returns Object containing deletedCount and backupPath
+   */
+  async purge(): Promise<{ deletedCount: number; backupPath?: string }> {
+    if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before purge()');
+    if (!this.cache) throw new Error('Cache not initialized');
+
+    try {
+      this.logger.info('Starting cache purge operation...');
+
+      const projectConfig = await loadProjectConfig(
+        this.workspacePath,
+        this.configProvider,
+        this.logger,
+        this.fileSystem
+      );
+
+      const csvExportPath = projectConfig.csvExportPath || 'translator.csv';
+      const shouldAutoExport = projectConfig.autoExport ?? true;
+      const csvPath = path.isAbsolute(csvExportPath)
+        ? csvExportPath
+        : path.join(this.workspacePath, csvExportPath);
+
+      let backupPath: string | undefined;
+      if (fs.existsSync(csvPath)) {
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+        const timeStr = now.toTimeString().slice(0, 5).replace(/:/g, '');
+        const ext = path.extname(csvPath);
+        const base = ext.length > 0 ? csvPath.slice(0, -ext.length) : csvPath;
+        backupPath = `${base}-${dateStr}-${timeStr}${ext || '.csv'}`;
+
+        this.logger.info(`Backing up current cache to: ${backupPath}`);
+        fs.copyFileSync(csvPath, backupPath);
+      }
+
+      this.logger.info('Marking all translations as unused...');
+      await this.cache.purge();
+
+      this.logger.info('Retranslating all files to mark used translations...');
+      const progressCallback = (current: number, total: number, file: string) => {
+        const filename = path.basename(file);
+        const percent = Math.round((current / total) * 100);
+        this.logger.info(`[${percent}%] Processing file ${current}/${total}: ${filename}`);
+      };
+
+      await this.translatorManager.bulkTranslate(projectConfig, progressCallback, false);
+
+      this.logger.info('Deleting unused translations...');
+      const result = await this.cache.completePurge();
+      this.logger.info(`Purged ${result.deletedCount} unused translations`);
+
+      if (shouldAutoExport) {
+        this.logger.info(`Auto-exporting cache to: ${csvPath}`);
+        await this.cache.exportCSV(csvPath);
+      }
+
+      return {
+        deletedCount: result.deletedCount,
+        backupPath
+      };
+    } catch (e: any) {
+      this.logger.error(`Cache purge failed: ${e.message}`);
+      if (e.stack) {
+        this.logger.debug(e.stack);
+      }
+      throw e;
     }
   }
 

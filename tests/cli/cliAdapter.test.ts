@@ -107,7 +107,7 @@ describe('CLITranslatorAdapter', () => {
     testConfigPath = path.join(testDir, TRANSLATOR_JSON);
 
     // Create cache directory
-    const cacheDir = path.join(testDir, '.i18n-cache');
+    const cacheDir = path.join(testDir, '.translator');
     fs.mkdirSync(cacheDir, { recursive: true });
 
     // Create necessary directory structure
