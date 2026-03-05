@@ -1,0 +1,1633 @@
+source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,updated_at
+i18n/en.json,0,google,en,de,world,,Welt,1772684405
+i18n/en.json,0,azure,es,en,Mundo,,World,1772684404
+i18n/en.json,0,google,fr,en,monde,,world,1772684404
+i18n/en.json,0,google,hi,en,दुनिया,,World,1772684405
+i18n/en.json,0,google,ur,en,دنیا,,World,1772684405
+i18n/en.json,0,google,de,en,Welt,,World,1772684406
+i18n/en.json,0,google,zh,en,世界,,world,1772684406
+i18n/en.json,0,azure,en,es,world,,Mundo,1772684403
+i18n/en.json,0,google,en,fr,world,,monde,1772684404
+i18n/en.json,0,google,en,hi,world,,दुनिया,1772684404
+i18n/en.json,0,google,en,ur,world,,دنیا,1772684405
+i18n/en.json,0,google,en,zh,world,,世界,1772684406
+i18n/en.json,1,google,en,de,back-translation,,Rückübersetzung,1772684405
+i18n/en.json,1,azure,es,en,Retrotraducción,,Back-Translation,1772684404
+i18n/en.json,1,google,fr,en,rétrotraduction,,back-translation,1772684404
+i18n/en.json,1,google,hi,en,अणुवादित का वापस से अनुवाद,,back translation,1772684405
+i18n/en.json,1,google,ur,en,واپس ترجمہ,,Back translation,1772684405
+i18n/en.json,1,google,de,en,Rückübersetzung,,Back translation,1772684406
+i18n/en.json,1,google,zh,en,回译,,Back translation,1772684406
+i18n/en.json,1,azure,en,es,back-translation,,Retrotraducción,1772684403
+i18n/en.json,1,google,en,fr,back-translation,,rétrotraduction,1772684404
+i18n/en.json,1,google,en,hi,back-translation,,अणुवादित का वापस से अनुवाद,1772684404
+i18n/en.json,1,google,en,ur,back-translation,,واپس ترجمہ,1772684405
+i18n/en.json,1,google,en,zh,back-translation,,回译,1772684406
+i18n/en.json,2,google,en,de,Gasp ,,Keuchen,1772684405
+i18n/en.json,2,azure,es,en,¡Jadeo ,,Gasp ,1772684404
+i18n/en.json,2,google,fr,en,Haleter ,,Panting,1772684404
+i18n/en.json,2,google,hi,en,हांफना,,gasp,1772684405
+i18n/en.json,2,google,ur,en,ہانپنا ,,Panting,1772684405
+i18n/en.json,2,google,de,en,Keuchen,,Gasping,1772684406
+i18n/en.json,2,google,zh,en,喘息,,respite,1772684406
+i18n/en.json,2,azure,en,es,Gasp ,,¡Jadeo ,1772684403
+i18n/en.json,2,google,en,fr,Gasp ,,Haleter ,1772684404
+i18n/en.json,2,google,en,hi,Gasp ,,हांफना,1772684404
+i18n/en.json,2,google,en,ur,Gasp ,,ہانپنا ,1772684405
+i18n/en.json,2,google,en,zh,Gasp ,,喘息,1772684406
+i18n/en/components/footer.json,0,google,en,de,© 2025 Test Company. All rights reserved.,,© 2025 Test Company. Alle Rechte vorbehalten.,1772684370
+i18n/en/components/footer.json,0,azure,es,en,© Compañía de Pruebas 2025. Todos los derechos reservados.,,© 2025 Test Company. All rights reserved.,1772684368
+i18n/en/components/footer.json,0,google,fr,en,© 2025 Test Company. Tous droits réservés.,,© 2025 Test Company. All rights reserved.,1772684369
+i18n/en/components/footer.json,0,google,hi,en,© 2025 टेस्ट कंपनी। सर्वाधिकार सुरक्षित।,,© 2025 The Test Company. All rights reserved.,1772684369
+i18n/en/components/footer.json,0,google,ur,en,© 2025 ٹیسٹ کمپنی۔ جملہ حقوق محفوظ ہیں۔,,© 2025 Test Company. All rights reserved.,1772684370
+i18n/en/components/footer.json,0,google,de,en,© 2025 Test Company. Alle Rechte vorbehalten.,,© 2025 Test Company. All rights reserved.,1772684370
+i18n/en/components/footer.json,0,google,zh,en,© 2025 测试公司。版权所有。,,© 2025 Testing Company. All rights reserved.,1772684371
+i18n/en/components/footer.json,0,azure,en,es,© 2025 Test Company. All rights reserved.,,© Compañía de Pruebas 2025. Todos los derechos reservados.,1772684367
+i18n/en/components/footer.json,0,google,en,fr,© 2025 Test Company. All rights reserved.,,© 2025 Test Company. Tous droits réservés.,1772684368
+i18n/en/components/footer.json,0,google,en,hi,© 2025 Test Company. All rights reserved.,,© 2025 टेस्ट कंपनी। सर्वाधिकार सुरक्षित।,1772684369
+i18n/en/components/footer.json,0,google,en,ur,© 2025 Test Company. All rights reserved.,,© 2025 ٹیسٹ کمپنی۔ جملہ حقوق محفوظ ہیں۔,1772684369
+i18n/en/components/footer.json,0,google,en,zh,© 2025 Test Company. All rights reserved.,,© 2025 测试公司。版权所有。,1772684370
+i18n/en/components/footer.json,1,google,en,de,Version {version},,Version {version},1772684370
+i18n/en/components/footer.json,1,azure,es,en,Versión {versión},,Version {version},1772684368
+i18n/en/components/footer.json,1,google,fr,en,Version {version},,Version {version},1772684369
+i18n/en/components/footer.json,1,google,hi,en,संस्करण {version},,version {version},1772684369
+i18n/en/components/footer.json,1,google,ur,en,ورژن {version},,Version {version},1772684370
+i18n/en/components/footer.json,1,google,de,en,Version {version},,Version {version},1772684370
+i18n/en/components/footer.json,1,google,zh,en,版本 {version},,Version {version},1772684371
+i18n/en/components/footer.json,1,azure,en,es,Version {version},,Versión {versión},1772684367
+i18n/en/components/footer.json,1,google,en,fr,Version {version},,Version {version},1772684368
+i18n/en/components/footer.json,1,google,en,hi,Version {version},,संस्करण {version},1772684369
+i18n/en/components/footer.json,1,google,en,ur,Version {version},,ورژن {version},1772684369
+i18n/en/components/footer.json,1,google,en,zh,Version {version},,版本 {version},1772684370
+i18n/en/components/footer.json,2,google,en,de,Privacy Policy,,Datenschutzrichtlinie,1772684370
+i18n/en/components/footer.json,2,azure,es,en,Política de privacidad,,Privacy Policy,1772684368
+i18n/en/components/footer.json,2,google,fr,en,politique de confidentialité,,Privacy Policy,1772684369
+i18n/en/components/footer.json,2,google,hi,en,गोपनीयता नीति,,Privacy Policy,1772684369
+i18n/en/components/footer.json,2,google,ur,en,رازداری کی پالیسی,,Privacy Policy,1772684370
+i18n/en/components/footer.json,2,google,de,en,Datenschutzrichtlinie,,Privacy Policy,1772684370
+i18n/en/components/footer.json,2,google,zh,en,隐私政策,,Privacy Policy,1772684371
+i18n/en/components/footer.json,2,azure,en,es,Privacy Policy,,Política de privacidad,1772684367
+i18n/en/components/footer.json,2,google,en,fr,Privacy Policy,,politique de confidentialité,1772684368
+i18n/en/components/footer.json,2,google,en,hi,Privacy Policy,,गोपनीयता नीति,1772684369
+i18n/en/components/footer.json,2,google,en,ur,Privacy Policy,,رازداری کی پالیسی,1772684369
+i18n/en/components/footer.json,2,google,en,zh,Privacy Policy,,隐私政策,1772684370
+i18n/en/components/footer.json,3,google,en,de,Terms of Service,,Nutzungsbedingungen,1772684370
+i18n/en/components/footer.json,3,azure,es,en,Términos de servicio,,Terms of Service,1772684368
+i18n/en/components/footer.json,3,google,fr,en,Conditions d'utilisation,,Terms of Use,1772684369
+i18n/en/components/footer.json,3,google,hi,en,सेवा की शर्तें,,terms of Service,1772684369
+i18n/en/components/footer.json,3,google,ur,en,سروس کی شرائط,,Terms of Service,1772684370
+i18n/en/components/footer.json,3,google,de,en,Nutzungsbedingungen,,Terms of Use,1772684370
+i18n/en/components/footer.json,3,google,zh,en,服务条款,,Terms of Service,1772684371
+i18n/en/components/footer.json,3,azure,en,es,Terms of Service,,Términos de servicio,1772684367
+i18n/en/components/footer.json,3,google,en,fr,Terms of Service,,Conditions d'utilisation,1772684368
+i18n/en/components/footer.json,3,google,en,hi,Terms of Service,,सेवा की शर्तें,1772684369
+i18n/en/components/footer.json,3,google,en,ur,Terms of Service,,سروس کی شرائط,1772684369
+i18n/en/components/footer.json,3,google,en,zh,Terms of Service,,服务条款,1772684370
+i18n/en/components/footer.json,4,google,en,de,Contact Us,,Kontaktieren Sie uns,1772684370
+i18n/en/components/footer.json,4,azure,es,en,Contáctanos,,Contact Us,1772684368
+i18n/en/components/footer.json,4,google,fr,en,Contactez-nous,,Contact us,1772684369
+i18n/en/components/footer.json,4,google,hi,en,हमसे संपर्क करें,,Contact us,1772684369
+i18n/en/components/footer.json,4,google,ur,en,ہم سے رابطہ کریں۔,,Contact us.,1772684370
+i18n/en/components/footer.json,4,google,de,en,Kontaktieren Sie uns,,Contact us,1772684370
+i18n/en/components/footer.json,4,google,zh,en,联系我们,,Contact Us,1772684371
+i18n/en/components/footer.json,4,azure,en,es,Contact Us,,Contáctanos,1772684367
+i18n/en/components/footer.json,4,google,en,fr,Contact Us,,Contactez-nous,1772684368
+i18n/en/components/footer.json,4,google,en,hi,Contact Us,,हमसे संपर्क करें,1772684369
+i18n/en/components/footer.json,4,google,en,ur,Contact Us,,ہم سے رابطہ کریں۔,1772684369
+i18n/en/components/footer.json,4,google,en,zh,Contact Us,,联系我们,1772684370
+i18n/en/components/footer.json,5,google,en,de,About Us,,Über uns,1772684370
+i18n/en/components/footer.json,5,azure,es,en,Sobre nosotros,,About Us,1772684368
+i18n/en/components/footer.json,5,google,fr,en,À propos de nous,,About Us,1772684369
+i18n/en/components/footer.json,5,google,hi,en,हमारे बारे में,,About Us,1772684369
+i18n/en/components/footer.json,5,google,ur,en,ہمارے بارے میں,,About us,1772684370
+i18n/en/components/footer.json,5,google,de,en,Über uns,,About Us,1772684370
+i18n/en/components/footer.json,5,google,zh,en,关于我们,,about Us,1772684371
+i18n/en/components/footer.json,5,azure,en,es,About Us,,Sobre nosotros,1772684367
+i18n/en/components/footer.json,5,google,en,fr,About Us,,À propos de nous,1772684368
+i18n/en/components/footer.json,5,google,en,hi,About Us,,हमारे बारे में,1772684369
+i18n/en/components/footer.json,5,google,en,ur,About Us,,ہمارے بارے میں,1772684369
+i18n/en/components/footer.json,5,google,en,zh,About Us,,关于我们,1772684370
+i18n/en/components/footer.json,6,google,en,de,Select Language,,Sprache auswählen,1772684370
+i18n/en/components/footer.json,6,azure,es,en,Idioma seleccionado,,Selected language,1772684368
+i18n/en/components/footer.json,6,google,fr,en,Sélectionner la langue,,Select language,1772684369
+i18n/en/components/footer.json,6,google,hi,en,भाषा चुने,,Select language,1772684369
+i18n/en/components/footer.json,6,google,ur,en,زبان منتخب کریں۔,,Select language.,1772684370
+i18n/en/components/footer.json,6,google,de,en,Sprache auswählen,,Select language,1772684370
+i18n/en/components/footer.json,6,google,zh,en,选择语言,,Select language,1772684371
+i18n/en/components/footer.json,6,azure,en,es,Select Language,,Idioma seleccionado,1772684367
+i18n/en/components/footer.json,6,google,en,fr,Select Language,,Sélectionner la langue,1772684368
+i18n/en/components/footer.json,6,google,en,hi,Select Language,,भाषा चुने,1772684369
+i18n/en/components/footer.json,6,google,en,ur,Select Language,,زبان منتخب کریں۔,1772684369
+i18n/en/components/footer.json,6,google,en,zh,Select Language,,选择语言,1772684370
+i18n/en/components/footer.json,7,google,en,de,Current Language: {language},,Aktuelle Sprache: {language},1772684370
+i18n/en/components/footer.json,7,azure,es,en,Idioma actual: {idioma},,Current language: {language},1772684368
+i18n/en/components/footer.json,7,google,fr,en,Langue actuelle : {langue},,Current language: {language},1772684369
+i18n/en/components/footer.json,7,google,hi,en,वर्तमान भाषा: {language},,Current language: {language},1772684369
+i18n/en/components/footer.json,7,google,ur,en,موجودہ زبان: {language},,Current language: {language},1772684370
+i18n/en/components/footer.json,7,google,de,en,Aktuelle Sprache: {language},,Current language: {language},1772684370
+i18n/en/components/footer.json,7,google,zh,en,当前语言：{language},,Current language: {language},1772684371
+i18n/en/components/footer.json,7,azure,en,es,Current Language: {language},,Idioma actual: {idioma},1772684367
+i18n/en/components/footer.json,7,google,en,fr,Current Language: {language},,Langue actuelle : {langue},1772684368
+i18n/en/components/footer.json,7,google,en,hi,Current Language: {language},,वर्तमान भाषा: {language},1772684369
+i18n/en/components/footer.json,7,google,en,ur,Current Language: {language},,موجودہ زبان: {language},1772684369
+i18n/en/components/footer.json,7,google,en,zh,Current Language: {language},,当前语言：{language},1772684370
+i18n/en/components/footer.json,8,google,en,de,Follow us,,Folgen Sie uns,1772684370
+i18n/en/components/footer.json,8,azure,es,en,Síguenos,,Follow Us,1772684368
+i18n/en/components/footer.json,8,google,fr,en,Suivez-nous,,Follow us,1772684369
+i18n/en/components/footer.json,8,google,hi,en,हमारे पर का पालन करें,,Follow us,1772684369
+i18n/en/components/footer.json,8,google,ur,en,ہمیں فالو کریں۔,,Follow us.,1772684370
+i18n/en/components/footer.json,8,google,de,en,Folgen Sie uns,,Follow us,1772684370
+i18n/en/components/footer.json,8,google,zh,en,跟着我们,,follow us,1772684371
+i18n/en/components/footer.json,8,azure,en,es,Follow us,,Síguenos,1772684367
+i18n/en/components/footer.json,8,google,en,fr,Follow us,,Suivez-nous,1772684368
+i18n/en/components/footer.json,8,google,en,hi,Follow us,,हमारे पर का पालन करें,1772684369
+i18n/en/components/footer.json,8,google,en,ur,Follow us,,ہمیں فالو کریں۔,1772684369
+i18n/en/components/footer.json,8,google,en,zh,Follow us,,跟着我们,1772684370
+i18n/en/components/footer.json,9,google,en,de,Twitter,,Twitter,1772684370
+i18n/en/components/footer.json,9,azure,es,en,Twitter,,Twitter,1772684368
+i18n/en/components/footer.json,9,google,fr,en,Gazouillement,,Twitter,1772684369
+i18n/en/components/footer.json,9,google,hi,en,ट्विटर,,Twitter,1772684369
+i18n/en/components/footer.json,9,google,ur,en,ٹویٹر,,Twitter,1772684370
+i18n/en/components/footer.json,9,google,de,en,Twitter,,Twitter,1772684370
+i18n/en/components/footer.json,9,google,zh,en,叽叽喳喳,,twitter,1772684371
+i18n/en/components/footer.json,9,azure,en,es,Twitter,,Twitter,1772684367
+i18n/en/components/footer.json,9,google,en,fr,Twitter,,Gazouillement,1772684368
+i18n/en/components/footer.json,9,google,en,hi,Twitter,,ट्विटर,1772684369
+i18n/en/components/footer.json,9,google,en,ur,Twitter,,ٹویٹر,1772684369
+i18n/en/components/footer.json,9,google,en,zh,Twitter,,叽叽喳喳,1772684370
+i18n/en/components/footer.json,10,google,en,de,Facebook,,Facebook,1772684370
+i18n/en/components/footer.json,10,azure,es,en,Facebook,,Facebook,1772684368
+i18n/en/components/footer.json,10,google,fr,en,Facebook,,Facebook,1772684369
+i18n/en/components/footer.json,10,google,hi,en,फेसबुक,,Facebook,1772684369
+i18n/en/components/footer.json,10,google,ur,en,فیس بک,,Facebook,1772684370
+i18n/en/components/footer.json,10,google,de,en,Facebook,,Facebook,1772684370
+i18n/en/components/footer.json,10,google,zh,en,Facebook,,Facebook,1772684371
+i18n/en/components/footer.json,10,azure,en,es,Facebook,,Facebook,1772684367
+i18n/en/components/footer.json,10,google,en,fr,Facebook,,Facebook,1772684368
+i18n/en/components/footer.json,10,google,en,hi,Facebook,,फेसबुक,1772684369
+i18n/en/components/footer.json,10,google,en,ur,Facebook,,فیس بک,1772684369
+i18n/en/components/footer.json,10,google,en,zh,Facebook,,Facebook,1772684370
+i18n/en/components/footer.json,11,google,en,de,LinkedIn,,LinkedIn,1772684370
+i18n/en/components/footer.json,11,azure,es,en,LinkedIn,,LinkedIn,1772684368
+i18n/en/components/footer.json,11,google,fr,en,LinkedIn,,LinkedIn,1772684369
+i18n/en/components/footer.json,11,google,hi,en,Linkedin,,Linkedin,1772684369
+i18n/en/components/footer.json,11,google,ur,en,LinkedIn,,LinkedIn,1772684370
+i18n/en/components/footer.json,11,google,de,en,LinkedIn,,LinkedIn,1772684370
+i18n/en/components/footer.json,11,google,zh,en,LinkedIn,,LinkedIn,1772684371
+i18n/en/components/footer.json,11,azure,en,es,LinkedIn,,LinkedIn,1772684367
+i18n/en/components/footer.json,11,google,en,fr,LinkedIn,,LinkedIn,1772684368
+i18n/en/components/footer.json,11,google,en,hi,LinkedIn,,Linkedin,1772684369
+i18n/en/components/footer.json,11,google,en,ur,LinkedIn,,LinkedIn,1772684369
+i18n/en/components/footer.json,11,google,en,zh,LinkedIn,,LinkedIn,1772684370
+i18n/en/components/footer.json,12,google,en,de,GitHub,,GitHub,1772684370
+i18n/en/components/footer.json,12,azure,es,en,GitHub,,GitHub,1772684368
+i18n/en/components/footer.json,12,google,fr,en,GitHub,,GitHub,1772684369
+i18n/en/components/footer.json,12,google,hi,en,GitHub,,GitHub,1772684369
+i18n/en/components/footer.json,12,google,ur,en,گٹ ہب,,GitHub,1772684370
+i18n/en/components/footer.json,12,google,de,en,GitHub,,GitHub,1772684370
+i18n/en/components/footer.json,12,google,zh,en,GitHub,,GitHub,1772684371
+i18n/en/components/footer.json,12,azure,en,es,GitHub,,GitHub,1772684367
+i18n/en/components/footer.json,12,google,en,fr,GitHub,,GitHub,1772684368
+i18n/en/components/footer.json,12,google,en,hi,GitHub,,GitHub,1772684369
+i18n/en/components/footer.json,12,google,en,ur,GitHub,,گٹ ہب,1772684369
+i18n/en/components/footer.json,12,google,en,zh,GitHub,,GitHub,1772684370
+i18n/en/components/header.json,0,google,en,de,Application Dashboard,,Anwendungs-Dashboard,1772684374
+i18n/en/components/header.json,0,azure,es,en,Panel de control de aplicaciones,,Application Control Panel,1772684373
+i18n/en/components/header.json,0,google,fr,en,Tableau de bord de l'application,,Application dashboard,1772684373
+i18n/en/components/header.json,0,google,hi,en,एप्लिकेशन डैशबोर्ड,,Application Dashboard,1772684374
+i18n/en/components/header.json,0,google,ur,en,ایپلیکیشن ڈیش بورڈ,,Application Dashboard,1772684374
+i18n/en/components/header.json,0,google,de,en,Anwendungs-Dashboard,,Application dashboard,1772684375
+i18n/en/components/header.json,0,google,zh,en,应用程序仪表盘,,Application Dashboard,1772684375
+i18n/en/components/header.json,0,azure,en,es,Application Dashboard,,Panel de control de aplicaciones,1772684372
+i18n/en/components/header.json,0,google,en,fr,Application Dashboard,,Tableau de bord de l'application,1772684373
+i18n/en/components/header.json,0,google,en,hi,Application Dashboard,,एप्लिकेशन डैशबोर्ड,1772684373
+i18n/en/components/header.json,0,google,en,ur,Application Dashboard,,ایپلیکیشن ڈیش بورڈ,1772684374
+i18n/en/components/header.json,0,google,en,zh,Application Dashboard,,应用程序仪表盘,1772684375
+i18n/en/components/header.json,1,google,en,de,Logo Alt Text,,Alternativtext für das Logo,1772684374
+i18n/en/components/header.json,1,azure,es,en,Texto alternativo del logotipo,,Logo alt text,1772684373
+i18n/en/components/header.json,1,google,fr,en,Texte alternatif du logo,,Alternative text for the logo,1772684373
+i18n/en/components/header.json,1,google,hi,en,लोगो ऑल्ट टेक्स्ट,,Logo Alt Text,1772684374
+i18n/en/components/header.json,1,google,ur,en,لوگو Alt متن,,Logo Alt Text,1772684374
+i18n/en/components/header.json,1,google,de,en,Alternativtext für das Logo,,Alternative text for the logo,1772684375
+i18n/en/components/header.json,1,google,zh,en,标志替代文字,,Logo Alternative Text,1772684375
+i18n/en/components/header.json,1,azure,en,es,Logo Alt Text,,Texto alternativo del logotipo,1772684372
+i18n/en/components/header.json,1,google,en,fr,Logo Alt Text,,Texte alternatif du logo,1772684373
+i18n/en/components/header.json,1,google,en,hi,Logo Alt Text,,लोगो ऑल्ट टेक्स्ट,1772684373
+i18n/en/components/header.json,1,google,en,ur,Logo Alt Text,,لوگو Alt متن,1772684374
+i18n/en/components/header.json,1,google,en,zh,Logo Alt Text,,标志替代文字,1772684375
+i18n/en/components/header.json,2,google,en,de,Menu,,Speisekarte,1772684374
+i18n/en/components/header.json,2,azure,es,en,Menú,,Menu,1772684373
+i18n/en/components/header.json,2,google,fr,en,Menu,,Menu,1772684373
+i18n/en/components/header.json,2,google,hi,en,मेनू,,Menu,1772684374
+i18n/en/components/header.json,2,google,ur,en,مینو,,Menu,1772684374
+i18n/en/components/header.json,2,google,de,en,Speisekarte,,Menu,1772684375
+i18n/en/components/header.json,2,google,zh,en,菜单,,menu,1772684375
+i18n/en/components/header.json,2,azure,en,es,Menu,,Menú,1772684372
+i18n/en/components/header.json,2,google,en,fr,Menu,,Menu,1772684373
+i18n/en/components/header.json,2,google,en,hi,Menu,,मेनू,1772684373
+i18n/en/components/header.json,2,google,en,ur,Menu,,مینو,1772684374
+i18n/en/components/header.json,2,google,en,zh,Menu,,菜单,1772684375
+i18n/en/components/header.json,3,google,en,de,Search...,,Suchen...,1772684374
+i18n/en/components/header.json,3,azure,es,en,Buscar...,,Search...,1772684373
+i18n/en/components/header.json,3,google,fr,en,Recherche...,,Research...,1772684373
+i18n/en/components/header.json,3,google,hi,en,खोज...,,Search...,1772684374
+i18n/en/components/header.json,3,google,ur,en,تلاش کریں...,,Search...,1772684374
+i18n/en/components/header.json,3,google,de,en,Suchen...,,Seek...,1772684375
+i18n/en/components/header.json,3,google,zh,en,搜索...,,search...,1772684375
+i18n/en/components/header.json,3,azure,en,es,Search...,,Buscar...,1772684372
+i18n/en/components/header.json,3,google,en,fr,Search...,,Recherche...,1772684373
+i18n/en/components/header.json,3,google,en,hi,Search...,,खोज...,1772684373
+i18n/en/components/header.json,3,google,en,ur,Search...,,تلاش کریں...,1772684374
+i18n/en/components/header.json,3,google,en,zh,Search...,,搜索...,1772684375
+i18n/en/components/header.json,4,google,en,de,Notifications,,Benachrichtigungen,1772684374
+i18n/en/components/header.json,4,azure,es,en,Notificaciones,,Notifications,1772684373
+i18n/en/components/header.json,4,google,fr,en,Notifications,,Notifications,1772684373
+i18n/en/components/header.json,4,google,hi,en,सूचनाएं,,Notifications,1772684374
+i18n/en/components/header.json,4,google,ur,en,اطلاعات,,Notifications,1772684374
+i18n/en/components/header.json,4,google,de,en,Benachrichtigungen,,Notifications,1772684375
+i18n/en/components/header.json,4,google,zh,en,通知,,notify,1772684375
+i18n/en/components/header.json,4,azure,en,es,Notifications,,Notificaciones,1772684372
+i18n/en/components/header.json,4,google,en,fr,Notifications,,Notifications,1772684373
+i18n/en/components/header.json,4,google,en,hi,Notifications,,सूचनाएं,1772684373
+i18n/en/components/header.json,4,google,en,ur,Notifications,,اطلاعات,1772684374
+i18n/en/components/header.json,4,google,en,zh,Notifications,,通知,1772684375
+i18n/en/components/header.json,5,google,en,de,My Profile,,Mein Profil,1772684374
+i18n/en/components/header.json,5,azure,es,en,Mi perfil,,My profile,1772684373
+i18n/en/components/header.json,5,google,fr,en,Mon profil,,My profile,1772684373
+i18n/en/components/header.json,5,google,hi,en,मेरी प्रोफाइल,,my profile,1772684374
+i18n/en/components/header.json,5,google,ur,en,میرا پروفائل,,My profile,1772684374
+i18n/en/components/header.json,5,google,de,en,Mein Profil,,My profile,1772684375
+i18n/en/components/header.json,5,google,zh,en,我的个人资料,,My Personal Profile,1772684375
+i18n/en/components/header.json,5,azure,en,es,My Profile,,Mi perfil,1772684372
+i18n/en/components/header.json,5,google,en,fr,My Profile,,Mon profil,1772684373
+i18n/en/components/header.json,5,google,en,hi,My Profile,,मेरी प्रोफाइल,1772684373
+i18n/en/components/header.json,5,google,en,ur,My Profile,,میرا پروفائل,1772684374
+i18n/en/components/header.json,5,google,en,zh,My Profile,,我的个人资料,1772684375
+i18n/en/components/header.json,6,google,en,de,Account Settings,,Kontoeinstellungen,1772684374
+i18n/en/components/header.json,6,azure,es,en,Configuración de la cuenta,,Account Settings,1772684373
+i18n/en/components/header.json,6,google,fr,en,Paramètres du compte,,Account settings,1772684373
+i18n/en/components/header.json,6,google,hi,en,अकाउंट सेटिंग,,account settings,1772684374
+i18n/en/components/header.json,6,google,ur,en,اکاؤنٹ کی ترتیبات,,Account settings,1772684374
+i18n/en/components/header.json,6,google,de,en,Kontoeinstellungen,,Account settings,1772684375
+i18n/en/components/header.json,6,google,zh,en,账户设置,,Account Settings,1772684375
+i18n/en/components/header.json,6,azure,en,es,Account Settings,,Configuración de la cuenta,1772684372
+i18n/en/components/header.json,6,google,en,fr,Account Settings,,Paramètres du compte,1772684373
+i18n/en/components/header.json,6,google,en,hi,Account Settings,,अकाउंट सेटिंग,1772684373
+i18n/en/components/header.json,6,google,en,ur,Account Settings,,اکاؤنٹ کی ترتیبات,1772684374
+i18n/en/components/header.json,6,google,en,zh,Account Settings,,账户设置,1772684375
+i18n/en/components/header.json,7,google,en,de,Preferences,,Präferenzen,1772684374
+i18n/en/components/header.json,7,azure,es,en,Preferencias,,Preferences,1772684373
+i18n/en/components/header.json,7,google,fr,en,Préférences,,Preferences,1772684373
+i18n/en/components/header.json,7,google,hi,en,प्राथमिकताएँ,,preferences,1772684374
+i18n/en/components/header.json,7,google,ur,en,ترجیحات,,Preferences,1772684374
+i18n/en/components/header.json,7,google,de,en,Präferenzen,,Preferences,1772684375
+i18n/en/components/header.json,7,google,zh,en,偏好,,Preference,1772684375
+i18n/en/components/header.json,7,azure,en,es,Preferences,,Preferencias,1772684372
+i18n/en/components/header.json,7,google,en,fr,Preferences,,Préférences,1772684373
+i18n/en/components/header.json,7,google,en,hi,Preferences,,प्राथमिकताएँ,1772684373
+i18n/en/components/header.json,7,google,en,ur,Preferences,,ترجیحات,1772684374
+i18n/en/components/header.json,7,google,en,zh,Preferences,,偏好,1772684375
+i18n/en/components/header.json,8,google,en,de,Help & Support,,Hilfe & Unterstützung,1772684374
+i18n/en/components/header.json,8,azure,es,en,Ayuda y apoyo,,Help and support,1772684373
+i18n/en/components/header.json,8,google,fr,en,Aide et assistance,,Help and assistance,1772684373
+i18n/en/components/header.json,8,google,hi,en,सहायता और समर्थन,,Help and support,1772684374
+i18n/en/components/header.json,8,google,ur,en,مدد اور تعاون,,Help and support,1772684374
+i18n/en/components/header.json,8,google,de,en,Hilfe & Unterstützung,,Help & Support,1772684375
+i18n/en/components/header.json,8,google,zh,en,帮助与支持,,Help and support,1772684375
+i18n/en/components/header.json,8,azure,en,es,Help & Support,,Ayuda y apoyo,1772684372
+i18n/en/components/header.json,8,google,en,fr,Help & Support,,Aide et assistance,1772684373
+i18n/en/components/header.json,8,google,en,hi,Help & Support,,सहायता और समर्थन,1772684373
+i18n/en/components/header.json,8,google,en,ur,Help & Support,,مدد اور تعاون,1772684374
+i18n/en/components/header.json,8,google,en,zh,Help & Support,,帮助与支持,1772684375
+i18n/en/components/header.json,9,google,en,de,Sign Out,,Abmelden,1772684374
+i18n/en/components/header.json,9,azure,es,en,Desconectarse,,Disconnect,1772684373
+i18n/en/components/header.json,9,google,fr,en,Se déconnecter,,Log out,1772684373
+i18n/en/components/header.json,9,google,hi,en,साइन आउट,,Sign Out,1772684374
+i18n/en/components/header.json,9,google,ur,en,سائن آؤٹ کریں۔,,Sign out.,1772684374
+i18n/en/components/header.json,9,google,de,en,Abmelden,,Log out,1772684375
+i18n/en/components/header.json,9,google,zh,en,登出,,Sign out,1772684375
+i18n/en/components/header.json,9,azure,en,es,Sign Out,,Desconectarse,1772684372
+i18n/en/components/header.json,9,google,en,fr,Sign Out,,Se déconnecter,1772684373
+i18n/en/components/header.json,9,google,en,hi,Sign Out,,साइन आउट,1772684373
+i18n/en/components/header.json,9,google,en,ur,Sign Out,,سائن آؤٹ کریں۔,1772684374
+i18n/en/components/header.json,9,google,en,zh,Sign Out,,登出,1772684375
+i18n/en/components/header.json,10,google,en,de,Your Notifications,,Ihre Benachrichtigungen,1772684374
+i18n/en/components/header.json,10,azure,es,en,Tus notificaciones,,Your notifications,1772684373
+i18n/en/components/header.json,10,google,fr,en,Vos notifications,,Your notifications,1772684373
+i18n/en/components/header.json,10,google,hi,en,आपकी सूचनाएं,,Your Notifications,1772684374
+i18n/en/components/header.json,10,google,ur,en,آپ کی اطلاعات,,Your notifications,1772684374
+i18n/en/components/header.json,10,google,de,en,Ihre Benachrichtigungen,,Your notifications,1772684375
+i18n/en/components/header.json,10,google,zh,en,您的通知,,Your notification,1772684375
+i18n/en/components/header.json,10,azure,en,es,Your Notifications,,Tus notificaciones,1772684372
+i18n/en/components/header.json,10,google,en,fr,Your Notifications,,Vos notifications,1772684373
+i18n/en/components/header.json,10,google,en,hi,Your Notifications,,आपकी सूचनाएं,1772684373
+i18n/en/components/header.json,10,google,en,ur,Your Notifications,,آپ کی اطلاعات,1772684374
+i18n/en/components/header.json,10,google,en,zh,Your Notifications,,您的通知,1772684375
+i18n/en/components/header.json,11,google,en,de,No new notifications,,Keine neuen Benachrichtigungen,1772684374
+i18n/en/components/header.json,11,azure,es,en,Sin notificaciones nuevas,,No new notifications,1772684373
+i18n/en/components/header.json,11,google,fr,en,Aucune nouvelle notification,,No new notifications,1772684373
+i18n/en/components/header.json,11,google,hi,en,कोई नए संदेश नहीं,,No new notifications,1772684374
+i18n/en/components/header.json,11,google,ur,en,کوئی نئی اطلاعات نہیں ہیں۔,,There are no new notifications.,1772684374
+i18n/en/components/header.json,11,google,de,en,Keine neuen Benachrichtigungen,,No new notifications,1772684375
+i18n/en/components/header.json,11,google,zh,en,没有新通知,,No new notifications,1772684375
+i18n/en/components/header.json,11,azure,en,es,No new notifications,,Sin notificaciones nuevas,1772684372
+i18n/en/components/header.json,11,google,en,fr,No new notifications,,Aucune nouvelle notification,1772684373
+i18n/en/components/header.json,11,google,en,hi,No new notifications,,कोई नए संदेश नहीं,1772684373
+i18n/en/components/header.json,11,google,en,ur,No new notifications,,کوئی نئی اطلاعات نہیں ہیں۔,1772684374
+i18n/en/components/header.json,11,google,en,zh,No new notifications,,没有新通知,1772684375
+i18n/en/components/header.json,12,google,en,de,Mark all as read,,Alle als gelesen markieren,1772684374
+i18n/en/components/header.json,12,azure,es,en,Marca todo como leído,,Mark everything as read,1772684373
+i18n/en/components/header.json,12,google,fr,en,Marquer tout comme lu,,Mark as read,1772684373
+i18n/en/components/header.json,12,google,hi,en,सभी को पढ़ा हुआ मार्क करें,,Mark all as read,1772684374
+i18n/en/components/header.json,12,google,ur,en,سبھی کو پڑھا ہوا نشان زد کریں۔,,Mark all as read.,1772684374
+i18n/en/components/header.json,12,google,de,en,Alle als gelesen markieren,,Mark all as read,1772684375
+i18n/en/components/header.json,12,google,zh,en,全部标记为已读,,Mark all as read,1772684375
+i18n/en/components/header.json,12,azure,en,es,Mark all as read,,Marca todo como leído,1772684372
+i18n/en/components/header.json,12,google,en,fr,Mark all as read,,Marquer tout comme lu,1772684373
+i18n/en/components/header.json,12,google,en,hi,Mark all as read,,सभी को पढ़ा हुआ मार्क करें,1772684373
+i18n/en/components/header.json,12,google,en,ur,Mark all as read,,سبھی کو پڑھا ہوا نشان زد کریں۔,1772684374
+i18n/en/components/header.json,12,google,en,zh,Mark all as read,,全部标记为已读,1772684375
+i18n/en/components/header.json,13,google,en,de,Notification Settings,,Benachrichtigungseinstellungen,1772684374
+i18n/en/components/header.json,13,azure,es,en,Configuración de notificaciones,,Notification settings,1772684373
+i18n/en/components/header.json,13,google,fr,en,Paramètres de notification,,Notification settings,1772684373
+i18n/en/components/header.json,13,google,hi,en,अधिसूचना सेटिंग्स,,notification settings,1772684374
+i18n/en/components/header.json,13,google,ur,en,اطلاع کی ترتیبات,,Notification settings,1772684374
+i18n/en/components/header.json,13,google,de,en,Benachrichtigungseinstellungen,,Notification settings,1772684375
+i18n/en/components/header.json,13,google,zh,en,通知设置,,Notification settings,1772684375
+i18n/en/components/header.json,13,azure,en,es,Notification Settings,,Configuración de notificaciones,1772684372
+i18n/en/components/header.json,13,google,en,fr,Notification Settings,,Paramètres de notification,1772684373
+i18n/en/components/header.json,13,google,en,hi,Notification Settings,,अधिसूचना सेटिंग्स,1772684373
+i18n/en/components/header.json,13,google,en,ur,Notification Settings,,اطلاع کی ترتیبات,1772684374
+i18n/en/components/header.json,13,google,en,zh,Notification Settings,,通知设置,1772684375
+i18n/en/config.yaml,0,google,en,de,Sample YAML File,,Beispiel-YAML-Datei,1772684378
+i18n/en/config.yaml,0,azure,es,en,Archivo YAML de ejemplo,,Sample YAML file,1772684376
+i18n/en/config.yaml,0,google,fr,en,Exemple de fichier YAML,,Example of a YAML file,1772684377
+i18n/en/config.yaml,0,google,hi,en,नमूना YAML फ़ाइल,,Sample YAML File,1772684377
+i18n/en/config.yaml,0,google,ur,en,نمونہ YAML فائل,,Sample YAML file,1772684378
+i18n/en/config.yaml,0,google,de,en,Beispiel-YAML-Datei,,Example YAML file,1772684378
+i18n/en/config.yaml,0,google,zh,en,示例 YAML 文件,,Example YAML file,1772684379
+i18n/en/config.yaml,0,azure,en,es,Sample YAML File,,Archivo YAML de ejemplo,1772684376
+i18n/en/config.yaml,0,google,en,fr,Sample YAML File,,Exemple de fichier YAML,1772684376
+i18n/en/config.yaml,0,google,en,hi,Sample YAML File,,नमूना YAML फ़ाइल,1772684377
+i18n/en/config.yaml,0,google,en,ur,Sample YAML File,,نمونہ YAML فائل,1772684378
+i18n/en/config.yaml,0,google,en,zh,Sample YAML File,,示例 YAML 文件,1772684379
+i18n/en/config.yaml,1,google,en,de,This is a demonstration of YAML translation,,Dies ist eine Demonstration der YAML-Übersetzung.,1772684378
+i18n/en/config.yaml,1,azure,es,en,Esta es una demostración de la traducción YAML,,This is a demonstration of the YAML translation,1772684376
+i18n/en/config.yaml,1,google,fr,en,Ceci est une démonstration de traduction YAML,,This is a YAML translation demonstration,1772684377
+i18n/en/config.yaml,1,google,hi,en,यह YAML अनुवाद का एक प्रदर्शन है।,,This is a demonstration of YAML translation.,1772684377
+i18n/en/config.yaml,1,google,ur,en,یہ YAML ترجمہ کا ایک مظاہرہ ہے۔,,This is a demonstration of YAML translation.,1772684378
+i18n/en/config.yaml,1,google,de,en,Dies ist eine Demonstration der YAML-Übersetzung.,,This is a demonstration of YAML translation.,1772684378
+i18n/en/config.yaml,1,google,zh,en,这是一个 YAML 翻译演示。,,This is a YAML translation demonstration.,1772684379
+i18n/en/config.yaml,1,azure,en,es,This is a demonstration of YAML translation,,Esta es una demostración de la traducción YAML,1772684376
+i18n/en/config.yaml,1,google,en,fr,This is a demonstration of YAML translation,,Ceci est une démonstration de traduction YAML,1772684376
+i18n/en/config.yaml,1,google,en,hi,This is a demonstration of YAML translation,,यह YAML अनुवाद का एक प्रदर्शन है।,1772684377
+i18n/en/config.yaml,1,google,en,ur,This is a demonstration of YAML translation,,یہ YAML ترجمہ کا ایک مظاہرہ ہے۔,1772684378
+i18n/en/config.yaml,1,google,en,zh,This is a demonstration of YAML translation,,这是一个 YAML 翻译演示。,1772684379
+i18n/en/config.yaml,2,google,en,de,Introduction,,Einführung,1772684378
+i18n/en/config.yaml,2,azure,es,en,Introducción,,Introduction,1772684376
+i18n/en/config.yaml,2,google,fr,en,Introduction,,Introduction,1772684377
+i18n/en/config.yaml,2,google,hi,en,परिचय,,Introduction,1772684377
+i18n/en/config.yaml,2,google,ur,en,تعارف,,Introduction,1772684378
+i18n/en/config.yaml,2,google,de,en,Einführung,,introduction,1772684378
+i18n/en/config.yaml,2,google,zh,en,介绍,,introduce,1772684379
+i18n/en/config.yaml,2,azure,en,es,Introduction,,Introducción,1772684376
+i18n/en/config.yaml,2,google,en,fr,Introduction,,Introduction,1772684376
+i18n/en/config.yaml,2,google,en,hi,Introduction,,परिचय,1772684377
+i18n/en/config.yaml,2,google,en,ur,Introduction,,تعارف,1772684378
+i18n/en/config.yaml,2,google,en,zh,Introduction,,介绍,1772684379
+i18n/en/config.yaml,3,google,en,de,YAML files are commonly used for configuration,,YAML-Dateien werden häufig zur Konfiguration verwendet.,1772684378
+i18n/en/config.yaml,3,azure,es,en,Los archivos YAML se usan comúnmente para la configuración,,YAML files are commonly used for configuration,1772684376
+i18n/en/config.yaml,3,google,fr,en,Les fichiers YAML sont couramment utilisés pour la configuration,,YAML files are commonly used for configuration,1772684377
+i18n/en/config.yaml,3,google,hi,en,YAML फ़ाइलें आमतौर पर कॉन्फ़िगरेशन के लिए उपयोग की जाती हैं।,,YAML files are typically used for configuration.,1772684377
+i18n/en/config.yaml,3,google,ur,en,YAML فائلیں عام طور پر کنفیگریشن کے لیے استعمال ہوتی ہیں۔,,YAML files are commonly used for configuration.,1772684378
+i18n/en/config.yaml,3,google,de,en,YAML-Dateien werden häufig zur Konfiguration verwendet.,,YAML files are frequently used for configuration.,1772684378
+i18n/en/config.yaml,3,google,zh,en,YAML 文件通常用于配置。,,YAML files are typically used for configuration.,1772684379
+i18n/en/config.yaml,3,azure,en,es,YAML files are commonly used for configuration,,Los archivos YAML se usan comúnmente para la configuración,1772684376
+i18n/en/config.yaml,3,google,en,fr,YAML files are commonly used for configuration,,Les fichiers YAML sont couramment utilisés pour la configuration,1772684376
+i18n/en/config.yaml,3,google,en,hi,YAML files are commonly used for configuration,,YAML फ़ाइलें आमतौर पर कॉन्फ़िगरेशन के लिए उपयोग की जाती हैं।,1772684377
+i18n/en/config.yaml,3,google,en,ur,YAML files are commonly used for configuration,,YAML فائلیں عام طور پر کنفیگریشن کے لیے استعمال ہوتی ہیں۔,1772684378
+i18n/en/config.yaml,3,google,en,zh,YAML files are commonly used for configuration,,YAML 文件通常用于配置。,1772684379
+i18n/en/config.yaml,4,google,en,de,Benefits,,Vorteile,1772684378
+i18n/en/config.yaml,4,azure,es,en,Beneficios,,Benefits,1772684376
+i18n/en/config.yaml,4,google,fr,en,Avantages,,Benefits,1772684377
+i18n/en/config.yaml,4,google,hi,en,फ़ायदे,,benefits,1772684377
+i18n/en/config.yaml,4,google,ur,en,فوائد,,Benefits,1772684378
+i18n/en/config.yaml,4,google,de,en,Vorteile,,Advantages,1772684378
+i18n/en/config.yaml,4,google,zh,en,好处,,benefit,1772684379
+i18n/en/config.yaml,4,azure,en,es,Benefits,,Beneficios,1772684376
+i18n/en/config.yaml,4,google,en,fr,Benefits,,Avantages,1772684376
+i18n/en/config.yaml,4,google,en,hi,Benefits,,फ़ायदे,1772684377
+i18n/en/config.yaml,4,google,en,ur,Benefits,,فوائد,1772684378
+i18n/en/config.yaml,4,google,en,zh,Benefits,,好处,1772684379
+i18n/en/config.yaml,5,google,en,de,YAML is human-readable and supports comments,,YAML ist für Menschen lesbar und unterstützt Kommentare.,1772684378
+i18n/en/config.yaml,5,azure,es,en,YAML es legible para humanos y soporta comentarios,,YAML is human-readable and supports comments,1772684376
+i18n/en/config.yaml,5,google,fr,en,YAML est lisible par l'humain et prend en charge les commentaires.,,YAML is human-readable and supports comments.,1772684377
+i18n/en/config.yaml,5,google,hi,en,YAML भाषा मानव-पठनीय है और टिप्पणियों का समर्थन करती है।,,The YAML language is human-readable and supports comments.,1772684377
+i18n/en/config.yaml,5,google,ur,en,YAML انسانی پڑھنے کے قابل ہے اور تبصروں کی حمایت کرتا ہے۔,,YAML is human-readable and supports comments.,1772684378
+i18n/en/config.yaml,5,google,de,en,YAML ist für Menschen lesbar und unterstützt Kommentare.,,YAML is human-readable and supports comments.,1772684378
+i18n/en/config.yaml,5,google,zh,en,YAML 格式易于阅读，并支持注释。,,The YAML format is easy to read and supports comments.,1772684379
+i18n/en/config.yaml,5,azure,en,es,YAML is human-readable and supports comments,,YAML es legible para humanos y soporta comentarios,1772684376
+i18n/en/config.yaml,5,google,en,fr,YAML is human-readable and supports comments,,YAML est lisible par l'humain et prend en charge les commentaires.,1772684376
+i18n/en/config.yaml,5,google,en,hi,YAML is human-readable and supports comments,,YAML भाषा मानव-पठनीय है और टिप्पणियों का समर्थन करती है।,1772684377
+i18n/en/config.yaml,5,google,en,ur,YAML is human-readable and supports comments,,YAML انسانی پڑھنے کے قابل ہے اور تبصروں کی حمایت کرتا ہے۔,1772684378
+i18n/en/config.yaml,5,google,en,zh,YAML is human-readable and supports comments,,YAML 格式易于阅读，并支持注释。,1772684379
+i18n/en/config.yaml,6,google,en,de,Welcome to YAML translation,,Willkommen zur YAML-Übersetzung,1772684378
+i18n/en/config.yaml,6,azure,es,en,Bienvenido a la traducción de YAML,,Welcome to the translation of YAML,1772684376
+i18n/en/config.yaml,6,google,fr,en,Bienvenue dans la traduction YAML,,Welcome to YAML translation,1772684377
+i18n/en/config.yaml,6,google,hi,en,YAML अनुवाद में आपका स्वागत है,,Welcome to YAML Translation,1772684377
+i18n/en/config.yaml,6,google,ur,en,YAML ترجمہ میں خوش آمدید,,Welcome to YAML translation,1772684378
+i18n/en/config.yaml,6,google,de,en,Willkommen zur YAML-Übersetzung,,Welcome to the YAML translation,1772684378
+i18n/en/config.yaml,6,google,zh,en,欢迎使用 YAML 翻译,,Welcome to YAML Translation,1772684379
+i18n/en/config.yaml,6,azure,en,es,Welcome to YAML translation,,Bienvenido a la traducción de YAML,1772684376
+i18n/en/config.yaml,6,google,en,fr,Welcome to YAML translation,,Bienvenue dans la traduction YAML,1772684376
+i18n/en/config.yaml,6,google,en,hi,Welcome to YAML translation,,YAML अनुवाद में आपका स्वागत है,1772684377
+i18n/en/config.yaml,6,google,en,ur,Welcome to YAML translation,,YAML ترجمہ میں خوش آمدید,1772684378
+i18n/en/config.yaml,6,google,en,zh,Welcome to YAML translation,,欢迎使用 YAML 翻译,1772684379
+i18n/en/config.yaml,7,google,en,de,Automatic translation,,Automatische Übersetzung,1772684378
+i18n/en/config.yaml,7,azure,es,en,Traducción automática,,Machine translation,1772684376
+i18n/en/config.yaml,7,google,fr,en,Traduction automatique,,Automatic translation,1772684377
+i18n/en/config.yaml,7,google,hi,en,स्वचालित अनुवाद,,Automatic translation,1772684377
+i18n/en/config.yaml,7,google,ur,en,خودکار ترجمہ,,Automatic translation,1772684378
+i18n/en/config.yaml,7,google,de,en,Automatische Übersetzung,,Automatic translation,1772684378
+i18n/en/config.yaml,7,google,zh,en,自动翻译,,Automatic translation,1772684379
+i18n/en/config.yaml,7,azure,en,es,Automatic translation,,Traducción automática,1772684376
+i18n/en/config.yaml,7,google,en,fr,Automatic translation,,Traduction automatique,1772684376
+i18n/en/config.yaml,7,google,en,hi,Automatic translation,,स्वचालित अनुवाद,1772684377
+i18n/en/config.yaml,7,google,en,ur,Automatic translation,,خودکار ترجمہ,1772684378
+i18n/en/config.yaml,7,google,en,zh,Automatic translation,,自动翻译,1772684379
+i18n/en/config.yaml,8,google,en,de,Context-aware translation,,Kontextsensitive Übersetzung,1772684378
+i18n/en/config.yaml,8,azure,es,en,Traducción consciente del contexto,,Context-aware translation,1772684376
+i18n/en/config.yaml,8,google,fr,en,Traduction contextuelle,,Contextual translation,1772684377
+i18n/en/config.yaml,8,google,hi,en,संदर्भ-जागरूक अनुवाद,,Context-aware translation,1772684377
+i18n/en/config.yaml,8,google,ur,en,سیاق و سباق سے آگاہ ترجمہ,,Context-aware translation,1772684378
+i18n/en/config.yaml,8,google,de,en,Kontextsensitive Übersetzung,,Context-sensitive translation,1772684378
+i18n/en/config.yaml,8,google,zh,en,上下文感知翻译,,Context-aware translation,1772684379
+i18n/en/config.yaml,8,azure,en,es,Context-aware translation,,Traducción consciente del contexto,1772684376
+i18n/en/config.yaml,8,google,en,fr,Context-aware translation,,Traduction contextuelle,1772684376
+i18n/en/config.yaml,8,google,en,hi,Context-aware translation,,संदर्भ-जागरूक अनुवाद,1772684377
+i18n/en/config.yaml,8,google,en,ur,Context-aware translation,,سیاق و سباق سے آگاہ ترجمہ,1772684378
+i18n/en/config.yaml,8,google,en,zh,Context-aware translation,,上下文感知翻译,1772684379
+i18n/en/config.yaml,9,google,en,de,Support for nested structures,,Unterstützung für verschachtelte Strukturen,1772684378
+i18n/en/config.yaml,9,azure,es,en,Soporte para estructuras anidadas,,Support for nested structures,1772684376
+i18n/en/config.yaml,9,google,fr,en,Support pour les structures imbriquées,,Support for nested structures,1772684377
+i18n/en/config.yaml,9,google,hi,en,नेस्टेड संरचनाओं के लिए समर्थन,,Support for nested structures,1772684377
+i18n/en/config.yaml,9,google,ur,en,گھریلو ڈھانچے کے لئے معاونت,,Support for household structures,1772684378
+i18n/en/config.yaml,9,google,de,en,Unterstützung für verschachtelte Strukturen,,Support for nested structures,1772684378
+i18n/en/config.yaml,9,google,zh,en,支持嵌套结构,,Supports nested structures,1772684379
+i18n/en/config.yaml,9,azure,en,es,Support for nested structures,,Soporte para estructuras anidadas,1772684376
+i18n/en/config.yaml,9,google,en,fr,Support for nested structures,,Support pour les structures imbriquées,1772684376
+i18n/en/config.yaml,9,google,en,hi,Support for nested structures,,नेस्टेड संरचनाओं के लिए समर्थन,1772684377
+i18n/en/config.yaml,9,google,en,ur,Support for nested structures,,گھریلو ڈھانچے کے لئے معاونت,1772684378
+i18n/en/config.yaml,9,google,en,zh,Support for nested structures,,支持嵌套结构,1772684379
+i18n/en/document.md,0,google,en,de,Sample Markdown File,,Beispiel-Markdown-Datei,1772684383
+i18n/en/document.md,0,azure,es,en,Archivo de Markdown de Ejemplo,,Example Markdown File,1772684381
+i18n/en/document.md,0,google,fr,en,Exemple de fichier Markdown,,Example Markdown file,1772684381
+i18n/en/document.md,0,google,hi,en,नमूना मार्कडाउन फ़ाइल,,Sample Markdown File,1772684382
+i18n/en/document.md,0,google,ur,en,نمونہ مارک ڈاؤن فائل,,Sample Markdown file,1772684383
+i18n/en/document.md,0,google,de,en,Beispiel-Markdown-Datei,,Example Markdown file,1772684383
+i18n/en/document.md,0,google,zh,en,Markdown 示例文件,,Markdown sample files,1772684384
+i18n/en/document.md,0,azure,en,es,Sample Markdown File,,Archivo de Markdown de Ejemplo,1772684380
+i18n/en/document.md,0,google,en,fr,Sample Markdown File,,Exemple de fichier Markdown,1772684381
+i18n/en/document.md,0,google,en,hi,Sample Markdown File,,नमूना मार्कडाउन फ़ाइल,1772684382
+i18n/en/document.md,0,google,en,ur,Sample Markdown File,,نمونہ مارک ڈاؤن فائل,1772684382
+i18n/en/document.md,0,google,en,zh,Sample Markdown File,,Markdown 示例文件,1772684384
+i18n/en/document.md,1,google,en,de,Introduction,,Einführung,1772684383
+i18n/en/document.md,1,azure,es,en,Introducción,,Introduction,1772684381
+i18n/en/document.md,1,google,fr,en,Introduction,,Introduction,1772684381
+i18n/en/document.md,1,google,hi,en,परिचय,,Introduction,1772684382
+i18n/en/document.md,1,google,ur,en,تعارف,,Introduction,1772684383
+i18n/en/document.md,1,google,de,en,Einführung,,introduction,1772684383
+i18n/en/document.md,1,google,zh,en,介绍,,introduce,1772684384
+i18n/en/document.md,1,azure,en,es,Introduction,,Introducción,1772684380
+i18n/en/document.md,1,google,en,fr,Introduction,,Introduction,1772684381
+i18n/en/document.md,1,google,en,hi,Introduction,,परिचय,1772684382
+i18n/en/document.md,1,google,en,ur,Introduction,,تعارف,1772684382
+i18n/en/document.md,1,google,en,zh,Introduction,,介绍,1772684384
+i18n/en/document.md,2,google,en,de,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"Dies ist eine Demonstration der Markdown-Übersetzung. Die Erweiterung kann Überschriften, Absätze und andere Markdown-Elemente übersetzen.",1772684383
+i18n/en/document.md,2,azure,es,en,"Esto es una demostración de la traducción de Markdown. La extensión puede traducir encabezados, párrafos y otros elementos de Markdown.",,"This is a demonstration of Markdown's translation. The extension can translate headings, paragraphs, and other Markdown elements.",1772684381
+i18n/en/document.md,2,google,fr,en,"Ceci est une démonstration de la traduction Markdown. L'extension peut traduire les titres, les paragraphes et d'autres éléments Markdown.",,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",1772684381
+i18n/en/document.md,2,google,hi,en,"यह मार्कडाउन अनुवाद का एक उदाहरण है। यह एक्सटेंशन शीर्षकों, पैराग्राफों और अन्य मार्कडाउन तत्वों का अनुवाद कर सकता है।",,"This is an example of Markdown translation. This extension can translate headings, paragraphs, and other Markdown elements.",1772684382
+i18n/en/document.md,2,google,ur,en,یہ مارک ڈاؤن ترجمہ کا ایک مظاہرہ ہے۔ ایکسٹینشن عنوانات، پیراگراف اور دیگر مارک ڈاؤن عناصر کا ترجمہ کر سکتی ہے۔,,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",1772684383
+i18n/en/document.md,2,google,de,en,"Dies ist eine Demonstration der Markdown-Übersetzung. Die Erweiterung kann Überschriften, Absätze und andere Markdown-Elemente übersetzen.",,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",1772684383
+i18n/en/document.md,2,google,zh,en,这是一个 Markdown 翻译演示。该扩展程序可以翻译标题、段落和其他 Markdown 元素。,,"This is a Markdown translation demo. This extension can translate headings, paragraphs, and other Markdown elements.",1772684384
+i18n/en/document.md,2,azure,en,es,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"Esto es una demostración de la traducción de Markdown. La extensión puede traducir encabezados, párrafos y otros elementos de Markdown.",1772684380
+i18n/en/document.md,2,google,en,fr,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"Ceci est une démonstration de la traduction Markdown. L'extension peut traduire les titres, les paragraphes et d'autres éléments Markdown.",1772684381
+i18n/en/document.md,2,google,en,hi,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"यह मार्कडाउन अनुवाद का एक उदाहरण है। यह एक्सटेंशन शीर्षकों, पैराग्राफों और अन्य मार्कडाउन तत्वों का अनुवाद कर सकता है।",1772684382
+i18n/en/document.md,2,google,en,ur,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,یہ مارک ڈاؤن ترجمہ کا ایک مظاہرہ ہے۔ ایکسٹینشن عنوانات، پیراگراف اور دیگر مارک ڈاؤن عناصر کا ترجمہ کر سکتی ہے۔,1772684382
+i18n/en/document.md,2,google,en,zh,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,这是一个 Markdown 翻译演示。该扩展程序可以翻译标题、段落和其他 Markdown 元素。,1772684384
+i18n/en/document.md,3,google,en,de,Features,,Merkmale,1772684383
+i18n/en/document.md,3,azure,es,en,Características,,Features,1772684381
+i18n/en/document.md,3,google,fr,en,Caractéristiques,,Features,1772684381
+i18n/en/document.md,3,google,hi,en,विशेषताएँ,,features,1772684382
+i18n/en/document.md,3,google,ur,en,خصوصیات,,Features,1772684383
+i18n/en/document.md,3,google,de,en,Merkmale,,Features,1772684383
+i18n/en/document.md,3,google,zh,en,特征,,feature,1772684384
+i18n/en/document.md,3,azure,en,es,Features,,Características,1772684380
+i18n/en/document.md,3,google,en,fr,Features,,Caractéristiques,1772684381
+i18n/en/document.md,3,google,en,hi,Features,,विशेषताएँ,1772684382
+i18n/en/document.md,3,google,en,ur,Features,,خصوصیات,1772684382
+i18n/en/document.md,3,google,en,zh,Features,,特征,1772684384
+i18n/en/document.md,4,google,en,de,Translates regular text in Markdown,,Übersetzt normalen Text in Markdown,1772684383
+i18n/en/document.md,4,azure,es,en,Traduce texto normal en Markdown,,Translate regular text in Markdown,1772684381
+i18n/en/document.md,4,google,fr,en,Traduit du texte normal en Markdown,,Translated from normal text into Markdown,1772684381
+i18n/en/document.md,4,google,hi,en,मार्कडाउन में सामान्य टेक्स्ट का अनुवाद करता है,,Translates normal text into Markdown,1772684382
+i18n/en/document.md,4,google,ur,en,مارک ڈاؤن میں باقاعدہ متن کا ترجمہ کرتا ہے۔,,Translates regular text into Markdown.,1772684383
+i18n/en/document.md,4,google,de,en,Übersetzt normalen Text in Markdown,,Translates normal text to Markdown,1772684383
+i18n/en/document.md,4,google,zh,en,将普通文本翻译成 Markdown 格式,,Translate plain text into Markdown format,1772684384
+i18n/en/document.md,4,azure,en,es,Translates regular text in Markdown,,Traduce texto normal en Markdown,1772684380
+i18n/en/document.md,4,google,en,fr,Translates regular text in Markdown,,Traduit du texte normal en Markdown,1772684381
+i18n/en/document.md,4,google,en,hi,Translates regular text in Markdown,,मार्कडाउन में सामान्य टेक्स्ट का अनुवाद करता है,1772684382
+i18n/en/document.md,4,google,en,ur,Translates regular text in Markdown,,مارک ڈاؤن میں باقاعدہ متن کا ترجمہ کرتا ہے۔,1772684382
+i18n/en/document.md,4,google,en,zh,Translates regular text in Markdown,,将普通文本翻译成 Markdown 格式,1772684384
+i18n/en/document.md,5,google,en,de,Preserves Markdown formatting,,Behält die Markdown-Formatierung bei,1772684383
+i18n/en/document.md,5,azure,es,en,Preserva el formato Markdown,,Preserve Markdown formatting,1772684381
+i18n/en/document.md,5,google,fr,en,Préserve la mise en forme Markdown,,Preserves Markdown formatting,1772684381
+i18n/en/document.md,5,google,hi,en,मार्कडाउन फॉर्मेटिंग को सुरक्षित रखता है,,Preserves Markdown formatting,1772684382
+i18n/en/document.md,5,google,ur,en,مارک ڈاؤن فارمیٹنگ کو محفوظ رکھتا ہے۔,,Markdown preserves formatting.,1772684383
+i18n/en/document.md,5,google,de,en,Behält die Markdown-Formatierung bei,,Retains Markdown formatting,1772684383
+i18n/en/document.md,5,google,zh,en,保留 Markdown 格式,,Preserve Markdown formatting,1772684384
+i18n/en/document.md,5,azure,en,es,Preserves Markdown formatting,,Preserva el formato Markdown,1772684380
+i18n/en/document.md,5,google,en,fr,Preserves Markdown formatting,,Préserve la mise en forme Markdown,1772684381
+i18n/en/document.md,5,google,en,hi,Preserves Markdown formatting,,मार्कडाउन फॉर्मेटिंग को सुरक्षित रखता है,1772684382
+i18n/en/document.md,5,google,en,ur,Preserves Markdown formatting,,مارک ڈاؤن فارمیٹنگ کو محفوظ رکھتا ہے۔,1772684382
+i18n/en/document.md,5,google,en,zh,Preserves Markdown formatting,,保留 Markdown 格式,1772684384
+i18n/en/document.md,6,google,en,de,Handles lists and nested elements,,Verarbeitet Listen und verschachtelte Elemente,1772684383
+i18n/en/document.md,6,azure,es,en,Maneja listas y elementos anidados,,Handle lists and nested items,1772684381
+i18n/en/document.md,6,google,fr,en,Gère les listes et les éléments imbriqués,,Handles lists and nested elements,1772684381
+i18n/en/document.md,6,google,hi,en,सूचियों और नेस्टेड तत्वों को संभालता है,,Handles lists and nested elements,1772684382
+i18n/en/document.md,6,google,ur,en,فہرستوں اور گھریلو عناصر کو ہینڈل کرتا ہے۔,,Handles lists and nested elements.,1772684383
+i18n/en/document.md,6,google,de,en,Verarbeitet Listen und verschachtelte Elemente,,Processes lists and nested elements,1772684383
+i18n/en/document.md,6,google,zh,en,处理列表和嵌套元素,,Handling lists and nested elements,1772684384
+i18n/en/document.md,6,azure,en,es,Handles lists and nested elements,,Maneja listas y elementos anidados,1772684380
+i18n/en/document.md,6,google,en,fr,Handles lists and nested elements,,Gère les listes et les éléments imbriqués,1772684381
+i18n/en/document.md,6,google,en,hi,Handles lists and nested elements,,सूचियों और नेस्टेड तत्वों को संभालता है,1772684382
+i18n/en/document.md,6,google,en,ur,Handles lists and nested elements,,فہرستوں اور گھریلو عناصر کو ہینڈل کرتا ہے۔,1772684382
+i18n/en/document.md,6,google,en,zh,Handles lists and nested elements,,处理列表和嵌套元素,1772684384
+i18n/en/document.md,7,google,en,de,Code Examples,,Codebeispiele,1772684383
+i18n/en/document.md,7,azure,es,en,Ejemplos de código,,Code Examples,1772684381
+i18n/en/document.md,7,google,fr,en,Exemples de code,,Code examples,1772684381
+i18n/en/document.md,7,google,hi,en,कोड उदाहरण,,code example,1772684382
+i18n/en/document.md,7,google,ur,en,کوڈ کی مثالیں۔,,Code examples,1772684383
+i18n/en/document.md,7,google,de,en,Codebeispiele,,Code examples,1772684383
+i18n/en/document.md,7,google,zh,en,代码示例,,Code Example,1772684384
+i18n/en/document.md,7,azure,en,es,Code Examples,,Ejemplos de código,1772684380
+i18n/en/document.md,7,google,en,fr,Code Examples,,Exemples de code,1772684381
+i18n/en/document.md,7,google,en,hi,Code Examples,,कोड उदाहरण,1772684382
+i18n/en/document.md,7,google,en,ur,Code Examples,,کوڈ کی مثالیں۔,1772684382
+i18n/en/document.md,7,google,en,zh,Code Examples,,代码示例,1772684384
+i18n/en/document.md,8,google,en,de,This is a blockquote that will be translated.,,"Dies ist ein Blockzitat, das übersetzt wird.",1772684383
+i18n/en/document.md,8,azure,es,en,Esta es una cita bloqueada que se traducirá.,,This is a blocked appointment that will be translated.,1772684381
+i18n/en/document.md,8,google,fr,en,Ceci est une citation qui sera traduite.,,This is a quote that will be translated.,1772684381
+i18n/en/document.md,8,google,hi,en,यह एक ब्लॉक कोट है जिसका अनुवाद किया जाएगा।,,This is a block quote that will be translated.,1772684382
+i18n/en/document.md,8,google,ur,en,یہ ایک بلاک کوٹ ہے جس کا ترجمہ کیا جائے گا۔,,This is a block quote that will be translated.,1772684383
+i18n/en/document.md,8,google,de,en,"Dies ist ein Blockzitat, das übersetzt wird.",,This is a block quote that is being translated.,1772684383
+i18n/en/document.md,8,google,zh,en,这是一段需要翻译的引用。,,This is a quote that needs to be translated.,1772684384
+i18n/en/document.md,8,azure,en,es,This is a blockquote that will be translated.,,Esta es una cita bloqueada que se traducirá.,1772684380
+i18n/en/document.md,8,google,en,fr,This is a blockquote that will be translated.,,Ceci est une citation qui sera traduite.,1772684381
+i18n/en/document.md,8,google,en,hi,This is a blockquote that will be translated.,,यह एक ब्लॉक कोट है जिसका अनुवाद किया जाएगा।,1772684382
+i18n/en/document.md,8,google,en,ur,This is a blockquote that will be translated.,,یہ ایک بلاک کوٹ ہے جس کا ترجمہ کیا جائے گا۔,1772684382
+i18n/en/document.md,8,google,en,zh,This is a blockquote that will be translated.,,这是一段需要翻译的引用。,1772684384
+i18n/en/document.md,9,google,en,de,Tables,,Tabellen,1772684383
+i18n/en/document.md,9,azure,es,en,Tablas,,Tables,1772684381
+i18n/en/document.md,9,google,fr,en,Tables,,Tables,1772684381
+i18n/en/document.md,9,google,hi,en,टेबल,,Table,1772684382
+i18n/en/document.md,9,google,ur,en,میزیں,,Tables,1772684383
+i18n/en/document.md,9,google,de,en,Tabellen,,tables,1772684383
+i18n/en/document.md,9,google,zh,en,表格,,sheet,1772684384
+i18n/en/document.md,9,azure,en,es,Tables,,Tablas,1772684380
+i18n/en/document.md,9,google,en,fr,Tables,,Tables,1772684381
+i18n/en/document.md,9,google,en,hi,Tables,,टेबल,1772684382
+i18n/en/document.md,9,google,en,ur,Tables,,میزیں,1772684382
+i18n/en/document.md,9,google,en,zh,Tables,,表格,1772684384
+i18n/en/document.md,10,google,en,de,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| Überschrift 1 | Überschrift 2 |
+
+----------|----------|
+
+Wert 1 | Wert 2 |
+
+Wert 3 | Wert 4 |",1772684383
+i18n/en/document.md,10,azure,es,en,"| Cabecera 1 | Cabecera 2 |
+|----------|----------|
+| Valor 1 | Valor 2 |
+| Valor 3 | Valor 4 |",,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1 | Value 2 |
+| Value 3 | Value 4 |",1772684381
+i18n/en/document.md,10,google,fr,en,"| En-tête 1 | En-tête 2 |
+
+|----------|----------|
+
+| Valeur 1 | Valeur 2 |
+
+| Valeur 3 | Valeur 4 |",,"| Header 1 | Header 2 |
+
+|----------|----------|
+
+| Value 1 | Value 2 |
+
+| Value 3 | Value 4 |",1772684381
+i18n/en/document.md,10,google,hi,en,"| शीर्षक 1 | शीर्षक 2 |
+
+|----------|----------|
+
+| मान 1 | मान 2 |
+
+| मान 3 | मान 4 |",,"| Heading 1 | Heading 2 |
+
+|----------|----------|
+
+| Value 1 | Value 2 |
+
+| Value 3 | Value 4 |",1772684382
+i18n/en/document.md,10,google,ur,en,"| ہیڈر 1 | ہیڈر 2 |
+|------------|------------|
+| قدر 1 | قدر 2 |
+| قدر 3 | قدر 4 |",,"| Header 1 | Header 2 |
+|------------|------------|
+| Value 1 | Value 2 |
+| Value 3 | Value 4 |",1772684383
+i18n/en/document.md,10,google,de,en,"| Überschrift 1 | Überschrift 2 |
+
+----------|----------|
+
+Wert 1 | Wert 2 |
+
+Wert 3 | Wert 4 |",,"| Heading 1 | Heading 2 |
+
+--------|----------|
+
+Value 1 | Value 2 |
+
+Value 3 | Value 4 |",1772684383
+i18n/en/document.md,10,google,zh,en,"| 标题 1 | 标题 2 |
+
+|----------|----------|
+
+| 值 1 | 值 2 |
+
+| 值 3 | 值 4 |",,"| Title 1 | Title 2 |
+
+|----------|----------|
+
+| Value 1 | Value 2 |
+
+| Value 3 | Value 4 |",1772684384
+i18n/en/document.md,10,azure,en,es,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| Cabecera 1 | Cabecera 2 |
+|----------|----------|
+| Valor 1 | Valor 2 |
+| Valor 3 | Valor 4 |",1772684380
+i18n/en/document.md,10,google,en,fr,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| En-tête 1 | En-tête 2 |
+
+|----------|----------|
+
+| Valeur 1 | Valeur 2 |
+
+| Valeur 3 | Valeur 4 |",1772684381
+i18n/en/document.md,10,google,en,hi,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| शीर्षक 1 | शीर्षक 2 |
+
+|----------|----------|
+
+| मान 1 | मान 2 |
+
+| मान 3 | मान 4 |",1772684382
+i18n/en/document.md,10,google,en,ur,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| ہیڈر 1 | ہیڈر 2 |
+|------------|------------|
+| قدر 1 | قدر 2 |
+| قدر 3 | قدر 4 |",1772684382
+i18n/en/document.md,10,google,en,zh,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| 标题 1 | 标题 2 |
+
+|----------|----------|
+
+| 值 1 | 值 2 |
+
+| 值 3 | 值 4 |",1772684384
+i18n/en/document.md,11,google,en,de,Links,,Links,1772684383
+i18n/en/document.md,11,azure,es,en,Enlaces,,Links,1772684381
+i18n/en/document.md,11,google,fr,en,Links,,Links,1772684381
+i18n/en/document.md,11,google,hi,en,लिंक,,Link,1772684382
+i18n/en/document.md,11,google,ur,en,لنکس,,Links,1772684383
+i18n/en/document.md,11,google,de,en,Links,,Left,1772684383
+i18n/en/document.md,11,google,zh,en,链接,,Link,1772684384
+i18n/en/document.md,11,azure,en,es,Links,,Enlaces,1772684380
+i18n/en/document.md,11,google,en,fr,Links,,Links,1772684381
+i18n/en/document.md,11,google,en,hi,Links,,लिंक,1772684382
+i18n/en/document.md,11,google,en,ur,Links,,لنکس,1772684382
+i18n/en/document.md,11,google,en,zh,Links,,链接,1772684384
+i18n/en/document.md,12,google,en,de,Website link,,Website-Link,1772684383
+i18n/en/document.md,12,azure,es,en,Enlace a la página web,,Link to the website,1772684381
+i18n/en/document.md,12,google,fr,en,Lien vers le site Web,,Link to the website,1772684381
+i18n/en/document.md,12,google,hi,en,वेबसाइट लिंक,,Website Link,1772684382
+i18n/en/document.md,12,google,ur,en,ویب سائٹ کا لنک,,Website link,1772684383
+i18n/en/document.md,12,google,de,en,Website-Link,,Website link,1772684383
+i18n/en/document.md,12,google,zh,en,网站链接,,Website link,1772684384
+i18n/en/document.md,12,azure,en,es,Website link,,Enlace a la página web,1772684380
+i18n/en/document.md,12,google,en,fr,Website link,,Lien vers le site Web,1772684381
+i18n/en/document.md,12,google,en,hi,Website link,,वेबसाइट लिंक,1772684382
+i18n/en/document.md,12,google,en,ur,Website link,,ویب سائٹ کا لنک,1772684382
+i18n/en/document.md,12,google,en,zh,Website link,,网站链接,1772684384
+i18n/en/document.md,13,google,en,de,Visit our website,,Besuchen Sie unsere Website,1772684383
+i18n/en/document.md,13,azure,es,en,Visita nuestra página web,,Visit Website,1772684381
+i18n/en/document.md,13,google,fr,en,Visitez notre site web,,Visit our website,1772684381
+i18n/en/document.md,13,google,hi,en,हमारी वेबसाइट पर पधारें,,visit our website,1772684382
+i18n/en/document.md,13,google,ur,en,ہماری ویب سائٹ ملاحظہ کریں۔,,Visit our website.,1772684383
+i18n/en/document.md,13,google,de,en,Besuchen Sie unsere Website,,Visit our website,1772684383
+i18n/en/document.md,13,google,zh,en,访问我们的网站,,Visit our website,1772684384
+i18n/en/document.md,13,azure,en,es,Visit our website,,Visita nuestra página web,1772684380
+i18n/en/document.md,13,google,en,fr,Visit our website,,Visitez notre site web,1772684381
+i18n/en/document.md,13,google,en,hi,Visit our website,,हमारी वेबसाइट पर पधारें,1772684382
+i18n/en/document.md,13,google,en,ur,Visit our website,,ہماری ویب سائٹ ملاحظہ کریں۔,1772684382
+i18n/en/document.md,13,google,en,zh,Visit our website,,访问我们的网站,1772684384
+i18n/en/document.md,14,google,en,de,Image title,,Bildtitel,1772684383
+i18n/en/document.md,14,azure,es,en,Título de la imagen,,Image Title,1772684381
+i18n/en/document.md,14,google,fr,en,Titre de l'image,,Image title,1772684381
+i18n/en/document.md,14,google,hi,en,छवि शीर्षक,,Image caption,1772684382
+i18n/en/document.md,14,google,ur,en,تصویر کا عنوان,,Image caption,1772684383
+i18n/en/document.md,14,google,de,en,Bildtitel,,Image title,1772684383
+i18n/en/document.md,14,google,zh,en,图片标题,,Image title,1772684384
+i18n/en/document.md,14,azure,en,es,Image title,,Título de la imagen,1772684380
+i18n/en/document.md,14,google,en,fr,Image title,,Titre de l'image,1772684381
+i18n/en/document.md,14,google,en,hi,Image title,,छवि शीर्षक,1772684382
+i18n/en/document.md,14,google,en,ur,Image title,,تصویر کا عنوان,1772684382
+i18n/en/document.md,14,google,en,zh,Image title,,图片标题,1772684384
+i18n/en/document.md,15,google,en,de,Image description,,Bildbeschreibung,1772684383
+i18n/en/document.md,15,azure,es,en,Descripción de la imagen,,Image description,1772684381
+i18n/en/document.md,15,google,fr,en,Description de l'image,,Image description,1772684381
+i18n/en/document.md,15,google,hi,en,छवि विवरण,,Image description,1772684382
+i18n/en/document.md,15,google,ur,en,تصویر کی تفصیل,,Image description,1772684383
+i18n/en/document.md,15,google,de,en,Bildbeschreibung,,Image description,1772684383
+i18n/en/document.md,15,google,zh,en,图片描述,,Image description,1772684384
+i18n/en/document.md,15,azure,en,es,Image description,,Descripción de la imagen,1772684380
+i18n/en/document.md,15,google,en,fr,Image description,,Description de l'image,1772684381
+i18n/en/document.md,15,google,en,hi,Image description,,छवि विवरण,1772684382
+i18n/en/document.md,15,google,en,ur,Image description,,تصویر کی تفصیل,1772684382
+i18n/en/document.md,15,google,en,zh,Image description,,图片描述,1772684384
+i18n/en/messages.json,0,google,en,de,"Hello, World! Updated Again and Again",,Hallo Welt! Immer wieder aktualisiert,1772684387
+i18n/en/messages.json,0,azure,es,en,"¡Hola, Mundo! Actualizado una y otra vez",,"Hello, World! Updated over and over again",1772684385
+i18n/en/messages.json,0,google,fr,en,Bonjour le monde ! Mise à jour régulière,,Hello world! Regular updates,1772684386
+i18n/en/messages.json,0,google,hi,en,हैलो वर्ल्ड! बार-बार अपडेट किया गया,,Hello World! Updated frequently,1772684386
+i18n/en/messages.json,0,google,ur,en,ہیلو، دنیا! بار بار اپ ڈیٹ کیا گیا۔,,"Hello, world! Updated frequently.",1772684387
+i18n/en/messages.json,0,google,de,en,Hallo Welt! Immer wieder aktualisiert,,Hello world! Updated regularly,1772684387
+i18n/en/messages.json,0,google,zh,en,你好，世界！不断更新,,"Hello, world! (Continuously updating)",1772684388
+i18n/en/messages.json,0,azure,en,es,"Hello, World! Updated Again and Again",,"¡Hola, Mundo! Actualizado una y otra vez",1772684385
+i18n/en/messages.json,0,google,en,fr,"Hello, World! Updated Again and Again",,Bonjour le monde ! Mise à jour régulière,1772684385
+i18n/en/messages.json,0,google,en,hi,"Hello, World! Updated Again and Again",,हैलो वर्ल्ड! बार-बार अपडेट किया गया,1772684386
+i18n/en/messages.json,0,google,en,ur,"Hello, World! Updated Again and Again",,ہیلو، دنیا! بار بار اپ ڈیٹ کیا گیا۔,1772684386
+i18n/en/messages.json,0,google,en,zh,"Hello, World! Updated Again and Again",,你好，世界！不断更新,1772684387
+i18n/en/messages.json,1,google,en,de,Welcome to the test project,,Willkommen zum Testprojekt,1772684387
+i18n/en/messages.json,1,azure,es,en,Bienvenido al proyecto de prueba,,Welcome to the test project,1772684385
+i18n/en/messages.json,1,google,fr,en,Bienvenue dans le projet test,,Welcome to the test project,1772684386
+i18n/en/messages.json,1,google,hi,en,टेस्ट प्रोजेक्ट में आपका स्वागत है,,Welcome to the test project,1772684386
+i18n/en/messages.json,1,google,ur,en,ٹیسٹ پروجیکٹ میں خوش آمدید,,Welcome to the test project.,1772684387
+i18n/en/messages.json,1,google,de,en,Willkommen zum Testprojekt,,Welcome to the test project,1772684387
+i18n/en/messages.json,1,google,zh,en,欢迎来到测试项目,,Welcome to the test project,1772684388
+i18n/en/messages.json,1,azure,en,es,Welcome to the test project,,Bienvenido al proyecto de prueba,1772684385
+i18n/en/messages.json,1,google,en,fr,Welcome to the test project,,Bienvenue dans le projet test,1772684385
+i18n/en/messages.json,1,google,en,hi,Welcome to the test project,,टेस्ट प्रोजेक्ट में आपका स्वागत है,1772684386
+i18n/en/messages.json,1,google,en,ur,Welcome to the test project,,ٹیسٹ پروجیکٹ میں خوش آمدید,1772684386
+i18n/en/messages.json,1,google,en,zh,Welcome to the test project,,欢迎来到测试项目,1772684387
+i18n/en/messages.json,2,google,en,de,This is a demonstration of JSON translation,,Dies ist eine Demonstration der JSON-Übersetzung.,1772684387
+i18n/en/messages.json,2,azure,es,en,Esto es una demostración de la traducción JSON,,This is a demonstration of JSON translation,1772684385
+i18n/en/messages.json,2,google,fr,en,Ceci est une démonstration de la traduction JSON,,This is a demonstration of JSON translation,1772684386
+i18n/en/messages.json,2,google,hi,en,यह JSON अनुवाद का एक प्रदर्शन है।,,This is a demonstration of JSON translation.,1772684386
+i18n/en/messages.json,2,google,ur,en,یہ JSON ترجمہ کا ایک مظاہرہ ہے۔,,This is a demonstration of JSON translation.,1772684387
+i18n/en/messages.json,2,google,de,en,Dies ist eine Demonstration der JSON-Übersetzung.,,This is a demonstration of JSON translation.,1772684387
+i18n/en/messages.json,2,google,zh,en,这是一个 JSON 翻译演示,,This is a JSON translation demonstration.,1772684388
+i18n/en/messages.json,2,azure,en,es,This is a demonstration of JSON translation,,Esto es una demostración de la traducción JSON,1772684385
+i18n/en/messages.json,2,google,en,fr,This is a demonstration of JSON translation,,Ceci est une démonstration de la traduction JSON,1772684385
+i18n/en/messages.json,2,google,en,hi,This is a demonstration of JSON translation,,यह JSON अनुवाद का एक प्रदर्शन है।,1772684386
+i18n/en/messages.json,2,google,en,ur,This is a demonstration of JSON translation,,یہ JSON ترجمہ کا ایک مظاہرہ ہے۔,1772684386
+i18n/en/messages.json,2,google,en,zh,This is a demonstration of JSON translation,,这是一个 JSON 翻译演示,1772684387
+i18n/en/messages.json,3,google,en,de,Let's get started with translations,,Fangen wir mit den Übersetzungen an.,1772684387
+i18n/en/messages.json,3,azure,es,en,Empecemos con las traducciones,,Let's start with translations,1772684385
+i18n/en/messages.json,3,google,fr,en,Commençons par les traductions,,Let's start with the translations,1772684386
+i18n/en/messages.json,3,google,hi,en,चलिए अनुवाद शुरू करते हैं,,Let's start the translation,1772684386
+i18n/en/messages.json,3,google,ur,en,آئیے ترجمے کے ساتھ شروع کرتے ہیں۔,,Let's start with the translation.,1772684387
+i18n/en/messages.json,3,google,de,en,Fangen wir mit den Übersetzungen an.,,Let's start with the translations.,1772684387
+i18n/en/messages.json,3,google,zh,en,让我们开始翻译吧,,Let's begin translating.,1772684388
+i18n/en/messages.json,3,azure,en,es,Let's get started with translations,,Empecemos con las traducciones,1772684385
+i18n/en/messages.json,3,google,en,fr,Let's get started with translations,,Commençons par les traductions,1772684385
+i18n/en/messages.json,3,google,en,hi,Let's get started with translations,,चलिए अनुवाद शुरू करते हैं,1772684386
+i18n/en/messages.json,3,google,en,ur,Let's get started with translations,,آئیے ترجمے کے ساتھ شروع کرتے ہیں۔,1772684386
+i18n/en/messages.json,3,google,en,zh,Let's get started with translations,,让我们开始翻译吧,1772684387
+i18n/en/messages.json,4,google,en,de,OK,,OK,1772684387
+i18n/en/messages.json,4,azure,es,en,Vale,,Okay,1772684385
+i18n/en/messages.json,4,google,fr,en,D'ACCORD,,ALL RIGHT,1772684386
+i18n/en/messages.json,4,google,hi,en,ठीक है,,Ok,1772684386
+i18n/en/messages.json,4,google,ur,en,ٹھیک ہے,,Okay.,1772684387
+i18n/en/messages.json,4,google,de,en,OK,,OK,1772684387
+i18n/en/messages.json,4,google,zh,en,好的,,OK,1772684388
+i18n/en/messages.json,4,azure,en,es,OK,,Vale,1772684385
+i18n/en/messages.json,4,google,en,fr,OK,,D'ACCORD,1772684385
+i18n/en/messages.json,4,google,en,hi,OK,,ठीक है,1772684386
+i18n/en/messages.json,4,google,en,ur,OK,,ٹھیک ہے,1772684386
+i18n/en/messages.json,4,google,en,zh,OK,,好的,1772684387
+i18n/en/messages.json,5,google,en,de,Cancel,,Stornieren,1772684387
+i18n/en/messages.json,5,azure,es,en,Cancelar,,Cancel,1772684385
+i18n/en/messages.json,5,google,fr,en,Annuler,,Cancel,1772684386
+i18n/en/messages.json,5,google,hi,en,रद्द करना,,Cancel,1772684386
+i18n/en/messages.json,5,google,ur,en,منسوخ کریں۔,,Cancel.,1772684387
+i18n/en/messages.json,5,google,de,en,Stornieren,,Cancel,1772684387
+i18n/en/messages.json,5,google,zh,en,取消,,Cancel,1772684388
+i18n/en/messages.json,5,azure,en,es,Cancel,,Cancelar,1772684385
+i18n/en/messages.json,5,google,en,fr,Cancel,,Annuler,1772684385
+i18n/en/messages.json,5,google,en,hi,Cancel,,रद्द करना,1772684386
+i18n/en/messages.json,5,google,en,ur,Cancel,,منسوخ کریں۔,1772684386
+i18n/en/messages.json,5,google,en,zh,Cancel,,取消,1772684387
+i18n/en/messages.json,6,google,en,de,Save,,Speichern,1772684387
+i18n/en/messages.json,6,azure,es,en,Salvar,,Save,1772684385
+i18n/en/messages.json,6,google,fr,en,Sauvegarder,,To safeguard,1772684386
+i18n/en/messages.json,6,google,hi,en,बचाना,,save,1772684386
+i18n/en/messages.json,6,google,ur,en,محفوظ کریں۔,,Save.,1772684387
+i18n/en/messages.json,6,google,de,en,Speichern,,Save,1772684387
+i18n/en/messages.json,6,google,zh,en,节省,,save,1772684388
+i18n/en/messages.json,6,azure,en,es,Save,,Salvar,1772684385
+i18n/en/messages.json,6,google,en,fr,Save,,Sauvegarder,1772684385
+i18n/en/messages.json,6,google,en,hi,Save,,बचाना,1772684386
+i18n/en/messages.json,6,google,en,ur,Save,,محفوظ کریں۔,1772684386
+i18n/en/messages.json,6,google,en,zh,Save,,节省,1772684387
+i18n/en/messages.json,7,google,en,de,Delete,,Löschen,1772684387
+i18n/en/messages.json,7,azure,es,en,Borrar,,Delete,1772684385
+i18n/en/messages.json,7,google,fr,en,Supprimer,,DELETE,1772684386
+i18n/en/messages.json,7,google,hi,en,मिटाना,,delete,1772684386
+i18n/en/messages.json,7,google,ur,en,حذف کریں۔,,Delete.,1772684387
+i18n/en/messages.json,7,google,de,en,Löschen,,Delete,1772684387
+i18n/en/messages.json,7,google,zh,en,删除,,delete,1772684388
+i18n/en/messages.json,7,azure,en,es,Delete,,Borrar,1772684385
+i18n/en/messages.json,7,google,en,fr,Delete,,Supprimer,1772684385
+i18n/en/messages.json,7,google,en,hi,Delete,,मिटाना,1772684386
+i18n/en/messages.json,7,google,en,ur,Delete,,حذف کریں۔,1772684386
+i18n/en/messages.json,7,google,en,zh,Delete,,删除,1772684387
+i18n/en/messages.json,8,google,en,de,Edit,,Bearbeiten,1772684387
+i18n/en/messages.json,8,azure,es,en,Edición,,Edition,1772684385
+i18n/en/messages.json,8,google,fr,en,Modifier,,To modify,1772684386
+i18n/en/messages.json,8,google,hi,en,संपादन करना,,edit,1772684386
+i18n/en/messages.json,8,google,ur,en,ترمیم کریں۔,,Edit,1772684387
+i18n/en/messages.json,8,google,de,en,Bearbeiten,,Edit,1772684387
+i18n/en/messages.json,8,google,zh,en,编辑,,edit,1772684388
+i18n/en/messages.json,8,azure,en,es,Edit,,Edición,1772684385
+i18n/en/messages.json,8,google,en,fr,Edit,,Modifier,1772684385
+i18n/en/messages.json,8,google,en,hi,Edit,,संपादन करना,1772684386
+i18n/en/messages.json,8,google,en,ur,Edit,,ترمیم کریں۔,1772684386
+i18n/en/messages.json,8,google,en,zh,Edit,,编辑,1772684387
+i18n/en/messages.json,9,google,en,de,We value your feedback,,Wir schätzen Ihr Feedback.,1772684387
+i18n/en/messages.json,9,azure,es,en,Valoramos mucho tus comentarios,,We greatly value your feedback,1772684385
+i18n/en/messages.json,9,google,fr,en,Nous apprécions vos commentaires,,We appreciate your feedback,1772684386
+i18n/en/messages.json,9,google,hi,en,हम आपकी प्रतिक्रिया को महत्व देते हैं।,,We value your feedback.,1772684386
+i18n/en/messages.json,9,google,ur,en,ہم آپ کے تاثرات کی قدر کرتے ہیں۔,,We value your feedback.,1772684387
+i18n/en/messages.json,9,google,de,en,Wir schätzen Ihr Feedback.,,We appreciate your feedback.,1772684387
+i18n/en/messages.json,9,google,zh,en,我们重视您的反馈。,,We value your feedback.,1772684388
+i18n/en/messages.json,9,azure,en,es,We value your feedback,,Valoramos mucho tus comentarios,1772684385
+i18n/en/messages.json,9,google,en,fr,We value your feedback,,Nous apprécions vos commentaires,1772684385
+i18n/en/messages.json,9,google,en,hi,We value your feedback,,हम आपकी प्रतिक्रिया को महत्व देते हैं।,1772684386
+i18n/en/messages.json,9,google,en,ur,We value your feedback,,ہم آپ کے تاثرات کی قدر کرتے ہیں۔,1772684386
+i18n/en/messages.json,9,google,en,zh,We value your feedback,,我们重视您的反馈。,1772684387
+i18n/en/messages.json,10,google,en,de,How would you rate your experience?,,Wie würden Sie Ihre Erfahrung bewerten?,1772684387
+i18n/en/messages.json,10,azure,es,en,¿Cómo valorarías tu experiencia?,,How would you rate your experience?,1772684385
+i18n/en/messages.json,10,google,fr,en,Comment évalueriez-vous votre expérience ?,,How would you rate your experience?,1772684386
+i18n/en/messages.json,10,google,hi,en,आपके द्वारा आपके अनुभव का मूल्यांकन किस तरह किया जाएगा?,,How would you rate your experience?,1772684386
+i18n/en/messages.json,10,google,ur,en,آپ اپنے تجربے کی درجہ بندی کیسے کریں گے؟,,How would you rate your experience?,1772684387
+i18n/en/messages.json,10,google,de,en,Wie würden Sie Ihre Erfahrung bewerten?,,How would you rate your experience?,1772684387
+i18n/en/messages.json,10,google,zh,en,您如何评价您的体验？,,How would you rate your experience?,1772684388
+i18n/en/messages.json,10,azure,en,es,How would you rate your experience?,,¿Cómo valorarías tu experiencia?,1772684385
+i18n/en/messages.json,10,google,en,fr,How would you rate your experience?,,Comment évalueriez-vous votre expérience ?,1772684385
+i18n/en/messages.json,10,google,en,hi,How would you rate your experience?,,आपके द्वारा आपके अनुभव का मूल्यांकन किस तरह किया जाएगा?,1772684386
+i18n/en/messages.json,10,google,en,ur,How would you rate your experience?,,آپ اپنے تجربے کی درجہ بندی کیسے کریں گے؟,1772684386
+i18n/en/messages.json,10,google,en,zh,How would you rate your experience?,,您如何评价您的体验？,1772684387
+i18n/en/messages.json,11,google,en,de,Thank you for your positive feedback!,,Vielen Dank für Ihr positives Feedback!,1772684387
+i18n/en/messages.json,11,azure,es,en,¡Gracias por tus comentarios positivos!,,Thank you for your positive feedback!,1772684385
+i18n/en/messages.json,11,google,fr,en,Merci pour vos commentaires positifs !,,Thank you for your positive feedback!,1772684386
+i18n/en/messages.json,11,google,hi,en,आपकी सकारात्मक प्रतिक्रिया के लिए धन्यवाद!,,Thank you for your positive feedback!,1772684386
+i18n/en/messages.json,11,google,ur,en,آپ کے مثبت تاثرات کے لیے آپ کا شکریہ!,,Thank you for your positive feedback!,1772684387
+i18n/en/messages.json,11,google,de,en,Vielen Dank für Ihr positives Feedback!,,Thank you for your positive feedback!,1772684387
+i18n/en/messages.json,11,google,zh,en,感谢您的好评！,,Thank you for your positive review!,1772684388
+i18n/en/messages.json,11,azure,en,es,Thank you for your positive feedback!,,¡Gracias por tus comentarios positivos!,1772684385
+i18n/en/messages.json,11,google,en,fr,Thank you for your positive feedback!,,Merci pour vos commentaires positifs !,1772684385
+i18n/en/messages.json,11,google,en,hi,Thank you for your positive feedback!,,आपकी सकारात्मक प्रतिक्रिया के लिए धन्यवाद!,1772684386
+i18n/en/messages.json,11,google,en,ur,Thank you for your positive feedback!,,آپ کے مثبت تاثرات کے لیے آپ کا شکریہ!,1772684386
+i18n/en/messages.json,11,google,en,zh,Thank you for your positive feedback!,,感谢您的好评！,1772684387
+i18n/en/messages.json,12,google,en,de,We're sorry to hear that. How can we improve?,,Das tut uns leid. Wie können wir uns verbessern?,1772684387
+i18n/en/messages.json,12,azure,es,en,Lamentamos oír eso. ¿Cómo podemos mejorar?,,We are sorry to hear that. How can we improve?,1772684385
+i18n/en/messages.json,12,google,fr,en,Nous sommes désolés d'apprendre cela. Comment pouvons-nous nous améliorer ?,,We are sorry to hear that. How can we improve?,1772684386
+i18n/en/messages.json,12,google,hi,en,हमें यह सुनकर खेद हुआ। हम क्या सुधार कर सकते हैं?,,We're sorry to hear that. What can we do to improve?,1772684386
+i18n/en/messages.json,12,google,ur,en,ہمیں یہ سن کر افسوس ہوا۔ ہم کیسے بہتر کر سکتے ہیں؟,,We are sorry to hear this. How can we improve?,1772684387
+i18n/en/messages.json,12,google,de,en,Das tut uns leid. Wie können wir uns verbessern?,,We're sorry about that. How can we improve?,1772684387
+i18n/en/messages.json,12,google,zh,en,听到这个消息我们很遗憾。我们该如何改进？,,We are very sorry to hear this news. How can we improve?,1772684388
+i18n/en/messages.json,12,azure,en,es,We're sorry to hear that. How can we improve?,,Lamentamos oír eso. ¿Cómo podemos mejorar?,1772684385
+i18n/en/messages.json,12,google,en,fr,We're sorry to hear that. How can we improve?,,Nous sommes désolés d'apprendre cela. Comment pouvons-nous nous améliorer ?,1772684385
+i18n/en/messages.json,12,google,en,hi,We're sorry to hear that. How can we improve?,,हमें यह सुनकर खेद हुआ। हम क्या सुधार कर सकते हैं?,1772684386
+i18n/en/messages.json,12,google,en,ur,We're sorry to hear that. How can we improve?,,ہمیں یہ سن کر افسوس ہوا۔ ہم کیسے بہتر کر سکتے ہیں؟,1772684386
+i18n/en/messages.json,12,google,en,zh,We're sorry to hear that. How can we improve?,,听到这个消息我们很遗憾。我们该如何改进？,1772684387
+i18n/en/messages.json,13,google,en,de,Submit Feedback,,Feedback senden,1772684387
+i18n/en/messages.json,13,azure,es,en,Enviar comentarios,,Send feedback,1772684385
+i18n/en/messages.json,13,google,fr,en,Envoyer des commentaires,,Send feedback,1772684386
+i18n/en/messages.json,13,google,hi,en,प्रतिक्रिया सबमिट करें,,submit feedback,1772684386
+i18n/en/messages.json,13,google,ur,en,تاثرات جمع کروائیں۔,,Submit feedback.,1772684387
+i18n/en/messages.json,13,google,de,en,Feedback senden,,Send feedback,1772684387
+i18n/en/messages.json,13,google,zh,en,提交反馈,,Submit feedback,1772684388
+i18n/en/messages.json,13,azure,en,es,Submit Feedback,,Enviar comentarios,1772684385
+i18n/en/messages.json,13,google,en,fr,Submit Feedback,,Envoyer des commentaires,1772684385
+i18n/en/messages.json,13,google,en,hi,Submit Feedback,,प्रतिक्रिया सबमिट करें,1772684386
+i18n/en/messages.json,13,google,en,ur,Submit Feedback,,تاثرات جمع کروائیں۔,1772684386
+i18n/en/messages.json,13,google,en,zh,Submit Feedback,,提交反馈,1772684387
+i18n/en/messages.json,14,google,en,de,Need Help?,,Brauchen Sie Hilfe?,1772684387
+i18n/en/messages.json,14,azure,es,en,¿Necesitas ayuda?,,Need help?,1772684385
+i18n/en/messages.json,14,google,fr,en,Besoin d'aide ?,,Need help?,1772684386
+i18n/en/messages.json,14,google,hi,en,मदद की ज़रूरत है?,,Need help?,1772684386
+i18n/en/messages.json,14,google,ur,en,مدد کی ضرورت ہے؟,,Need help?,1772684387
+i18n/en/messages.json,14,google,de,en,Brauchen Sie Hilfe?,,Do you need help?,1772684387
+i18n/en/messages.json,14,google,zh,en,需要帮助吗？,,Do you need help?,1772684388
+i18n/en/messages.json,14,azure,en,es,Need Help?,,¿Necesitas ayuda?,1772684385
+i18n/en/messages.json,14,google,en,fr,Need Help?,,Besoin d'aide ?,1772684385
+i18n/en/messages.json,14,google,en,hi,Need Help?,,मदद की ज़रूरत है?,1772684386
+i18n/en/messages.json,14,google,en,ur,Need Help?,,مدد کی ضرورت ہے؟,1772684386
+i18n/en/messages.json,14,google,en,zh,Need Help?,,需要帮助吗？,1772684387
+i18n/en/messages.json,15,google,en,de,Find answers to common questions,,Hier finden Sie Antworten auf häufig gestellte Fragen,1772684387
+i18n/en/messages.json,15,azure,es,en,Encuentra respuestas a preguntas comunes,,Find answers to common questions,1772684385
+i18n/en/messages.json,15,google,fr,en,Trouvez les réponses aux questions fréquentes,,Find answers to frequently asked questions,1772684386
+i18n/en/messages.json,15,google,hi,en,आम सवालों के जवाब ढूंढें,,Find answers to common questions,1772684386
+i18n/en/messages.json,15,google,ur,en,عام سوالات کے جوابات تلاش کریں۔,,Find answers to common questions.,1772684387
+i18n/en/messages.json,15,google,de,en,Hier finden Sie Antworten auf häufig gestellte Fragen,,Here you will find answers to frequently asked questions.,1772684387
+i18n/en/messages.json,15,google,zh,en,查找常见问题的答案,,Find answers to common questions,1772684388
+i18n/en/messages.json,15,azure,en,es,Find answers to common questions,,Encuentra respuestas a preguntas comunes,1772684385
+i18n/en/messages.json,15,google,en,fr,Find answers to common questions,,Trouvez les réponses aux questions fréquentes,1772684385
+i18n/en/messages.json,15,google,en,hi,Find answers to common questions,,आम सवालों के जवाब ढूंढें,1772684386
+i18n/en/messages.json,15,google,en,ur,Find answers to common questions,,عام سوالات کے جوابات تلاش کریں۔,1772684386
+i18n/en/messages.json,15,google,en,zh,Find answers to common questions,,查找常见问题的答案,1772684387
+i18n/en/messages.json,16,google,en,de,Contact Support,,Kontaktieren Sie den Support.,1772684387
+i18n/en/messages.json,16,azure,es,en,Contacta con el soporte,,Contact Support,1772684385
+i18n/en/messages.json,16,google,fr,en,Contacter l'assistance,,Contact support,1772684386
+i18n/en/messages.json,16,google,hi,en,समर्थन से संपर्क करें,,contact support,1772684386
+i18n/en/messages.json,16,google,ur,en,سپورٹ سے رابطہ کریں۔,,Contact support.,1772684387
+i18n/en/messages.json,16,google,de,en,Kontaktieren Sie den Support.,,Contact support.,1772684387
+i18n/en/messages.json,16,google,zh,en,联系客服,,Contact customer service,1772684388
+i18n/en/messages.json,16,azure,en,es,Contact Support,,Contacta con el soporte,1772684385
+i18n/en/messages.json,16,google,en,fr,Contact Support,,Contacter l'assistance,1772684385
+i18n/en/messages.json,16,google,en,hi,Contact Support,,समर्थन से संपर्क करें,1772684386
+i18n/en/messages.json,16,google,en,ur,Contact Support,,سپورٹ سے رابطہ کریں۔,1772684386
+i18n/en/messages.json,16,google,en,zh,Contact Support,,联系客服,1772684387
+i18n/en/messages.json,17,google,en,de,Frequently Asked Questions,,Häufig gestellte Fragen,1772684387
+i18n/en/messages.json,17,azure,es,en,Preguntas frecuentes,,Frequently Asked Questions,1772684385
+i18n/en/messages.json,17,google,fr,en,Foire aux questions,,Frequently Asked Questions,1772684386
+i18n/en/messages.json,17,google,hi,en,अक्सर पूछे जाने वाले प्रश्नों,,Frequently Asked Questions,1772684386
+i18n/en/messages.json,17,google,ur,en,اکثر پوچھے گئے سوالات,,Frequently Asked Questions,1772684387
+i18n/en/messages.json,17,google,de,en,Häufig gestellte Fragen,,Frequently Asked Questions,1772684387
+i18n/en/messages.json,17,google,zh,en,常见问题解答,,Frequently Asked Questions,1772684388
+i18n/en/messages.json,17,azure,en,es,Frequently Asked Questions,,Preguntas frecuentes,1772684385
+i18n/en/messages.json,17,google,en,fr,Frequently Asked Questions,,Foire aux questions,1772684385
+i18n/en/messages.json,17,google,en,hi,Frequently Asked Questions,,अक्सर पूछे जाने वाले प्रश्नों,1772684386
+i18n/en/messages.json,17,google,en,ur,Frequently Asked Questions,,اکثر پوچھے گئے سوالات,1772684386
+i18n/en/messages.json,17,google,en,zh,Frequently Asked Questions,,常见问题解答,1772684387
+i18n/en/messages.json,18,google,en,de,View Documentation,,Dokumentation ansehen,1772684387
+i18n/en/messages.json,18,azure,es,en,Ver documentación,,View documentation,1772684385
+i18n/en/messages.json,18,google,fr,en,Consulter la documentation,,Consult the documentation,1772684386
+i18n/en/messages.json,18,google,hi,en,दस्तावेज़ देखें,,View Documents,1772684386
+i18n/en/messages.json,18,google,ur,en,دستاویزات دیکھیں,,View documents,1772684387
+i18n/en/messages.json,18,google,de,en,Dokumentation ansehen,,Watch the documentary,1772684387
+i18n/en/messages.json,18,google,zh,en,查看文档,,View document,1772684388
+i18n/en/messages.json,18,azure,en,es,View Documentation,,Ver documentación,1772684385
+i18n/en/messages.json,18,google,en,fr,View Documentation,,Consulter la documentation,1772684385
+i18n/en/messages.json,18,google,en,hi,View Documentation,,दस्तावेज़ देखें,1772684386
+i18n/en/messages.json,18,google,en,ur,View Documentation,,دستاویزات دیکھیں,1772684386
+i18n/en/messages.json,18,google,en,zh,View Documentation,,查看文档,1772684387
+i18n/en/messages.json,19,google,en,de,Privacy Policy,,Datenschutzrichtlinie,1772684387
+i18n/en/messages.json,19,azure,es,en,Política de privacidad,,Privacy Policy,1772684385
+i18n/en/messages.json,19,google,fr,en,politique de confidentialité,,Privacy Policy,1772684386
+i18n/en/messages.json,19,google,hi,en,गोपनीयता नीति,,Privacy Policy,1772684386
+i18n/en/messages.json,19,google,ur,en,رازداری کی پالیسی,,Privacy Policy,1772684387
+i18n/en/messages.json,19,google,de,en,Datenschutzrichtlinie,,Privacy Policy,1772684387
+i18n/en/messages.json,19,google,zh,en,隐私政策,,Privacy Policy,1772684388
+i18n/en/messages.json,19,azure,en,es,Privacy Policy,,Política de privacidad,1772684385
+i18n/en/messages.json,19,google,en,fr,Privacy Policy,,politique de confidentialité,1772684385
+i18n/en/messages.json,19,google,en,hi,Privacy Policy,,गोपनीयता नीति,1772684386
+i18n/en/messages.json,19,google,en,ur,Privacy Policy,,رازداری کی پالیسی,1772684386
+i18n/en/messages.json,19,google,en,zh,Privacy Policy,,隐私政策,1772684387
+i18n/en/messages.json,20,google,en,de,Terms of Service,,Nutzungsbedingungen,1772684387
+i18n/en/messages.json,20,azure,es,en,Términos de servicio,,Terms of Service,1772684385
+i18n/en/messages.json,20,google,fr,en,Conditions d'utilisation,,Terms of Use,1772684386
+i18n/en/messages.json,20,google,hi,en,सेवा की शर्तें,,terms of Service,1772684386
+i18n/en/messages.json,20,google,ur,en,سروس کی شرائط,,Terms of Service,1772684387
+i18n/en/messages.json,20,google,de,en,Nutzungsbedingungen,,Terms of Use,1772684387
+i18n/en/messages.json,20,google,zh,en,服务条款,,Terms of Service,1772684388
+i18n/en/messages.json,20,azure,en,es,Terms of Service,,Términos de servicio,1772684385
+i18n/en/messages.json,20,google,en,fr,Terms of Service,,Conditions d'utilisation,1772684385
+i18n/en/messages.json,20,google,en,hi,Terms of Service,,सेवा की शर्तें,1772684386
+i18n/en/messages.json,20,google,en,ur,Terms of Service,,سروس کی شرائط,1772684386
+i18n/en/messages.json,20,google,en,zh,Terms of Service,,服务条款,1772684387
+i18n/en/messages.json,21,google,en,de,Cookie Policy,,Cookie-Richtlinie,1772684387
+i18n/en/messages.json,21,azure,es,en,Política de Cookies,,Cookies Policy,1772684385
+i18n/en/messages.json,21,google,fr,en,Politique relative aux cookies,,Cookie Policy,1772684386
+i18n/en/messages.json,21,google,hi,en,कूकी नीति,,cookie Policy,1772684386
+i18n/en/messages.json,21,google,ur,en,کوکی پالیسی,,Cookie Policy,1772684387
+i18n/en/messages.json,21,google,de,en,Cookie-Richtlinie,,Cookie Policy,1772684387
+i18n/en/messages.json,21,google,zh,en,Cookie政策,,Cookie Policy,1772684388
+i18n/en/messages.json,21,azure,en,es,Cookie Policy,,Política de Cookies,1772684385
+i18n/en/messages.json,21,google,en,fr,Cookie Policy,,Politique relative aux cookies,1772684385
+i18n/en/messages.json,21,google,en,hi,Cookie Policy,,कूकी नीति,1772684386
+i18n/en/messages.json,21,google,en,ur,Cookie Policy,,کوکی پالیسی,1772684386
+i18n/en/messages.json,21,google,en,zh,Cookie Policy,,Cookie政策,1772684387
+i18n/en/messages.json,22,google,en,de,All Rights Reserved,,Alle Rechte vorbehalten,1772684387
+i18n/en/messages.json,22,azure,es,en,Todos los derechos reservados,,All rights reserved,1772684385
+i18n/en/messages.json,22,google,fr,en,Tous droits réservés,,All rights reserved,1772684386
+i18n/en/messages.json,22,google,hi,en,सर्वाधिकार सुरक्षित,,All rights reserved,1772684386
+i18n/en/messages.json,22,google,ur,en,جملہ حقوق محفوظ ہیں۔,,All rights reserved.,1772684387
+i18n/en/messages.json,22,google,de,en,Alle Rechte vorbehalten,,All rights reserved.,1772684387
+i18n/en/messages.json,22,google,zh,en,版权所有,,all rights reserved,1772684388
+i18n/en/messages.json,22,azure,en,es,All Rights Reserved,,Todos los derechos reservados,1772684385
+i18n/en/messages.json,22,google,en,fr,All Rights Reserved,,Tous droits réservés,1772684385
+i18n/en/messages.json,22,google,en,hi,All Rights Reserved,,सर्वाधिकार सुरक्षित,1772684386
+i18n/en/messages.json,22,google,en,ur,All Rights Reserved,,جملہ حقوق محفوظ ہیں۔,1772684386
+i18n/en/messages.json,22,google,en,zh,All Rights Reserved,,版权所有,1772684387
+i18n/en/nested.json,0,google,en,de,Save,,Speichern,1772684391
+i18n/en/nested.json,0,azure,es,en,Salvar,,Save,1772684389
+i18n/en/nested.json,0,google,fr,en,Sauvegarder,,To safeguard,1772684390
+i18n/en/nested.json,0,google,hi,en,बचाना,,save,1772684390
+i18n/en/nested.json,0,google,ur,en,محفوظ کریں۔,,Save.,1772684391
+i18n/en/nested.json,0,google,de,en,Speichern,,Save,1772684391
+i18n/en/nested.json,0,google,zh,en,节省,,save,1772684392
+i18n/en/nested.json,0,azure,en,es,Save,,Salvar,1772684388
+i18n/en/nested.json,0,google,en,fr,Save,,Sauvegarder,1772684390
+i18n/en/nested.json,0,google,en,hi,Save,,बचाना,1772684390
+i18n/en/nested.json,0,google,en,ur,Save,,محفوظ کریں۔,1772684391
+i18n/en/nested.json,0,google,en,zh,Save,,节省,1772684392
+i18n/en/nested.json,1,google,en,de,Cancel,,Stornieren,1772684391
+i18n/en/nested.json,1,azure,es,en,Cancelar,,Cancel,1772684389
+i18n/en/nested.json,1,google,fr,en,Annuler,,Cancel,1772684390
+i18n/en/nested.json,1,google,hi,en,रद्द करना,,Cancel,1772684390
+i18n/en/nested.json,1,google,ur,en,منسوخ کریں۔,,Cancel.,1772684391
+i18n/en/nested.json,1,google,de,en,Stornieren,,Cancel,1772684391
+i18n/en/nested.json,1,google,zh,en,取消,,Cancel,1772684392
+i18n/en/nested.json,1,azure,en,es,Cancel,,Cancelar,1772684388
+i18n/en/nested.json,1,google,en,fr,Cancel,,Annuler,1772684390
+i18n/en/nested.json,1,google,en,hi,Cancel,,रद्द करना,1772684390
+i18n/en/nested.json,1,google,en,ur,Cancel,,منسوخ کریں۔,1772684391
+i18n/en/nested.json,1,google,en,zh,Cancel,,取消,1772684392
+i18n/en/nested.json,2,google,en,de,Apply,,Anwenden,1772684391
+i18n/en/nested.json,2,azure,es,en,Solicita,,Request,1772684389
+i18n/en/nested.json,2,google,fr,en,Appliquer,,Apply,1772684390
+i18n/en/nested.json,2,google,hi,en,आवेदन करना,,apply,1772684390
+i18n/en/nested.json,2,google,ur,en,لگائیں,,Apply,1772684391
+i18n/en/nested.json,2,google,de,en,Anwenden,,Apply,1772684391
+i18n/en/nested.json,2,google,zh,en,申请,,Apply,1772684392
+i18n/en/nested.json,2,azure,en,es,Apply,,Solicita,1772684388
+i18n/en/nested.json,2,google,en,fr,Apply,,Appliquer,1772684390
+i18n/en/nested.json,2,google,en,hi,Apply,,आवेदन करना,1772684390
+i18n/en/nested.json,2,google,en,ur,Apply,,لگائیں,1772684391
+i18n/en/nested.json,2,google,en,zh,Apply,,申请,1772684392
+i18n/en/nested.json,3,google,en,de,Reset to Default,,Auf Standardwerte zurücksetzen,1772684391
+i18n/en/nested.json,3,azure,es,en,Restablecer a predeterminado,,Reset to Default,1772684389
+i18n/en/nested.json,3,google,fr,en,Réinitialiser par défaut,,Reset to default,1772684390
+i18n/en/nested.json,3,google,hi,en,वितथ पर ले जाएं,,reset to default,1772684390
+i18n/en/nested.json,3,google,ur,en,ڈیفالٹ پر ری سیٹ کریں۔,,Reset to default.,1772684391
+i18n/en/nested.json,3,google,de,en,Auf Standardwerte zurücksetzen,,Reset to default values,1772684391
+i18n/en/nested.json,3,google,zh,en,重置为默认值,,Reset to default value,1772684392
+i18n/en/nested.json,3,azure,en,es,Reset to Default,,Restablecer a predeterminado,1772684388
+i18n/en/nested.json,3,google,en,fr,Reset to Default,,Réinitialiser par défaut,1772684390
+i18n/en/nested.json,3,google,en,hi,Reset to Default,,वितथ पर ले जाएं,1772684390
+i18n/en/nested.json,3,google,en,ur,Reset to Default,,ڈیفالٹ پر ری سیٹ کریں۔,1772684391
+i18n/en/nested.json,3,google,en,zh,Reset to Default,,重置为默认值,1772684392
+i18n/en/nested.json,4,google,en,de,Name,,Name,1772684391
+i18n/en/nested.json,4,azure,es,en,Nombre,,Name,1772684389
+i18n/en/nested.json,4,google,fr,en,Nom,,Name,1772684390
+i18n/en/nested.json,4,google,hi,en,नाम,,Name,1772684390
+i18n/en/nested.json,4,google,ur,en,نام,,Name,1772684391
+i18n/en/nested.json,4,google,de,en,Name,,name,1772684391
+i18n/en/nested.json,4,google,zh,en,姓名,,Name,1772684392
+i18n/en/nested.json,4,azure,en,es,Name,,Nombre,1772684388
+i18n/en/nested.json,4,google,en,fr,Name,,Nom,1772684390
+i18n/en/nested.json,4,google,en,hi,Name,,नाम,1772684390
+i18n/en/nested.json,4,google,en,ur,Name,,نام,1772684391
+i18n/en/nested.json,4,google,en,zh,Name,,姓名,1772684392
+i18n/en/nested.json,5,google,en,de,Email Address,,E-Mail-Adresse,1772684391
+i18n/en/nested.json,5,azure,es,en,Dirección de correo electrónico,,Email address,1772684389
+i18n/en/nested.json,5,google,fr,en,Adresse email,,E-mail address,1772684390
+i18n/en/nested.json,5,google,hi,en,मेल पता,,email address,1772684390
+i18n/en/nested.json,5,google,ur,en,ای میل ایڈریس,,Email address,1772684391
+i18n/en/nested.json,5,google,de,en,E-Mail-Adresse,,E-mail address,1772684391
+i18n/en/nested.json,5,google,zh,en,电子邮件,,e-mail,1772684392
+i18n/en/nested.json,5,azure,en,es,Email Address,,Dirección de correo electrónico,1772684388
+i18n/en/nested.json,5,google,en,fr,Email Address,,Adresse email,1772684390
+i18n/en/nested.json,5,google,en,hi,Email Address,,मेल पता,1772684390
+i18n/en/nested.json,5,google,en,ur,Email Address,,ای میل ایڈریس,1772684391
+i18n/en/nested.json,5,google,en,zh,Email Address,,电子邮件,1772684392
+i18n/en/nested.json,6,google,en,de,Phone Number,,Telefonnummer,1772684391
+i18n/en/nested.json,6,azure,es,en,Número de teléfono,,Phone Number,1772684389
+i18n/en/nested.json,6,google,fr,en,Numéro de téléphone,,Phone number,1772684390
+i18n/en/nested.json,6,google,hi,en,फ़ोन नंबर,,phone number,1772684390
+i18n/en/nested.json,6,google,ur,en,فون نمبر,,Phone number,1772684391
+i18n/en/nested.json,6,google,de,en,Telefonnummer,,Telephone number,1772684391
+i18n/en/nested.json,6,google,zh,en,电话号码,,telephone number,1772684392
+i18n/en/nested.json,6,azure,en,es,Phone Number,,Número de teléfono,1772684388
+i18n/en/nested.json,6,google,en,fr,Phone Number,,Numéro de téléphone,1772684390
+i18n/en/nested.json,6,google,en,hi,Phone Number,,फ़ोन नंबर,1772684390
+i18n/en/nested.json,6,google,en,ur,Phone Number,,فون نمبر,1772684391
+i18n/en/nested.json,6,google,en,zh,Phone Number,,电话号码,1772684392
+i18n/en/nested.json,7,google,en,de,Mailing Address,,Postanschrift,1772684391
+i18n/en/nested.json,7,azure,es,en,Dirección postal,,Mailing address,1772684389
+i18n/en/nested.json,7,google,fr,en,Adresse postale,,Mailing address,1772684390
+i18n/en/nested.json,7,google,hi,en,डाक पता,,postal address,1772684390
+i18n/en/nested.json,7,google,ur,en,ڈاک کا پتہ,,Postal address,1772684391
+i18n/en/nested.json,7,google,de,en,Postanschrift,,Postal address,1772684391
+i18n/en/nested.json,7,google,zh,en,邮寄地址,,mailing address,1772684392
+i18n/en/nested.json,7,azure,en,es,Mailing Address,,Dirección postal,1772684388
+i18n/en/nested.json,7,google,en,fr,Mailing Address,,Adresse postale,1772684390
+i18n/en/nested.json,7,google,en,hi,Mailing Address,,डाक पता,1772684390
+i18n/en/nested.json,7,google,en,ur,Mailing Address,,ڈاک کا پتہ,1772684391
+i18n/en/nested.json,7,google,en,zh,Mailing Address,,邮寄地址,1772684392
+i18n/en/nested.json,8,google,en,de,Operation completed successfully,,Operation erfolgreich abgeschlossen,1772684391
+i18n/en/nested.json,8,azure,es,en,Operación completada con éxito,,Operation completed successfully,1772684389
+i18n/en/nested.json,8,google,fr,en,Opération réussie,,Operation successful,1772684390
+i18n/en/nested.json,8,google,hi,en,ऑपरेशन सफलतापूर्वक पूरा किया,,Operation completed successfully,1772684390
+i18n/en/nested.json,8,google,ur,en,آپریشن کامیابی سے مکمل ہوا۔,,The operation was completed successfully.,1772684391
+i18n/en/nested.json,8,google,de,en,Operation erfolgreich abgeschlossen,,Operation successfully completed,1772684391
+i18n/en/nested.json,8,google,zh,en,手术成功完成,,The surgery was successfully completed.,1772684392
+i18n/en/nested.json,8,azure,en,es,Operation completed successfully,,Operación completada con éxito,1772684388
+i18n/en/nested.json,8,google,en,fr,Operation completed successfully,,Opération réussie,1772684390
+i18n/en/nested.json,8,google,en,hi,Operation completed successfully,,ऑपरेशन सफलतापूर्वक पूरा किया,1772684390
+i18n/en/nested.json,8,google,en,ur,Operation completed successfully,,آپریشن کامیابی سے مکمل ہوا۔,1772684391
+i18n/en/nested.json,8,google,en,zh,Operation completed successfully,,手术成功完成,1772684392
+i18n/en/nested.json,9,google,en,de,An error occurred,,Es ist ein Fehler aufgetreten,1772684391
+i18n/en/nested.json,9,azure,es,en,Se produjo un error,,An error occurred,1772684389
+i18n/en/nested.json,9,google,fr,en,Une erreur s'est produite.,,An error has occurred.,1772684390
+i18n/en/nested.json,9,google,hi,en,एक त्रुटि पाई गई,,an error occurred,1772684390
+i18n/en/nested.json,9,google,ur,en,ایک خرابی پیش آ گئی۔,,An error occurred.,1772684391
+i18n/en/nested.json,9,google,de,en,Es ist ein Fehler aufgetreten,,An error has occurred,1772684391
+i18n/en/nested.json,9,google,zh,en,发生错误,,An error occurred,1772684392
+i18n/en/nested.json,9,azure,en,es,An error occurred,,Se produjo un error,1772684388
+i18n/en/nested.json,9,google,en,fr,An error occurred,,Une erreur s'est produite.,1772684390
+i18n/en/nested.json,9,google,en,hi,An error occurred,,एक त्रुटि पाई गई,1772684390
+i18n/en/nested.json,9,google,en,ur,An error occurred,,ایک خرابی پیش آ گئی۔,1772684391
+i18n/en/nested.json,9,google,en,zh,An error occurred,,发生错误,1772684392
+i18n/en/nested.json,10,google,en,de,Warning: proceed with caution,,Warnung: Vorsicht ist geboten,1772684391
+i18n/en/nested.json,10,azure,es,en,Aviso: procede con precaución,,Warning: proceed with caution,1772684389
+i18n/en/nested.json,10,google,fr,en,Avertissement : procéder avec prudence,,Warning: Proceed with caution,1772684390
+i18n/en/nested.json,10,google,hi,en,चेतावनी: सावधानीपूर्वक आगे बढ़ें,,Warning: Proceed with caution,1772684390
+i18n/en/nested.json,10,google,ur,en,انتباہ: احتیاط کے ساتھ آگے بڑھیں۔,,Warning: Proceed with caution.,1772684391
+i18n/en/nested.json,10,google,de,en,Warnung: Vorsicht ist geboten,,Warning: Caution is advised,1772684391
+i18n/en/nested.json,10,google,zh,en,警告：请谨慎行事,,Warning: Please proceed with caution.,1772684392
+i18n/en/nested.json,10,azure,en,es,Warning: proceed with caution,,Aviso: procede con precaución,1772684388
+i18n/en/nested.json,10,google,en,fr,Warning: proceed with caution,,Avertissement : procéder avec prudence,1772684390
+i18n/en/nested.json,10,google,en,hi,Warning: proceed with caution,,चेतावनी: सावधानीपूर्वक आगे बढ़ें,1772684390
+i18n/en/nested.json,10,google,en,ur,Warning: proceed with caution,,انتباہ: احتیاط کے ساتھ آگے بڑھیں۔,1772684391
+i18n/en/nested.json,10,google,en,zh,Warning: proceed with caution,,警告：请谨慎行事,1772684392
+i18n/en/nested.json,11,google,en,de,For your information,,Zu Ihrer Information,1772684391
+i18n/en/nested.json,11,azure,es,en,Para tu información,,For your information,1772684389
+i18n/en/nested.json,11,google,fr,en,Pour votre information,,For your information,1772684390
+i18n/en/nested.json,11,google,hi,en,आपकी जानकारी के लिए,,For your information,1772684390
+i18n/en/nested.json,11,google,ur,en,آپ کی معلومات کے لیے,,For your information,1772684391
+i18n/en/nested.json,11,google,de,en,Zu Ihrer Information,,For your information,1772684391
+i18n/en/nested.json,11,google,zh,en,供你参考,,for your information,1772684392
+i18n/en/nested.json,11,azure,en,es,For your information,,Para tu información,1772684388
+i18n/en/nested.json,11,google,en,fr,For your information,,Pour votre information,1772684390
+i18n/en/nested.json,11,google,en,hi,For your information,,आपकी जानकारी के लिए,1772684390
+i18n/en/nested.json,11,google,en,ur,For your information,,آپ کی معلومات کے لیے,1772684391
+i18n/en/nested.json,11,google,en,zh,For your information,,供你参考,1772684392
+i18n/en/nested.json,12,google,en,de,This field is required,,Dieses Feld ist erforderlich,1772684391
+i18n/en/nested.json,12,azure,es,en,Este campo es obligatorio,,This field is required,1772684389
+i18n/en/nested.json,12,google,fr,en,Ce champ est obligatoire,,This field is required,1772684390
+i18n/en/nested.json,12,google,hi,en,यह फ़ील्ड आवश्यक है,,This field is required,1772684390
+i18n/en/nested.json,12,google,ur,en,یہ فیلڈ درکار ہے۔,,This field is required.,1772684391
+i18n/en/nested.json,12,google,de,en,Dieses Feld ist erforderlich,,This field is required,1772684391
+i18n/en/nested.json,12,google,zh,en,此字段是必需的,,This field is required,1772684392
+i18n/en/nested.json,12,azure,en,es,This field is required,,Este campo es obligatorio,1772684388
+i18n/en/nested.json,12,google,en,fr,This field is required,,Ce champ est obligatoire,1772684390
+i18n/en/nested.json,12,google,en,hi,This field is required,,यह फ़ील्ड आवश्यक है,1772684390
+i18n/en/nested.json,12,google,en,ur,This field is required,,یہ فیلڈ درکار ہے۔,1772684391
+i18n/en/nested.json,12,google,en,zh,This field is required,,此字段是必需的,1772684392
+i18n/en/nested.json,13,google,en,de,Must be at least {length} characters,,Muss mindestens {length} Zeichen lang sein,1772684391
+i18n/en/nested.json,13,azure,es,en,Deben tener al menos caracteres de {longitud},,They must have at least {length} characters,1772684389
+i18n/en/nested.json,13,google,fr,en,Doit contenir au moins {length} caractères,,Must contain at least {length} characters,1772684390
+i18n/en/nested.json,13,google,hi,en,कम से कम {length} अक्षर होने चाहिए,,Must be at least {length} characters,1772684390
+i18n/en/nested.json,13,google,ur,en,کم از کم {length} حروف کا ہونا ضروری ہے۔,,Must be at least {length} characters.,1772684391
+i18n/en/nested.json,13,google,de,en,Muss mindestens {length} Zeichen lang sein,,Must be at least {length} characters long,1772684391
+i18n/en/nested.json,13,google,zh,en,必须至少包含 {length} 个字符,,It must contain at least {length} characters,1772684392
+i18n/en/nested.json,13,azure,en,es,Must be at least {length} characters,,Deben tener al menos caracteres de {longitud},1772684388
+i18n/en/nested.json,13,google,en,fr,Must be at least {length} characters,,Doit contenir au moins {length} caractères,1772684390
+i18n/en/nested.json,13,google,en,hi,Must be at least {length} characters,,कम से कम {length} अक्षर होने चाहिए,1772684390
+i18n/en/nested.json,13,google,en,ur,Must be at least {length} characters,,کم از کم {length} حروف کا ہونا ضروری ہے۔,1772684391
+i18n/en/nested.json,13,google,en,zh,Must be at least {length} characters,,必须至少包含 {length} 个字符,1772684392
+i18n/en/nested.json,14,google,en,de,Cannot exceed {length} characters,,Darf nicht mehr als {length} Zeichen,1772684391
+i18n/en/nested.json,14,azure,es,en,No pueden superar {longitud} caracteres,,Cannot exceed {length} characters,1772684389
+i18n/en/nested.json,14,google,fr,en,Ne peut pas dépasser {length} caractères,,Cannot exceed {length} characters,1772684390
+i18n/en/nested.json,14,google,hi,en,{length} वर्णों से अधिक नहीं हो सकता,,Cannot exceed {length} characters,1772684390
+i18n/en/nested.json,14,google,ur,en,{length} حروف سے زیادہ نہیں ہو سکتا,,Cannot exceed {length} characters.,1772684391
+i18n/en/nested.json,14,google,de,en,Darf nicht mehr als {length} Zeichen,,Must not exceed {length} characters,1772684391
+i18n/en/nested.json,14,google,zh,en,不能超过 {length} 个字符,,No more than {length} characters,1772684392
+i18n/en/nested.json,14,azure,en,es,Cannot exceed {length} characters,,No pueden superar {longitud} caracteres,1772684388
+i18n/en/nested.json,14,google,en,fr,Cannot exceed {length} characters,,Ne peut pas dépasser {length} caractères,1772684390
+i18n/en/nested.json,14,google,en,hi,Cannot exceed {length} characters,,{length} वर्णों से अधिक नहीं हो सकता,1772684390
+i18n/en/nested.json,14,google,en,ur,Cannot exceed {length} characters,,{length} حروف سے زیادہ نہیں ہو سکتا,1772684391
+i18n/en/nested.json,14,google,en,zh,Cannot exceed {length} characters,,不能超过 {length} 个字符,1772684392
+i18n/en/nested.json,15,google,en,de,Invalid format,,Ungültiges Format,1772684391
+i18n/en/nested.json,15,azure,es,en,Formato inválido,,Invalid format,1772684389
+i18n/en/nested.json,15,google,fr,en,Format invalide,,Invalid format,1772684390
+i18n/en/nested.json,15,google,hi,en,अमान्य प्रारूप,,Invalid format,1772684390
+i18n/en/nested.json,15,google,ur,en,غلط فارمیٹ,,Incorrect format,1772684391
+i18n/en/nested.json,15,google,de,en,Ungültiges Format,,Invalid format,1772684391
+i18n/en/nested.json,15,google,zh,en,格式无效,,Invalid format,1772684392
+i18n/en/nested.json,15,azure,en,es,Invalid format,,Formato inválido,1772684388
+i18n/en/nested.json,15,google,en,fr,Invalid format,,Format invalide,1772684390
+i18n/en/nested.json,15,google,en,hi,Invalid format,,अमान्य प्रारूप,1772684390
+i18n/en/nested.json,15,google,en,ur,Invalid format,,غلط فارمیٹ,1772684391
+i18n/en/nested.json,15,google,en,zh,Invalid format,,格式无效,1772684392
+i18n/en/nested.json,16,google,en,de,Fields do not match,,Die Felder stimmen nicht überein.,1772684391
+i18n/en/nested.json,16,azure,es,en,Los campos no coinciden,,Fields don't match,1772684389
+i18n/en/nested.json,16,google,fr,en,Les champs ne correspondent pas,,The fields do not match,1772684390
+i18n/en/nested.json,16,google,hi,en,फील्ड्स से मेल नहीं खाते,,Fields do not match,1772684390
+i18n/en/nested.json,16,google,ur,en,فیلڈز میل نہیں کھاتے,,Fields do not match.,1772684391
+i18n/en/nested.json,16,google,de,en,Die Felder stimmen nicht überein.,,The fields do not match.,1772684391
+i18n/en/nested.json,16,google,zh,en,字段不匹配,,Field mismatch,1772684392
+i18n/en/nested.json,16,azure,en,es,Fields do not match,,Los campos no coinciden,1772684388
+i18n/en/nested.json,16,google,en,fr,Fields do not match,,Les champs ne correspondent pas,1772684390
+i18n/en/nested.json,16,google,en,hi,Fields do not match,,फील्ड्स से मेल नहीं खाते,1772684390
+i18n/en/nested.json,16,google,en,ur,Fields do not match,,فیلڈز میل نہیں کھاتے,1772684391
+i18n/en/nested.json,16,google,en,zh,Fields do not match,,字段不匹配,1772684392
+i18n/en/nested.json,17,google,en,de,Search...,,Suchen...,1772684391
+i18n/en/nested.json,17,azure,es,en,Buscar...,,Search...,1772684389
+i18n/en/nested.json,17,google,fr,en,Recherche...,,Research...,1772684390
+i18n/en/nested.json,17,google,hi,en,खोज...,,Search...,1772684390
+i18n/en/nested.json,17,google,ur,en,تلاش کریں...,,Search...,1772684391
+i18n/en/nested.json,17,google,de,en,Suchen...,,Seek...,1772684391
+i18n/en/nested.json,17,google,zh,en,搜索...,,search...,1772684392
+i18n/en/nested.json,17,azure,en,es,Search...,,Buscar...,1772684388
+i18n/en/nested.json,17,google,en,fr,Search...,,Recherche...,1772684390
+i18n/en/nested.json,17,google,en,hi,Search...,,खोज...,1772684390
+i18n/en/nested.json,17,google,en,ur,Search...,,تلاش کریں...,1772684391
+i18n/en/nested.json,17,google,en,zh,Search...,,搜索...,1772684392
+i18n/en/nested.json,18,google,en,de,Select an option,,Wählen Sie eine Option aus,1772684391
+i18n/en/nested.json,18,azure,es,en,Selecciona una opción,,Select an option,1772684389
+i18n/en/nested.json,18,google,fr,en,Sélectionnez une option,,Select an option,1772684390
+i18n/en/nested.json,18,google,hi,en,कोई विकल्प चुनें,,select an option,1772684390
+i18n/en/nested.json,18,google,ur,en,ایک آپشن منتخب کریں۔,,Select an option.,1772684391
+i18n/en/nested.json,18,google,de,en,Wählen Sie eine Option aus,,Select an option,1772684391
+i18n/en/nested.json,18,google,zh,en,选择一个选项,,Choose an option,1772684392
+i18n/en/nested.json,18,azure,en,es,Select an option,,Selecciona una opción,1772684388
+i18n/en/nested.json,18,google,en,fr,Select an option,,Sélectionnez une option,1772684390
+i18n/en/nested.json,18,google,en,hi,Select an option,,कोई विकल्प चुनें,1772684390
+i18n/en/nested.json,18,google,en,ur,Select an option,,ایک آپشن منتخب کریں۔,1772684391
+i18n/en/nested.json,18,google,en,zh,Select an option,,选择一个选项,1772684392
+i18n/en/nested.json,19,google,en,de,MM/DD/YYYY,,MM/TT/JJJJ,1772684391
+i18n/en/nested.json,19,azure,es,en,MM/DD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAA,,MM/DD/YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY,1772684389
+i18n/en/nested.json,19,google,fr,en,MM/JJ/AAAA,,MM/DD/YYYY,1772684390
+i18n/en/nested.json,19,google,hi,en,एमएम/डीडी/वाईवाईवाई,,MM/DD/YYYY,1772684390
+i18n/en/nested.json,19,google,ur,en,MM/DD/YYYY,,MM/DD/YYYY,1772684391
+i18n/en/nested.json,19,google,de,en,MM/TT/JJJJ,,MM/DD/YYYY,1772684391
+i18n/en/nested.json,19,google,zh,en,月/日/年,,Month/Day/Year,1772684392
+i18n/en/nested.json,19,azure,en,es,MM/DD/YYYY,,MM/DD/AAAAAAAAAAAAAAAAAAAAAAAAAAAAA,1772684388
+i18n/en/nested.json,19,google,en,fr,MM/DD/YYYY,,MM/JJ/AAAA,1772684390
+i18n/en/nested.json,19,google,en,hi,MM/DD/YYYY,,एमएम/डीडी/वाईवाईवाई,1772684390
+i18n/en/nested.json,19,google,en,ur,MM/DD/YYYY,,MM/DD/YYYY,1772684391
+i18n/en/nested.json,19,google,en,zh,MM/DD/YYYY,,月/日/年,1772684392
+i18n/en/nested.json,20,google,en,de,Enable Dark Mode,,Dunkelmodus aktivieren,1772684391
+i18n/en/nested.json,20,azure,es,en,Activar el modo oscuro,,Turn on dark mode,1772684389
+i18n/en/nested.json,20,google,fr,en,Activer le mode sombre,,Enable dark mode,1772684390
+i18n/en/nested.json,20,google,hi,en,डार्क मोड चालू करें,,Turn on dark mode,1772684390
+i18n/en/nested.json,20,google,ur,en,ڈارک موڈ کو فعال کریں۔,,Enable dark mode.,1772684391
+i18n/en/nested.json,20,google,de,en,Dunkelmodus aktivieren,,Activate dark mode,1772684391
+i18n/en/nested.json,20,google,zh,en,启用深色模式,,Enable Dark Mode,1772684392
+i18n/en/nested.json,20,azure,en,es,Enable Dark Mode,,Activar el modo oscuro,1772684388
+i18n/en/nested.json,20,google,en,fr,Enable Dark Mode,,Activer le mode sombre,1772684390
+i18n/en/nested.json,20,google,en,hi,Enable Dark Mode,,डार्क मोड चालू करें,1772684390
+i18n/en/nested.json,20,google,en,ur,Enable Dark Mode,,ڈارک موڈ کو فعال کریں۔,1772684391
+i18n/en/nested.json,20,google,en,zh,Enable Dark Mode,,启用深色模式,1772684392
+i18n/en/nested.json,21,google,en,de,Disable Dark Mode,,Dunkelmodus deaktivieren,1772684391
+i18n/en/nested.json,21,azure,es,en,Desactivar el modo oscuro,,Turn off dark mode,1772684389
+i18n/en/nested.json,21,google,fr,en,Désactiver le mode sombre,,Turn off dark mode,1772684390
+i18n/en/nested.json,21,google,hi,en,डार्क मोड को अक्षम करें,,Disable Dark Mode,1772684390
+i18n/en/nested.json,21,google,ur,en,ڈارک موڈ کو غیر فعال کریں۔,,Disable dark mode.,1772684391
+i18n/en/nested.json,21,google,de,en,Dunkelmodus deaktivieren,,Disable dark mode,1772684391
+i18n/en/nested.json,21,google,zh,en,关闭深色模式,,Turn off dark mode,1772684392
+i18n/en/nested.json,21,azure,en,es,Disable Dark Mode,,Desactivar el modo oscuro,1772684388
+i18n/en/nested.json,21,google,en,fr,Disable Dark Mode,,Désactiver le mode sombre,1772684390
+i18n/en/nested.json,21,google,en,hi,Disable Dark Mode,,डार्क मोड को अक्षम करें,1772684390
+i18n/en/nested.json,21,google,en,ur,Disable Dark Mode,,ڈارک موڈ کو غیر فعال کریں۔,1772684391
+i18n/en/nested.json,21,google,en,zh,Disable Dark Mode,,关闭深色模式,1772684392
+i18n/en/nested.json,22,google,en,de,Use System Setting,,Systemeinstellung verwenden,1772684391
+i18n/en/nested.json,22,azure,es,en,Usar Configuración del Sistema,,Use System Configuration,1772684389
+i18n/en/nested.json,22,google,fr,en,Utiliser les paramètres système,,Use system settings,1772684390
+i18n/en/nested.json,22,google,hi,en,सिस्टम सेटिंग का उपयोग करें,,Use system settings,1772684390
+i18n/en/nested.json,22,google,ur,en,سسٹم سیٹنگ کا استعمال کریں۔,,Use system settings.,1772684391
+i18n/en/nested.json,22,google,de,en,Systemeinstellung verwenden,,Use system settings,1772684391
+i18n/en/nested.json,22,google,zh,en,使用系统设置,,Use system settings,1772684392
+i18n/en/nested.json,22,azure,en,es,Use System Setting,,Usar Configuración del Sistema,1772684388
+i18n/en/nested.json,22,google,en,fr,Use System Setting,,Utiliser les paramètres système,1772684390
+i18n/en/nested.json,22,google,en,hi,Use System Setting,,सिस्टम सेटिंग का उपयोग करें,1772684390
+i18n/en/nested.json,22,google,en,ur,Use System Setting,,سسٹم سیٹنگ کا استعمال کریں۔,1772684391
+i18n/en/nested.json,22,google,en,zh,Use System Setting,,使用系统设置,1772684392
+i18n/en/nested.json,23,google,en,de,High Contrast,,Hoher Kontrast,1772684391
+i18n/en/nested.json,23,azure,es,en,Alto contraste,,High contrast,1772684389
+i18n/en/nested.json,23,google,fr,en,Contraste élevé,,High contrast,1772684390
+i18n/en/nested.json,23,google,hi,en,हाई कॉन्ट्रास्ट,,high contrast,1772684390
+i18n/en/nested.json,23,google,ur,en,ہائی کنٹراسٹ,,High contrast,1772684391
+i18n/en/nested.json,23,google,de,en,Hoher Kontrast,,High contrast,1772684391
+i18n/en/nested.json,23,google,zh,en,高对比度,,High contrast,1772684392
+i18n/en/nested.json,23,azure,en,es,High Contrast,,Alto contraste,1772684388
+i18n/en/nested.json,23,google,en,fr,High Contrast,,Contraste élevé,1772684390
+i18n/en/nested.json,23,google,en,hi,High Contrast,,हाई कॉन्ट्रास्ट,1772684390
+i18n/en/nested.json,23,google,en,ur,High Contrast,,ہائی کنٹراسٹ,1772684391
+i18n/en/nested.json,23,google,en,zh,High Contrast,,高对比度,1772684392
+i18n/en/nested.json,24,google,en,de,Large Text,,Großer Text,1772684391
+i18n/en/nested.json,24,azure,es,en,Texto grande,,Large text,1772684389
+i18n/en/nested.json,24,google,fr,en,Texte en gros,,Large text,1772684390
+i18n/en/nested.json,24,google,hi,en,बड़ी किताब,,Big Book,1772684390
+i18n/en/nested.json,24,google,ur,en,بڑا متن,,Large text,1772684391
+i18n/en/nested.json,24,google,de,en,Großer Text,,Large text,1772684391
+i18n/en/nested.json,24,google,zh,en,大字,,Large characters,1772684392
+i18n/en/nested.json,24,azure,en,es,Large Text,,Texto grande,1772684388
+i18n/en/nested.json,24,google,en,fr,Large Text,,Texte en gros,1772684390
+i18n/en/nested.json,24,google,en,hi,Large Text,,बड़ी किताब,1772684390
+i18n/en/nested.json,24,google,en,ur,Large Text,,بڑا متن,1772684391
+i18n/en/nested.json,24,google,en,zh,Large Text,,大字,1772684392
+i18n/en/nested.json,25,google,en,de,Screen Reader Support,,Unterstützung für Bildschirmleseprogramme,1772684391
+i18n/en/nested.json,25,azure,es,en,Soporte para lectores de pantalla,,Screen reader support,1772684389
+i18n/en/nested.json,25,google,fr,en,Assistance pour les lecteurs d'écran,,Screen reader support,1772684390
+i18n/en/nested.json,25,google,hi,en,स्क्रीन रीडर समर्थन,,Screen reader support,1772684390
+i18n/en/nested.json,25,google,ur,en,اسکرین ریڈر سپورٹ,,Screen reader support,1772684391
+i18n/en/nested.json,25,google,de,en,Unterstützung für Bildschirmleseprogramme,,Support for screen readers,1772684391
+i18n/en/nested.json,25,google,zh,en,屏幕阅读器支持,,Screen reader support,1772684392
+i18n/en/nested.json,25,azure,en,es,Screen Reader Support,,Soporte para lectores de pantalla,1772684388
+i18n/en/nested.json,25,google,en,fr,Screen Reader Support,,Assistance pour les lecteurs d'écran,1772684390
+i18n/en/nested.json,25,google,en,hi,Screen Reader Support,,स्क्रीन रीडर समर्थन,1772684390
+i18n/en/nested.json,25,google,en,ur,Screen Reader Support,,اسکرین ریڈر سپورٹ,1772684391
+i18n/en/nested.json,25,google,en,zh,Screen Reader Support,,屏幕阅读器支持,1772684392
+i18n/en/simple.yml,0,google,en,de,YML Test,,YML-Test,1772684395
+i18n/en/simple.yml,0,azure,es,en,Prueba YML,,YML Test,1772684393
+i18n/en/simple.yml,0,google,fr,en,Test YML,,YML Test,1772684394
+i18n/en/simple.yml,0,google,hi,en,YML परीक्षण,,YML Testing,1772684394
+i18n/en/simple.yml,0,google,ur,en,YML ٹیسٹ,,YML test,1772684394
+i18n/en/simple.yml,0,google,de,en,YML-Test,,YML test,1772684395
+i18n/en/simple.yml,0,google,zh,en,YML 测试,,YML testing,1772684395
+i18n/en/simple.yml,0,azure,en,es,YML Test,,Prueba YML,1772684393
+i18n/en/simple.yml,0,google,en,fr,YML Test,,Test YML,1772684393
+i18n/en/simple.yml,0,google,en,hi,YML Test,,YML परीक्षण,1772684394
+i18n/en/simple.yml,0,google,en,ur,YML Test,,YML ٹیسٹ,1772684394
+i18n/en/simple.yml,0,google,en,zh,YML Test,,YML 测试,1772684395
+i18n/en/simple.yml,1,google,en,de,This is a simple YML file,,Dies ist eine einfache YML-Datei.,1772684395
+i18n/en/simple.yml,1,azure,es,en,Este es un archivo YML sencillo,,This is a simple YML file,1772684393
+i18n/en/simple.yml,1,google,fr,en,Il s'agit d'un simple fichier YML,,It is a simple YML file,1772684394
+i18n/en/simple.yml,1,google,hi,en,यह एक साधारण YML फ़ाइल है,,This is a simple YML file.,1772684394
+i18n/en/simple.yml,1,google,ur,en,یہ ایک سادہ YML فائل ہے۔,,This is a simple YML file.,1772684394
+i18n/en/simple.yml,1,google,de,en,Dies ist eine einfache YML-Datei.,,This is a simple YML file.,1772684395
+i18n/en/simple.yml,1,google,zh,en,这是一个简单的 YML 文件,,This is a simple YML file,1772684395
+i18n/en/simple.yml,1,azure,en,es,This is a simple YML file,,Este es un archivo YML sencillo,1772684393
+i18n/en/simple.yml,1,google,en,fr,This is a simple YML file,,Il s'agit d'un simple fichier YML,1772684393
+i18n/en/simple.yml,1,google,en,hi,This is a simple YML file,,यह एक साधारण YML फ़ाइल है,1772684394
+i18n/en/simple.yml,1,google,en,ur,This is a simple YML file,,یہ ایک سادہ YML فائل ہے۔,1772684394
+i18n/en/simple.yml,1,google,en,zh,This is a simple YML file,,这是一个简单的 YML 文件,1772684395
+i18n/en/simple.yml,2,google,en,de,First item,,Erster Punkt,1772684395
+i18n/en/simple.yml,2,azure,es,en,Primer punto,,First point,1772684393
+i18n/en/simple.yml,2,google,fr,en,Premier article,,First article,1772684394
+i18n/en/simple.yml,2,google,hi,en,पहला आइटम,,first item,1772684394
+i18n/en/simple.yml,2,google,ur,en,پہلی چیز,,First thing,1772684394
+i18n/en/simple.yml,2,google,de,en,Erster Punkt,,First point,1772684395
+i18n/en/simple.yml,2,google,zh,en,第一项,,First item,1772684395
+i18n/en/simple.yml,2,azure,en,es,First item,,Primer punto,1772684393
+i18n/en/simple.yml,2,google,en,fr,First item,,Premier article,1772684393
+i18n/en/simple.yml,2,google,en,hi,First item,,पहला आइटम,1772684394
+i18n/en/simple.yml,2,google,en,ur,First item,,پہلی چیز,1772684394
+i18n/en/simple.yml,2,google,en,zh,First item,,第一项,1772684395
+i18n/en/simple.yml,3,google,en,de,Second item,,Zweiter Punkt,1772684395
+i18n/en/simple.yml,3,azure,es,en,Segundo punto,,Second point,1772684393
+i18n/en/simple.yml,3,google,fr,en,Deuxième article,,Second article,1772684394
+i18n/en/simple.yml,3,google,hi,en,दूसरी वस्तु,,second item,1772684394
+i18n/en/simple.yml,3,google,ur,en,دوسری چیز,,Another thing,1772684394
+i18n/en/simple.yml,3,google,de,en,Zweiter Punkt,,Second point,1772684395
+i18n/en/simple.yml,3,google,zh,en,第二项,,Second item,1772684395
+i18n/en/simple.yml,3,azure,en,es,Second item,,Segundo punto,1772684393
+i18n/en/simple.yml,3,google,en,fr,Second item,,Deuxième article,1772684393
+i18n/en/simple.yml,3,google,en,hi,Second item,,दूसरी वस्तु,1772684394
+i18n/en/simple.yml,3,google,en,ur,Second item,,دوسری چیز,1772684394
+i18n/en/simple.yml,3,google,en,zh,Second item,,第二项,1772684395
+i18n/en/simple.yml,4,google,en,de,Third item,,Dritter Punkt,1772684395
+i18n/en/simple.yml,4,azure,es,en,Tercer punto,,Third point,1772684393
+i18n/en/simple.yml,4,google,fr,en,Troisième élément,,Third element,1772684394
+i18n/en/simple.yml,4,google,hi,en,तीसरा आइटम,,Third item,1772684394
+i18n/en/simple.yml,4,google,ur,en,تیسری چیز,,Third thing,1772684394
+i18n/en/simple.yml,4,google,de,en,Dritter Punkt,,Third point,1772684395
+i18n/en/simple.yml,4,google,zh,en,第三项,,Third item,1772684395
+i18n/en/simple.yml,4,azure,en,es,Third item,,Tercer punto,1772684393
+i18n/en/simple.yml,4,google,en,fr,Third item,,Troisième élément,1772684393
+i18n/en/simple.yml,4,google,en,hi,Third item,,तीसरा आइटम,1772684394
+i18n/en/simple.yml,4,google,en,ur,Third item,,تیسری چیز,1772684394
+i18n/en/simple.yml,4,google,en,zh,Third item,,第三项,1772684395
+i18n/en/ts-example/locales.ts,0,google,en,de,English,,Englisch,1772684398
+i18n/en/ts-example/locales.ts,0,azure,es,en,Inglés,,English,1772684397
+i18n/en/ts-example/locales.ts,0,google,fr,en,Anglais,,English,1772684397
+i18n/en/ts-example/locales.ts,0,google,hi,en,अंग्रेज़ी,,English,1772684398
+i18n/en/ts-example/locales.ts,0,google,ur,en,انگریزی,,English,1772684398
+i18n/en/ts-example/locales.ts,0,google,de,en,Englisch,,English,1772684398
+i18n/en/ts-example/locales.ts,0,google,zh,en,英语,,English,1772684399
+i18n/en/ts-example/locales.ts,0,azure,en,es,English,,Inglés,1772684396
+i18n/en/ts-example/locales.ts,0,google,en,fr,English,,Anglais,1772684397
+i18n/en/ts-example/locales.ts,0,google,en,hi,English,,अंग्रेज़ी,1772684397
+i18n/en/ts-example/locales.ts,0,google,en,ur,English,,انگریزی,1772684398
+i18n/en/ts-example/locales.ts,0,google,en,zh,English,,英语,1772684399
+i18n/en/ts-example/locales.ts,1,google,en,de,Spanish,,Spanisch,1772684398
+i18n/en/ts-example/locales.ts,1,azure,es,en,Español,,Spanish,1772684397
+i18n/en/ts-example/locales.ts,1,google,fr,en,Espagnol,,Spanish,1772684397
+i18n/en/ts-example/locales.ts,1,google,hi,en,स्पैनिश,,Spanish,1772684398
+i18n/en/ts-example/locales.ts,1,google,ur,en,ہسپانوی,,Spanish,1772684398
+i18n/en/ts-example/locales.ts,1,google,de,en,Spanisch,,Spanish,1772684398
+i18n/en/ts-example/locales.ts,1,google,zh,en,西班牙语,,Spanish,1772684399
+i18n/en/ts-example/locales.ts,1,azure,en,es,Spanish,,Español,1772684396
+i18n/en/ts-example/locales.ts,1,google,en,fr,Spanish,,Espagnol,1772684397
+i18n/en/ts-example/locales.ts,1,google,en,hi,Spanish,,स्पैनिश,1772684397
+i18n/en/ts-example/locales.ts,1,google,en,ur,Spanish,,ہسپانوی,1772684398
+i18n/en/ts-example/locales.ts,1,google,en,zh,Spanish,,西班牙语,1772684399
+i18n/en/ts-example/locales.ts,2,google,en,de,French,,Französisch,1772684398
+i18n/en/ts-example/locales.ts,2,azure,es,en,Francés,,French,1772684397
+i18n/en/ts-example/locales.ts,2,google,fr,en,Français,,French,1772684397
+i18n/en/ts-example/locales.ts,2,google,hi,en,फ्रेंच,,French,1772684398
+i18n/en/ts-example/locales.ts,2,google,ur,en,فرانسیسی,,French,1772684398
+i18n/en/ts-example/locales.ts,2,google,de,en,Französisch,,French,1772684398
+i18n/en/ts-example/locales.ts,2,google,zh,en,法语,,French,1772684399
+i18n/en/ts-example/locales.ts,2,azure,en,es,French,,Francés,1772684396
+i18n/en/ts-example/locales.ts,2,google,en,fr,French,,Français,1772684397
+i18n/en/ts-example/locales.ts,2,google,en,hi,French,,फ्रेंच,1772684397
+i18n/en/ts-example/locales.ts,2,google,en,ur,French,,فرانسیسی,1772684398
+i18n/en/ts-example/locales.ts,2,google,en,zh,French,,法语,1772684399
+i18n/en/ts-example/locales.ts,3,google,en,de,German,,Deutsch,1772684398
+i18n/en/ts-example/locales.ts,3,azure,es,en,Alemán,,German,1772684397
+i18n/en/ts-example/locales.ts,3,google,fr,en,Allemand,,German,1772684397
+i18n/en/ts-example/locales.ts,3,google,hi,en,जर्मन,,German,1772684398
+i18n/en/ts-example/locales.ts,3,google,ur,en,جرمن,,German,1772684398
+i18n/en/ts-example/locales.ts,3,google,de,en,Deutsch,,German,1772684398
+i18n/en/ts-example/locales.ts,3,google,zh,en,德语,,German,1772684399
+i18n/en/ts-example/locales.ts,3,azure,en,es,German,,Alemán,1772684396
+i18n/en/ts-example/locales.ts,3,google,en,fr,German,,Allemand,1772684397
+i18n/en/ts-example/locales.ts,3,google,en,hi,German,,जर्मन,1772684397
+i18n/en/ts-example/locales.ts,3,google,en,ur,German,,جرمن,1772684398
+i18n/en/ts-example/locales.ts,3,google,en,zh,German,,德语,1772684399
+i18n/en/ts-example/locales.ts,4,google,en,de,Chinese,,chinesisch,1772684398
+i18n/en/ts-example/locales.ts,4,azure,es,en,Chino,,Chinese,1772684397
+i18n/en/ts-example/locales.ts,4,google,fr,en,Chinois,,Chinese,1772684397
+i18n/en/ts-example/locales.ts,4,google,hi,en,चीनी,,Sugar,1772684398
+i18n/en/ts-example/locales.ts,4,google,ur,en,چینی,,Chinese,1772684398
+i18n/en/ts-example/locales.ts,4,google,de,en,chinesisch,,Chinese,1772684398
+i18n/en/ts-example/locales.ts,4,google,zh,en,中国人,,Chinese,1772684399
+i18n/en/ts-example/locales.ts,4,azure,en,es,Chinese,,Chino,1772684396
+i18n/en/ts-example/locales.ts,4,google,en,fr,Chinese,,Chinois,1772684397
+i18n/en/ts-example/locales.ts,4,google,en,hi,Chinese,,चीनी,1772684397
+i18n/en/ts-example/locales.ts,4,google,en,ur,Chinese,,چینی,1772684398
+i18n/en/ts-example/locales.ts,4,google,en,zh,Chinese,,中国人,1772684399
+i18n/en/ts-example/locales.ts,5,google,en,de,Japanese,,japanisch,1772684398
+i18n/en/ts-example/locales.ts,5,azure,es,en,Japonés,,Japanese,1772684397
+i18n/en/ts-example/locales.ts,5,google,fr,en,japonais,,Japanese,1772684397
+i18n/en/ts-example/locales.ts,5,google,hi,en,जापानी,,Japani,1772684398
+i18n/en/ts-example/locales.ts,5,google,ur,en,جاپانی,,Japanese,1772684398
+i18n/en/ts-example/locales.ts,5,google,de,en,japanisch,,Japanese,1772684398
+i18n/en/ts-example/locales.ts,5,google,zh,en,日本人,,Japanese,1772684399
+i18n/en/ts-example/locales.ts,5,azure,en,es,Japanese,,Japonés,1772684396
+i18n/en/ts-example/locales.ts,5,google,en,fr,Japanese,,japonais,1772684397
+i18n/en/ts-example/locales.ts,5,google,en,hi,Japanese,,जापानी,1772684397
+i18n/en/ts-example/locales.ts,5,google,en,ur,Japanese,,جاپانی,1772684398
+i18n/en/ts-example/locales.ts,5,google,en,zh,Japanese,,日本人,1772684399
+i18n/en/ts-example/locales.ts,6,google,en,de,Russian,,Russisch,1772684398
+i18n/en/ts-example/locales.ts,6,azure,es,en,Ruso,,Russian,1772684397
+i18n/en/ts-example/locales.ts,6,google,fr,en,russe,,Russian,1772684397
+i18n/en/ts-example/locales.ts,6,google,hi,en,रूसी,,Russian,1772684398
+i18n/en/ts-example/locales.ts,6,google,ur,en,روسی,,Russian,1772684398
+i18n/en/ts-example/locales.ts,6,google,de,en,Russisch,,Russian,1772684398
+i18n/en/ts-example/locales.ts,6,google,zh,en,俄语,,Russian,1772684399
+i18n/en/ts-example/locales.ts,6,azure,en,es,Russian,,Ruso,1772684396
+i18n/en/ts-example/locales.ts,6,google,en,fr,Russian,,russe,1772684397
+i18n/en/ts-example/locales.ts,6,google,en,hi,Russian,,रूसी,1772684397
+i18n/en/ts-example/locales.ts,6,google,en,ur,Russian,,روسی,1772684398
+i18n/en/ts-example/locales.ts,6,google,en,zh,Russian,,俄语,1772684399
+i18n/en/ts-example/locales.ts,7,google,en,de,Arabic,,Arabisch,1772684398
+i18n/en/ts-example/locales.ts,7,azure,es,en,Árabe,,Arabic,1772684397
+i18n/en/ts-example/locales.ts,7,google,fr,en,arabe,,Arab,1772684397
+i18n/en/ts-example/locales.ts,7,google,hi,en,अरबी,,Arabic,1772684398
+i18n/en/ts-example/locales.ts,7,google,ur,en,عربی,,Arabic,1772684398
+i18n/en/ts-example/locales.ts,7,google,de,en,Arabisch,,Arabic,1772684398
+i18n/en/ts-example/locales.ts,7,google,zh,en,阿拉伯,,Arab,1772684399
+i18n/en/ts-example/locales.ts,7,azure,en,es,Arabic,,Árabe,1772684396
+i18n/en/ts-example/locales.ts,7,google,en,fr,Arabic,,arabe,1772684397
+i18n/en/ts-example/locales.ts,7,google,en,hi,Arabic,,अरबी,1772684397
+i18n/en/ts-example/locales.ts,7,google,en,ur,Arabic,,عربی,1772684398
+i18n/en/ts-example/locales.ts,7,google,en,zh,Arabic,,阿拉伯,1772684399
+i18n/en/ts-example/locales.ts,8,google,en,de,Portuguese,,Portugiesisch,1772684398
+i18n/en/ts-example/locales.ts,8,azure,es,en,Portugués,,Portuguese,1772684397
+i18n/en/ts-example/locales.ts,8,google,fr,en,portugais,,Portuguese,1772684397
+i18n/en/ts-example/locales.ts,8,google,hi,en,पुर्तगाली,,Portuguese,1772684398
+i18n/en/ts-example/locales.ts,8,google,ur,en,پرتگالی,,Portuguese,1772684398
+i18n/en/ts-example/locales.ts,8,google,de,en,Portugiesisch,,Portuguese,1772684398
+i18n/en/ts-example/locales.ts,8,google,zh,en,葡萄牙语,,Portuguese,1772684399
+i18n/en/ts-example/locales.ts,8,azure,en,es,Portuguese,,Portugués,1772684396
+i18n/en/ts-example/locales.ts,8,google,en,fr,Portuguese,,portugais,1772684397
+i18n/en/ts-example/locales.ts,8,google,en,hi,Portuguese,,पुर्तगाली,1772684397
+i18n/en/ts-example/locales.ts,8,google,en,ur,Portuguese,,پرتگالی,1772684398
+i18n/en/ts-example/locales.ts,8,google,en,zh,Portuguese,,葡萄牙语,1772684399
+i18n/en/ts-example/locales.ts,9,google,en,de,Hindi,,Hindi,1772684398
+i18n/en/ts-example/locales.ts,9,azure,es,en,Hindi,,Hindi,1772684397
+i18n/en/ts-example/locales.ts,9,google,fr,en,hindi,,Hindi,1772684397
+i18n/en/ts-example/locales.ts,9,google,hi,en,हिंदी,,Hindi,1772684398
+i18n/en/ts-example/locales.ts,9,google,ur,en,ہندی,,Hindi,1772684398
+i18n/en/ts-example/locales.ts,9,google,de,en,Hindi,,Hindi,1772684398
+i18n/en/ts-example/locales.ts,9,google,zh,en,印地语,,Hindi,1772684399
+i18n/en/ts-example/locales.ts,9,azure,en,es,Hindi,,Hindi,1772684396
+i18n/en/ts-example/locales.ts,9,google,en,fr,Hindi,,hindi,1772684397
+i18n/en/ts-example/locales.ts,9,google,en,hi,Hindi,,हिंदी,1772684397
+i18n/en/ts-example/locales.ts,9,google,en,ur,Hindi,,ہندی,1772684398
+i18n/en/ts-example/locales.ts,9,google,en,zh,Hindi,,印地语,1772684399
+i18n/en/ts-example/messages.ts,0,google,en,de,"Hello, world!",,Hallo Welt!,1772684402
+i18n/en/ts-example/messages.ts,0,azure,es,en,"¡Hola, mundo!",,"Hello, world!",1772684400
+i18n/en/ts-example/messages.ts,0,google,fr,en,Bonjour le monde!,,Hello world!,1772684401
+i18n/en/ts-example/messages.ts,0,google,hi,en,हैलो वर्ल्ड!,,Hello World!,1772684401
+i18n/en/ts-example/messages.ts,0,google,ur,en,ہیلو، دنیا!,,"Hello, world!",1772684402
+i18n/en/ts-example/messages.ts,0,google,de,en,Hallo Welt!,,Hello World!,1772684402
+i18n/en/ts-example/messages.ts,0,google,zh,en,你好世界！,,Hello World!,1772684403
+i18n/en/ts-example/messages.ts,0,azure,en,es,"Hello, world!",,"¡Hola, mundo!",1772684400
+i18n/en/ts-example/messages.ts,0,google,en,fr,"Hello, world!",,Bonjour le monde!,1772684400
+i18n/en/ts-example/messages.ts,0,google,en,hi,"Hello, world!",,हैलो वर्ल्ड!,1772684401
+i18n/en/ts-example/messages.ts,0,google,en,ur,"Hello, world!",,ہیلو، دنیا!,1772684401
+i18n/en/ts-example/messages.ts,0,google,en,zh,"Hello, world!",,你好世界！,1772684402
+i18n/en/ts-example/messages.ts,1,google,en,de,"Goodbye, world!",,"Auf Wiedersehen, Welt!",1772684402
+i18n/en/ts-example/messages.ts,1,azure,es,en,"¡Adiós, mundo!",,"Goodbye, world!",1772684400
+i18n/en/ts-example/messages.ts,1,google,fr,en,"Au revoir, monde !",,"Goodbye, world!",1772684401
+i18n/en/ts-example/messages.ts,1,google,hi,en,अलविदा दुनिया!,,goodbye World!,1772684401
+i18n/en/ts-example/messages.ts,1,google,ur,en,الوداع، دنیا!,,"Goodbye, world!",1772684402
+i18n/en/ts-example/messages.ts,1,google,de,en,"Auf Wiedersehen, Welt!",,"Goodbye, world!",1772684402
+i18n/en/ts-example/messages.ts,1,google,zh,en,再见了，世界！,,"Goodbye, world!",1772684403
+i18n/en/ts-example/messages.ts,1,azure,en,es,"Goodbye, world!",,"¡Adiós, mundo!",1772684400
+i18n/en/ts-example/messages.ts,1,google,en,fr,"Goodbye, world!",,"Au revoir, monde !",1772684400
+i18n/en/ts-example/messages.ts,1,google,en,hi,"Goodbye, world!",,अलविदा दुनिया!,1772684401
+i18n/en/ts-example/messages.ts,1,google,en,ur,"Goodbye, world!",,الوداع، دنیا!,1772684401
+i18n/en/ts-example/messages.ts,1,google,en,zh,"Goodbye, world!",,再见了，世界！,1772684402
+i18n/en/ts-example/messages.ts,2,google,en,de,Welcome to the translation system.,,Willkommen beim Übersetzungssystem.,1772684402
+i18n/en/ts-example/messages.ts,2,azure,es,en,Bienvenido al sistema de traducción.,,Welcome to the translation system.,1772684400
+i18n/en/ts-example/messages.ts,2,google,fr,en,Bienvenue dans le système de traduction.,,Welcome to the translation system.,1772684401
+i18n/en/ts-example/messages.ts,2,google,hi,en,अनुवाद प्रणाली में आपका स्वागत है।,,Welcome to the translation system.,1772684401
+i18n/en/ts-example/messages.ts,2,google,ur,en,ترجمہ کے نظام میں خوش آمدید۔,,Welcome to the translation system.,1772684402
+i18n/en/ts-example/messages.ts,2,google,de,en,Willkommen beim Übersetzungssystem.,,Welcome to the translation system.,1772684402
+i18n/en/ts-example/messages.ts,2,google,zh,en,欢迎使用翻译系统。,,Welcome to the translation system.,1772684403
+i18n/en/ts-example/messages.ts,2,azure,en,es,Welcome to the translation system.,,Bienvenido al sistema de traducción.,1772684400
+i18n/en/ts-example/messages.ts,2,google,en,fr,Welcome to the translation system.,,Bienvenue dans le système de traduction.,1772684400
+i18n/en/ts-example/messages.ts,2,google,en,hi,Welcome to the translation system.,,अनुवाद प्रणाली में आपका स्वागत है।,1772684401
+i18n/en/ts-example/messages.ts,2,google,en,ur,Welcome to the translation system.,,ترجمہ کے نظام میں خوش آمدید۔,1772684401
+i18n/en/ts-example/messages.ts,2,google,en,zh,Welcome to the translation system.,,欢迎使用翻译系统。,1772684402
+i18n/en/ts-example/messages.ts,3,google,en,de,Thank you for using our service.,,"Vielen Dank, dass Sie unseren Service genutzt haben.",1772684402
+i18n/en/ts-example/messages.ts,3,azure,es,en,Gracias por utilizar nuestro servicio.,,Thank you for using our service.,1772684400
+i18n/en/ts-example/messages.ts,3,google,fr,en,Merci d'avoir utilisé notre service.,,Thank you for using our service.,1772684401
+i18n/en/ts-example/messages.ts,3,google,hi,en,हमारी सेवा का उपयोग करने के लिए धन्यवाद।,,Thank you for using our service.,1772684401
+i18n/en/ts-example/messages.ts,3,google,ur,en,ہماری سروس استعمال کرنے کے لیے آپ کا شکریہ۔,,Thank you for using our service.,1772684402
+i18n/en/ts-example/messages.ts,3,google,de,en,"Vielen Dank, dass Sie unseren Service genutzt haben.",,Thank you for using our service.,1772684402
+i18n/en/ts-example/messages.ts,3,google,zh,en,感谢您使用我们的服务。,,Thank you for using our service.,1772684403
+i18n/en/ts-example/messages.ts,3,azure,en,es,Thank you for using our service.,,Gracias por utilizar nuestro servicio.,1772684400
+i18n/en/ts-example/messages.ts,3,google,en,fr,Thank you for using our service.,,Merci d'avoir utilisé notre service.,1772684400
+i18n/en/ts-example/messages.ts,3,google,en,hi,Thank you for using our service.,,हमारी सेवा का उपयोग करने के लिए धन्यवाद।,1772684401
+i18n/en/ts-example/messages.ts,3,google,en,ur,Thank you for using our service.,,ہماری سروس استعمال کرنے کے لیے آپ کا شکریہ۔,1772684401
+i18n/en/ts-example/messages.ts,3,google,en,zh,Thank you for using our service.,,感谢您使用我们的服务。,1772684402
+i18n/en/ts-example/messages.ts,4,google,en,de,First item,,Erster Punkt,1772684402
+i18n/en/ts-example/messages.ts,4,azure,es,en,Primer punto,,First point,1772684400
+i18n/en/ts-example/messages.ts,4,google,fr,en,Premier article,,First article,1772684401
+i18n/en/ts-example/messages.ts,4,google,hi,en,पहला आइटम,,first item,1772684401
+i18n/en/ts-example/messages.ts,4,google,ur,en,پہلی چیز,,First thing,1772684402
+i18n/en/ts-example/messages.ts,4,google,de,en,Erster Punkt,,First point,1772684402
+i18n/en/ts-example/messages.ts,4,google,zh,en,第一项,,First item,1772684403
+i18n/en/ts-example/messages.ts,4,azure,en,es,First item,,Primer punto,1772684400
+i18n/en/ts-example/messages.ts,4,google,en,fr,First item,,Premier article,1772684400
+i18n/en/ts-example/messages.ts,4,google,en,hi,First item,,पहला आइटम,1772684401
+i18n/en/ts-example/messages.ts,4,google,en,ur,First item,,پہلی چیز,1772684401
+i18n/en/ts-example/messages.ts,4,google,en,zh,First item,,第一项,1772684402
+i18n/en/ts-example/messages.ts,5,google,en,de,Second item,,Zweiter Punkt,1772684402
+i18n/en/ts-example/messages.ts,5,azure,es,en,Segundo punto,,Second point,1772684400
+i18n/en/ts-example/messages.ts,5,google,fr,en,Deuxième article,,Second article,1772684401
+i18n/en/ts-example/messages.ts,5,google,hi,en,दूसरी वस्तु,,second item,1772684401
+i18n/en/ts-example/messages.ts,5,google,ur,en,دوسری چیز,,Another thing,1772684402
+i18n/en/ts-example/messages.ts,5,google,de,en,Zweiter Punkt,,Second point,1772684402
+i18n/en/ts-example/messages.ts,5,google,zh,en,第二项,,Second item,1772684403
+i18n/en/ts-example/messages.ts,5,azure,en,es,Second item,,Segundo punto,1772684400
+i18n/en/ts-example/messages.ts,5,google,en,fr,Second item,,Deuxième article,1772684400
+i18n/en/ts-example/messages.ts,5,google,en,hi,Second item,,दूसरी वस्तु,1772684401
+i18n/en/ts-example/messages.ts,5,google,en,ur,Second item,,دوسری چیز,1772684401
+i18n/en/ts-example/messages.ts,5,google,en,zh,Second item,,第二项,1772684402
+i18n/en/ts-example/messages.ts,6,google,en,de,Third item,,Dritter Punkt,1772684402
+i18n/en/ts-example/messages.ts,6,azure,es,en,Tercer punto,,Third point,1772684400
+i18n/en/ts-example/messages.ts,6,google,fr,en,Troisième élément,,Third element,1772684401
+i18n/en/ts-example/messages.ts,6,google,hi,en,तीसरा आइटम,,Third item,1772684401
+i18n/en/ts-example/messages.ts,6,google,ur,en,تیسری چیز,,Third thing,1772684402
+i18n/en/ts-example/messages.ts,6,google,de,en,Dritter Punkt,,Third point,1772684402
+i18n/en/ts-example/messages.ts,6,google,zh,en,第三项,,Third item,1772684403
+i18n/en/ts-example/messages.ts,6,azure,en,es,Third item,,Tercer punto,1772684400
+i18n/en/ts-example/messages.ts,6,google,en,fr,Third item,,Troisième élément,1772684400
+i18n/en/ts-example/messages.ts,6,google,en,hi,Third item,,तीसरा आइटम,1772684401
+i18n/en/ts-example/messages.ts,6,google,en,ur,Third item,,تیسری چیز,1772684401
+i18n/en/ts-example/messages.ts,6,google,en,zh,Third item,,第三项,1772684402
