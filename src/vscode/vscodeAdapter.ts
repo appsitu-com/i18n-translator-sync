@@ -33,6 +33,18 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   }
 
   /**
+   * Ensure heavy runtime state is initialized lazily.
+   * This is where cache/database creation happens.
+   */
+  private async ensureRuntimeInitialized(): Promise<void> {
+    if (this.translatorManager) {
+      return
+    }
+
+    await this.initialize()
+  }
+
+  /**
    * Get the passphrase
    */
   private async getPassphrase(): Promise<string | undefined> {
@@ -107,10 +119,8 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
         this.passphraseManager = new PassphraseManager(context, this.logger)
       }
 
-      await this.initialize()
-
       this.initialized = true
-      this.logger.info('Translator initialized (not started)')
+      this.logger.info('Translator activation initialized (runtime not started)')
     } catch (error: any) {
       this.logger.error(`Error initializing translator: ${error.message || String(error)}`)
       throw error
@@ -146,6 +156,9 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
 
       // Start watching for file changes and performing translations
       try {
+        // Initialize runtime lazily so opening a workspace does not create a DB.
+        await this.ensureRuntimeInitialized()
+
         // Get the passphrase once - it's already stored in the singleton
         await this.getPassphrase()
 
@@ -211,6 +224,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   async pushToMateCat(): Promise<void> {
     // Ensure we're initialized but don't require the translator to be running
     await this.initializeOnActivation()
+    await this.ensureRuntimeInitialized()
 
     if (!this.translatorManager) {
       vscode.window.showErrorMessage('Translator not initialized properly')
@@ -231,6 +245,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   async pullFromMateCat(): Promise<void> {
     // Ensure we're initialized but don't require the translator to be running
     await this.initializeOnActivation()
+    await this.ensureRuntimeInitialized()
 
     if (!this.translatorManager) {
       vscode.window.showErrorMessage('Translator not initialized properly')

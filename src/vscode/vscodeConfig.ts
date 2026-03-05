@@ -4,11 +4,18 @@ import * as path from 'path';
 import { ConfigProvider } from '../core/coreConfig';
 import { TRANSLATOR_JSON } from '../core/constants';
 
+type EngineSection = 'azure' | 'google' | 'deepl' | 'gemini' | 'copy';
+
+function isEngineSection(section: string): section is EngineSection {
+  return section === 'azure' || section === 'google' || section === 'deepl' || section === 'gemini' || section === 'copy';
+}
+
 /**
  * VSCode configuration provider implementation
  */
 export class VsCodeConfigProvider implements ConfigProvider {
   private config: Record<string, any> = {};
+  private engineConfigCache: Partial<Record<EngineSection, unknown>> = {};
 
   /**
    * Load configuration from translator.json file in the workspace
@@ -18,6 +25,10 @@ export class VsCodeConfigProvider implements ConfigProvider {
     if (!workspaceFolder) {
       return;
     }
+
+    // Always clear cached values before reloading from disk.
+    this.config = {};
+    this.engineConfigCache = {};
 
     const configPath = path.join(workspaceFolder.uri.fsPath, TRANSLATOR_JSON);
 
@@ -37,7 +48,12 @@ export class VsCodeConfigProvider implements ConfigProvider {
    */
   get<T>(section: string, defaultValue?: T): T {
     // Special handling for translation engine configs
-    if (section === 'azure' || section === 'google' || section === 'deepl' || section === 'gemini' || section === 'copy') {
+    if (isEngineSection(section)) {
+      const cached = this.engineConfigCache[section] as T | undefined;
+      if (cached !== undefined) {
+        return cached;
+      }
+
       // For translation engines, create a default configuration if not specified
       let engineConfig: any = {};
 
@@ -76,8 +92,7 @@ export class VsCodeConfigProvider implements ConfigProvider {
         engineConfig = { ...engineConfig, ...translatorConfigs[section] };
       }
 
-      console.log(`Loaded ${section} translator config from translator.json and environment variables`);
-
+      this.engineConfigCache[section] = engineConfig;
       return engineConfig as T;
     }
 
