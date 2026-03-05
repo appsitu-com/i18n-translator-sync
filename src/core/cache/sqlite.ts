@@ -146,6 +146,7 @@ export class SQLiteCache implements TranslationCache {
   private getSourceFileIdStmt: Database.Statement
   private insertSourceFileStmt: Database.Statement
   private selectTranslationStmt: Database.Statement
+  private selectTranslationFallbackStmt: Database.Statement
   private insertTranslationStmt: Database.Statement
   private updateTextPosStmt: Database.Statement
   private updateUsedStmt: Database.Statement
@@ -195,6 +196,18 @@ export class SQLiteCache implements TranslationCache {
         AND text_pos = ?
         AND source_text = ?
         AND context = ?
+    `)
+
+    this.selectTranslationFallbackStmt = this.db.prepare(`
+      SELECT id, target_text, text_pos, used
+      FROM translations
+      WHERE engine_name = ?
+        AND source_lang = ?
+        AND target_lang = ?
+        AND source_text = ?
+        AND context = ?
+      ORDER BY updated_at DESC, id DESC
+      LIMIT 1
     `)
 
     this.insertTranslationStmt = this.db.prepare(`
@@ -447,9 +460,17 @@ export class SQLiteCache implements TranslationCache {
         const c = (contexts[i] ?? '').toString()
         const pos = positions[i] ?? 0
 
-        const row = this.selectTranslationStmt.get(
+        let row = this.selectTranslationStmt.get(
           engine, source, target, sourceFileId, pos, t, c
         ) as any
+
+        // Fallback lookup for renamed/moved files: reuse any matching cached translation
+        // when strict same-file/same-position lookup misses.
+        if (!row) {
+          row = this.selectTranslationFallbackStmt.get(
+            engine, source, target, t, c
+          ) as any
+        }
 
         if (row) {
                     // Mark as used (only update if not already used)

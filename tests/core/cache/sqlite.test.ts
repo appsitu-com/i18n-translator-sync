@@ -241,6 +241,35 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
     cache.close()
   })
 
+  it('falls back to any file and position for renamed or moved source files', async () => {
+    const cache = new SQLiteCache(dbPath, dir)
+
+    await cache.putMany({
+      engine: 'deepl',
+      source: 'en',
+      target: 'fr',
+      pairs: [{ src: 'Save', dst: 'Enregistrer', pos: 7 }],
+      sourcePath: 'old/path/file.json'
+    })
+
+    // Simulate file rename/move where both source_path and text_pos changed.
+    const result = await cache.getMany({
+      engine: 'deepl',
+      source: 'en',
+      target: 'fr',
+      texts: ['Save'],
+      contexts: [null],
+      sourcePath: 'new/path/file.json',
+      positions: [0]
+    })
+
+    expect(result.get('Save::')?.translation).toBe('Enregistrer')
+    // Returned text position should be the cached one from the prior location.
+    expect(result.get('Save::')?.textPos).toBe(7)
+
+    cache.close()
+  })
+
   it('handles CSV import when file does not exist', async () => {
     const logger = createMockLogger()
     const cache = new SQLiteCache(dbPath, dir, logger)
