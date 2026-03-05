@@ -68,8 +68,8 @@ export interface TranslationCache {
 export class NodeSQLiteCache implements TranslationCache {
   private cache: SQLiteCache
 
-  constructor(logger: Logger, dbPath: string) {
-    this.cache = new SQLiteCache(dbPath, logger)
+  constructor(logger: Logger, dbPath: string, workspacePath: string) {
+    this.cache = new SQLiteCache(dbPath, workspacePath, logger)
   }
 
   async initialize(): Promise<void> {
@@ -130,6 +130,7 @@ export class NodeSQLiteCache implements TranslationCache {
 export class SQLiteCache implements TranslationCache {
   private db: Database.Database
   private logger: Logger
+  private workspacePath: string
   private getSourceFileIdStmt: Database.Statement
   private insertSourceFileStmt: Database.Statement
   private selectTranslationStmt: Database.Statement
@@ -140,8 +141,9 @@ export class SQLiteCache implements TranslationCache {
   /**
    * Create a new SQLite cache
    */
-  constructor(dbFile: string, logger: Logger = NO_OP_LOGGER) {
+  constructor(dbFile: string, workspacePath: string, logger: Logger = NO_OP_LOGGER) {
     this.logger = logger
+    this.workspacePath = workspacePath
 
     const dir = path.dirname(dbFile)
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
@@ -369,23 +371,42 @@ export class SQLiteCache implements TranslationCache {
     // Ensure the cache directory exists
     await fileSystem.createDirectory(fileSystem.createUri(cacheDir))
 
-    return new SQLiteCache(dbPath, logger)
+    return new SQLiteCache(dbPath, workspacePath, logger)
+  }
+
+  /**
+   * Normalize source path to be relative to workspace and use forward slashes
+   * This ensures paths are portable across Windows, macOS, and Linux
+   */
+  private normalizePath(sourcePath: string): string {
+    if (!sourcePath) return ''
+
+    // Convert to absolute path if needed
+    const absolutePath = path.isAbsolute(sourcePath) ? sourcePath : path.resolve(this.workspacePath, sourcePath)
+
+    // Make relative to workspace
+    const relativePath = path.relative(this.workspacePath, absolutePath)
+
+    // Convert backslashes to forward slashes for cross-platform consistency
+    return relativePath.split(path.sep).join('/')
   }
 
   /**
    * Get or create source_file_id for a given path
    */
   private getOrCreateSourceFileId(sourcePath: string): number {
-    const existing = this.getSourceFileIdStmt.get(sourcePath) as any
+    const normalizedPath = this.normalizePath(sourcePath)
+    const existing = this.getSourceFileIdStmt.get(normalizedPath) as any
     if (existing) {
       return existing.id
     }
-    const result = this.insertSourceFileStmt.get(sourcePath) as any
+    const result = this.insertSourceFileStmt.get(normalizedPath) as any
     return result.id
   }
 
   async hasSourcePath(sourcePath: string): Promise<boolean> {
-    const row = this.getSourceFileIdStmt.get(sourcePath) as { id?: number } | undefined
+    const normalizedPath = this.normalizePath(sourcePath)
+    const row = this.getSourceFileIdStmt.get(normalizedPath) as { id?: number } | undefined
     return Boolean(row?.id)
   }
 

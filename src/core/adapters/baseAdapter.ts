@@ -68,7 +68,7 @@ export abstract class TranslatorAdapter {
     const dirUri = this.fileSystem.createUri(cacheDir);
     await this.fileSystem.createDirectory(dirUri);
 
-    this.cache = new SQLiteCache(dbPath, this.logger);
+    this.cache = new SQLiteCache(dbPath, this.workspacePath, this.logger);
     return this.cache;
   }
 

@@ -140,7 +140,7 @@ describe('Bulk Translation Integration Tests', () => {
     // Initialize real components (not mocks)
     fileSystem = new NodeFileSystem();
     logger = new ConsoleLogger('test');
-    cache = new SQLiteCache(':memory:'); // Use in-memory DB for tests
+    cache = new SQLiteCache(':memory:', process.cwd()); // Use in-memory DB for tests
     watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
     configProvider = new CliConfigProvider(fileSystem, logger, path.join(tempDir, TRANSLATOR_JSON));
 

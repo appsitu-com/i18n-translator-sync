@@ -52,7 +52,7 @@ describe('CLI Copy Translator Tests', () => {
     // Setup test environment
     fileSystem = new NodeFileSystem();
     logger = new ConsoleLogger('test');
-    cache = new SQLiteCache(':memory:');
+    cache = new SQLiteCache(':memory:', process.cwd());
 
     // Clear the registry before each test
     try {

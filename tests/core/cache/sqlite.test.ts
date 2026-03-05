@@ -52,7 +52,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
 
   it('putMany/getMany respects context in PK and persists across reopen', async () => {
     // 1) create + write
-    let cache = new SQLiteCache(dbPath)
+    let cache = new SQLiteCache(dbPath, dir)
 
     // miss first
     let got = await cache.getMany({
@@ -95,7 +95,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
     cache.close()
 
     // 2) reopen & verify persistence
-    cache = new SQLiteCache(dbPath)
+    cache = new SQLiteCache(dbPath, dir)
     const again = await cache.getMany({
       engine: 'deepl',
       source: 'EN',
@@ -140,7 +140,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
 
     // Fresh DB + import
     const db2 = join(dir, 'cache2.db')
-    let cache2 = new SQLiteCache(db2)
+    let cache2 = new SQLiteCache(db2, dir)
     const imported = await cache2.importCSV(csvPath)
     expect(imported).toBeGreaterThan(0)
 
@@ -160,7 +160,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
   })
 
   it('tracks and returns text_pos for each translation', async () => {
-    const cache = new SQLiteCache(dbPath)
+    const cache = new SQLiteCache(dbPath, dir)
 
     // Put translations with positions
     await cache.putMany({
@@ -195,7 +195,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
   })
 
   it('handles multiple source files with same text', async () => {
-    const cache = new SQLiteCache(dbPath)
+    const cache = new SQLiteCache(dbPath, dir)
 
     // Same text in different files
     await cache.putMany({
@@ -243,7 +243,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
 
   it('handles CSV import when file does not exist', async () => {
     const logger = createMockLogger()
-    const cache = new SQLiteCache(dbPath, logger)
+    const cache = new SQLiteCache(dbPath, dir, logger)
 
     const nonExistentPath = join(dir, 'does-not-exist.csv')
     const imported = await cache.importCSV(nonExistentPath)
@@ -255,7 +255,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
   })
 
   it('handles empty CSV import', async () => {
-    const cache = new SQLiteCache(dbPath)
+    const cache = new SQLiteCache(dbPath, dir)
 
     // Create empty CSV with just headers
     const csvPath = join(dir, 'empty.csv')
@@ -269,7 +269,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
 
   it('logs when closing cache', async () => {
     const logger = createMockLogger()
-    const cache = new SQLiteCache(dbPath, logger)
+    const cache = new SQLiteCache(dbPath, dir, logger)
 
     cache.close()
 
@@ -277,7 +277,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
   })
 
   it('handles CSV import without updated_at values', async () => {
-    const cache = new SQLiteCache(dbPath)
+    const cache = new SQLiteCache(dbPath, dir)
 
     // Create CSV without updated_at column
     const csvPath = join(dir, 'no-timestamp.csv')
@@ -303,7 +303,7 @@ describe('SQLiteCache (better-sqlite3 real DB)', () => {
   })
 
   it('handles missing positions array gracefully', async () => {
-    const cache = new SQLiteCache(dbPath)
+    const cache = new SQLiteCache(dbPath, dir)
 
     // Put with mixed positions
     await cache.putMany({
@@ -468,7 +468,7 @@ describe('SQLiteCache schema migrations', () => {
   })
 
   it('creates schema_version table on first use', async () => {
-    const cache = new SQLiteCache(dbPath)
+    const cache = new SQLiteCache(dbPath, dir)
 
     // Verify schema_version table exists and is set to 1
     const version = cache['getSchemaVersion']()
@@ -497,7 +497,7 @@ describe('SQLiteCache schema migrations', () => {
 
     // Open with SQLiteCache - should detect no schema_version and recreate
     const logger = createMockLogger()
-    const cache = new SQLiteCache(dbPath, logger)
+    const cache = new SQLiteCache(dbPath, dir, logger)
 
     expect(logger.info).toHaveBeenCalledWith('No schema version found. Recreating database schema.')
 
@@ -552,7 +552,7 @@ describe('SQLiteCache schema migrations', () => {
 
     // Open with SQLiteCache - should detect version 0 and migrate
     const logger = createMockLogger()
-    const cache = new SQLiteCache(dbPath, logger)
+    const cache = new SQLiteCache(dbPath, dir, logger)
 
     expect(logger.info).toHaveBeenCalledWith('No schema version found. Recreating database schema.')
 
@@ -586,7 +586,7 @@ describe('SQLiteCache schema migrations', () => {
 
     // Open with SQLiteCache - should detect version < 1 and run migrations
     const logger = createMockLogger()
-    const cache = new SQLiteCache(dbPath, logger)
+    const cache = new SQLiteCache(dbPath, dir, logger)
 
     expect(logger.info).toHaveBeenCalledWith('No schema version found. Recreating database schema.')
 
