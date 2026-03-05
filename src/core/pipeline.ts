@@ -243,7 +243,6 @@ export class TranslatorPipeline {
 
     // Get relative path from the source folder
     const rel = getRelativePath(srcUri.fsPath, workspacePath, config)
-    this.logger.info(`File ${srcUri.fsPath} resolved to relative path: ${rel}`)
 
     // Read and process file content
     const filename = srcUri.fsPath.replace(/\\/g, '/').toLowerCase()
