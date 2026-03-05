@@ -4,7 +4,7 @@ import * as fs from 'fs'
 import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
 import { StatusBarManager, VSCodeStatusBarManager, TranslatorState } from './vscode/statusBar'
 import { VSCodeLogger } from './vscode/vscodeLogger'
-import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './core/constants'
+import { TRANSLATOR_JSON, TRANSLATOR_ENV, TRANSLATOR_DIR } from './core/constants'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
@@ -145,6 +145,11 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
   }
 
   const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath
+
+  // Ensure sensitive/runtime paths are always git-ignored on start
+  ensureGitignoreEntry(workspacePath, TRANSLATOR_ENV)
+  ensureGitignoreEntry(workspacePath, `${TRANSLATOR_DIR}/`)
+
   const configFiles = [
     {
       name: TRANSLATOR_ENV,
@@ -153,7 +158,7 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
       message: 'A translator.env file has been created. Please configure your translation API keys.',
       reminderMessage: "Don't forget to configure your translation API keys in the translator.env file.",
       docsUrl: 'https://github.com/appsitu-com/i18n-translator-sync#api-keys',
-      gitignoreEntry: TRANSLATOR_ENV // Ensure translator.env is git-ignored (contains secrets)
+      gitignoreEntry: null
     },
     {
       name: TRANSLATOR_JSON,
