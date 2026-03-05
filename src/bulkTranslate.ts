@@ -1,5 +1,5 @@
 import { getTranslator } from './translators/registry'
-import type { TranslationCache } from './cache.sqlite'
+import type { TranslationCache } from './core/cache/sqlite'
 import { TranslatorApiConfig } from './translators/types'
 import { normalizeLocaleWithMap } from './util/localeNorm'
 
@@ -20,7 +20,8 @@ export async function bulkTranslateWithEngine(
   contexts: (string | null | undefined)[],
   engineName: string,
   opts: { source: string; target: string; apiConfig: TranslatorApiConfig },
-  cache: TranslationCache
+  cache: TranslationCache,
+  sourcePath?: string
 ): Promise<{ translations: string[]; stats: TranslationStats }> {
   if (!texts.length) {
     return {
@@ -38,7 +39,7 @@ export async function bulkTranslateWithEngine(
   const srcNorm = normalizeLocaleWithMap(opts.source, langMap)
   const tgtNorm = normalizeLocaleWithMap(opts.target, langMap)
 
-  const uniq: Array<{ t: string; c: string }> = []
+  const uniq: Array<{ t: string; c: string; pos: number }> = []
   const seen = new Set<string>()
 
   // Use a readable separator that can be easily seen in database queries
@@ -51,7 +52,7 @@ export async function bulkTranslateWithEngine(
     const k = `${t}${SEPARATOR}${c}`
     if (!seen.has(k)) {
       seen.add(k)
-      uniq.push({ t, c })
+      uniq.push({ t, c, pos: i })
     }
   }
 
@@ -60,7 +61,9 @@ export async function bulkTranslateWithEngine(
     source: srcNorm,
     target: tgtNorm,
     texts: uniq.map((u) => u.t),
-    contexts: uniq.map((u) => u.c)
+    contexts: uniq.map((u) => u.c),
+    sourcePath: sourcePath,
+    positions: uniq.map((u) => u.pos)
   })
 
   const misses = uniq.filter((u) => !cached.has(`${u.t}${SEPARATOR}${u.c}`))
@@ -81,13 +84,17 @@ export async function bulkTranslateWithEngine(
       engine: engine.name,
       source: srcNorm,
       target: tgtNorm,
-      pairs: misses.map((m, i) => ({ src: m.t, dst: translated[i], ctx: m.c }))
+      pairs: misses.map((m, i) => ({ src: m.t, dst: translated[i], ctx: m.c, pos: m.pos })),
+      sourcePath: sourcePath
     })
 
-    misses.forEach((m, i) => cached.set(`${m.t}${SEPARATOR}${m.c}`, translated[i]))
+    misses.forEach((m, i) => cached.set(`${m.t}${SEPARATOR}${m.c}`, { translation: translated[i], textPos: m.pos }))
   }
 
-  const translations = texts.map((t, i) => cached.get(`${t}${SEPARATOR}${(contexts[i] ?? '').toString()}`) ?? t)
+  const translations = texts.map((t, i) => {
+    const entry = cached.get(`${t}${SEPARATOR}${(contexts[i] ?? '').toString()}`)
+    return entry?.translation ?? t
+  })
 
   // Note: For the copy engine, apiCalls represents the number of "identity mappings" created
   // though they don't consume API quota. We count them separately for consistency.
