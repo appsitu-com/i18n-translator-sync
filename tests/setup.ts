@@ -15,21 +15,33 @@ const testLogger = {
   show: () => {} // no-op for tests
 };
 
-// Load environment variables from test-project/translator.env before running tests
-const testProjectEnvFile = path.resolve(__dirname, '../test-project/translator.env');
-if (fs.existsSync(testProjectEnvFile)) {
-  // console.log('Loading environment variables from:', testProjectEnvFile);
-  const result = dotenv.config({ path: testProjectEnvFile, override: true });
-  if (result.error) {
-    console.error('Error loading test-project/translator.env:', result.error);
+// Load environment variables before running tests (once per process).
+// Priority:
+// 1) workspace translator.env (used by extension/integration tests)
+// 2) test-project/translator.env (fallback for local test fixtures)
+const TEST_ENV_LOADED_FLAG = 'I18N_TRANSLATOR_TEST_ENV_LOADED';
+
+if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
+  const workspaceEnvFile = path.resolve(__dirname, '../translator.env');
+  const testProjectEnvFile = path.resolve(__dirname, '../test-project/translator.env');
+
+  if (fs.existsSync(workspaceEnvFile)) {
+    const result = dotenv.config({ path: workspaceEnvFile, override: true });
+    if (result.error) {
+      console.error('Error loading translator.env:', result.error);
+    }
+  } else if (fs.existsSync(testProjectEnvFile)) {
+    const result = dotenv.config({ path: testProjectEnvFile, override: true });
+    if (result.error) {
+      console.error('Error loading test-project/translator.env:', result.error);
+    }
   } else {
-    // console.log('Successfully loaded API keys from test-project/translator.env');
+    console.warn('No translator.env file found for tests, using fallback initialization');
+    const rootDir = path.resolve(__dirname, '..');
+    initTranslatorEnv(rootDir, testLogger, nodeFileSystem);
   }
-} else {
-  console.warn('test-project/translator.env not found, using fallback initialization');
-  // Initialize the environment from translator.env in current directory as fallback
-  const rootDir = path.resolve(__dirname, '..');
-  initTranslatorEnv(rootDir, testLogger, nodeFileSystem);
+
+  process.env[TEST_ENV_LOADED_FLAG] = '1';
 }
 
 // SQLite test environment setup - ensure it's available

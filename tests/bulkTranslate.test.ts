@@ -32,7 +32,7 @@ describe('bulkTranslateWithEngine()', () => {
 
     // fake cache
     const cache = {
-      getMany: vi.fn(async (_q: any) => new Map([['A::', 'A*']])),
+      getMany: vi.fn(async (_q: any) => new Map([['A::', { translation: 'A*', textPos: 0 }]])),
       putMany: vi.fn(async () => {})
     }
 

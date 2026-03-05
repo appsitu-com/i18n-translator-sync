@@ -1,4 +1,4 @@
-import { SQLiteCache as OriginalSQLiteCache, type Pair, type TranslationCache } from '../../src/cache.sqlite';
+import { SQLiteCache as OriginalSQLiteCache, type Pair, type TranslationCache } from '../../src/core/cache/sqlite';
 import * as fs from 'fs';
 import * as nodePath from 'path';
 

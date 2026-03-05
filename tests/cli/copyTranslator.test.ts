@@ -10,7 +10,7 @@ import { CopyTranslator } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
 import { TranslatorEngine } from '../../src/translators/types';
 import { TranslatorPipeline } from '../../src/core/pipeline';
-import { SQLiteCache } from '../../src/cache.sqlite';
+import { SQLiteCache } from '../../src/core/cache/sqlite';
 
 // Helper function to create temp config file
 async function createTempConfigFile(translator?: { copy: any }) {

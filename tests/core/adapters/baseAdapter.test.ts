@@ -7,6 +7,7 @@ import { WorkspaceWatcher } from '../../../src/core/util/watcher';
 import { TranslatorManager } from '../../../src/core/translatorManager';
 import { SQLiteCache } from '../../../src/core/cache/sqlite';
 import * as path from 'path';
+import * as coreConfig from '../../../src/core/coreConfig';
 
 import { createTranslatorManagerMock } from '../../mocks/translatorManager';
 
@@ -27,7 +28,10 @@ vi.mock('../../../src/core/translatorManager', () => {
 
 vi.mock('../../../src/core/cache/sqlite', () => ({
   SQLiteCache: vi.fn().mockImplementation(() => ({
-    close: vi.fn()
+    close: vi.fn(),
+    exportCSV: vi.fn().mockResolvedValue(undefined),
+    purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+    completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
   }))
 }));
 
@@ -311,6 +315,63 @@ describe('TranslatorAdapter', () => {
 
       expect(result).toBe(0);
       expect(mockLogger.error).toHaveBeenCalledWith(expect.stringContaining('Bulk translation failed'));
+    });
+
+    it('should continue when auto-export fails', async () => {
+      await adapter.initialize();
+      await adapter.start();
+
+      const cache = vi.mocked(SQLiteCache).mock.results.at(-1)?.value as any;
+      expect(cache).toBeDefined();
+      cache.exportCSV = vi.fn().mockRejectedValueOnce(new Error('Export failed'));
+
+      const result = await adapter.bulkTranslate(false);
+
+      expect(result).toBe(5);
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Auto-export failed'));
+    });
+  });
+
+  describe('purge', () => {
+    it('should fail when adapter is not initialized', async () => {
+      await expect(adapter.purge()).rejects.toThrow('Translator manager not initialized');
+    });
+
+    it('should purge cache, create backup, and auto-export when enabled', async () => {
+      await adapter.initialize();
+      await adapter.start();
+
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+        sourceDir: '',
+        targetDir: '',
+        sourcePaths: ['i18n/en'],
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        enableBackTranslation: false,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'google',
+        engineOverrides: {},
+        excludeKeys: [],
+        excludeKeyPaths: [],
+        copyOnlyFiles: [],
+        csvExportPath: 'translator.csv',
+        autoExport: true
+      });
+
+      const cache = vi.mocked(SQLiteCache).mock.results.at(-1)?.value as any;
+      expect(cache).toBeDefined();
+      cache.purge = vi.fn().mockResolvedValueOnce({ deletedCount: 0 });
+      cache.completePurge = vi.fn().mockResolvedValueOnce({ deletedCount: 3 });
+      cache.exportCSV = vi.fn().mockResolvedValue(undefined);
+
+      const result = await adapter.purge();
+
+      const translatorManager = adapter.getTranslatorManager();
+      expect(cache.purge).toHaveBeenCalledTimes(1);
+      expect(translatorManager?.bulkTranslate).toHaveBeenCalledTimes(1);
+      expect(cache.completePurge).toHaveBeenCalledTimes(1);
+      expect(cache.exportCSV).toHaveBeenCalled();
+      expect(result.deletedCount).toBe(3);
     });
   });
 

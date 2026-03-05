@@ -77,7 +77,9 @@ describe('Config', () => {
           ...validConfig,
           excludeKeys: [],
           excludeKeyPaths: [],
-          copyOnlyFiles: []
+          copyOnlyFiles: [],
+          csvExportPath: 'translator.csv',
+          autoExport: true
         })
       }
     })
@@ -134,7 +136,9 @@ describe('Config', () => {
         engineOverrides: {},
         excludeKeys: [],
         excludeKeyPaths: [],
-        copyOnlyFiles: []
+        copyOnlyFiles: [],
+        csvExportPath: 'translator.csv',
+        autoExport: true
       })
     })
   })

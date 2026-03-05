@@ -71,6 +71,7 @@ vi.mock('../src/vscode/adapter', () => {
   };
 });
 
+
 describe('extension.ts', () => {
   let ctx: any
   let registerCommandSpy: any
@@ -460,6 +461,7 @@ describe('extension.ts', () => {
       // Try to restart again - this should not throw the "manager not initialized" error
       await expect(extension.restartTranslator(ctx)).resolves.not.toThrow();
     })
+
   })
 
   describe('File Watching & Event Handling', () => {
