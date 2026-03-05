@@ -6,6 +6,7 @@ import { stringify } from 'csv-stringify/sync'
 import { TRANSLATOR_DIR } from '../constants'
 import { FileSystem } from '../util/fs'
 import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
+import { toWorkspaceRelativePosix } from '../util/pathShared'
 
 const LATEST_SCHEMA_VERSION = 2
 
@@ -68,8 +69,9 @@ export interface TranslationCache {
 export class NodeSQLiteCache implements TranslationCache {
   private cache: SQLiteCache
 
-  constructor(logger: Logger, dbPath: string, workspacePath: string) {
-    this.cache = new SQLiteCache(dbPath, workspacePath, logger)
+  constructor(logger: Logger, dbPath: string, workspacePath?: string) {
+    const resolvedWorkspacePath = workspacePath ?? process.cwd()
+    this.cache = new SQLiteCache(dbPath, resolvedWorkspacePath, logger)
   }
 
   async initialize(): Promise<void> {
@@ -375,27 +377,10 @@ export class SQLiteCache implements TranslationCache {
   }
 
   /**
-   * Normalize source path to be relative to workspace and use forward slashes
-   * This ensures paths are portable across Windows, macOS, and Linux
-   */
-  private normalizePath(sourcePath: string): string {
-    if (!sourcePath) return ''
-
-    // Convert to absolute path if needed
-    const absolutePath = path.isAbsolute(sourcePath) ? sourcePath : path.resolve(this.workspacePath, sourcePath)
-
-    // Make relative to workspace
-    const relativePath = path.relative(this.workspacePath, absolutePath)
-
-    // Convert backslashes to forward slashes for cross-platform consistency
-    return relativePath.split(path.sep).join('/')
-  }
-
-  /**
    * Get or create source_file_id for a given path
    */
   private getOrCreateSourceFileId(sourcePath: string): number {
-    const normalizedPath = this.normalizePath(sourcePath)
+    const normalizedPath = toWorkspaceRelativePosix(sourcePath, this.workspacePath)
     const existing = this.getSourceFileIdStmt.get(normalizedPath) as any
     if (existing) {
       return existing.id
@@ -405,7 +390,7 @@ export class SQLiteCache implements TranslationCache {
   }
 
   async hasSourcePath(sourcePath: string): Promise<boolean> {
-    const normalizedPath = this.normalizePath(sourcePath)
+    const normalizedPath = toWorkspaceRelativePosix(sourcePath, this.workspacePath)
     const row = this.getSourceFileIdStmt.get(normalizedPath) as { id?: number } | undefined
     return Boolean(row?.id)
   }

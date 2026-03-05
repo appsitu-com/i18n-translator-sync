@@ -16,8 +16,7 @@ import { registerTranslator } from '../../src/translators/registry';
 
 // Helper function to create a temp directory with test files
 async function createTempTestDir() {
-  const tempDir = path.join(os.tmpdir(), `i18n-translator-test-${Date.now()}`);
-  await fs.mkdir(tempDir, { recursive: true });
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'i18n-translator-test-'));
 
   // Create source directory structure
   const sourceDir = path.join(tempDir, 'i18n', 'en');
@@ -201,13 +200,15 @@ describe('File Watcher Integration Tests', () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Verify that the file creation was detected
-    expect(onAddOrChangeSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fsPath: expect.stringMatching(/newfile\.json$/)
-      }),
-      config
-    );
-  });
+    await vi.waitFor(() => {
+      expect(onAddOrChangeSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fsPath: expect.stringMatching(/newfile\.json$/)
+        }),
+        config
+      );
+    }, { timeout: 5000 });
+  }, 10000);
 
   it('should trigger onDidChange when existing files are modified', async () => {
     // Set up spies BEFORE starting watching

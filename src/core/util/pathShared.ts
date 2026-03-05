@@ -12,6 +12,30 @@ export function normalizePath(pathStr: string): string {
 }
 
 /**
+ * Convert an absolute or relative path to workspace-relative POSIX format
+ * Used for storing paths in the database in a portable format
+ *
+ * @param filePath Absolute or relative file path
+ * @param workspacePath Absolute path to workspace root
+ * @returns Relative path from workspace root using forward slashes
+ * @example
+ * toWorkspaceRelativePosix('C:\\Users\\tony\\project\\src\\file.ts', 'C:\\Users\\tony\\project')
+ * // Returns: 'src/file.ts'
+ */
+export function toWorkspaceRelativePosix(filePath: string, workspacePath: string): string {
+  if (!filePath) return '';
+
+  // Convert to absolute path if needed
+  const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(workspacePath, filePath);
+
+  // Make relative to workspace
+  const relativePath = path.relative(workspacePath, absolutePath);
+
+  // Convert backslashes to forward slashes for cross-platform consistency
+  return relativePath.split(path.sep).join('/');
+}
+
+/**
  * Checks if the given path contains a locale identifier
  * either as a folder name or basename (without extension)
  */
