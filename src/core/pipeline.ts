@@ -190,6 +190,24 @@ export class TranslatorPipeline {
     }
   }
 
+  private async shouldTranslateForCacheState(sourcePath: string): Promise<boolean> {
+    if (typeof this.cache.hasSourcePath === 'function') {
+      const hasSourcePath = await this.cache.hasSourcePath(sourcePath)
+      if (!hasSourcePath) {
+        return true
+      }
+    }
+
+    if (typeof this.cache.hasPendingPurge === 'function') {
+      const hasPendingPurge = await this.cache.hasPendingPurge()
+      if (hasPendingPurge) {
+        return true
+      }
+    }
+
+    return false
+  }
+
   getFileType(filePath: string): string {
     const lowerPath = filePath.toLowerCase();
     if (lowerPath.endsWith('.md') || lowerPath.endsWith('.mdx') || lowerPath.endsWith('.markdown')) {
@@ -264,14 +282,15 @@ export class TranslatorPipeline {
     const contexts = await this.loadJsonContexts(extraction, srcUri)
     const passphrase = await this.resolvePassphrase()
 
+    const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
+    if (!sourcePath) {
+      throw new Error(`File ${srcUri.fsPath} is not in any of the configured source paths`)
+    }
+
+    const translateForCacheState = await this.shouldTranslateForCacheState(sourcePath)
+
     // Process each target locale
     for (const targetLocale of targetLocales) {
-      // Get source path to determine which path this file matched
-      const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
-      if (!sourcePath) {
-        throw new Error(`File ${srcUri.fsPath} is not in any of the configured source paths`)
-      }
-
       // Create target URI
       const targetUri = createTargetUri(
         this.fileSystem,
@@ -284,7 +303,10 @@ export class TranslatorPipeline {
       )
 
       // Check if translation is needed based on file timestamps
-      const translationNeeded = forceTranslation || await this.needsTranslation(srcUri, targetUri)
+      const translationNeeded =
+        forceTranslation ||
+        translateForCacheState ||
+        await this.needsTranslation(srcUri, targetUri)
 
       if (!translationNeeded) {
         this.logger.info(`Skipping up-to-date file: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}]`)

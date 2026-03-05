@@ -54,6 +54,8 @@ describe('TranslatorPipeline', () => {
       putMany: vi.fn(async () => {}),
       exportCSV: vi.fn(async () => {}),
       importCSV: vi.fn(async () => 0),
+      hasSourcePath: vi.fn(async () => true),
+      hasPendingPurge: vi.fn(async () => false),
       close: vi.fn(() => {})
     }
 
@@ -237,5 +239,126 @@ describe('TranslatorPipeline - pruneEmptyDirs', () => {
     await pipeline.pruneEmptyDirs(root, relPath)
 
     expect(mockFs.deleteFile).not.toHaveBeenCalled()
+  })
+})
+
+describe('TranslatorPipeline translation trigger conditions', () => {
+  const workspacePath = '/ws'
+  const srcPath = '/ws/i18n/en/demo.json'
+
+  const config: TranslateProjectConfig = {
+    sourceDir: '',
+    targetDir: '',
+    sourcePaths: ['i18n/en'],
+    sourceLocale: 'en',
+    targetLocales: ['fr-FR'],
+    enableBackTranslation: false,
+    defaultMarkdownEngine: 'copy',
+    defaultJsonEngine: 'copy',
+    engineOverrides: {}
+  }
+
+  const configProvider = { get: vi.fn().mockReturnValue('copy') }
+
+  function createStatAwareFileSystem(): any {
+    return {
+      readFile: vi.fn().mockResolvedValue(JSON.stringify({ title: 'Hello' })),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+      fileExists: vi.fn().mockResolvedValue(true),
+      readDirectory: vi.fn(),
+      createDirectory: vi.fn().mockResolvedValue(undefined),
+      deleteFile: vi.fn(),
+      createUri: vi.fn((p: string) => ({ fsPath: p, path: p, scheme: 'file' })),
+      joinPath: vi.fn((base, ...paths) => {
+        const rawBase = typeof base === 'string' ? base : base.fsPath
+        const normalizedBase = rawBase.endsWith('/') ? rawBase.slice(0, -1) : rawBase
+        const joined = `${normalizedBase}/${paths.join('/')}`
+        return { fsPath: joined, path: joined, scheme: 'file' }
+      }),
+      stat: vi.fn((uri: any) => {
+        if (uri.fsPath.includes('/i18n/en/')) {
+          return Promise.resolve({ mtime: new Date('2026-01-01T00:00:00Z') })
+        }
+        return Promise.resolve({ mtime: new Date('2026-01-02T00:00:00Z') })
+      })
+    }
+  }
+
+  function createLogger(): any {
+    return {
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
+      appendLine: vi.fn(),
+      show: vi.fn()
+    }
+  }
+
+  it('translates when source file path is not in cache even if target is newer', async () => {
+    const fs = createStatAwareFileSystem()
+    const logger = createLogger()
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {}),
+      exportCSV: vi.fn(async () => {}),
+      importCSV: vi.fn(async () => 0),
+      hasSourcePath: vi.fn(async () => false),
+      hasPendingPurge: vi.fn(async () => false),
+      close: vi.fn()
+    }
+    const executor = new MockTranslationExecutor(fs)
+    const pipeline = new TranslatorPipeline(fs, logger, cache as any, executor)
+
+    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
+
+    expect(executor.translationCommands.length).toBe(1)
+  })
+
+  it('translates when purge is pending even if target is newer', async () => {
+    const fs = createStatAwareFileSystem()
+    const logger = createLogger()
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {}),
+      exportCSV: vi.fn(async () => {}),
+      importCSV: vi.fn(async () => 0),
+      hasSourcePath: vi.fn(async () => true),
+      hasPendingPurge: vi.fn(async () => true),
+      close: vi.fn()
+    }
+    const executor = new MockTranslationExecutor(fs)
+    const pipeline = new TranslatorPipeline(fs, logger, cache as any, executor)
+
+    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
+
+    expect(executor.translationCommands.length).toBe(1)
+  })
+
+  it('translates when source file is newer than target file', async () => {
+    const fs = createStatAwareFileSystem()
+    fs.stat = vi.fn((uri: any) => {
+      if (uri.fsPath.includes('/i18n/en/')) {
+        return Promise.resolve({ mtime: new Date('2026-01-03T00:00:00Z') })
+      }
+      return Promise.resolve({ mtime: new Date('2026-01-02T00:00:00Z') })
+    })
+
+    const logger = createLogger()
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {}),
+      exportCSV: vi.fn(async () => {}),
+      importCSV: vi.fn(async () => 0),
+      hasSourcePath: vi.fn(async () => true),
+      hasPendingPurge: vi.fn(async () => false),
+      close: vi.fn()
+    }
+    const executor = new MockTranslationExecutor(fs)
+    const pipeline = new TranslatorPipeline(fs, logger, cache as any, executor)
+
+    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
+
+    expect(executor.translationCommands.length).toBe(1)
   })
 })
