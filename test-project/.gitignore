@@ -1,3 +1,7 @@
 .i18n-cache/
 
 translator.env
+
+.translator/
+
+.translator
