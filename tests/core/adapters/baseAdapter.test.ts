@@ -30,6 +30,8 @@ vi.mock('../../../src/core/cache/sqlite', () => ({
   SQLiteCache: vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     exportCSV: vi.fn().mockResolvedValue(undefined),
+    importCSV: vi.fn().mockResolvedValue(0),
+    isNew: vi.fn().mockReturnValue(false),
     purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
     completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
   }))
@@ -355,7 +357,8 @@ describe('TranslatorAdapter', () => {
         excludeKeyPaths: [],
         copyOnlyFiles: [],
         csvExportPath: 'translator.csv',
-        autoExport: true
+        autoExport: true,
+        autoImport: false
       });
 
       const cache = vi.mocked(SQLiteCache).mock.results.at(-1)?.value as any;
@@ -394,6 +397,116 @@ describe('TranslatorAdapter', () => {
 
       const translatorManager = adapter.getTranslatorManager();
       expect(translatorManager?.pullFromMateCat).toHaveBeenCalled();
+    });
+  });
+
+  describe('startup auto-import', () => {
+    it('imports translations.csv on new database when autoImport is enabled', async () => {
+      const importCSV = vi.fn().mockResolvedValue(3);
+      vi.mocked(SQLiteCache).mockImplementationOnce(() => ({
+        close: vi.fn(),
+        exportCSV: vi.fn().mockResolvedValue(undefined),
+        importCSV,
+        isNew: vi.fn().mockReturnValue(true),
+        purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+        completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
+      }) as any);
+
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+        sourceDir: '',
+        targetDir: '',
+        sourcePaths: ['i18n/en'],
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        enableBackTranslation: false,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'google',
+        engineOverrides: {},
+        excludeKeys: [],
+        excludeKeyPaths: [],
+        copyOnlyFiles: [],
+        csvExportPath: 'translator.csv',
+        autoExport: true,
+        autoImport: true
+      });
+
+      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true);
+
+      await adapter.initialize();
+
+      expect(importCSV).toHaveBeenCalledWith(path.join(testWorkspacePath, 'translations.csv'));
+    });
+
+    it('falls back to configured csvExportPath when translations.csv is missing', async () => {
+      const importCSV = vi.fn().mockResolvedValue(2);
+      vi.mocked(SQLiteCache).mockImplementationOnce(() => ({
+        close: vi.fn(),
+        exportCSV: vi.fn().mockResolvedValue(undefined),
+        importCSV,
+        isNew: vi.fn().mockReturnValue(true),
+        purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+        completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
+      }) as any);
+
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+        sourceDir: '',
+        targetDir: '',
+        sourcePaths: ['i18n/en'],
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        enableBackTranslation: false,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'google',
+        engineOverrides: {},
+        excludeKeys: [],
+        excludeKeyPaths: [],
+        copyOnlyFiles: [],
+        csvExportPath: 'translator.csv',
+        autoExport: true,
+        autoImport: true
+      });
+
+      vi.mocked(mockFileSystem.fileExists).mockImplementation(async (uri: IUri) => {
+        return !uri.fsPath.endsWith('translations.csv');
+      });
+
+      await adapter.initialize();
+
+      expect(importCSV).toHaveBeenCalledWith(path.join(testWorkspacePath, 'translator.csv'));
+    });
+
+    it('skips startup import when autoImport is disabled', async () => {
+      const importCSV = vi.fn().mockResolvedValue(1);
+      vi.mocked(SQLiteCache).mockImplementationOnce(() => ({
+        close: vi.fn(),
+        exportCSV: vi.fn().mockResolvedValue(undefined),
+        importCSV,
+        isNew: vi.fn().mockReturnValue(true),
+        purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+        completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
+      }) as any);
+
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+        sourceDir: '',
+        targetDir: '',
+        sourcePaths: ['i18n/en'],
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        enableBackTranslation: false,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'google',
+        engineOverrides: {},
+        excludeKeys: [],
+        excludeKeyPaths: [],
+        copyOnlyFiles: [],
+        csvExportPath: 'translator.csv',
+        autoExport: true,
+        autoImport: false
+      });
+
+      await adapter.initialize();
+
+      expect(importCSV).not.toHaveBeenCalled();
     });
   });
 

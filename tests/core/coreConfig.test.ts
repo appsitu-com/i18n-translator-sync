@@ -79,7 +79,8 @@ describe('Config', () => {
           excludeKeyPaths: [],
           copyOnlyFiles: [],
           csvExportPath: 'translator.csv',
-          autoExport: true
+          autoExport: true,
+          autoImport: false
         })
       }
     })
@@ -138,7 +139,8 @@ describe('Config', () => {
         excludeKeyPaths: [],
         copyOnlyFiles: [],
         csvExportPath: 'translator.csv',
-        autoExport: true
+        autoExport: true,
+        autoImport: false
       })
     })
   })

@@ -58,6 +58,11 @@ export interface TranslationCache {
   hasPendingPurge?(): Promise<boolean>
 
   /**
+   * Check if this cache database was just created
+   */
+  isNew?(): boolean
+
+  /**
    * Close the cache connection
    */
   close(): void
@@ -127,12 +132,17 @@ export class NodeSQLiteCache implements TranslationCache {
   close(): void {
     this.cache.close()
   }
+
+  isNew(): boolean {
+    return this.cache.isNew()
+  }
 }
 
 export class SQLiteCache implements TranslationCache {
   private db: Database.Database
   private logger: Logger
   private workspacePath: string
+  private isNewDatabase: boolean
   private getSourceFileIdStmt: Database.Statement
   private insertSourceFileStmt: Database.Statement
   private selectTranslationStmt: Database.Statement
@@ -150,10 +160,16 @@ export class SQLiteCache implements TranslationCache {
     const dir = path.dirname(dbFile)
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
 
+    // Check if database file exists before creating it
+    const dbExists = fs.existsSync(dbFile)
+
     this.logger.debug(`Opening SQLite cache at ${dbFile}`)
 
     this.db = Database(dbFile)
     this.db.pragma('journal_mode = WAL')
+
+    // Database is new if it didn't exist before we opened it
+    this.isNewDatabase = !dbExists
 
     // Check schema version and migrate if needed
     this.migrateSchema()
@@ -634,5 +650,12 @@ export class SQLiteCache implements TranslationCache {
   close() {
     this.logger.debug('Closing SQLite cache')
     this.db.close()
+  }
+
+  /**
+   * Check if this database was just created (did not exist before initialization)
+   */
+  isNew(): boolean {
+    return this.isNewDatabase
   }
 }

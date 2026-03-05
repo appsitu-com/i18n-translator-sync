@@ -1,4 +1,7 @@
 {
+  "csvExportPath": "translator.csv",
+  "autoExport": true,
+  "autoImport": true,
   "sourcePaths": ["i18n/en", "i18n/en.json"],
   "sourceLocale": "en",
   "targetLocales": ["en-US", "es", "fr", "hi", "ur", "de", "zh-CN"],

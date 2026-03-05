@@ -49,7 +49,12 @@ export const TranslateConfigSchema = z.object({
     .boolean()
     .optional()
     .default(true)
-    .describe('Automatically export cache to CSV after translations complete.')
+    .describe('Automatically export cache to CSV after translations complete.'),
+  autoImport: z
+    .boolean()
+    .optional()
+    .default(false)
+    .describe('Automatically import translations from CSV when database is first created.')
 })
 
 
@@ -91,7 +96,8 @@ export const defaultConfig: TranslateProjectConfig = {
   excludeKeyPaths: [] as string[],
   copyOnlyFiles: [] as string[],
   csvExportPath: 'translator.csv',
-  autoExport: true
+  autoExport: true,
+  autoImport: false
 }
 
 /**
@@ -192,6 +198,7 @@ export async function loadProjectConfig(
     excludeKeyPaths: projectConfig.excludeKeyPaths ?? defaultConfig.excludeKeyPaths,
     copyOnlyFiles: projectConfig.copyOnlyFiles ?? defaultConfig.copyOnlyFiles,
     csvExportPath: projectConfig.csvExportPath ?? defaultConfig.csvExportPath,
-    autoExport: projectConfig.autoExport ?? defaultConfig.autoExport
+    autoExport: projectConfig.autoExport ?? defaultConfig.autoExport,
+    autoImport: projectConfig.autoImport ?? defaultConfig.autoImport
   }
 }

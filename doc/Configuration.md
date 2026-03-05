@@ -21,7 +21,10 @@ The extension now supports a project-specific configuration file called `transla
   },
   "excludeKeys": ["_comment", "$schema"],
   "excludeKeyPaths": ["meta.version", "build.timestamp"],
-  "copyOnlyFiles": ["index.ts"]
+  "copyOnlyFiles": ["index.ts"],
+  "csvExportPath": "translator.csv",
+  "autoExport": true,
+  "autoImport": true
 }
 ```
 
@@ -39,6 +42,9 @@ The extension now supports a project-specific configuration file called `transla
 | `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `[]` |
 | `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation (e.g. `"meta.version"`). | `[]` |
 | `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating (e.g. `"index.ts"`). | `[]` |
+| `csvExportPath` | `string` | Path to cache CSV used for export and manual import. Relative paths are resolved from workspace root. | `"translator.csv"` |
+| `autoExport` | `boolean` | Automatically export cache to CSV after translation operations complete. | `true` |
+| `autoImport` | `boolean` | On startup, when the database is newly created, auto-import translations from CSV. Prefers `translations.csv`, then falls back to `csvExportPath` if present. | `false` |
 
 ## Backward Compatibility
 

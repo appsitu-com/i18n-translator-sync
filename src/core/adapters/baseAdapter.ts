@@ -73,6 +73,78 @@ export abstract class TranslatorAdapter {
   }
 
   /**
+   * Resolve a CSV path to an absolute path under the workspace when needed
+   */
+  private resolveCsvPath(csvPath: string): string {
+    return path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
+  }
+
+  /**
+   * Resolve which CSV file should be used for startup auto-import.
+   * Prefer translations.csv to match startup import behavior, then fall back to configured csvExportPath.
+   */
+  private async resolveAutoImportCsvPath(csvExportPath: string): Promise<string | undefined> {
+    const preferredCsvPath = this.resolveCsvPath('translations.csv');
+    const preferredUri = this.fileSystem.createUri(preferredCsvPath);
+
+    if (await this.fileSystem.fileExists(preferredUri)) {
+      return preferredCsvPath;
+    }
+
+    const configuredCsvPath = this.resolveCsvPath(csvExportPath || 'translator.csv');
+    if (path.resolve(configuredCsvPath) === path.resolve(preferredCsvPath)) {
+      return undefined;
+    }
+
+    const configuredUri = this.fileSystem.createUri(configuredCsvPath);
+    if (await this.fileSystem.fileExists(configuredUri)) {
+      return configuredCsvPath;
+    }
+
+    return undefined;
+  }
+
+  /**
+   * Perform auto-import of translations from CSV if configured
+   */
+  private async performAutoImport(): Promise<void> {
+    if (!this.cache) {
+      return;
+    }
+
+    try {
+      // Load project config to check autoImport setting
+      const projectConfig = await loadProjectConfig(
+        this.workspacePath,
+        this.configProvider,
+        this.logger,
+        this.fileSystem
+      );
+
+      if (!projectConfig.autoImport) {
+        this.logger.debug('Auto-import disabled in configuration');
+        return;
+      }
+
+      const csvExportPath = projectConfig.csvExportPath || 'translator.csv';
+      const csvPath = await this.resolveAutoImportCsvPath(csvExportPath);
+
+      if (!csvPath) {
+        this.logger.debug('Auto-import skipped: no startup CSV found (translations.csv or configured csvExportPath)');
+        return;
+      }
+
+      // Perform import
+      this.logger.info(`Auto-importing translations from ${csvPath}`);
+      const count = await this.cache.importCSV(csvPath);
+      this.logger.info(`Auto-imported ${count} translations from CSV`);
+    } catch (error: any) {
+      this.logger.warn(`Auto-import failed: ${error.message || String(error)}`);
+      // Don't throw - auto-import failure should not prevent initialization
+    }
+  }
+
+  /**
    * Create a handler for configuration file changes
    * Returns a callback that will reload config and restart watching
    * @protected
@@ -146,6 +218,11 @@ export abstract class TranslatorAdapter {
       this.cache = await this.getCache();
       if (!this.cache) {
         return;
+      }
+
+      // Perform auto-import if database is new and autoImport is enabled
+      if (this.cache.isNew?.()) {
+        await this.performAutoImport();
       }
 
       // Create translator manager if it doesn't exist yet
