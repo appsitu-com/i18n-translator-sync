@@ -1,4 +1,4 @@
-import { Logger } from '../util/baseLogger'
+import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
 import { IPassphraseManager } from './passphraseManager'
 
 /**
@@ -7,14 +7,14 @@ import { IPassphraseManager } from './passphraseManager'
 export class EnvPassphraseManager implements IPassphraseManager {
   private passphrase: string | undefined
 
-  constructor(private readonly envVar: string = 'TRANSLATOR_KEY', private readonly logger?: Logger) {}
+  constructor(private readonly envVar: string = 'TRANSLATOR_KEY', private readonly logger: Logger = NO_OP_LOGGER) {}
 
   async loadPassphrase(): Promise<void> {
     this.passphrase = process.env[this.envVar]
     if (this.passphrase) {
-      this.logger?.debug(`Loaded passphrase from ${this.envVar}`)
+      this.logger.debug(`Loaded passphrase from ${this.envVar}`)
     } else {
-      this.logger?.debug(`No passphrase found in ${this.envVar}`)
+      this.logger.debug(`No passphrase found in ${this.envVar}`)
     }
   }
 

@@ -49,6 +49,15 @@ export interface Logger {
   setLevel?(level: LogLevel): void
 }
 
+export const NO_OP_LOGGER: Logger = {
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+  debug: () => {},
+  appendLine: () => {},
+  show: () => {}
+}
+
 /**
  * Logger implementation that writes to console
  */

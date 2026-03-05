@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Logger } from '../util/baseLogger';
+import { Logger, NO_OP_LOGGER } from '../util/baseLogger';
 
 /**
  * Key used to encrypt/decrypt API keys in translator.env
@@ -24,9 +24,9 @@ export class PassphraseManager {
    * Create a new PassphraseManager
    *
    * @param context Optional VS Code extension context (not available in CLI/testing)
-   * @param logger Optional logger instance
+    * @param logger Logger instance
    */
-  constructor(private context?: vscode.ExtensionContext, private logger?: Logger) {
+    constructor(private context?: vscode.ExtensionContext, private logger: Logger = NO_OP_LOGGER) {
   }
 
   async initialize(): Promise<void> {
@@ -45,12 +45,12 @@ export class PassphraseManager {
     try {
       this.passphrase = await this.context.secrets.get(TRANSLATOR_KEY) || process.env.TRANSLATOR_KEY;
       if (this.passphrase) {
-        this.logger?.debug('Encryption passphrase loaded from secrets storage');
+        this.logger.debug('Encryption passphrase loaded from secrets storage');
       } else {
-        this.logger?.debug('No encryption passphrase found in secrets storage');
+        this.logger.debug('No encryption passphrase found in secrets storage');
       }
     } catch (error) {
-      this.logger?.error(`Error loading encryption passphrase: ${error}`);
+      this.logger.error(`Error loading encryption passphrase: ${error}`);
       this.passphrase = undefined;
     }
   }
@@ -72,10 +72,10 @@ export class PassphraseManager {
       // Store the passphrase in secrets if in VS Code environment
       if (this.context) {
         await this.context.secrets.store(TRANSLATOR_KEY, newPassphrase);
-        this.logger?.info('Encryption passphrase set successfully');
+        this.logger.info('Encryption passphrase set successfully');
       }
     } catch (error) {
-      this.logger?.error(`Error setting encryption passphrase: ${error}`);
+      this.logger.error(`Error setting encryption passphrase: ${error}`);
       throw new Error(`Failed to set encryption passphrase: ${error}`);
     }
   }
@@ -109,10 +109,10 @@ export class PassphraseManager {
       // Clear from secrets if in VS Code environment
       if (this.context) {
         await this.context.secrets.delete(TRANSLATOR_KEY);
-        this.logger?.info('Encryption passphrase cleared successfully');
+        this.logger.info('Encryption passphrase cleared successfully');
       }
     } catch (error) {
-      this.logger?.error(`Error clearing encryption passphrase: ${error}`);
+      this.logger.error(`Error clearing encryption passphrase: ${error}`);
       throw new Error(`Failed to clear encryption passphrase: ${error}`);
     }
   }
