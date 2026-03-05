@@ -20,12 +20,16 @@ For information about the internal architecture of the extension, see [Architect
 │   ├── translators/      # Translation engine adapters (Azure, Google, DeepL, etc.)
 │   │   ├── registry.ts   # Registration of all translation engines
 │   │   └── types.ts      # Common interfaces for translation engines
+│   ├── core/             # Core business logic
+│   │   ├── cache/        # Translation cache implementations
+│   │   │   └── sqlite.ts # SQLite translation cache
+│   │   └── util/         # Core utilities
 │   ├── util/             # Utility functions
 │   ├── extension.ts      # Main extension entry point
 │   ├── pipeline.ts       # Translation pipeline
-│   ├── config.ts         # Configuration loading
-│   └── cache.sqlite.ts   # SQLite translation cache
+│   └── config.ts         # Configuration loading
 ├── tests/                # Test files
+│   ├── core/cache/       # Core cache tests
 │   ├── fixtures/         # Test data
 │   ├── mocks/            # Mock implementations
 │   └── *.test.ts         # Test suites

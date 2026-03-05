@@ -100,6 +100,8 @@ The i18n Translator uses a **SQLite-based translation memory database** for prof
 - **Prevents translation drift** - AI engines return different results each time; translation memory ensures consistency
 - **Fast lookups** - Instant retrieval of previously translated content
 - **Persistent storage** - Translations survive across sessions and project updates
+- **CSV export/import** - Move cache data between environments and tools
+- **Purge unused entries** - Mark-and-sweep cleanup for stale translations
 
 **Planned enhancements** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
 - CSV import/export for version control and team collaboration
@@ -234,6 +236,8 @@ See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator
 | `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]` |
 | `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation. | `["meta.version"]` |
 | `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating. | `["index.ts"]` |
+| `csvExportPath` | `string` | Path to cache CSV export/import file. Absolute or relative to workspace. | `"translator.csv"` |
+| `autoExport` | `boolean` | Automatically export cache to CSV after translation updates. | `true` |
 
 
 Example `translator.json`:
@@ -252,9 +256,31 @@ Example `translator.json`:
   },
   "excludeKeys": ["_comment"],
   "excludeKeyPaths": ["meta.version"],
-  "copyOnlyFiles": ["index.ts"]
+  "copyOnlyFiles": ["index.ts"],
+  "csvExportPath": "translator.csv",
+  "autoExport": true
 }
 ```
+
+## Cache Purge
+
+Use purge to remove stale cache rows that are no longer referenced by active source files.
+
+**VS Code**
+- Command Palette: `Translator: Purge Unused Translations`
+- Context menu: `Purge Unused Translations`
+
+**CLI**
+```bash
+i18n-translator <workspace> --purge-cache
+```
+
+Purge workflow:
+1. Creates a timestamped CSV backup when the export file exists (e.g. `translator-20260305-1420.csv`)
+2. Marks all cached rows as unused
+3. Retranslates project source files to mark active rows as used
+4. Deletes rows still marked unused
+5. Auto-exports updated cache when `autoExport` is enabled
 
 ## Setting API Keys
 
