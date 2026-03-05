@@ -247,6 +247,8 @@ export class TranslatorManager {
         this.configProvider
       );
 
+      await this.autoExportCacheIfEnabled(config);
+
       this.logger.info(`Successfully processed file: ${uri.fsPath}`);
     } catch (error) {
       this.logger.error(`Error processing file ${uri.fsPath}: ${error instanceof Error ? error.message : String(error)}`);
@@ -254,6 +256,21 @@ export class TranslatorManager {
         this.logger.debug(error.stack);
       }
     }
+  }
+
+  private async autoExportCacheIfEnabled(config: TranslateProjectConfig): Promise<void> {
+    const shouldAutoExport = config.autoExport ?? true;
+    if (!shouldAutoExport) {
+      return;
+    }
+
+    const csvExportPath = config.csvExportPath || 'translator.csv';
+    const csvPath = path.isAbsolute(csvExportPath)
+      ? csvExportPath
+      : path.join(this.workspacePath, csvExportPath);
+
+    await this.cache.exportCSV(csvPath);
+    this.logger.info(`Auto-exported cache to ${csvPath}`);
   }
 
   /**

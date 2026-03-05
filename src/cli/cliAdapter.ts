@@ -5,6 +5,8 @@ import { CliConfigProvider } from './cliConfig';
 import { TranslatorAdapter } from '../core/adapters/baseAdapter';
 import { WorkspaceWatcher } from '../core/util/watcher';
 import { EnvPassphraseManager } from '../core/secrets/envPassphraseManager';
+import { loadProjectConfig } from '../core/coreConfig';
+import * as path from 'path';
 
 /**
  * CLI adapter for the TranslatorManager
@@ -79,5 +81,70 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
 
     // Call the base implementation with the force parameter
     await super.translateFile(filePath, forceTranslation);
+  }
+
+  /**
+   * Export cache to CSV file
+   * @param csvPath Optional path to CSV file (defaults to csvPath from config)
+   */
+  async exportCache(csvPath?: string): Promise<void> {
+    try {
+      // Get the cache
+      const cache = await this.getCache(true);
+      if (!cache) {
+        this.logger.error('Cache not available. Start the translator first to create the cache.');
+        return;
+      }
+
+      // Determine the CSV path
+      let outputPath: string;
+      if (csvPath) {
+        outputPath = path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
+      } else {
+        // Load config to get default csvPath
+        const config = await loadProjectConfig(
+          this.workspacePath,
+          this.configProvider,
+          this.logger,
+          this.fileSystem
+        );
+        const defaultCsvPath = config.csvExportPath || 'translator.csv';
+        outputPath = path.isAbsolute(defaultCsvPath)
+          ? defaultCsvPath
+          : path.join(this.workspacePath, defaultCsvPath);
+      }
+
+      this.logger.info(`Exporting cache to ${outputPath}...`);
+      await cache.exportCSV(outputPath);
+      this.logger.info(`Cache exported successfully to ${outputPath}`);
+    } catch (error: any) {
+      this.logger.error(`Failed to export cache: ${error.message || String(error)}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Import cache from CSV file
+   * @param csvPath Path to CSV file to import
+   */
+  async importCache(csvPath: string): Promise<void> {
+    try {
+      // Get the cache
+      const cache = await this.getCache();
+      if (!cache) {
+        this.logger.error('Cache not available.');
+        return;
+      }
+
+      // Resolve the CSV path
+      const inputPath = path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
+
+      this.logger.info(`Importing cache from ${inputPath}...`);
+      const count = await cache.importCSV(inputPath);
+      this.logger.info(`Cache import completed. Imported ${count} translations.`);
+    } catch (error: any) {
+      this.logger.error(`Failed to import cache: ${error.message || String(error)}`);
+      throw error;
+    }
   }
 }

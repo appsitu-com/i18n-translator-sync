@@ -7,6 +7,8 @@ import { VSCodeWorkspaceWatcher } from './watcher'
 import { VsCodeConfigProvider } from './vscodeConfig'
 import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
 import { Logger } from '../core/util/baseLogger'
+import { loadProjectConfig } from '../core/coreConfig'
+import { SQLiteCache } from '../core/cache/sqlite'
 
 /**
  * VSCode adapter for the TranslatorManager
@@ -267,6 +269,25 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
    */
   isRunning(): boolean {
     return this.running
+  }
+
+  /**
+   * Get the cache instance (public accessor for extension commands)
+   */
+  getCacheInstance(): SQLiteCache | undefined {
+    return this.cache
+  }
+
+  /**
+   * Get the project configuration (public accessor for extension commands)
+   */
+  async getProjectConfig() {
+    return await loadProjectConfig(
+      this.workspacePath,
+      this.configProvider,
+      this.logger,
+      this.fileSystem
+    )
   }
 
   /**

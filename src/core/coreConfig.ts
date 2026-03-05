@@ -39,7 +39,17 @@ export const TranslateConfigSchema = z.object({
     .array(z.string())
     .optional()
     .default([])
-    .describe('File names (not paths) to copy verbatim instead of translating (e.g. "index.ts").')
+    .describe('File names (not paths) to copy verbatim instead of translating (e.g. "index.ts").'),
+  csvExportPath: z
+    .string()
+    .optional()
+    .default('translator.csv')
+    .describe('Path to the CSV file for cache export operations.'),
+  autoExport: z
+    .boolean()
+    .optional()
+    .default(true)
+    .describe('Automatically export cache to CSV after translations complete.')
 })
 
 
@@ -79,7 +89,9 @@ export const defaultConfig: TranslateProjectConfig = {
   engineOverrides: {} as Record<string, string[]>,
   excludeKeys: [] as string[],
   excludeKeyPaths: [] as string[],
-  copyOnlyFiles: [] as string[]
+  copyOnlyFiles: [] as string[],
+  csvExportPath: 'translator.csv',
+  autoExport: true
 }
 
 /**
@@ -178,6 +190,8 @@ export async function loadProjectConfig(
     // These fields are translator.json-only (no VS Code settings fallback)
     excludeKeys: projectConfig.excludeKeys ?? defaultConfig.excludeKeys,
     excludeKeyPaths: projectConfig.excludeKeyPaths ?? defaultConfig.excludeKeyPaths,
-    copyOnlyFiles: projectConfig.copyOnlyFiles ?? defaultConfig.copyOnlyFiles
+    copyOnlyFiles: projectConfig.copyOnlyFiles ?? defaultConfig.copyOnlyFiles,
+    csvExportPath: projectConfig.csvExportPath ?? defaultConfig.csvExportPath,
+    autoExport: projectConfig.autoExport ?? defaultConfig.autoExport
   }
 }

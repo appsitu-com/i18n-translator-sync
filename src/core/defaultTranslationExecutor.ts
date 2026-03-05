@@ -26,7 +26,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     sourceLocale: string,
     targetLocale: string,
     configProvider: { get: <T>(section: string, defaultValue?: T) => T },
-    _sourceFile: string,
+    sourceFile: string,
     _isBackTranslation: boolean,
     passphrase?: string
   ): Promise<{ translations: string[]; stats: TranslationStats }> {
@@ -55,7 +55,8 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
         target: targetLocale,
         apiConfig
       },
-      this.cache
+      this.cache,
+      sourceFile
     )
   }
 

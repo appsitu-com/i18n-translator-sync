@@ -23,6 +23,9 @@ export async function runCli(): Promise<void> {
     .option('--config <path>', 'Path to custom configuration file (defaults to <workspace>/translator.json)')
     .option('--push-matecat', 'Push translations to MateCat')
     .option('--pull-matecat', 'Pull translations from MateCat')
+    .option('--export-cache [path]', 'Export translation cache to CSV file')
+    .option('--import-cache <path>', 'Import translation cache from CSV file')
+    .option('--purge-cache', 'Purge unused translations from cache (creates backup when CSV exists)')
     .option('--bulk-translate', 'Perform bulk translation of all files')
     .option('--force', 'Force translation even if target files are up to date')
     .option('--watch', 'Watch for file changes', true)
@@ -55,7 +58,23 @@ export async function runCli(): Promise<void> {
   // Initialize the configuration and create the translator manager
   await adapter.initialize()
 
-  if (options.pushMatecat) {
+  if (options.exportCache !== undefined) {
+    const cachePath = typeof options.exportCache === 'string' ? options.exportCache : undefined
+    await adapter.exportCache(cachePath)
+    console.log('Cache export completed. Exiting.')
+    process.exit(0)
+  } else if (options.importCache) {
+    await adapter.importCache(options.importCache)
+    console.log('Cache import completed. Exiting.')
+    process.exit(0)
+  } else if (options.purgeCache) {
+    const result = await adapter.purge()
+    console.log(`Purge completed. Deleted ${result.deletedCount} unused translations.`)
+    if (result.backupPath) {
+      console.log(`Backup saved to: ${result.backupPath}`)
+    }
+    process.exit(0)
+  } else if (options.pushMatecat) {
     await adapter.pushToMateCat()
     console.log('MateCat push operation completed. Exiting.')
     process.exit(0)

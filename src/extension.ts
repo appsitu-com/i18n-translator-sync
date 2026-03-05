@@ -357,6 +357,174 @@ export function onShowOutput(): void {
 }
 
 /**
+ * Export cache to CSV
+ */
+async function exportCache(): Promise<void> {
+  const channel = getOutputChannel()
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
+
+  if (!workspaceFolder) {
+    vscode.window.showErrorMessage('No workspace folder open')
+    return
+  }
+
+  const adapter = getCurrentVSCodeAdapter()
+  if (!adapter) {
+    vscode.window.showErrorMessage('Translator not initialized. Please start the translator first.')
+    return
+  }
+
+  try {
+    // Get CSV path from config
+    const config = await adapter.getProjectConfig()
+    const defaultPath = config.csvExportPath || 'translator.csv'
+    const csvPath = path.isAbsolute(defaultPath)
+      ? defaultPath
+      : path.join(workspaceFolder.uri.fsPath, defaultPath)
+
+    // Ask user for export path
+    const uri = await vscode.window.showSaveDialog({
+      defaultUri: vscode.Uri.file(csvPath),
+      filters: { 'CSV Files': ['csv'] },
+      title: 'Export Cache to CSV'
+    })
+
+    if (!uri) {
+      return
+    }
+
+    // Export
+    const cache = adapter.getCacheInstance()
+    if (cache) {
+      await cache.exportCSV(uri.fsPath)
+      vscode.window.showInformationMessage(`Cache exported to ${uri.fsPath}`)
+      channel.appendLine(`Cache exported to ${uri.fsPath}`)
+    } else {
+      vscode.window.showErrorMessage('Cache not available')
+    }
+  } catch (error) {
+    const msg = `Failed to export cache: ${error}`
+    channel.appendLine(msg)
+    vscode.window.showErrorMessage(msg)
+  }
+}
+
+/**
+ * Import cache from CSV
+ */
+async function importCache(): Promise<void> {
+  const channel = getOutputChannel()
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
+
+  if (!workspaceFolder) {
+    vscode.window.showErrorMessage('No workspace folder open')
+    return
+  }
+
+  const adapter = getCurrentVSCodeAdapter()
+  if (!adapter) {
+    vscode.window.showErrorMessage('Translator not initialized. Please start the translator first.')
+    return
+  }
+
+  try {
+    // Get CSV path from config
+    const config = await adapter.getProjectConfig()
+    const defaultPath = config.csvExportPath || 'translator.csv'
+    const csvPath = path.isAbsolute(defaultPath)
+      ? defaultPath
+      : path.join(workspaceFolder.uri.fsPath, defaultPath)
+
+    // Ask user for import path
+    const uris = await vscode.window.showOpenDialog({
+      defaultUri: vscode.Uri.file(csvPath),
+      filters: { 'CSV Files': ['csv'] },
+      title: 'Import Cache from CSV',
+      canSelectMany: false
+    })
+
+    if (!uris || uris.length === 0) {
+      return
+    }
+
+    // Confirm before importing (replaces all data)
+    const confirmed = await vscode.window.showWarningMessage(
+      'Import will replace all existing cache data. Continue?',
+      { modal: true },
+      'Import'
+    )
+
+    if (confirmed !== 'Import') {
+      return
+    }
+
+    // Import
+    const cache = adapter.getCacheInstance()
+    if (cache) {
+      const count = await cache.importCSV(uris[0].fsPath)
+      vscode.window.showInformationMessage(`Imported ${count} translations from ${uris[0].fsPath}`)
+      channel.appendLine(`Imported ${count} translations from ${uris[0].fsPath}`)
+    } else {
+      vscode.window.showErrorMessage('Cache not available')
+    }
+  } catch (error) {
+    const msg = `Failed to import cache: ${error}`
+    channel.appendLine(msg)
+    vscode.window.showErrorMessage(msg)
+  }
+}
+
+/**
+ * Purge unused translations from cache
+ */
+async function purgeCache(): Promise<void> {
+  const channel = getOutputChannel()
+  const workspaceFolder = vscode.workspace.workspaceFolders?.[0]
+
+  if (!workspaceFolder) {
+    vscode.window.showErrorMessage('No workspace folder open')
+    return
+  }
+
+  const adapter = getCurrentVSCodeAdapter()
+  if (!adapter) {
+    vscode.window.showErrorMessage('Translator not initialized. Please start the translator first.')
+    return
+  }
+
+  try {
+    const confirmed = await vscode.window.showWarningMessage(
+      'Purge will delete all unused translations. A CSV backup will be created first when available. Continue?',
+      { modal: true },
+      'Purge'
+    )
+
+    if (confirmed !== 'Purge') {
+      return
+    }
+
+    await vscode.window.withProgress(
+      {
+        location: vscode.ProgressLocation.Notification,
+        title: 'Purging unused translations...',
+        cancellable: false
+      },
+      async () => {
+        const result = await adapter.purge()
+        const details = result.backupPath ? ` Backup: ${result.backupPath}` : ''
+        const message = `Purged ${result.deletedCount} unused translations.${details}`
+        channel.appendLine(message)
+        vscode.window.showInformationMessage(message)
+      }
+    )
+  } catch (error) {
+    const msg = `Failed to purge cache: ${error}`
+    channel.appendLine(msg)
+    vscode.window.showErrorMessage(msg)
+  }
+}
+
+/**
  * Show context menu with all available translator commands
  */
 export async function showContextMenu(context: vscode.ExtensionContext): Promise<void> {
@@ -411,6 +579,21 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
     //   description: 'Download completed translations from MateCat',
     //   detail: 'translator.pull'
     // },
+    {
+      label: '$(export) Export Cache to CSV',
+      description: 'Export translation cache to CSV file',
+      detail: 'translator.exportCache'
+    },
+    {
+      label: '$(import) Import Cache from CSV',
+      description: 'Import translation cache from CSV file',
+      detail: 'translator.importCache'
+    },
+    {
+      label: '$(trash) Purge Unused Translations',
+      description: 'Remove translations not used by current source files',
+      detail: 'translator.purgeCache'
+    },
     {
       label: '$(output) Show Output',
       description: 'Open the translator output channel',
@@ -491,7 +674,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
     // vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
     vscode.commands.registerCommand('translator.showOutput', () => onShowOutput()),
-    vscode.commands.registerCommand('translator.showContextMenu', async () => showContextMenu(context))
+    vscode.commands.registerCommand('translator.showContextMenu', async () => showContextMenu(context)),
+    vscode.commands.registerCommand('translator.exportCache', async () => exportCache()),
+    vscode.commands.registerCommand('translator.importCache', async () => importCache()),
+    vscode.commands.registerCommand('translator.purgeCache', async () => purgeCache())
   )
 
   // Check if auto-start is enabled for this workspace
