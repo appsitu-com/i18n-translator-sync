@@ -2,9 +2,9 @@
   "name": "i18n-translator-sync",
   "description": "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
   "displayName": "i18n Sync Translator",
-  "publisher": "appsitu",
+  "publisher": "AppSitu",
   "preview": true,
-  "version": "0.2.7",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.103.0"
   },

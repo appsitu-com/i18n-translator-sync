@@ -1,7 +1,7 @@
 {
   "sourcePaths": ["i18n/en"],
   "sourceLocale": "en",
-  "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
+  "targetLocales": ["ar", "de", "es", "fr", "id", "ja", "pt-BR", "ru", "zh-Hans"],
   "enableBackTranslation": false,
   "defaultMarkdownEngine": "azure",
   "defaultJsonEngine": "google",

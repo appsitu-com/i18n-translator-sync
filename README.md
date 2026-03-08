@@ -15,7 +15,13 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 
 <!-- TODO: Add demo GIF here showing translation in action -->
 
-*Can't wait to get started?* Jump to the [Getting Started](#getting-started) section.
+**Quick Feature Overview:**
+- ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
+- ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, and copy-only mode
+- ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
+- ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
+- ✅ **Back translations** - Translate target languages back to source to verify quality
+- ✅ **Language-specific engines** - Override default engine per language for optimal results
 
 ## Installation
 
@@ -34,15 +40,22 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 **Requirements:**
 - VS Code version 1.109.5 or higher
 
+*Can't wait to get started?* Jump to the [Getting Started](#getting-started) section.
+
 # Features
 
-**Quick Feature Overview:**
-- ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
-- ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, and copy-only mode
-- ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
-- ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
-- ✅ **Back translations** - Translate target languages back to source to verify quality
-- ✅ **Language-specific engines** - Override default engine per language for optimal results
+## Visual Studio Code Commands
+
+| Command                                 | Description                                                           |
+| --------------------------------------- | --------------------------------------------------------------------- |
+| `Translator: Start`                     | Starts the translation service. Starts watching source & config files |
+| `Translator: Stop`                      | Stops the translation service                                         |
+| `Translator: Restart`                   | Restarts the translation service                                      |
+| `Translator: Export Cache to CSV`       | Exports the translation memory cache to a CSV file                    |
+| `Translator: Import Cache from CSV`     | Imports translations from a CSV file into the cache                   |
+| `Translator: Purge`                     | Removes all unused translations from translation cache                |
+| `Translator: Purge Unused Translations` | Removes cache entries that are no longer referenced by source files   |
+| `Translator: Show output`               | Opens the translator service output logs for debugging                |
 
 ## Instant Translation to Over 135 Languages
 
@@ -73,9 +86,11 @@ Examples - Replacing 'en' (English) with 'fr' (French):
 
 ## Multiple Source Language Files and Folders
 
-You can configure multiple source language files and folders. The translation service will attempt to translate all supported file types in all source language folders. This is very handy for mono-repo projects that need translated content in many places.
+You can configure multiple files and folders containing the source text to be translated. The translation service will attempt to translate all supported file types in these source folders.
 
-Source folders should normally only contain files you intend to translate with one exception - See [TypeScript i18n file translation](#typescript-i18n-file-translation) below.
+Being able to translate multiple source folder is very handy for projects like mono-repos that need to manage translated content in many places.
+
+Source folders would normally only contain files you intend to translate but there is one useful exception - See [TypeScript i18n file translation](#typescript-i18n-file-translation) below.
 
 ## Smart Folder Syncing
 
@@ -87,27 +102,28 @@ AI translations are admittedly "draft" translations but this feature can signifi
 
 When you enable "back translation", each target language is translated back to the source language. This creates an additional translation file or folder per target locale that you can review to assess translation quality. You might even wish to add a developer mode switch in your apps, to view back translations inside your app.
 
-Often tweaking your input source text can improve resulting translations. Using this feature, you can repeatedly adjust your input source text and instantly check back translations to assess resulting translation quality accross all your taregt languages.
+Often tweaking your input source text can improve resulting translations. Using this feature, you can repeatedly adjust your input source text and instantly check back translations to assess resulting translation quality across all your target languages.
 
 <!-- TODO: Add screenshot showing back translation comparison -->
 
 ## Translation Memory
 
-The i18n Translator uses a **SQLite-based translation memory database** for professional translation workflows. This is not just a performance cache - it's a foundational feature for managing translations over time.
+The i18n Translator uses a **SQLite-based translation memory database** for professional translation workflows.
+This is not just a performance cache - it's a foundational feature we'll develop for managing professional translations.
 
 **Current capabilities:**
 - **Reduces AI costs** - Only translates new or changed content
-- **Prevents translation drift** - AI engines return different results each time; translation memory ensures consistency
+- **Prevents translation drift** - AI engines return different results each time; translation memory ensures consistency essential for proof checking
 - **Fast lookups** - Instant retrieval of previously translated content
 - **Persistent storage** - Translations survive across sessions and project updates
-- **CSV export/import** - Move cache data between environments and tools
-- **Purge unused entries** - Mark-and-sweep cleanup for stale translations
+- **Purge unused entries** - Finds and removes unused translations
+- **CSV export/import** - Export your translation cache => `translator.csv` and commit it to Git.
+- **CSV export/import** - Import `translator.csv` pulled from Git into your translation cache.
+- **Auto export** - If enabled, it can automatically reexport translation memory to CSV keeping it in sync with source text and new translations and Git commits.
+- **Auto import** - If enabled, when a co-worker first pulls a CSV file from Git and runs "Translator: Start", this setting will auto import the CSV file into their new cache database
 
-**Planned enhancements** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
-- CSV import/export for version control and team collaboration
-- Integration with Computer-Assisted Translation (CAT) tools like MateCat
-- Translation memory sharing across projects
-- Automatic cleanup of unused translations
+**Coming soon** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
+- Integration with Computer-Assisted Translation (CAT) tools to convert your draft AI translations into production grade professional translations.
 
 <!-- TODO: Add diagram showing translation memory workflow -->
 
@@ -224,20 +240,20 @@ See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator
 - Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `copy`
 - `copy` engine is just that. It won't translate anything. It just copies a file from source to target.
 
-| Option | Type | Description | Example |
-|--------|------|-------------|---------|
-| `sourcePaths` | `string[]` | Source language directories to scan for files to translate OR single source files | `["i18n/en", "i18n/en.json"]` |
-| `sourceLocale` | `string` | Source locale | `"en"` |
-| `targetLocales` | `string[]` | Target locales to generate translations for | `['fr-FR', 'fr-CA']` |
-| `enableBackTranslation` | `boolean` | Enable back translation | `false` |
-| `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy) | `"azure"` |
-| `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy) | `"google"` |
-| `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales. | `{"deepl": ["fr", "de"]}` |
-| `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]` |
-| `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation. | `["meta.version"]` |
-| `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating. | `["index.ts"]` |
-| `csvExportPath` | `string` | Path to cache CSV export/import file. Absolute or relative to workspace. | `"translator.csv"` |
-| `autoExport` | `boolean` | Automatically export cache to CSV after translation updates. | `true` |
+| Option                  | Type                       | Description                                                                             | Example                       |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------- | ----------------------------- |
+| `sourcePaths`           | `string[]`                 | Source language directories to scan for files to translate OR single source files       | `["i18n/en", "i18n/en.json"]` |
+| `sourceLocale`          | `string`                   | Source locale                                                                           | `"en"`                        |
+| `targetLocales`         | `string[]`                 | Target locales to generate translations for                                             | `['fr-FR', 'fr-CA']`          |
+| `enableBackTranslation` | `boolean`                  | Enable back translation                                                                 | `false`                       |
+| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy)            | `"azure"`                     |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy)       | `"google"`                    |
+| `engineOverrides`       | `Record<string, string[]>` | Engine overrides for specific locales.                                                  | `{"deepl": ["fr", "de"]}`     |
+| `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]`          |
+| `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                     | `["meta.version"]`            |
+| `copyOnlyFiles`         | `string[]`                 | File names (not paths) to copy verbatim instead of translating.                         | `["index.ts"]`                |
+| `csvExportPath`         | `string`                   | Path to cache CSV export/import file. Absolute or relative to workspace.                | `"translator.csv"`            |
+| `autoExport`            | `boolean`                  | Automatically export cache to CSV after translation updates.                            | `true`                        |
 
 
 Example `translator.json`:
