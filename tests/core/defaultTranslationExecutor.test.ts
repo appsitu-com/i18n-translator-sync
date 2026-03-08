@@ -43,7 +43,7 @@ describe('defaultTranslationExecutor', () => {
       close: vi.fn()
     }
 
-    executor = new DefaultTranslationExecutor(mockFileSystem, mockLogger, mockCache)
+    executor = new DefaultTranslationExecutor(mockFileSystem, mockLogger, mockCache, '/test/workspace')
   })
 
   describe('constructor', () => {

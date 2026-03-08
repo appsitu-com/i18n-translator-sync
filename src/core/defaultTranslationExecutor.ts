@@ -13,7 +13,8 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
   constructor(
     private fileSystem: FileSystem,
     private logger: Logger,
-    private cache: TranslationCache
+    private cache: TranslationCache,
+    private workspacePath: string
   ) {}
 
     /**
@@ -105,10 +106,10 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       const getPassphrase = () => passphrase;
 
       // Use version with passphrase for decryption
-      return resolveEnvObjectWithDecryption(rawConfig, this.logger, getPassphrase) as TranslatorApiConfig;
+      return resolveEnvObjectWithDecryption(rawConfig, this.logger, getPassphrase, this.workspacePath) as TranslatorApiConfig;
     } else {
       // Fallback to synchronous version (may fail for encrypted values)
-      return resolveEnvDeep(rawConfig, this.logger) as TranslatorApiConfig;
+      return resolveEnvDeep(rawConfig, this.logger, this.workspacePath) as TranslatorApiConfig;
     }
   }
 

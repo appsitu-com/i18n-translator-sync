@@ -83,7 +83,7 @@ describe('TranslatorPipeline', () => {
     }
 
     // Create pipeline instance with mock executor
-    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, mockExecutor, mockPassphraseManager)
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor, mockPassphraseManager)
   })
 
   afterEach(() => {
@@ -206,7 +206,7 @@ describe('TranslatorPipeline - pruneEmptyDirs', () => {
       close: vi.fn()
     }
 
-    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache)
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace')
     vi.clearAllMocks()
   })
 
@@ -308,7 +308,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
       close: vi.fn()
     }
     const executor = new MockTranslationExecutor(fs)
-    const pipeline = new TranslatorPipeline(fs, logger, cache as any, executor)
+    const pipeline = new TranslatorPipeline(fs, logger, cache as any, '/test/workspace', executor)
 
     await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
 
@@ -328,7 +328,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
       close: vi.fn()
     }
     const executor = new MockTranslationExecutor(fs)
-    const pipeline = new TranslatorPipeline(fs, logger, cache as any, executor)
+    const pipeline = new TranslatorPipeline(fs, logger, cache as any, '/test/workspace', executor)
 
     await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
 
@@ -355,7 +355,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
       close: vi.fn()
     }
     const executor = new MockTranslationExecutor(fs)
-    const pipeline = new TranslatorPipeline(fs, logger, cache as any, executor)
+    const pipeline = new TranslatorPipeline(fs, logger, cache as any, '/test/workspace', executor)
 
     await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
 

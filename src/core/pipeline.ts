@@ -31,13 +31,14 @@ export class TranslatorPipeline {
     fileSystem: FileSystem,
     logger: Logger,
     cache: TranslationCache,
+    workspacePath: string,
     executor?: ITranslationExecutor,
     passphraseManager?: IPassphraseManager
   ) {
     this.fileSystem = fileSystem
     this.logger = logger
     this.cache = cache
-    this.executor = executor || new DefaultTranslationExecutor(fileSystem, logger, cache)
+    this.executor = executor || new DefaultTranslationExecutor(fileSystem, logger, cache, workspacePath)
     this.passphraseManager = passphraseManager
   }
 

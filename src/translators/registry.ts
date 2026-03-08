@@ -1,12 +1,42 @@
 import type { Translator, TranslatorEngine } from './types'
 
-const REGISTRY = new Map<string, Translator>()
+const DEFAULT_TRANSLATION_LIMIT = Number.MAX_SAFE_INTEGER
 
-export function registerTranslator(t: Translator) {
-  REGISTRY.set(t.name, t)
+export interface TranslatorRegistration {
+  limit?: number
+}
+
+export interface RegisteredTranslator {
+  translator: Translator
+  limit: number
+}
+
+const REGISTRY = new Map<string, RegisteredTranslator>()
+
+function normalizeLimit(limit?: number): number {
+  if (typeof limit !== 'number') {
+    return DEFAULT_TRANSLATION_LIMIT
+  }
+
+  if (!Number.isFinite(limit) || limit < 1) {
+    return DEFAULT_TRANSLATION_LIMIT
+  }
+
+  return Math.floor(limit)
+}
+
+export function registerTranslator(t: Translator, registration: TranslatorRegistration = {}) {
+  REGISTRY.set(t.name, {
+    translator: t,
+    limit: normalizeLimit(registration.limit)
+  })
 }
 
 export function getTranslator(name: string): Translator {
+  return getRegisteredTranslator(name).translator
+}
+
+export function getRegisteredTranslator(name: string): RegisteredTranslator {
   const t = REGISTRY.get(name)
   if (!t) throw new Error(`Translator not registered: ${name}`)
   return t

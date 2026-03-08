@@ -248,23 +248,31 @@ export function resolveEnvStringWithDecryption(
  * @param obj The object to resolve
  * @param logger The logger instance
  * @param getPassphrase Optional function to get the passphrase for decryption
+ * @param workspacePath Optional workspace path for resolving relative file paths
  */
 export function resolveEnvObjectWithDecryption<T = any>(
   obj: T,
   logger: Logger,
-  getPassphrase?: GetPassphraseFunction
+  getPassphrase?: GetPassphraseFunction,
+  workspacePath?: string
 ): T {
   if (obj == null || typeof obj !== 'object') {
     return resolveEnvStringWithDecryption(obj, logger, getPassphrase) as T
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(v => resolveEnvObjectWithDecryption(v, logger, getPassphrase)) as any
+    return obj.map(v => resolveEnvObjectWithDecryption(v, logger, getPassphrase, workspacePath)) as any
   }
 
   const out: any = {}
   for (const [k, v] of Object.entries(obj as any)) {
-    out[k] = resolveEnvObjectWithDecryption(v, logger, getPassphrase)
+    const resolved = resolveEnvObjectWithDecryption(v, logger, getPassphrase, workspacePath)
+    // Resolve file paths for 'key' field if workspacePath is provided
+    if (k === 'key' && typeof resolved === 'string' && workspacePath && !path.isAbsolute(resolved)) {
+      out[k] = path.resolve(workspacePath, resolved)
+    } else {
+      out[k] = resolved
+    }
   }
 
   return out as T
@@ -272,8 +280,11 @@ export function resolveEnvObjectWithDecryption<T = any>(
 
 /**
  * Synchronous version - only use for unencrypted values
+ * @param v The value to resolve
+ * @param logger The logger instance
+ * @param workspacePath Optional workspace path for resolving relative file paths
  */
-export function resolveEnvString(v: unknown, logger: Logger): unknown {
+export function resolveEnvString(v: unknown, logger: Logger, workspacePath?: string): unknown {
   if (typeof v !== 'string') return v
   const envRef = /^env:([A-Z0-9_]+)$/i.exec(v)
   if (envRef) {
@@ -284,11 +295,22 @@ export function resolveEnvString(v: unknown, logger: Logger): unknown {
 
 /**
  * Synchronous version - only use for unencrypted values
+ * @param obj The object to resolve
+ * @param logger The logger instance
+ * @param workspacePath Optional workspace path for resolving relative file paths
  */
-export function resolveEnvDeep<T = any>(obj: T, logger: Logger): T {
-  if (obj == null || typeof obj !== 'object') return resolveEnvString(obj, logger) as T
-  if (Array.isArray(obj)) return obj.map((v) => resolveEnvDeep(v, logger)) as any
+export function resolveEnvDeep<T = any>(obj: T, logger: Logger, workspacePath?: string): T {
+  if (obj == null || typeof obj !== 'object') return resolveEnvString(obj, logger, workspacePath) as T
+  if (Array.isArray(obj)) return obj.map((v) => resolveEnvDeep(v, logger, workspacePath)) as any
   const out: any = {}
-  for (const [k, v] of Object.entries(obj as any)) out[k] = resolveEnvDeep(v, logger)
+  for (const [k, v] of Object.entries(obj as any)) {
+    const resolved = resolveEnvDeep(v, logger, workspacePath)
+    // Resolve file paths for 'key' field if workspacePath is provided
+    if (k === 'key' && typeof resolved === 'string' && workspacePath && !path.isAbsolute(resolved)) {
+      out[k] = path.resolve(workspacePath, resolved)
+    } else {
+      out[k] = resolved
+    }
+  }
   return out as T
 }

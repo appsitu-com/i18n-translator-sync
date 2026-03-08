@@ -67,7 +67,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       hasPassphrase: vi.fn().mockReturnValue(false)
     }
 
-    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, mockExecutor, mockPassphraseManager)
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor, mockPassphraseManager)
   })
 
   describe('Translation Command Capture', () => {

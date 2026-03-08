@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { registerTranslator, getTranslator, deregisterTranslator, pickEngine } from '../../src/translators/registry'
+import {
+  registerTranslator,
+  getTranslator,
+  getRegisteredTranslator,
+  deregisterTranslator,
+  pickEngine
+} from '../../src/translators/registry'
 import type { Translator, TranslatorEngine } from '../../src/translators/types'
 
 describe('translators/registry', () => {
@@ -34,6 +40,15 @@ describe('translators/registry', () => {
 
       const retrieved = getTranslator('test-translator')
       expect(retrieved).toBe(mockTranslator)
+      expect(getRegisteredTranslator('test-translator').limit).toBe(Number.MAX_SAFE_INTEGER)
+    })
+
+    it('should register translator with explicit limit', () => {
+      registerTranslator(mockTranslator, { limit: 7 })
+
+      const retrieved = getRegisteredTranslator('test-translator')
+      expect(retrieved.translator).toBe(mockTranslator)
+      expect(retrieved.limit).toBe(7)
     })
 
     it('should allow overriding existing translator', () => {

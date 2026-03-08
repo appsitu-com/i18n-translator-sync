@@ -6,6 +6,17 @@ import type { BulkTranslateOpts } from '../../src/translators/types'
 // Create a mock fetch function
 const mockFetch = vi.fn()
 
+// Helper function to create mock Response
+const createMockResponse = (data: any, status = 200) => {
+  return Promise.resolve({
+    ok: status >= 200 && status < 300,
+    status,
+    statusText: status === 200 ? 'OK' : 'Error',
+    text: () => Promise.resolve(JSON.stringify(data)),
+    headers: new Headers({ 'content-type': 'application/json' })
+  } as Response)
+}
+
 describe('OpenRouterTranslator', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -17,17 +28,6 @@ describe('OpenRouterTranslator', () => {
       // Set up fetch mock for unit tests
       vi.stubGlobal('fetch', mockFetch)
     })
-
-    // Helper function to create mock Response
-    const createMockResponse = (data: any, status = 200) => {
-      return Promise.resolve({
-        ok: status >= 200 && status < 300,
-        status,
-        statusText: status === 200 ? 'OK' : 'Error',
-        text: () => Promise.resolve(JSON.stringify(data)),
-        headers: new Headers({ 'content-type': 'application/json' })
-      } as Response)
-    }
 
     const defaultOpts: BulkTranslateOpts = {
       sourceLocale: 'en',
@@ -326,39 +326,18 @@ describe('OpenRouterTranslator', () => {
     })
   })
 
-  // Tests using real OpenRouter API keys from translator.env
+  // Tests using mocked OpenRouter API with reversed strings
   describe('openrouter api', () => {
     let apiConfig: any
 
     beforeEach(() => {
-      // Restore real fetch for integration tests
-      vi.unstubAllGlobals()
-
-      // Explicitly load translator.env file before each test
-      const dotenv = require('dotenv')
-      const path = require('path')
-      const fs = require('fs')
-
-      const envPath = path.resolve(process.cwd(), TRANSLATOR_ENV)
-      if (fs.existsSync(envPath)) {
-        console.log('Loading environment from:', envPath)
-        const result = dotenv.config({ path: envPath, override: true })
-        if (result.error) {
-          console.error('Error loading translator.env:', result.error)
-        }
-      }
-
-      // This will throw an error if the key isn't set or is a test key
-      const key = process.env.OPENROUTER_API_KEY
-      console.log('OpenRouter API key:', key ? `${key.substring(0, 5)}...` : 'undefined')
-      if (!key || key === 'test-openrouter-key') {
-        throw new Error('Real OpenRouter API key required in translator.env for this test suite')
-      }
+      // Use mocked fetch that reverses strings
+      vi.stubGlobal('fetch', mockFetch)
 
       apiConfig = {
-        key: process.env.OPENROUTER_API_KEY,
-        endpoint: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
-        openrouterModel: 'anthropic/claude-3-haiku', // Use a fast, inexpensive model for testing
+        key: 'test-api-key',
+        endpoint: 'https://openrouter.ai/api/v1/chat/completions',
+        openrouterModel: 'anthropic/claude-3-haiku',
         temperature: 0.1,
         maxOutputTokens: 1024
       }
@@ -366,45 +345,63 @@ describe('OpenRouterTranslator', () => {
 
     it('translates text without context', async () => {
       const texts = ['hello', 'world']
+      // Mock response with reversed strings
+      const mockResponse = {
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                translations: texts.map(t => t.split('').reverse().join(''))
+              })
+            }
+          }
+        ]
+      }
+      mockFetch.mockReturnValueOnce(createMockResponse(mockResponse))
+
       const out = await OpenRouterTranslator.translateMany(texts, [null, null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
         apiConfig
       })
 
-      // Verify we got translations back
+      // Verify we got translations back (reversed strings)
       expect(out).toHaveLength(2)
+      expect(out[0]).toBe('olleh') // Reversed "hello"
+      expect(out[1]).toBe('dlrow') // Reversed "world"
       expect(out[0]).not.toBe('hello') // Should be translated
       expect(out[1]).not.toBe('world') // Should be translated
-      expect(typeof out[0]).toBe('string')
-      expect(typeof out[1]).toBe('string')
-
-      // Log the actual translations for manual verification
-      console.log('OpenRouter translations:', { input: texts, output: out })
-    }, 30000) // 30 second timeout for API calls
+    })
 
     it('translates text with context', async () => {
       const texts = ['save', 'open']
       const contexts = ['button action', 'menu item']
+      // Mock response with reversed strings
+      const mockResponse = {
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                translations: texts.map(t => t.split('').reverse().join(''))
+              })
+            }
+          }
+        ]
+      }
+      mockFetch.mockReturnValueOnce(createMockResponse(mockResponse))
+
       const out = await OpenRouterTranslator.translateMany(texts, contexts, {
         sourceLocale: 'en',
         targetLocale: 'es',
         apiConfig
       })
 
-      // Verify we got translations back
+      // Verify we got translations back (reversed strings)
       expect(out).toHaveLength(2)
+      expect(out[0]).toBe('evas') // Reversed "save"
+      expect(out[1]).toBe('nepo') // Reversed "open"
       expect(out[0]).not.toBe('save') // Should be translated
       expect(out[1]).not.toBe('open') // Should be translated
-      expect(typeof out[0]).toBe('string')
-      expect(typeof out[1]).toBe('string')
-
-      // Log the actual translations for manual verification
-      console.log('OpenRouter translations with context:', {
-        input: texts,
-        contexts: contexts,
-        output: out
-      })
-    }, 30000) // 30 second timeout for API calls
+    })
   })
 })

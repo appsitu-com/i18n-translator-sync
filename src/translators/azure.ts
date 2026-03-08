@@ -32,33 +32,19 @@ export const AzureTranslator: Translator = {
       'X-ClientTraceId': randomUUID()
     }
 
-    // Azure supports up to 100 items per request
-    const batchSize = Math.min(100, Number(opts.apiConfig.batchSize ?? 100))
-    const out: string[] = new Array(texts.length)
     const from = normalizeLocaleWithMap(opts.sourceLocale, langMap)
     const to = normalizeLocaleWithMap(opts.targetLocale, langMap)
-    let i = 0
 
-    while (i < texts.length) {
-      const slice = texts.slice(i, i + batchSize)
-      const url = new URL(`${endpoint}/translate`)
-      url.searchParams.set('api-version', '3.0')
-      url.searchParams.set('from', from)
-      url.searchParams.append('to', to)
-      if (category) url.searchParams.set('category', category)
+    const url = new URL(`${endpoint}/translate`)
+    url.searchParams.set('api-version', '3.0')
+    url.searchParams.set('from', from)
+    url.searchParams.append('to', to)
+    if (category) url.searchParams.set('category', category)
 
-      const body = slice.map((s) => ({ Text: s }))
-      const json = await withRetry(retry, () => postJson<any[]>(url.toString(), body, headers, timeout))
+    const body = texts.map((s) => ({ Text: s }))
+    const json = await withRetry(retry, () => postJson<any[]>(url.toString(), body, headers, timeout))
 
-      // Response is array of results, each with translations[0].text
-      let k = 0
-      for (const item of json) {
-        const translated = item?.translations?.[0]?.text ?? slice[k]
-        out[i + k] = translated
-        k++
-      }
-      i += batchSize
-    }
+    const out = texts.map((text, index) => json[index]?.translations?.[0]?.text ?? text)
     return out
   }
 }

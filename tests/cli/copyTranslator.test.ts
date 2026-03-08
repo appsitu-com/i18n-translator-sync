@@ -69,7 +69,7 @@ describe('CLI Copy Translator Tests', () => {
     configProvider = new CliConfigProvider(fileSystem, logger, configPath);
     await configProvider.load();
 
-    pipeline = new TranslatorPipeline(fileSystem, logger, cache);
+    pipeline = new TranslatorPipeline(fileSystem, logger, cache, tempDir);
   });
 
   afterEach(async () => {

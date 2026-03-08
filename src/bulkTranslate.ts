@@ -1,4 +1,4 @@
-import { getTranslator } from './translators/registry'
+import { getRegisteredTranslator } from './translators/registry'
 import type { TranslationCache } from './core/cache/sqlite'
 import { TranslatorApiConfig } from './translators/types'
 import { normalizeLocaleWithMap } from './util/localeNorm'
@@ -34,7 +34,7 @@ export async function bulkTranslateWithEngine(
     }
   }
 
-  const engine = getTranslator(engineName)
+  const { translator: engine, limit: translationLimit } = getRegisteredTranslator(engineName)
   const langMap = opts.apiConfig.langMap || {}
   const srcNorm = normalizeLocaleWithMap(opts.source, langMap)
   const tgtNorm = normalizeLocaleWithMap(opts.target, langMap)
@@ -72,12 +72,25 @@ export async function bulkTranslateWithEngine(
     const missTexts = misses.map((m) => m.t)
     const missCtx = misses.map((m) => m.c)
 
-    // Translate the missing segments
-    const translated = await engine.translateMany(missTexts, missCtx, {
-      sourceLocale: srcNorm,
-      targetLocale: tgtNorm,
-      apiConfig: opts.apiConfig
-    })
+    // Translate the missing segments in chunks to respect per-engine array limits.
+    const translated: string[] = []
+    for (let start = 0; start < missTexts.length; start += translationLimit) {
+      const end = Math.min(start + translationLimit, missTexts.length)
+      const chunkTexts = missTexts.slice(start, end)
+      const chunkContexts = missCtx.slice(start, end)
+      const chunkTranslated = await engine.translateMany(chunkTexts, chunkContexts, {
+        sourceLocale: srcNorm,
+        targetLocale: tgtNorm,
+        apiConfig: opts.apiConfig
+      })
+      translated.push(...chunkTranslated)
+    }
+
+    if (translated.length !== misses.length) {
+      throw new Error(
+        `Translator '${engine.name}' returned ${translated.length} translations for ${misses.length} inputs`
+      )
+    }
 
     // Always cache translations, even for "copy" engine
     await cache.putMany({

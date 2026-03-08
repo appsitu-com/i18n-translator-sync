@@ -7,10 +7,10 @@ import { GeminiTranslator } from './gemini';
 import { OpenRouterTranslator } from './openrouter';
 
 export function registerAllTranslators() {
-  registerTranslator(AzureTranslator);
-  registerTranslator(GoogleTranslator);
-  registerTranslator(DeepLTranslator);
-  registerTranslator(GeminiTranslator);
-  registerTranslator(OpenRouterTranslator);
-  registerTranslator(CopyTranslator);
+  registerTranslator(AzureTranslator, { limit: 100 });
+  registerTranslator(GoogleTranslator, { limit: 128 });
+  registerTranslator(DeepLTranslator, { limit: 50 });
+  registerTranslator(GeminiTranslator, { limit: 5 });
+  registerTranslator(OpenRouterTranslator, { limit: 50 });
+  registerTranslator(CopyTranslator, { limit: Number.MAX_SAFE_INTEGER });
 }

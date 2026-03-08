@@ -2,3 +2,6 @@ translator.env
 .translator/
 .translator
 keys/
+
+i18/en!
+i18/en.json!

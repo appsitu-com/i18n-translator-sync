@@ -33,7 +33,7 @@ export class TranslatorManager {
     onConfigChanged?: () => Promise<void>
   ) {
     this.cache = cache;
-    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, executor, passphraseManager);
+    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, passphraseManager);
     this.onConfigChanged = onConfigChanged;
 
     // Initialize MateCat integration

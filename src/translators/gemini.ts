@@ -22,53 +22,38 @@ export const GeminiTranslator: Translator = {
 
     if (!key) throw new Error(`Gemini Translate: missing 'key'`)
 
-    // Process in batches to avoid large payloads
-    const batchSize = 5
-    const results: string[] = new Array(texts.length)
+    const promptResponses = await Promise.all(
+      texts.map(async (text, idx) => {
+        const context = contexts[idx]
+        const contextInfo = context ? `\nContext: ${context}` : ''
 
-    for (let i = 0; i < texts.length; i += batchSize) {
-      const batch = texts.slice(i, i + batchSize)
-      const batchContexts = contexts.slice(i, i + batchSize)
+        const prompt = `Translate the following text from ${normalizeLocaleWithMap(opts.sourceLocale, langMap)} to ${normalizeLocaleWithMap(opts.targetLocale, langMap)}${contextInfo}.\n\nText to translate: "${text}"\n\nTranslation:`
 
-      // Construct prompts for each text
-      const promptResponses = await Promise.all(
-        batch.map(async (text, idx) => {
-          const context = batchContexts[idx]
-          const contextInfo = context ? `\nContext: ${context}` : ''
-
-          const prompt = `Translate the following text from ${normalizeLocaleWithMap(opts.sourceLocale, langMap)} to ${normalizeLocaleWithMap(opts.targetLocale, langMap)}${contextInfo}.\n\nText to translate: "${text}"\n\nTranslation:`
-
-          const url = `${endpoint}/models/${model}:generateContent?key=${encodeURIComponent(key)}`
-          const body = {
-            contents: [
-              {
-                parts: [{ text: prompt }]
-              }
-            ],
-            generation_config: {
-              temperature,
-              max_output_tokens: maxOutputTokens
+        const url = `${endpoint}/models/${model}:generateContent?key=${encodeURIComponent(key)}`
+        const body = {
+          contents: [
+            {
+              parts: [{ text: prompt }]
             }
+          ],
+          generation_config: {
+            temperature,
+            max_output_tokens: maxOutputTokens
           }
+        }
 
-          try {
-            const json = await withRetry(retry, () => postJson<any>(url, body, {}, timeout))
-            const response = json?.candidates?.[0]?.content?.parts?.[0]?.text || text
-            // Clean up the response - remove quotes and extra whitespace
-            return response.trim().replace(/^["']|["']$/g, '').trim()
-          } catch (error: any) {
-            console.error(`Gemini translation error: ${error.message}`, error)
-            return text // Return original text on error
-          }
-        })
-      )
+        try {
+          const json = await withRetry(retry, () => postJson<any>(url, body, {}, timeout))
+          const response = json?.candidates?.[0]?.content?.parts?.[0]?.text || text
+          // Clean up the response - remove quotes and extra whitespace
+          return response.trim().replace(/^["']|["']$/g, '').trim()
+        } catch (error: any) {
+          console.error(`Gemini translation error: ${error.message}`, error)
+          return text // Return original text on error
+        }
+      })
+    )
 
-      // Add batch results to the overall results
-      for (let j = 0; j < promptResponses.length; j++) {
-        results[i + j] = promptResponses[j]
-      }
-    }
-
-    return results
+    return promptResponses
   }
 }
