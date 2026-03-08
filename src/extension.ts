@@ -157,7 +157,7 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
       samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_ENV),
       message: 'A translator.env file has been created. Please configure your translation API keys.',
       reminderMessage: "Don't forget to configure your translation API keys in the translator.env file.",
-      docsUrl: 'https://github.com/appsitu-com/i18n-translator-sync#api-keys',
+      docsUrl: 'https://github.com/appsitu-com/i18n-translator-sync?tab=readme-ov-file#setting-api-keys',
       gitignoreEntry: null
     },
     {
@@ -166,7 +166,7 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
       samplePath: path.join(context.extensionPath, 'samples', TRANSLATOR_JSON),
       message: 'A translator.json file has been created. Please configure your translation settings.',
       reminderMessage: null, // No reminder for JSON file
-      docsUrl: 'https://github.com/appsitu-com/i18n-translator-sync#configuration',
+      docsUrl: 'https://github.com/appsitu-com/i18n-translator-sync?tab=readme-ov-file#getting-started',
       gitignoreEntry: null
     }
   ]
@@ -339,7 +339,7 @@ export function onShowOutput(): void {
   channel.appendLine('- Translator: Restart (restart watching)')
   // channel.appendLine('- Translator: Push to MateCat (works without starting)')
   // channel.appendLine('- Translator: Pull from MateCat (works without starting)')
-  channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
+  // channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
   channel.appendLine('- Translator: Show Output (this command)')
   channel.appendLine('')
 
