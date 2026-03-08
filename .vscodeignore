@@ -19,6 +19,7 @@ TODO.md
 .env
 .env-example
 /translator.json
+keys/**
 
 # Build config
 **/tsconfig.json
