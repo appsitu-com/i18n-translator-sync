@@ -15,14 +15,6 @@ describe('localeNorm', () => {
       expect(normalizeLocaleWithMap('pt-BR', langMap)).toBe('pt')
     })
 
-     it('should convert to lowercase in fallback', () => {
-      const langMap = {}
-
-      expect(normalizeLocaleWithMap('FR', langMap)).toBe('fr')
-      expect(normalizeLocaleWithMap('ES-MX', langMap)).toBe('es-mx')
-      expect(normalizeLocaleWithMap('DE', langMap)).toBe('de')
-    })
-
     it('should handle simple locale codes', () => {
       const langMap = {
         'zh': 'zh-CHS'

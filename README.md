@@ -320,8 +320,9 @@ AZURE_TRANSLATION_REGION='westus'
 AZURE_TRANSLATION_URL='https://api.cognitive.microsofttranslator.com'
 
 # Google Translate API configuration (v3)
-# Get API key from: https://cloud.google.com/translate/docs/setup
-GOOGLE_TRANSLATION_KEY='XXXXXXXXXXXXXXXXXXXXX'
+# Create a service account JSON key file:
+# GOOGLE_TRANSLATION_KEY is a path to a Google service credential JSON file
+GOOGLE_TRANSLATION_KEY='.translator/google-service-account.json'
 GOOGLE_TRANSLATION_URL='https://translation.googleapis.com'
 GOOGLE_TRANSLATION_PROJECT_ID='your-google-cloud-project-id'
 GOOGLE_TRANSLATION_LOCATION='global'

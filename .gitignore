@@ -16,10 +16,10 @@ dist/
 releases/
 *.vsix
 
-
 # Test project folder
 test-project/i18n/*
 !test-project/i18n/en/
 
 translator.env
 .translator
+keys/

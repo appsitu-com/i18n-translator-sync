@@ -45,28 +45,28 @@ describe('azure stub', () => {
 
 // Tests using real Azure API keys from translator.env
 describe('azure api', () => {
-  let apiConfig: any;
+  let apiConfig: any
 
   beforeEach(() => {
     // Explicitly load translator.env file before each test
-    const dotenv = require('dotenv');
-    const path = require('path');
-    const fs = require('fs');
+    const dotenv = require('dotenv')
+    const path = require('path')
+    const fs = require('fs')
 
-    const envPath = path.resolve(process.cwd(), 'test-project/translator.env');
+    const envPath = path.resolve(process.cwd(), 'test-project/translator.env')
     if (fs.existsSync(envPath)) {
-      console.log('Loading environment from:', envPath);
-      const result = dotenv.config({ path: envPath, override: true });
+      console.log('Loading environment from:', envPath)
+      const result = dotenv.config({ path: envPath, override: true })
       if (result.error) {
-        console.error('Error loading translator.env:', result.error);
+        console.error('Error loading translator.env:', result.error)
       }
     }
 
     // This will throw an error if the key isn't set or is a test key
-    const key = process.env.AZURE_TRANSLATION_KEY;
-    console.log('Azure API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
+    const key = process.env.AZURE_TRANSLATION_KEY
+    console.log('Azure API key:', key ? `${key.substring(0, 5)}...` : 'undefined')
     if (!key || key === 'test-azure-key') {
-      throw new Error('Real Azure API key required in translator.env for this test suite');
+      throw new Error('Real Azure API key required in translator.env for this test suite')
     }
 
     apiConfig = {
@@ -74,7 +74,7 @@ describe('azure api', () => {
       region: process.env.AZURE_TRANSLATION_REGION || 'westus',
       endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
     }
-  });
+  })
 
   it('translates text without context', async () => {
     const texts = ['hello', 'world']
@@ -84,6 +84,6 @@ describe('azure api', () => {
       apiConfig
     })
 
-    expect(out.map(text => text.toLowerCase())).toEqual(['bonjour', 'monde'])
-  });
+    expect(out.map((text) => text.toLowerCase())).toEqual(['bonjour', 'monde'])
+  })
 })

@@ -13,7 +13,6 @@ import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { TranslateProjectConfig } from '../../src/core/coreConfig';
 import { CopyTranslator } from '../../src/translators/copy';
 import { registerTranslator } from '../../src/translators/registry';
-import * as bulkTranslateModule from '../../src/bulkTranslate';
 
 // Helper function to create a temp directory with test files
 async function createTempTestDir() {

@@ -42,19 +42,15 @@ describe('GeminiTranslator stub', () => {
 
     vi.mocked(postJson).mockResolvedValueOnce(mockResponse)
 
-    const result = await GeminiTranslator.translateMany(
-      ['Hello world'],
-      [null],
-      {
-        sourceLocale: 'en',
-        targetLocale: 'es',
-        apiConfig: {
-          key: 'test-api-key',
-          endpoint: 'https://test-endpoint',
-          region: ''  // Not used by Gemini
-        }
+    const result = await GeminiTranslator.translateMany(['Hello world'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'es',
+      apiConfig: {
+        key: 'test-api-key',
+        endpoint: 'https://test-endpoint',
+        region: '' // Not used by Gemini
       }
-    )
+    })
 
     expect(result).toEqual(['Hola mundo'])
     expect(postJson).toHaveBeenCalledTimes(1)
@@ -86,19 +82,15 @@ describe('GeminiTranslator stub', () => {
 
     vi.mocked(postJson).mockResolvedValueOnce(mockResponse)
 
-    const result = await GeminiTranslator.translateMany(
-      ['Open file'],
-      ['Button label for opening a file'],
-      {
-        sourceLocale: 'en',
-        targetLocale: 'es',
-        apiConfig: {
-          key: 'test-api-key',
-          endpoint: 'https://test-endpoint',
-          region: ''
-        }
+    const result = await GeminiTranslator.translateMany(['Open file'], ['Button label for opening a file'], {
+      sourceLocale: 'en',
+      targetLocale: 'es',
+      apiConfig: {
+        key: 'test-api-key',
+        endpoint: 'https://test-endpoint',
+        region: ''
       }
-    )
+    })
 
     expect(result).toEqual(['Abrir archivo'])
     expect(postJson).toHaveBeenCalledTimes(1)
@@ -110,19 +102,15 @@ describe('GeminiTranslator stub', () => {
   it('handles error by returning original text', async () => {
     vi.mocked(postJson).mockRejectedValueOnce(new Error('API Error'))
 
-    const result = await GeminiTranslator.translateMany(
-      ['Test error handling'],
-      [null],
-      {
-        sourceLocale: 'en',
-        targetLocale: 'fr',
-        apiConfig: {
-          key: 'test-api-key',
-          endpoint: 'https://test-endpoint',
-          region: ''
-        }
+    const result = await GeminiTranslator.translateMany(['Test error handling'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig: {
+        key: 'test-api-key',
+        endpoint: 'https://test-endpoint',
+        region: ''
       }
-    )
+    })
 
     expect(result).toEqual(['Test error handling'])
   })
@@ -132,50 +120,49 @@ describe('GeminiTranslator stub', () => {
 describe('gemini api', () => {
   // This will ensure we're using the real implementation, not the mock
   beforeEach(() => {
-    vi.restoreAllMocks();
+    vi.restoreAllMocks()
 
     // Explicitly load translator.env file before each test
-    const dotenv = require('dotenv');
-    const path = require('path');
-    const fs = require('fs');
+    const dotenv = require('dotenv')
+    const path = require('path')
+    const fs = require('fs')
 
-    const envPath = path.resolve(process.cwd(), 'test-project/translator.env');
+    const envPath = path.resolve(process.cwd(), 'test-project/translator.env')
     if (fs.existsSync(envPath)) {
-      console.log('Loading environment from:', envPath);
-      const result = dotenv.config({ path: envPath, override: true });
+      console.log('Loading environment from:', envPath)
+      const result = dotenv.config({ path: envPath, override: true })
       if (result.error) {
-        console.error('Error loading translator.env:', result.error);
+        console.error('Error loading translator.env:', result.error)
       }
     }
 
     // This will throw an error if the key isn't set or is a test/placeholder key
-    const key = process.env.GEMINI_API_KEY;
-    console.log('Gemini API key:', key ? `${key.substring(0, 5)}...` : 'undefined');
+    const key = process.env.GEMINI_API_KEY
+    console.log('Gemini API key:', key ? `${key.substring(0, 5)}...` : 'undefined')
     if (!key || key === 'test-gemini-key' || key.includes('YOUR_GEMINI_API_KEY_HERE')) {
-      throw new Error('Real Gemini API key required in translator.env for this test suite');
+      throw new Error('Real Gemini API key required in translator.env for this test suite')
     }
-  });
+  })
 
   it('translates text with real API', async () => {
     const apiConfig = {
       key: process.env.GEMINI_API_KEY as string,
       endpoint: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta',
       region: ''
-    };
+    }
 
-    const texts = ['hello', 'world'];
+    const texts = ['hello', 'world']
     const out = await GeminiTranslator.translateMany(texts, [null, null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
       apiConfig
-    });
+    })
 
     // Verify we got some response (not necessarily the exact translations)
     // The Gemini API might give different translations or formats based on API key and rate limits
-    expect(out.length).toBe(2);
+    expect(out.length).toBe(2)
     // Just check that we got something other than an error (which would return original text)
-    expect(out[0].length).toBeGreaterThan(0);
-    expect(out[1].length).toBeGreaterThan(0);
-  });
+    expect(out[0].length).toBeGreaterThan(0)
+    expect(out[1].length).toBeGreaterThan(0)
+  })
 })
-
