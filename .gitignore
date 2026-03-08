@@ -3,7 +3,6 @@
 *.log
 
 .env
-translator.env
 !samples/translator.env
 
 node_modules/
@@ -22,4 +21,5 @@ releases/
 test-project/i18n/*
 !test-project/i18n/en/
 
-.i18n-cache
+translator.env
+.translator
