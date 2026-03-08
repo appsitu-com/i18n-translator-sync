@@ -21,8 +21,9 @@ export const DeepLTranslator: Translator = {
     if (!authKey) throw new Error(`DeepL: missing 'key'`)
     const headers = { Authorization: `DeepL-Auth-Key ${authKey}` }
 
-    const target = normalizeLocaleWithMap(opts.targetLocale, langMap)
-    const source = normalizeLocaleWithMap(opts.sourceLocale, langMap)
+    // DeepL documents uppercase locale codes
+    const target = normalizeLocaleWithMap(opts.targetLocale, langMap).toUpperCase()
+    const source = normalizeLocaleWithMap(opts.sourceLocale, langMap).toUpperCase()
 
     // Group texts by context, because DeepL's 'context' parameter applies to the whole request.
     const groups = new Map<string, number[]>()
