@@ -526,6 +526,7 @@ async function purgeCache(): Promise<void> {
 
 /**
  * Show context menu with all available translator commands
+ * Icons: https://microsoft.github.io/vscode-codicons/dist/codicon.html
  */
 export async function showContextMenu(context: vscode.ExtensionContext): Promise<void> {
   const state = getTranslatorState()
@@ -580,12 +581,12 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
     //   detail: 'translator.pull'
     // },
     {
-      label: '$(export) Export Cache to CSV',
+      label: '$(arrow-circle-right) Export Cache to CSV',
       description: 'Export translation cache to CSV file',
       detail: 'translator.exportCache'
     },
     {
-      label: '$(import) Import Cache from CSV',
+      label: '$(arrow-circle-left) Import Cache from CSV',
       description: 'Import translation cache from CSV file',
       detail: 'translator.importCache'
     },
