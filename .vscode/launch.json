@@ -2,18 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Extension with Test Project",
+      "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}", "${workspaceFolder}/test-project"],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js", "!**/node_modules/**/*.js"],
+      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js",
+        "!**/node_modules/**/*.js"
+      ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
       "preLaunchTask": "pnpm: prepare-debug",
       "trace": true,
       "smartStep": false,
-      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
       "env": {
         "VSCODE_DEBUG_MODE": "1",
         "DEBUG": "vscode:*,extension:*"
@@ -40,14 +46,19 @@
         "${workspaceFolder}/test-project/translator.json",
         "--watch"
       ],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
       "preLaunchTask": "pnpm: build",
       "smartStep": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "translator:*"
@@ -65,14 +76,19 @@
         "--bulk-translate",
         "--no-watch"
       ],
-      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
       "preLaunchTask": "pnpm: build",
       "smartStep": true,
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "skipFiles": ["<node_internals>/**", "${workspaceFolder}/node_modules/**"],
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/node_modules/**"
+      ],
       "env": {
         "NODE_ENV": "development",
         "DEBUG": "translator:*,bulk:*"
