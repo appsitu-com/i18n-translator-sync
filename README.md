@@ -240,20 +240,21 @@ See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator
 - Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `copy`
 - `copy` engine is just that. It won't translate anything. It just copies a file from source to target.
 
-| Option                  | Type                       | Description                                                                             | Example                       |
-| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------- | ----------------------------- |
-| `sourcePaths`           | `string[]`                 | Source language directories to scan for files to translate OR single source files       | `["i18n/en", "i18n/en.json"]` |
-| `sourceLocale`          | `string`                   | Source locale                                                                           | `"en"`                        |
-| `targetLocales`         | `string[]`                 | Target locales to generate translations for                                             | `['fr-FR', 'fr-CA']`          |
-| `enableBackTranslation` | `boolean`                  | Enable back translation                                                                 | `false`                       |
-| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy)            | `"azure"`                     |
-| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy)       | `"google"`                    |
-| `engineOverrides`       | `Record<string, string[]>` | Engine overrides for specific locales.                                                  | `{"deepl": ["fr", "de"]}`     |
-| `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]`          |
-| `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                     | `["meta.version"]`            |
-| `copyOnlyFiles`         | `string[]`                 | File names (not paths) to copy verbatim instead of translating.                         | `["index.ts"]`                |
-| `csvExportPath`         | `string`                   | Path to cache CSV export/import file. Absolute or relative to workspace.                | `"translator.csv"`            |
-| `autoExport`            | `boolean`                  | Automatically export cache to CSV after translation updates.                            | `true`                        |
+| Option                  | Type                       | Description                                                                             | Example                         |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
+| `sourcePaths`           | `string[]`                 | Source language directories to scan for files to translate OR single source files       | `["i18n/en", "i18n/en.json"]`   |
+| `sourceLocale`          | `string`                   | Source locale                                                                           | `"en"`                          |
+| `targetLocales`         | `string[]`                 | Target locales to generate translations for                                             | `['fr-FR', 'fr-CA']`            |
+| `enableBackTranslation` | `boolean`                  | Enable back translation                                                                 | `false`                         |
+| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy)            | `"azure"`                       |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy)       | `"google"`                      |
+| `engineOverrides`       | `Record<string, string[]>` | Engine overrides for specific locales (forward translation).                            | `{"deepl": ["fr", "de"]}`       |
+| `engineOverrides`       | `Record<string, string[]>` | Engine overrides for specific locales (back translation).                               | `{"azure": ["fr:en", "de:en"]}` |
+| `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]`            |
+| `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                     | `["meta.version"]`              |
+| `copyOnlyFiles`         | `string[]`                 | File names (not paths) to copy verbatim instead of translating.                         | `["index.ts"]`                  |
+| `csvExportPath`         | `string`                   | Path to cache CSV export/import file. Absolute or relative to workspace.                | `"translator.csv"`              |
+| `autoExport`            | `boolean`                  | Automatically export cache to CSV after translation updates.                            | `true`                          |
 
 
 Example `translator.json`:
