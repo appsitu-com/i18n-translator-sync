@@ -3,6 +3,7 @@ import { RetryOptions } from "../util/retry"
 export interface TranslatorApiConfig {
   key: string
   endpoint: string
+  url?: string
   timeoutMs?: number
   retry?: RetryOptions
 
@@ -19,6 +20,8 @@ export interface TranslatorApiConfig {
 
   // engine: 'google'
   googleModel?: string
+  googleProjectId?: string
+  googleLocation?: string
 
   // engine: 'deepl'
   free?: boolean

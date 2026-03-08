@@ -319,10 +319,12 @@ AZURE_TRANSLATION_KEY='XXXXXXXXXXXXXXXXX'
 AZURE_TRANSLATION_REGION='westus'
 AZURE_TRANSLATION_URL='https://api.cognitive.microsofttranslator.com'
 
-# Google Translate API configuration
+# Google Translate API configuration (v3)
 # Get API key from: https://cloud.google.com/translate/docs/setup
 GOOGLE_TRANSLATION_KEY='XXXXXXXXXXXXXXXXXXXXX'
 GOOGLE_TRANSLATION_URL='https://translation.googleapis.com'
+GOOGLE_TRANSLATION_PROJECT_ID='your-google-cloud-project-id'
+GOOGLE_TRANSLATION_LOCATION='global'
 
 # DeepL API configuration
 # Get API key from: https://www.deepl.com/pro-api

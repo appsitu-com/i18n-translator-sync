@@ -13,6 +13,8 @@ declare namespace NodeJS {
     // Google Translation API
     GOOGLE_TRANSLATION_KEY?: string;
     GOOGLE_TRANSLATION_URL?: string;
+    GOOGLE_TRANSLATION_PROJECT_ID?: string;
+    GOOGLE_TRANSLATION_LOCATION?: string;
 
     // DeepL Translation API
     DEEPL_TRANSLATION_KEY?: string;

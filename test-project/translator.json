@@ -20,7 +20,9 @@
     "copy": {},
     "google": {
       "apiKey": "${GOOGLE_TRANSLATION_KEY}",
-      "endpoint": "${GOOGLE_TRANSLATION_URL}"
+      "endpoint": "${GOOGLE_TRANSLATION_URL}",
+      "googleProjectId": "${GOOGLE_TRANSLATION_PROJECT_ID}",
+      "googleLocation": "${GOOGLE_TRANSLATION_LOCATION}"
     },
     "azure": {
       "apiKey": "${AZURE_TRANSLATION_KEY}",

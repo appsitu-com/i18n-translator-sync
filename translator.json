@@ -14,6 +14,8 @@
     "google": {
       "apiKey": "${GOOGLE_TRANSLATION_KEY}",
       "endpoint": "${GOOGLE_TRANSLATION_URL}",
+      "googleProjectId": "${GOOGLE_TRANSLATION_PROJECT_ID}",
+      "googleLocation": "${GOOGLE_TRANSLATION_LOCATION}",
       "langMap": {
         "zh-CN": "zh-cn",
         "zh-TW": "zh-tw",

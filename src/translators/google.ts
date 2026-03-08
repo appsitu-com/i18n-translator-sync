@@ -1,43 +1,51 @@
-import type { Translator, BulkTranslateOpts } from './types'
+import type { BulkTranslateOpts, Translator } from './types'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-// function norm(locale: string): string {
-//   // Google v2 accepts BCP-47; preserve region if present but lowercase language
-//   const [lang, rest] = locale.split('-');
-//   return rest ? `${lang.toLowerCase()}-${rest}` : lang.toLowerCase();
-// }
+interface GoogleV3TranslateResponse {
+  translations?: Array<{
+    translatedText?: string
+  }>
+}
 
 export const GoogleTranslator: Translator = {
   name: 'google',
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const key = opts.apiConfig.key as string
-    const endpoint =
-      (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') || 'https://translation.googleapis.com'
+    const key = opts.apiConfig.key
+    const endpoint = (opts.apiConfig.endpoint || opts.apiConfig.url || 'https://translation.googleapis.com').replace(/\/+$/, '')
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
-    const model = opts.apiConfig.googleModel as string | undefined // optional
     const retry = opts.apiConfig.retry
-
-    // Use langMap from config, fallback to no mapping if not provided
+    const model = opts.apiConfig.googleModel
+    const projectId = opts.apiConfig.googleProjectId
+    const location = opts.apiConfig.googleLocation || 'global'
     const langMap = opts.apiConfig.langMap || {}
 
-    if (!key) throw new Error(`Google Translate: missing 'key'`)
+    if (!key) throw new Error("Google Translate v3: missing 'key'")
+    if (!projectId) throw new Error("Google Translate v3: missing 'googleProjectId'")
 
-    const url = `${endpoint}/language/translate/v2?key=${encodeURIComponent(key)}`
-    const body: any = {
-      q: texts,
-      target: normalizeLocaleWithMap(opts.targetLocale, langMap),
-      source: normalizeLocaleWithMap(opts.sourceLocale, langMap),
-      format: 'text'
+    const parent = `projects/${projectId}/locations/${location}`
+    const url = `${endpoint}/v3/${parent}:translateText?key=${encodeURIComponent(key)}`
+    const body: {
+      contents: string[]
+      sourceLanguageCode: string
+      targetLanguageCode: string
+      mimeType: 'text/plain'
+      model?: string
+    } = {
+      sourceLanguageCode: normalizeLocaleWithMap(opts.sourceLocale, langMap),
+      targetLanguageCode: normalizeLocaleWithMap(opts.targetLocale, langMap),
+      contents: texts,
+      mimeType: 'text/plain'
     }
-    if (model) body.model = model
 
-    const json = await withRetry(retry, () => postJson<any>(url, body, {}, timeout))
+    if (model) {
+      body.model = model
+    }
 
-    const list = json?.data?.translations ?? []
-    // Google may return HTML-escaped content; allow as-is, caller can decode if necessary
-    return list.map((t: any, idx: number) => t?.translatedText ?? texts[idx])
+    const json = await withRetry(retry, () => postJson<GoogleV3TranslateResponse>(url, body, {}, timeout))
+    const translations = json.translations || []
+    return texts.map((text, index) => translations[index]?.translatedText ?? text)
   }
 }

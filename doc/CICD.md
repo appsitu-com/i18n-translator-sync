@@ -64,6 +64,8 @@ Workflow: `.github/workflows/publish.yml`
   - `DEEPL_TRANSLATION_KEY`
   - `GEMINI_API_KEY`
   - `GOOGLE_TRANSLATION_KEY`
+  - `GOOGLE_TRANSLATION_PROJECT_ID`
+  - `GOOGLE_TRANSLATION_LOCATION` (optional, defaults to 'global')
   - `OPENROUTER_API_KEY`
 
 Add secrets: **Settings → Secrets and Variables → Actions → New repository secret**.

@@ -77,7 +77,9 @@ export class CliConfigProvider implements ConfigProvider {
       } else if (section === 'google') {
         engineConfig = {
           key: process.env.GOOGLE_TRANSLATION_KEY,
-          url: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com'
+          endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
+          googleProjectId: process.env.GOOGLE_TRANSLATION_PROJECT_ID,
+          googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global'
         };
       } else if (section === 'deepl') {
         engineConfig = {
