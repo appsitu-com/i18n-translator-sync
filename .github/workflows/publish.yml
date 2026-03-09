@@ -1,17 +1,12 @@
 name: Publish
 on:
-  workflow_run:
-    workflows: ['Release']
-    types: [completed]
-    branches: [main]
+  release:
+    types: [published]
 jobs:
   publish-marketplaces:
     runs-on: ubuntu-latest
-    if: github.event.workflow_run.conclusion == 'success'
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_branch }}
       - uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -20,9 +15,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Prepare native dependencies
         run: sudo apt-get update && sudo apt-get install -y build-essential python3
-      - name: Extract version from latest tag
+      - name: Extract version from release tag
         id: version
-        run: echo "VERSION=$(git describe --tags --abbrev=0 | cut -d'v' -f2)" >> $GITHUB_OUTPUT
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
       - name: Package extension
         run: pnpm package --version=${{ steps.version.outputs.VERSION }} --ci
       - name: Install publishing tools
