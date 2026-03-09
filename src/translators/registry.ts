@@ -1,34 +1,38 @@
 import type { Translator, TranslatorEngine } from './types'
 
 const DEFAULT_TRANSLATION_LIMIT = Number.MAX_SAFE_INTEGER
+const DEFAULT_TRANSLATION_MAX_CHARS = Number.MAX_SAFE_INTEGER
 
 export interface TranslatorRegistration {
   limit?: number
+  maxchars?: number
 }
 
 export interface RegisteredTranslator {
   translator: Translator
   limit: number
+  maxchars: number
 }
 
 const REGISTRY = new Map<string, RegisteredTranslator>()
 
-function normalizeLimit(limit?: number): number {
-  if (typeof limit !== 'number') {
-    return DEFAULT_TRANSLATION_LIMIT
+function normalizePositiveInteger(value: number | undefined, fallback: number): number {
+  if (typeof value !== 'number') {
+    return fallback
   }
 
-  if (!Number.isFinite(limit) || limit < 1) {
-    return DEFAULT_TRANSLATION_LIMIT
+  if (!Number.isFinite(value) || value < 1) {
+    return fallback
   }
 
-  return Math.floor(limit)
+  return Math.floor(value)
 }
 
 export function registerTranslator(t: Translator, registration: TranslatorRegistration = {}) {
   REGISTRY.set(t.name, {
     translator: t,
-    limit: normalizeLimit(registration.limit)
+    limit: normalizePositiveInteger(registration.limit, DEFAULT_TRANSLATION_LIMIT),
+    maxchars: normalizePositiveInteger(registration.maxchars, DEFAULT_TRANSLATION_MAX_CHARS)
   })
 }
 

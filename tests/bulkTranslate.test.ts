@@ -21,17 +21,30 @@ class ChunkedFakeTranslator implements Translator {
   }
 }
 
+class MaxCharsFakeTranslator implements Translator {
+  name = 'fake-maxchars'
+  readonly calls: number[] = []
+
+  async translateMany(texts: string[]) {
+    this.calls.push(texts.length)
+    return texts.map((t) => `[${t}]`)
+  }
+}
+
 describe('bulkTranslateWithEngine()', () => {
   const chunkedTranslator = new ChunkedFakeTranslator()
+  const maxCharsTranslator = new MaxCharsFakeTranslator()
 
   beforeAll(() => {
     registerTranslator(new FakeTranslator())
     registerTranslator(chunkedTranslator, { limit: 2 })
+    registerTranslator(maxCharsTranslator, { limit: 10, maxchars: 5 })
   })
 
   afterAll(() => {
     deregisterTranslator('fake')
     deregisterTranslator('fake-chunked')
+    deregisterTranslator('fake-maxchars')
   })
 
   it('uses cache for hits and engine for misses', async () => {
@@ -75,6 +88,27 @@ describe('bulkTranslateWithEngine()', () => {
 
     expect(out.translations).toEqual(['[A]', '[B]', '[C]', '[D]', '[E]'])
     expect(chunkedTranslator.calls).toEqual([2, 2, 1])
+    expect(cache.putMany).toHaveBeenCalledTimes(1)
+  })
+
+  it('chunks misses using translator registration maxchars', async () => {
+    maxCharsTranslator.calls.length = 0
+
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    const out = await bulkTranslateWithEngine(
+      ['AA', 'BB', 'C', 'DD'],
+      [null, null, null, null],
+      'fake-maxchars',
+      { source: 'en', target: 'fr', apiConfig: {} },
+      cache as unknown as TranslationCache
+    )
+
+    expect(out.translations).toEqual(['[AA]', '[BB]', '[C]', '[DD]'])
+    expect(maxCharsTranslator.calls).toEqual([3, 1])
     expect(cache.putMany).toHaveBeenCalledTimes(1)
   })
 })

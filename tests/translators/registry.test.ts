@@ -41,14 +41,16 @@ describe('translators/registry', () => {
       const retrieved = getTranslator('test-translator')
       expect(retrieved).toBe(mockTranslator)
       expect(getRegisteredTranslator('test-translator').limit).toBe(Number.MAX_SAFE_INTEGER)
+      expect(getRegisteredTranslator('test-translator').maxchars).toBe(Number.MAX_SAFE_INTEGER)
     })
 
     it('should register translator with explicit limit', () => {
-      registerTranslator(mockTranslator, { limit: 7 })
+      registerTranslator(mockTranslator, { limit: 7, maxchars: 1234 })
 
       const retrieved = getRegisteredTranslator('test-translator')
       expect(retrieved.translator).toBe(mockTranslator)
       expect(retrieved.limit).toBe(7)
+      expect(retrieved.maxchars).toBe(1234)
     })
 
     it('should allow overriding existing translator', () => {

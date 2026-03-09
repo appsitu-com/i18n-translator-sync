@@ -15,6 +15,55 @@ export interface TranslationStats {
   total: number
 }
 
+interface TranslationChunk {
+  texts: string[]
+  contexts: string[]
+}
+
+function buildTranslationChunks(
+  texts: string[],
+  contexts: string[],
+  maxItemsPerRequest: number,
+  maxCharsPerRequest: number
+): TranslationChunk[] {
+  const chunks: TranslationChunk[] = []
+  let currentTexts: string[] = []
+  let currentContexts: string[] = []
+  let currentChars = 0
+
+  for (let i = 0; i < texts.length; i++) {
+    const text = texts[i]
+    const context = contexts[i]
+    const textCharCount = text.length
+
+    if (textCharCount > maxCharsPerRequest) {
+      throw new Error(
+        `Segment exceeds max translation characters per request (${textCharCount} > ${maxCharsPerRequest})`
+      )
+    }
+
+    const chunkIsFull = currentTexts.length >= maxItemsPerRequest
+    const charsWouldOverflow = currentChars + textCharCount > maxCharsPerRequest
+
+    if (currentTexts.length > 0 && (chunkIsFull || charsWouldOverflow)) {
+      chunks.push({ texts: currentTexts, contexts: currentContexts })
+      currentTexts = []
+      currentContexts = []
+      currentChars = 0
+    }
+
+    currentTexts.push(text)
+    currentContexts.push(context)
+    currentChars += textCharCount
+  }
+
+  if (currentTexts.length > 0) {
+    chunks.push({ texts: currentTexts, contexts: currentContexts })
+  }
+
+  return chunks
+}
+
 export async function bulkTranslateWithEngine(
   texts: string[],
   contexts: (string | null | undefined)[],
@@ -34,7 +83,11 @@ export async function bulkTranslateWithEngine(
     }
   }
 
-  const { translator: engine, limit: translationLimit } = getRegisteredTranslator(engineName)
+  const {
+    translator: engine,
+    limit: translationLimit,
+    maxchars: translationMaxChars
+  } = getRegisteredTranslator(engineName)
   const langMap = opts.apiConfig.langMap || {}
   const srcNorm = normalizeLocaleWithMap(opts.source, langMap)
   const tgtNorm = normalizeLocaleWithMap(opts.target, langMap)
@@ -72,12 +125,12 @@ export async function bulkTranslateWithEngine(
     const missTexts = misses.map((m) => m.t)
     const missCtx = misses.map((m) => m.c)
 
-    // Translate the missing segments in chunks to respect per-engine array limits.
+    // Translate the missing segments in chunks to respect per-engine request limits.
     const translated: string[] = []
-    for (let start = 0; start < missTexts.length; start += translationLimit) {
-      const end = Math.min(start + translationLimit, missTexts.length)
-      const chunkTexts = missTexts.slice(start, end)
-      const chunkContexts = missCtx.slice(start, end)
+    const chunks = buildTranslationChunks(missTexts, missCtx, translationLimit, translationMaxChars)
+    for (const chunk of chunks) {
+      const chunkTexts = chunk.texts
+      const chunkContexts = chunk.contexts
       const chunkTranslated = await engine.translateMany(chunkTexts, chunkContexts, {
         sourceLocale: srcNorm,
         targetLocale: tgtNorm,
