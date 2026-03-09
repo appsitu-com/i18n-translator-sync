@@ -3,8 +3,18 @@ on:
   push:
     tags: [ 'v*.*.*' ]
 jobs:
-  package-and-release:
-    runs-on: ubuntu-latest
+  package-vsix:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: linux-x64
+          - os: windows-latest
+            target: win32-x64
+          - os: macos-latest
+            target: darwin-x64
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: write
     steps:
@@ -16,16 +26,38 @@ jobs:
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - name: Prepare native dependencies
+        if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y build-essential python3
       - name: Extract version from tag
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+        run: |
+          raw_version="${GITHUB_REF#refs/tags/v}"
+          core_version="${raw_version%%-*}"
+          echo "VERSION=${core_version}" >> "$GITHUB_OUTPUT"
       - name: Package extension
-        run: pnpm package --version=${{ steps.version.outputs.VERSION }} --ci
+        run: pnpm package --version=${{ steps.version.outputs.VERSION }} --ci --target=${{ matrix.target }}
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-${{ matrix.target }}
+          path: releases/i18n-translator-vscode-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.vsix
+
+  create-release:
+    needs: package-vsix
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download VSIX artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vsix-*
+          merge-multiple: true
+          path: release-assets
       - uses: softprops/action-gh-release@v2
         with:
-          files: |
-            releases/*.vsix
+          files: release-assets/*.vsix
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
