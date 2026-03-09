@@ -49,7 +49,11 @@
     "i18n-translator": "./dist/cli/cliMain.js"
   },
   "scripts": {
-    "build": "tsc -p ./ && node ./scripts/generate-build-info.js",
+    "build": "pnpm clean:dist && tsc -p ./ --noEmit && pnpm bundle && node ./scripts/generate-build-info.js",
+    "clean:dist": "node -e \"require('fs').rmSync('dist',{ recursive: true, force: true })\"",
+    "bundle": "pnpm bundle:extension && pnpm bundle:cli",
+    "bundle:extension": "vite build",
+    "bundle:cli": "vite build -c vite.cli.config.ts",
     "watch": "tsc -w -p ./",
     "build:cli": "tsc -p ./",
     "lint": "eslint src --ext .ts",
@@ -94,6 +98,7 @@
     "eslint-plugin-unused-imports": "^4.2.0",
     "sharp": "^0.34.3",
     "typescript": "^5.9.2",
+    "vite": "^6.3.5",
     "vitest": "^3.2.4"
   },
   "dependencies": {
