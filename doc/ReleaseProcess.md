@@ -64,15 +64,17 @@ The extension uses the same packaging script for both local and CI/CD workflows,
 - **Trigger**: Push a git tag matching `v*.*.*` (e.g., `v0.2.3`)
 - **Process**:
   1. Extracts version from the tag (e.g., `v1.2.3` → `1.2.3`)
-  2. Runs `pnpm package --version=1.2.3 --ci`
-  3. Creates a GitHub Release with the VSIX from `releases/` directory
+  2. Runs a matrix build on Linux, Windows, and macOS using explicit VS Code targets (`linux-x64`, `win32-x64`, `darwin-x64`)
+  3. Packages each target via `pnpm package --version=1.2.3 --ci --target=<target>`
+  4. Uploads each platform VSIX as workflow artifacts
+  5. Creates a draft GitHub Release with all target VSIX files attached
 
 **Publish Workflow** (`.github/workflows/publish.yml`):
 - **Trigger**: When a GitHub Release is **published** (not drafted)
 - **Process**:
   1. Extracts version from the release tag
-  2. Packages the extension using `pnpm package --ci`
-  3. Publishes to VS Code Marketplace using `VSCE_PAT` secret
+  2. Runs matrix packaging on Linux, Windows, and macOS for explicit targets
+  3. Publishes each target-specific VSIX to VS Code Marketplace using `VSCE_PAT` secret
 
 ### Packaging Script Flags
 
@@ -89,6 +91,11 @@ The packaging script (`scripts/package-extension.js`) supports the following fla
 - In CI mode with `--version`, validates that it matches `package.json` version
 - Fails if version mismatch detected (ensures git tags match package.json)
 - Example: `pnpm package --version=0.2.3 --ci`
+
+**`--target=<vscode-target>`**: Package for a specific VS Code platform target
+- Produces deterministic output file names: `i18n-translator-vscode-X.Y.Z-<target>.vsix`
+- Intended for CI matrix jobs to avoid cross-platform native module mismatches
+- Example: `pnpm package --version=0.2.3 --ci --target=win32-x64`
 
 **`--force-icon-generation`**: Regenerate icon
 - Forces regeneration of PNG icon from SVG
@@ -107,11 +114,11 @@ If validation fails, the workflow will exit with an error and provide clear inst
 
 This extension uses `better-sqlite3`, which is a native module that requires platform-specific binaries. The packaging configuration is set up to handle cross-platform compatibility:
 
-- The extension uses the `vsce` packaging tool's native dependency support
-- In `package.json`, the `vsce.dependencies` array specifies which native modules to include
-- This ensures that the packaged extension will work on Windows, macOS, and Linux
+- The extension uses target-specific packaging so native modules are built on matching OS runners
+- In `package.json`, the `vsce.dependencies` array specifies which runtime native modules to include
+- Matrix workflows package one VSIX per platform target to prevent ABI mismatch issues
 
-This approach is the recommended way to handle native dependencies in VS Code extensions, ensuring that end users don't need to install any additional dependencies.
+This approach avoids shipping Linux-built binaries to Windows or macOS users and keeps installation reliable.
 
 ## Quick Packaging Options
 

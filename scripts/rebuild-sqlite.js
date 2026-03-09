@@ -33,37 +33,119 @@ if (process.versions && process.versions.electron) {
 }
 
 /**
- * Detects installed Visual Studio versions and returns the most recent Build Tools installation
+ * Infer node-gyp Visual Studio version from installation path.
+ * VS 2019 => 16.0, newer supported releases => 17.0.
+ * @param {string} installationPath
+ * @returns {string}
+ */
+function inferNodeGypVsVersion(installationPath) {
+  return installationPath.includes('\\2019\\') ? '16.0' : '17.0';
+}
+
+/**
+ * Detects Visual Studio using vswhere when available.
+ * @returns {object|null} Object with version info or null if not found
+ */
+function detectVisualStudioWithVsWhere() {
+  const programFilesX86 = process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)';
+  const vswherePath = path.join(
+    programFilesX86,
+    'Microsoft Visual Studio',
+    'Installer',
+    'vswhere.exe'
+  );
+
+  if (!fs.existsSync(vswherePath)) {
+    return null;
+  }
+
+  const result = spawnSync(
+    vswherePath,
+    ['-latest', '-products', '*', '-requires', 'Microsoft.Component.MSBuild', '-property', 'installationPath'],
+    { encoding: 'utf8' }
+  );
+
+  if (result.status !== 0) {
+    return null;
+  }
+
+  const installationPath = (result.stdout || '').trim().split(/\r?\n/).filter(Boolean).pop();
+  if (!installationPath) {
+    return null;
+  }
+
+  const msbuildCandidates = [
+    path.join(installationPath, 'MSBuild', 'Current', 'Bin', 'MSBuild.exe'),
+    path.join(installationPath, 'MSBuild', '15.0', 'Bin', 'MSBuild.exe')
+  ];
+  const msbuildPath = msbuildCandidates.find((candidate) => fs.existsSync(candidate));
+  if (!msbuildPath) {
+    return null;
+  }
+
+  return {
+    name: 'Visual Studio (detected via vswhere)',
+    version: inferNodeGypVsVersion(installationPath),
+    msbuildPath,
+    basePath: installationPath
+  };
+}
+
+/**
+ * Detects installed Visual Studio versions and returns the most recent matching installation.
  * @returns {object|null} Object with version info or null if not found
  */
 function detectVisualStudio() {
+  const viaVsWhere = detectVisualStudioWithVsWhere();
+  if (viaVsWhere) {
+    return viaVsWhere;
+  }
+
   const possiblePaths = [
     {
-      name: 'Visual Studio 2026 Build Tools',
+      name: 'Visual Studio 2026',
       version: '17.0',
       paths: [
         'C:\\Program Files\\Microsoft Visual Studio\\2026\\BuildTools',
+        'C:\\Program Files\\Microsoft Visual Studio\\2026\\Enterprise',
+        'C:\\Program Files\\Microsoft Visual Studio\\2026\\Professional',
+        'C:\\Program Files\\Microsoft Visual Studio\\2026\\Community',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2026\\BuildTools',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2026\\Enterprise',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2026\\Professional',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2026\\Community',
         'C:\\Program Files\\Microsoft Visual Studio\\18\\BuildTools',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools'
       ]
     },
     {
-      name: 'Visual Studio 2022 Build Tools',
+      name: 'Visual Studio 2022',
       version: '17.0',
       paths: [
         'C:\\Program Files\\Microsoft Visual Studio\\2022\\BuildTools',
+        'C:\\Program Files\\Microsoft Visual Studio\\2022\\Enterprise',
+        'C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional',
+        'C:\\Program Files\\Microsoft Visual Studio\\2022\\Community',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Enterprise',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Professional',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\Community',
         'C:\\Program Files\\Microsoft Visual Studio\\17\\BuildTools',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\17\\BuildTools'
       ]
     },
     {
-      name: 'Visual Studio 2019 Build Tools',
+      name: 'Visual Studio 2019',
       version: '16.0',
       paths: [
         'C:\\Program Files\\Microsoft Visual Studio\\2019\\BuildTools',
+        'C:\\Program Files\\Microsoft Visual Studio\\2019\\Enterprise',
+        'C:\\Program Files\\Microsoft Visual Studio\\2019\\Professional',
+        'C:\\Program Files\\Microsoft Visual Studio\\2019\\Community',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\BuildTools',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Enterprise',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional',
+        'C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Community',
         'C:\\Program Files\\Microsoft Visual Studio\\16\\BuildTools',
         'C:\\Program Files (x86)\\Microsoft Visual Studio\\16\\BuildTools'
       ]
@@ -200,21 +282,7 @@ function rebuildForElectron() {
       console.log(`✅ Found: ${detected.name}`);
       console.log(`   Path: ${detected.basePath}`);
       vsConfig.msbuildPath = detected.msbuildPath;
-
-      // Map VS version numbers to node-gyp compatible versions
-      // VS 2026 (version 18) -> node-gyp 17.0 (2022/2019 compatible)
-      // VS 2022 (version 17) -> node-gyp 17.0
-      // VS 2019 (version 16) -> node-gyp 16.0
-      const basePathVersion = detected.basePath.match(/\\(\d+)\\BuildTools/);
-      let vsVersionNumber = basePathVersion ? basePathVersion[1] : '17';
-
-      // node-gyp doesn't recognize version 18 yet, use 17.0 for VS 2026
-      if (vsVersionNumber === '18') {
-        console.log('ℹ️  VS 2026 detected, using node-gyp version 17.0 (compatible mode)');
-        vsConfig.version = '17.0';
-      } else {
-        vsConfig.version = detected.version;
-      }
+      vsConfig.version = detected.version;
 
       // Also check for VsDevCmd.bat which can set up the full environment
       const vsDevCmdPath = path.join(detected.basePath, 'Common7', 'Tools', 'VsDevCmd.bat');

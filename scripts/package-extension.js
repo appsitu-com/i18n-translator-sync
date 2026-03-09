@@ -26,6 +26,14 @@ const ICON_PNG_PATH = path.join(ROOT_DIR, 'images', 'icon.png');
 const PACKAGE_LOCK_PATH = path.join(ROOT_DIR, 'package-lock.json');
 const README_PATH = path.join(ROOT_DIR, 'README.md');
 const RELEASES_DIR = path.join(ROOT_DIR, 'releases');
+const BETTER_SQLITE_BINARY_PATH = path.join(
+  ROOT_DIR,
+  'node_modules',
+  'better-sqlite3',
+  'build',
+  'Release',
+  'better_sqlite3.node'
+);
 
 // Utilities
 function execPromise(command) {
@@ -50,6 +58,27 @@ function execPromise(command) {
       resolve(stdout);
     });
   });
+}
+
+function parseArgumentValue(name) {
+  const argPrefix = `--${name}=`;
+  const arg = process.argv.find((entry) => entry.startsWith(argPrefix));
+  if (!arg) return null;
+  return arg.slice(argPrefix.length).trim() || null;
+}
+
+function sanitizeTargetForFileName(target) {
+  if (!target) return null;
+  return target.replace(/[^a-zA-Z0-9.-]/g, '-');
+}
+
+function ensureNativeBinaryExists() {
+  if (!fs.existsSync(BETTER_SQLITE_BINARY_PATH)) {
+    console.error('Missing native better-sqlite3 binary at:');
+    console.error(`  ${BETTER_SQLITE_BINARY_PATH}`);
+    console.error('Run the Electron rebuild step before packaging.');
+    process.exit(1);
+  }
 }
 
 async function downloadFile(url, dest) {
@@ -299,7 +328,7 @@ async function buildExtension() {
   }
 }
 
-async function packageExtension(newVersion) {
+async function packageExtension(newVersion, target) {
   console.log('Packaging extension...');
 
   try {
@@ -315,12 +344,26 @@ async function packageExtension(newVersion) {
     // Note: vsce package will automatically trigger vscode:prepublish hook
     // No need to run it explicitly here
 
+    ensureNativeBinaryExists();
+
     // Package with vsce into the releases directory
     console.log('Packaging with @vscode/vsce...');
-    // Use vsce from devDependencies via pnpm exec
-    await execPromise(`pnpm exec vsce package --out "${RELEASES_DIR}"`);
+    const targetSuffix = sanitizeTargetForFileName(target);
+    const outputFileName = targetSuffix
+      ? `i18n-translator-vscode-${version}-${targetSuffix}.vsix`
+      : `i18n-translator-vscode-${version}.vsix`;
+    const outputPath = path.join(RELEASES_DIR, outputFileName);
 
-    const vsixName = `${RELEASES_DIR}/i18n-translator-vscode-${version}.vsix`;
+    const commandParts = ['pnpm exec vsce package'];
+    if (target) {
+      commandParts.push(`--target ${target}`);
+    }
+    commandParts.push(`--out "${outputPath}"`);
+
+    // Use vsce from devDependencies via pnpm exec
+    await execPromise(commandParts.join(' '));
+
+    const vsixName = outputPath;
     console.log(`Extension packaged successfully as ${vsixName}`);
 
     return vsixName;
@@ -383,6 +426,11 @@ async function main() {
 
   // Check for CI mode flag
   const ciMode = process.argv.includes('--ci');
+  const target = parseArgumentValue('target');
+  if (target) {
+    console.log(`Packaging target: ${target}`);
+  }
+
   if (ciMode) {
     console.log('CI mode enabled. Will skip interactive prompts and git tagging instructions.');
   }
@@ -432,7 +480,7 @@ async function main() {
     await buildExtension();
 
     // Package the extension with the new version
-    const vsixPath = await packageExtension(newVersion);
+    const vsixPath = await packageExtension(newVersion, target);
 
     console.log('Extension packaging completed successfully!');
     console.log(`VSIX file created: ${vsixPath}`);
