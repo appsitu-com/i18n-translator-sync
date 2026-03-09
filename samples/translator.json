@@ -1,27 +1,44 @@
 {
-  "csvExportPath": "translator.csv",
-  "autoExport": true,
-  "autoImport": true,
-  "sourcePaths": ["i18n/en"],
-  "sourceLocale": "en",
-  "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
-  "enableBackTranslation": false,
-  "defaultMarkdownEngine": "azure",
-  "defaultJsonEngine": "google",
+  // ========== CACHE & EXPORT SETTINGS ==========
+  "csvExportPath": "translator.csv",      // Path to export translation cache to CSV
+  "autoExport": true,                     // Automatically export cache after translations
+  "autoImport": true,                     // Automatically import from CSV on startup
+
+  // ========== SOURCE & TARGET CONFIGURATION ==========
+  "sourcePaths": ["i18n/en"],             // Paths to scan for source language files
+  "sourceLocale": "en",                   // Source language code
+  "targetLocales": ["es", "fr", "de", "ja", "zh-CN"], // Languages to translate to
+  "enableBackTranslation": false,         // Enable back-translation for quality checks
+
+  // ========== DEFAULT TRANSLATION ENGINES ==========
+  "defaultMarkdownEngine": "azure",       // Engine for .md and .mdx files
+  "defaultJsonEngine": "google",          // Engine for .json and .yaml files
+
+  // ========== ENGINE OVERRIDES BY LANGUAGE ==========
+  // Override the default engine for specific target languages
   "engineOverrides": {
-    "deepl": ["fr", "de"],
-    "azure": ["es:en", "ja:en"]
+    "deepl": ["fr", "de"],                // Use DeepL for French and German translation (back & forward)
+    "azure": ["es:en", "ja:en"]           // Use Azure for Spanish and Japanese back translations
   },
-  "excludeKeys": [],
-  "excludeKeyPaths": [],
-  "copyOnlyFiles": [],
+
+  // ========== KEY EXCLUSION RULES ==========
+  "excludeKeys": [],                      // Key names to exclude (matches at any depth)
+  "excludeKeyPaths": [],                  // Exact dotted paths to exclude (e.g., "meta.version")
+  "copyOnlyFiles": [],                    // Files to copy verbatim without translation
+
+  // ========== TRANSLATION ENGINE CONFIGURATIONS ==========
   "translator": {
+    // No-op translator - returns input unchanged
     "copy": {},
+
+    // Google Cloud Translation API
     "google": {
-      "apiKey": "${GOOGLE_TRANSLATION_KEY}",
-      "endpoint": "${GOOGLE_TRANSLATION_URL}",
+      "apiKey": "${GOOGLE_TRANSLATION_KEY}",           // Service account JSON or file path
+      "endpoint": "${GOOGLE_TRANSLATION_URL}",         // API endpoint
       "googleProjectId": "${GOOGLE_TRANSLATION_PROJECT_ID}",
       "googleLocation": "${GOOGLE_TRANSLATION_LOCATION}",
+
+      // Locale mappings for Google Cloud Translation
       "langMap": {
         "zh-CN": "zh-cn",
         "zh-TW": "zh-tw",
@@ -29,10 +46,14 @@
         "zh-Hant": "zh-tw"
       }
     },
+
+    // Microsoft Azure Translator
     "azure": {
       "apiKey": "${AZURE_TRANSLATION_KEY}",
       "region": "${AZURE_TRANSLATION_REGION}",
       "endpoint": "${AZURE_TRANSLATION_URL}",
+
+      // Locale mappings for Azure Translator
       "langMap": {
         "zh-CN": "zh-Hans",
         "zh-TW": "zh-Hant",
@@ -50,9 +71,13 @@
         "sr-Latn": "sr-Latn"
       }
     },
+
+    // DeepL Translation API
     "deepl": {
       "apiKey": "${DEEPL_TRANSLATION_KEY}",
       "endpoint": "${DEEPL_TRANSLATION_URL}",
+
+      // Locale mappings for DeepL (uses uppercase language codes)
       "langMap": {
         "ar": "AR",
         "bg": "BG",
@@ -88,9 +113,13 @@
         "zh": "ZH"
       }
     },
+
+    // Google Gemini API (LLM-based translation)
     "gemini": {
       "apiKey": "${GEMINI_API_KEY}",
       "endpoint": "${GEMINI_API_URL}",
+
+      // Locale mappings for Gemini (uses language names)
       "langMap": {
         "ar": "Arabic",
         "zh-CN": "Chinese (Simplified)",
@@ -108,9 +137,13 @@
         "es": "Spanish"
       }
     },
+
+    // OpenRouter API (supports multiple LLM models)
     "openrouter": {
       "apiKey": "${OPENROUTER_API_KEY}",
       "endpoint": "${OPENROUTER_API_URL}",
+
+      // Locale mappings for OpenRouter
       "langMap": {
         "ar": "Arabic",
         "da": "Danish",

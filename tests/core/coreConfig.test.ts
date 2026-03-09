@@ -270,5 +270,74 @@ describe('Config', () => {
         'google': ['es']
       })
     })
+
+    it('should parse JSON5 with comments in translator.json', async () => {
+      const json5Content = `
+        {
+          // Source configuration
+          sourceDir: 'src/locales',
+
+          // Target configuration
+          targetDir: 'dist/locales',
+
+          // List of source paths
+          sourcePaths: ['i18n/en'],
+
+          // Source language code
+          sourceLocale: 'en',
+
+          /* Target languages to translate to */
+          targetLocales: ['fr', 'es'],
+
+          // Which engine to use by default
+          defaultMarkdownEngine: 'azure',
+          defaultJsonEngine: 'google',
+
+          // No back translation for this project
+          enableBackTranslation: false,
+
+          // Engine-specific overrides
+          engineOverrides: {}
+        }
+      `
+
+      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
+      vi.mocked(mockFileSystem.readFile).mockResolvedValue(json5Content)
+
+      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
+
+      expect(result.sourceDir).toBe('src/locales')
+      expect(result.targetDir).toBe('dist/locales')
+      expect(result.sourcePaths).toEqual(['i18n/en'])
+      expect(result.sourceLocale).toBe('en')
+      expect(result.targetLocales).toEqual(['fr', 'es'])
+      expect(result.defaultMarkdownEngine).toBe('azure')
+      expect(result.defaultJsonEngine).toBe('google')
+      expect(result.enableBackTranslation).toBe(false)
+    })
+
+    it('should parse JSON5 with single quotes', async () => {
+      const json5Content = `
+        {
+          sourcePaths: ['src/en.json'],
+          sourceLocale: 'en',
+          targetLocales: ['fr'],
+          defaultMarkdownEngine: 'google',
+          defaultJsonEngine: 'deepl',
+          enableBackTranslation: false,
+          engineOverrides: {}
+        }
+      `
+
+      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
+      vi.mocked(mockFileSystem.readFile).mockResolvedValue(json5Content)
+
+      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
+
+      expect(result.sourcePaths).toEqual(['src/en.json'])
+      expect(result.sourceLocale).toBe('en')
+      expect(result.targetLocales).toEqual(['fr'])
+      expect(result.defaultJsonEngine).toBe('deepl')
+    })
   })
 })

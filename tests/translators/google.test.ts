@@ -141,4 +141,88 @@ describe('google v3 stub', () => {
     const tokenCallsAfterExpiry = callsAfterExpiry.filter((url) => url === 'https://oauth2.googleapis.com/token')
     expect(tokenCallsAfterExpiry).toHaveLength(2)
   })
+
+  it('accepts credentials as JSON string', async () => {
+    const jsonString = JSON.stringify({
+      client_email: 'translator-test@example.iam.gserviceaccount.com',
+      private_key: privateKeyPem,
+      token_uri: 'https://oauth2.googleapis.com/token'
+    })
+
+    const out = await GoogleTranslator.translateMany(['hello'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig: {
+        key: jsonString,
+        endpoint: 'https://translation.googleapis.com',
+        googleProjectId: 'demo-project',
+        googleLocation: 'global'
+      }
+    })
+
+    expect(out).toEqual(['HELLO'])
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2)
+  })
+
+  it('accepts credentials as file path', async () => {
+    const out = await GoogleTranslator.translateMany(['world'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig: {
+        key: credentialsPath,
+        endpoint: 'https://translation.googleapis.com',
+        googleProjectId: 'demo-project',
+        googleLocation: 'global'
+      }
+    })
+
+    expect(out).toEqual(['WORLD'])
+  })
+
+  it('throws when credentials JSON string is invalid', async () => {
+    await expect(
+      GoogleTranslator.translateMany(['test'], [null], {
+        sourceLocale: 'en',
+        targetLocale: 'fr',
+        apiConfig: {
+          key: '{invalid json',
+          endpoint: 'https://translation.googleapis.com',
+          googleProjectId: 'demo-project'
+        }
+      })
+    ).rejects.toThrow('failed to parse service credentials JSON')
+  })
+
+  it('throws when credentials JSON is missing required fields', async () => {
+    const incompleteJson = JSON.stringify({
+      client_email: 'test@example.com'
+      // missing private_key
+    })
+
+    await expect(
+      GoogleTranslator.translateMany(['test'], [null], {
+        sourceLocale: 'en',
+        targetLocale: 'fr',
+        apiConfig: {
+          key: incompleteJson,
+          endpoint: 'https://translation.googleapis.com',
+          googleProjectId: 'demo-project'
+        }
+      })
+    ).rejects.toThrow("missing 'client_email' or 'private_key'")
+  })
+
+  it('throws when credentials file path does not exist', async () => {
+    await expect(
+      GoogleTranslator.translateMany(['test'], [null], {
+        sourceLocale: 'en',
+        targetLocale: 'fr',
+        apiConfig: {
+          key: '/nonexistent/path/to/creds.json',
+          endpoint: 'https://translation.googleapis.com',
+          googleProjectId: 'demo-project'
+        }
+      })
+    ).rejects.toThrow('failed to read service credentials from')
+  })
 })

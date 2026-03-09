@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import JSON5 from 'json5';
 import { ConfigProvider } from '../core/coreConfig';
 import { FileSystem } from '../core/util/fs';
 import { Logger } from '../core/util/baseLogger';
@@ -30,7 +31,7 @@ export class CliConfigProvider implements ConfigProvider {
     try {
       if (await this.fs.fileExists(this.fs.createUri(this.configPath))) {
         const content = await this.fs.readFile(this.fs.createUri(this.configPath));
-        this.config = JSON.parse(content);
+        this.config = JSON5.parse(content);
         this.logger.debug(`Loaded project configuration from ${this.configPath}`);
       } else {
         this.logger.warn(`Project configuration file not found: ${this.configPath}`);

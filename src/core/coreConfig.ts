@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import JSON5 from 'json5'
 import { z } from 'zod'
 import { TranslatorEngine } from '../translators/types'
 import { FileSystem } from './util/fs'
@@ -134,7 +135,7 @@ export async function loadProjectConfig(
         ? await fileSystem.readFile(fileSystem.createUri(configPath))
         : fs.readFileSync(configPath, 'utf8')
 
-      const parsedConfig = JSON.parse(configContent)
+      const parsedConfig = JSON5.parse(configContent)
 
       // Validate the configuration
       const validationResult = TranslateConfigSchema.safeParse(parsedConfig)

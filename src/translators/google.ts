@@ -42,23 +42,21 @@ function toBase64Url(value: string): string {
     .replace(/=+$/g, '')
 }
 
-function readServiceAccountCredentials(pathToCredentials: string): GoogleServiceAccountCredentials {
+function parseServiceAccountCredentials(credentialsJson: string): GoogleServiceAccountCredentials {
   let parsed: unknown
   try {
-    parsed = JSON.parse(readFileSync(pathToCredentials, 'utf-8'))
+    parsed = JSON.parse(credentialsJson)
   } catch (error) {
-    throw new Error(`Google Translate v3: failed to read service credentials '${pathToCredentials}': ${String(error)}`)
+    throw new Error(`Google Translate v3: failed to parse service credentials JSON: ${String(error)}`)
   }
 
   if (!parsed || typeof parsed !== 'object') {
-    throw new Error(`Google Translate v3: invalid service credentials '${pathToCredentials}'`)
+    throw new Error('Google Translate v3: invalid service credentials - expected JSON object')
   }
 
   const creds = parsed as Partial<GoogleServiceAccountCredentials>
   if (!creds.client_email || !creds.private_key) {
-    throw new Error(
-      `Google Translate v3: service credentials '${pathToCredentials}' missing 'client_email' or 'private_key'`
-    )
+    throw new Error("Google Translate v3: service credentials missing 'client_email' or 'private_key'")
   }
 
   return {
@@ -66,6 +64,28 @@ function readServiceAccountCredentials(pathToCredentials: string): GoogleService
     private_key: creds.private_key,
     token_uri: creds.token_uri
   }
+}
+
+function readServiceAccountCredentials(keyOrPath: string): GoogleServiceAccountCredentials {
+  // Try to parse as JSON string first
+  if (keyOrPath.trim().startsWith('{')) {
+    try {
+      return parseServiceAccountCredentials(keyOrPath)
+    } catch (error) {
+      // If it looks like JSON but failed to parse, throw immediately
+      throw error
+    }
+  }
+
+  // Otherwise, treat as file path
+  let fileContent: string
+  try {
+    fileContent = readFileSync(keyOrPath, 'utf-8')
+  } catch (error) {
+    throw new Error(`Google Translate v3: failed to read service credentials from '${keyOrPath}': ${String(error)}`)
+  }
+
+  return parseServiceAccountCredentials(fileContent)
 }
 
 function buildJwtAssertion(credentials: GoogleServiceAccountCredentials): string {
