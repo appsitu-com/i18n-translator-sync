@@ -12,5 +12,17 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["appsitu", "deepl", "Étiquette", "frontmatter", "gemini", "matecat", "O'Hagan"]
+  "cSpell.words": [
+    "appsitu",
+    "deepl",
+    "Étiquette",
+    "frontmatter",
+    "gemini",
+    "github",
+    "matecat",
+    "O'Hagan",
+    "sqlite",
+    "vite",
+    "vitest"
+  ]
 }
