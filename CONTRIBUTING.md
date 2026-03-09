@@ -79,7 +79,7 @@ pnpm test:cov
 
 ### Debugging
 
-> **⚠️ Important:** If you have this extension installed from the marketplace (or a `.vsix`), **uninstall the extension before launching the debugger**. Having both the installed extension and the debug instance running simultaneously causes conflicts — duplicate commands, file watcher collisions, and unexpected behavior. To uninstall it, go to the Extensions view (`Ctrl+Shift+X`), find "i18n Sync Translator", click the gear icon, and select **Uninstall**.
+> **⚠️ Important:** If you have this extension installed from the marketplace (or a `.vsix`), **uninstall the extension before launching the debugger**. Having both the installed extension and the debug instance running simultaneously causes conflicts — duplicate commands, file watcher collisions, and unexpected behavior. To uninstall it, go to the Extensions view (`Ctrl+Shift+X`), find "i18n Translator Sync", click the gear icon, and select **Uninstall**.
 
 Use the "Run Extension with Test Project" in VS Code Debug panel.
 This will launch a new instance of VS Code and open the `test-project` subfolder.
@@ -142,7 +142,8 @@ In the `package.json` file we have the following rule to ensure that the publish
 ```json
 "vsce": {
   "dependencies": [
-    "better-sqlite3"
+    "better-sqlite3",
+    "json5"
   ]
 }
 ```

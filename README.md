@@ -1,4 +1,4 @@
-# i18n Sync Translator
+# i18n Translator Sync
 
 **Instant file translation with AI - multiple engines, smart caching, professional workflow**
 
@@ -32,7 +32,7 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 **From VS Code:**
 1. Open VS Code
 2. Press `Ctrl+Shift+X` (Windows/Linux) or `Cmd+Shift+X` (Mac) to open Extensions
-3. Search for "i18n Sync Translator"
+3. Search for "i18n Translator Sync"
 4. Click Install
 
 **Requirements:**

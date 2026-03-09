@@ -644,7 +644,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   } catch {
     // ignore - buildInfo.json may not exist in dev
   }
-  channel.appendLine(`i18n Translator v${version} (built ${buildDate})`)
+  channel.appendLine(`i18n Translator Sync v${version} (built ${buildDate})`)
   channel.appendLine(`Activation time: ${new Date().toISOString()}`)
   channel.appendLine(`Extension path: ${context.extensionPath}`)
   channel.appendLine('To see this output, run the command "Translator: Show Output"')
@@ -654,20 +654,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     channel.show()
   }
 
-  // Initialize the adapter during activation so commands can work
-  try {
-    await vsCodeAdapter.initializeOnActivation()
-    // Update status bar after initialization
-    updateStatusBar()
-  } catch (error) {
-    // Don't fail activation if initialization fails - commands can still try to initialize
-    channel.appendLine(`Warning: Failed to initialize translator during activation: ${error}`)
-    channel.appendLine('Commands will attempt to initialize when needed')
-    // Still update status bar to show uninitialized state
-    updateStatusBar()
-  }
-
-  // Register commands
+  // Register commands early so they are always available, even if initialization is slow.
   context.subscriptions.push(
     vscode.commands.registerCommand('translator.start', async () => onStartTranslator(context)),
     vscode.commands.registerCommand('translator.stop', () => stopTranslator()),
@@ -681,11 +668,30 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('translator.purgeCache', async () => purgeCache())
   )
 
-  // Check if auto-start is enabled for this workspace
-  const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
-  if (autoStartSetting === 'true') {
-    await onStartTranslator(context)
-  }
+  // Run initialization in the background so extension activation never blocks.
+  void (async () => {
+    try {
+      await vsCodeAdapter.initializeOnActivation()
+      updateStatusBar()
+    } catch (error) {
+      console.error(`i18n Translator Sync: Failed to initialize translator during activation: ${error}`)
+      // Don't fail activation if initialization fails - commands can still try to initialize
+      channel.appendLine(`Warning: i18n Translator Sync: Failed to initialize translator during activation: ${error}`)
+      channel.appendLine('Commands will attempt to initialize when needed')
+      updateStatusBar()
+    }
+
+    // Auto-start runs in the same background task to avoid blocking activation.
+    const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
+    if (autoStartSetting === 'true') {
+      try {
+        await onStartTranslator(context)
+      } catch (error) {
+        console.error(`i18n Translator Sync: Auto-start failed: ${error}`)
+        channel.appendLine(`Warning: i18n Translator Sync: Auto-start failed: ${error}`)
+      }
+    }
+  })()
 
   // Status bar is already created and will be updated by the commands
 }

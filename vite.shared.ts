@@ -19,10 +19,7 @@ export function createNodeBundleConfig(options: NodeBundleConfigOptions): UserCo
 
   return {
     resolve: {
-      conditions: ['node'],
-      alias: {
-        'decode-named-character-reference': 'decode-named-character-reference/index.js'
-      }
+      conditions: ['node']
     },
     build: {
       ssr: true,
@@ -42,6 +39,11 @@ export function createNodeBundleConfig(options: NodeBundleConfigOptions): UserCo
           inlineDynamicImports: true
         }
       }
+    },
+    // Bundle all non-native dependencies for extension runtime reliability.
+    // Keep only explicit runtime externals (vscode, Node built-ins, native deps).
+    ssr: {
+      noExternal: true
     }
   }
 }
