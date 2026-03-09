@@ -184,14 +184,16 @@ function rebuildForElectron() {
     }
   }
 
-  // Detect or use Visual Studio configuration
+  const isWindows = os.platform() === 'win32';
+
+  // Detect or use Visual Studio configuration (Windows only)
   let vsConfig = { version: null, msbuildPath: null, vsDevCmdPath: null };
 
-  if (vsVersionOverride && msbuildPathOverride) {
+  if (isWindows && vsVersionOverride && msbuildPathOverride) {
     console.log('✅ Using Visual Studio overrides from environment variables');
     vsConfig.version = vsVersionOverride;
     vsConfig.msbuildPath = msbuildPathOverride;
-  } else {
+  } else if (isWindows) {
     console.log('🔍 Detecting Visual Studio installation...');
     const detected = detectVisualStudio();
     if (detected) {
@@ -238,6 +240,8 @@ function rebuildForElectron() {
       console.error('  pnpm rebuild:sqlite:electron');
       process.exit(1);
     }
+  } else {
+    console.log(`ℹ️ Non-Windows platform detected (${os.platform()}); skipping Visual Studio detection.`);
   }
 
   // Check if electron-rebuild is installed
@@ -272,16 +276,16 @@ function rebuildForElectron() {
     // Set up environment with Visual Studio configuration
     const rebuildEnv = { ...process.env, DEBUG: 'electron-rebuild' };
 
-    // node-gyp expects GYP_MSVS_VERSION for the Visual Studio version
-    if (vsConfig.version) {
+    // node-gyp expects GYP_MSVS_VERSION for the Visual Studio version on Windows
+    if (isWindows && vsConfig.version) {
       rebuildEnv.GYP_MSVS_VERSION = vsConfig.version;
     }
 
-    // Also set npm config variables for compatibility
-    if (vsConfig.version) {
+    // Also set npm config variables for compatibility on Windows
+    if (isWindows && vsConfig.version) {
       rebuildEnv.npm_config_msvs_version = vsConfig.version;
     }
-    if (vsConfig.msbuildPath) {
+    if (isWindows && vsConfig.msbuildPath) {
       rebuildEnv.npm_config_msbuild_path = vsConfig.msbuildPath;
     }
 
@@ -335,22 +339,28 @@ npx ${electronRebuildArgs.join(' ')}
       console.error(`❌ electron-rebuild failed with exit code ${result.status}`);
       console.error('');
       console.error('Troubleshooting:');
-      console.error('1. Verify Visual Studio Build Tools is installed with C++ workload:');
-      console.error('   https://visualstudio.microsoft.com/downloads/');
-      console.error('   Install "Desktop development with C++" workload');
-      console.error('');
-      console.error('2. Try setting environment variables manually (PowerShell):');
-      console.error(`   $env:GYP_MSVS_VERSION = "${vsConfig.version || '17.0'}"`);
-      console.error(`   $env:npm_config_msbuild_path = "${vsConfig.msbuildPath || 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe'}"`);
-      console.error('   pnpm rebuild:sqlite:electron');
-      console.error('');
-      console.error('   Or in cmd.exe:');
-      console.error(`   set GYP_MSVS_VERSION=${vsConfig.version || '17.0'}`);
-      console.error(`   set npm_config_msbuild_path=${vsConfig.msbuildPath || 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe'}`);
-      console.error('   pnpm rebuild:sqlite:electron');
+      if (isWindows) {
+        console.error('1. Verify Visual Studio Build Tools is installed with C++ workload:');
+        console.error('   https://visualstudio.microsoft.com/downloads/');
+        console.error('   Install "Desktop development with C++" workload');
+        console.error('');
+        console.error('2. Try setting environment variables manually (PowerShell):');
+        console.error(`   $env:GYP_MSVS_VERSION = "${vsConfig.version || '17.0'}"`);
+        console.error(`   $env:npm_config_msbuild_path = "${vsConfig.msbuildPath || 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe'}"`);
+        console.error('   pnpm rebuild:sqlite:electron');
+        console.error('');
+        console.error('   Or in cmd.exe:');
+        console.error(`   set GYP_MSVS_VERSION=${vsConfig.version || '17.0'}`);
+        console.error(`   set npm_config_msbuild_path=${vsConfig.msbuildPath || 'C:\\Program Files (x86)\\Microsoft Visual Studio\\18\\BuildTools\\MSBuild\\Current\\Bin\\MSBuild.exe'}`);
+        console.error('   pnpm rebuild:sqlite:electron');
+      } else {
+        console.error('1. Ensure native build toolchain is installed (gcc/g++/make/python3).');
+        console.error('   Ubuntu/Debian: sudo apt-get update && sudo apt-get install -y build-essential python3');
+        console.error('2. Re-run: pnpm rebuild:sqlite:electron');
+      }
       console.error('');
       console.error('3. For more debug info, run with:');
-      console.error('   $env:DEBUG = "electron-rebuild"');
+      console.error('   DEBUG=electron-rebuild pnpm rebuild:sqlite:electron --verbose');
       console.error('   pnpm rebuild:sqlite:electron --verbose');
       process.exit(result.status);
     }
