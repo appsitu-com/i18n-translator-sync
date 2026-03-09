@@ -24,7 +24,9 @@ keys/**
 # Build config
 **/tsconfig.json
 **/vitest.config.ts
-**/vite.config.js
+**/vite.config.ts
+**/vite.cli.config.ts
+**/vite.shared.ts
 **/eslint.config.js
 **/.eslintrc.json
 **/.eslintignore
@@ -32,7 +34,6 @@ keys/**
 # Build artifacts and other exclusions
 **/*.map
 **/*.ts
-!**/*.d.ts
 **/*.tgz
 **/*.vsix
 .git/**
@@ -40,8 +41,8 @@ coverage/**
 releases/**
 test-project/**
 
-# Exclude node_modules EXCEPT production dependencies needed at runtime.
-# vsce.dependencies in package.json tells vsce to include better-sqlite3,
-# but only if node_modules is not blanket-excluded here.
-# Instead of excluding all node_modules, we let vsce manage it.
-# vsce automatically excludes devDependencies and only bundles production deps.
+# Exclude all node_modules by default and include only native runtime deps.
+node_modules/**
+!node_modules/better-sqlite3/**
+!node_modules/bindings/**
+!node_modules/file-uri-to-path/**
