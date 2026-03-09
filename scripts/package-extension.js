@@ -93,7 +93,7 @@ async function updatePackageJson() {
       license: "MIT",
       icon: "images/icon.png",  // Use PNG for best compatibility with the marketplace
       galleryBanner: {
-        color: "#E0E0E0",
+        color: "#102010",
         theme: "dark"
       },
       categories: ["Other", "Machine Learning", "Formatters"],
