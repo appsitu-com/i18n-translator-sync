@@ -2,8 +2,7 @@
 
 **Instant file translation with AI - multiple engines, smart caching, professional workflow**
 
-<!-- TODO: Update MARKETPLACE_URL_PLACEHOLDER after publishing -->
-[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code%20Marketplace-Install-blue.svg)](MARKETPLACE_URL_PLACEHOLDER)
+[![VS Code Marketplace](https://img.shields.io/badge/VS%20Code%20Marketplace-Install-blue.svg)](https://marketplace.visualstudio.com/items?itemName=AppSitu.i18n-translator-sync)
 [![Preview](https://img.shields.io/badge/Status-Preview-orange.svg)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -28,8 +27,7 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 ⚠️ **This extension is currently in Preview** - Features and configuration may change as we refine the user experience based on feedback.
 
 **From VS Code Marketplace:**
-<!-- TODO: Update MARKETPLACE_URL_PLACEHOLDER after publishing -->
-[Install from VS Code Marketplace](MARKETPLACE_URL_PLACEHOLDER)
+[Install from VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=AppSitu.i18n-translator-sync)
 
 **From VS Code:**
 1. Open VS Code

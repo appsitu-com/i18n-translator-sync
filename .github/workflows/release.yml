@@ -26,5 +26,6 @@ jobs:
         with:
           files: |
             releases/*.vsix
+          draft: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
