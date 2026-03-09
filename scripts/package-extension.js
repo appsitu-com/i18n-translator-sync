@@ -79,13 +79,13 @@ async function updatePackageJson() {
     const updates = {
       description: "Instantly translates Markdown/MDX, YAML, JSON and TypeScript/JSON files. Fast, caching and highly configurable.",
       keywords: ["i18n", "translation", "localization", "azure", "google", "deepl", "gemini", "markdown", "mdx", "json", "yaml"],
-      homepage: "https://github.com/appsitu-com/i18n-translator-sync.git",
+      homepage: "https://github.com/appsitu-com/i18n-translator-sync",
       repository: {
         type: "git",
-        url: "https://github.com/appsitu-com/i18n-translator-sync.git.git"
+        url: "https://github.com/appsitu-com/i18n-translator-sync"
       },
       bugs: {
-        url: "https://github.com/appsitu-com/i18n-translator-sync.git/issues"
+        url: "https://github.com/appsitu-com/i18n-translator-sync/issues"
       },
       author: {
         name: "Tony O'Hagan"
