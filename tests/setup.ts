@@ -39,7 +39,7 @@ if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
       console.error('Error loading translator.env:', result.error);
     }
   } else {
-    console.warn('No translator.env file found for tests, using fallback initialization');
+    // console.warn('No translator.env file found for tests, using fallback initialization');
     const rootDir = path.resolve(__dirname, '..');
     initTranslatorEnv(rootDir, testLogger, nodeFileSystem);
   }
