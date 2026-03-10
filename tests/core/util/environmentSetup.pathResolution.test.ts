@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { resolveEnvDeep, resolveEnvObjectWithDecryption } from '../../../src/core/util/environmentSetup'
 import { Logger } from '../../../src/core/util/baseLogger'
-import * as path from 'path'
 
 describe('Environment Setup - File Path Resolution', () => {
   let mockLogger: Logger
@@ -16,7 +15,7 @@ describe('Environment Setup - File Path Resolution', () => {
   })
 
   describe('resolveEnvDeep', () => {
-    it('should resolve relative file path in key field when workspace path provided', () => {
+    it('should not resolve relative key values into absolute paths when workspace path provided', () => {
       const config = {
         key: 'keys/credentials.json',
         endpoint: 'https://api.example.com'
@@ -24,11 +23,11 @@ describe('Environment Setup - File Path Resolution', () => {
 
       const resolved = resolveEnvDeep(config, mockLogger, '/workspace')
 
-      expect(resolved.key).toBe(path.resolve('/workspace', 'keys/credentials.json'))
+      expect(resolved.key).toBe('keys/credentials.json')
       expect(resolved.endpoint).toBe('https://api.example.com')
     })
 
-    it('should keep absolute file path in key field unchanged', () => {
+    it('should keep absolute key-like values unchanged', () => {
       const absolutePath = '/absolute/path/credentials.json'
       const config = {
         key: absolutePath,
@@ -38,7 +37,6 @@ describe('Environment Setup - File Path Resolution', () => {
       const resolved = resolveEnvDeep(config, mockLogger, '/workspace')
 
       expect(resolved.key).toBe(absolutePath)
-      expect(path.isAbsolute(resolved.key)).toBe(true)
     })
 
     it('should not resolve key field when workspace path not provided', () => {
@@ -52,7 +50,7 @@ describe('Environment Setup - File Path Resolution', () => {
       expect(resolved.key).toBe('keys/credentials.json')
     })
 
-    it('should only resolve key field, not other fields', () => {
+    it('should not resolve key field or other fields to absolute paths', () => {
       const config = {
         key: 'keys/credentials.json',
         endpoint: 'relative/path',
@@ -61,7 +59,7 @@ describe('Environment Setup - File Path Resolution', () => {
 
       const resolved = resolveEnvDeep(config, mockLogger, '/workspace')
 
-      expect(resolved.key).toBe(path.resolve('/workspace', 'keys/credentials.json'))
+      expect(resolved.key).toBe('keys/credentials.json')
       expect(resolved.endpoint).toBe('relative/path')
       expect(resolved.url).toBe('another/relative/path')
     })
@@ -80,13 +78,23 @@ describe('Environment Setup - File Path Resolution', () => {
 
       const resolved = resolveEnvDeep(config, mockLogger, '/workspace')
 
-      expect(resolved.translator.google.key).toBe(path.resolve('/workspace', 'keys/google.json'))
-      expect(resolved.translator.azure.key).toBe(path.resolve('/workspace', 'keys/azure-key'))
+      expect(resolved.translator.google.key).toBe('keys/google.json')
+      expect(resolved.translator.azure.key).toBe('keys/azure-key')
+    })
+
+    it('should preserve api keys that are not file paths', () => {
+      const config = {
+        key: 'G2BxK8ASiq6pJsJ342mBTFQkOz8cCDd4Wv4lQgPiJjuDz4d6LrfZJQQJ99CCAC4f1cMXJ3w3AAAbACOGWizE'
+      }
+
+      const resolved = resolveEnvDeep(config, mockLogger, '/workspace')
+
+      expect(resolved.key).toBe(config.key)
     })
   })
 
   describe('resolveEnvObjectWithDecryption', () => {
-    it('should resolve relative file path in key field when workspace path provided', () => {
+    it('should not resolve relative key values into absolute paths when workspace path provided', () => {
       const config = {
         key: 'keys/credentials.json',
         endpoint: 'https://api.example.com'
@@ -94,7 +102,7 @@ describe('Environment Setup - File Path Resolution', () => {
 
       const resolved = resolveEnvObjectWithDecryption(config, mockLogger, undefined, '/workspace')
 
-      expect(resolved.key).toBe(path.resolve('/workspace', 'keys/credentials.json'))
+      expect(resolved.key).toBe('keys/credentials.json')
       expect(resolved.endpoint).toBe('https://api.example.com')
     })
 
@@ -108,7 +116,6 @@ describe('Environment Setup - File Path Resolution', () => {
       const resolved = resolveEnvObjectWithDecryption(config, mockLogger, undefined, '/workspace')
 
       expect(resolved.key).toBe(absolutePath)
-      expect(path.isAbsolute(resolved.key)).toBe(true)
     })
 
     it('should not resolve key field when workspace path not provided', () => {
@@ -130,8 +137,8 @@ describe('Environment Setup - File Path Resolution', () => {
 
       const resolved = resolveEnvObjectWithDecryption(config, mockLogger, undefined, '/workspace')
 
-      expect(resolved[0].key).toBe(path.resolve('/workspace', 'keys/first.json'))
-      expect(resolved[1].key).toBe(path.resolve('/workspace', 'keys/second.json'))
+      expect(resolved[0].key).toBe('keys/first.json')
+      expect(resolved[1].key).toBe('keys/second.json')
     })
   })
 })

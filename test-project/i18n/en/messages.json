@@ -1,5 +1,6 @@
 {
-  "greeting": "Hello, World! Updated Again and Again",
+  "greeting": "Hello, World!",
+  "greeting2": "Drink it Freddy",
   "messages": {
     "welcome": "Welcome to the test project",
     "intro": "This is a demonstration of JSON translation",

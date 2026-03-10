@@ -100,16 +100,49 @@ describe('google v3 stub', () => {
   })
 
   it('throws when googleProjectId is missing', async () => {
-    await expect(
-      GoogleTranslator.translateMany(['a'], [null], {
+    const originalProjectId = process.env.GOOGLE_TRANSLATION_PROJECT_ID
+    delete process.env.GOOGLE_TRANSLATION_PROJECT_ID
+
+    try {
+      await expect(
+        GoogleTranslator.translateMany(['a'], [null], {
+          sourceLocale: 'en',
+          targetLocale: 'fr',
+          apiConfig: {
+            key: credentialsPath,
+            endpoint: 'https://translation.googleapis.com'
+          }
+        })
+      ).rejects.toThrow("Google Translate v3: missing 'googleProjectId'")
+    } finally {
+      if (originalProjectId === undefined) {
+        delete process.env.GOOGLE_TRANSLATION_PROJECT_ID
+      } else {
+        process.env.GOOGLE_TRANSLATION_PROJECT_ID = originalProjectId
+      }
+    }
+  })
+
+  it('falls back to env vars when key and project are not provided in apiConfig', async () => {
+    process.env.GOOGLE_TRANSLATION_KEY = credentialsPath
+    process.env.GOOGLE_TRANSLATION_PROJECT_ID = 'env-project'
+    process.env.GOOGLE_TRANSLATION_LOCATION = 'global'
+
+    try {
+      const out = await GoogleTranslator.translateMany(['env'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
         apiConfig: {
-          key: credentialsPath,
-          endpoint: 'https://translation.googleapis.com'
+          endpoint: ''
         }
       })
-    ).rejects.toThrow("Google Translate v3: missing 'googleProjectId'")
+
+      expect(out).toEqual(['ENV'])
+    } finally {
+      delete process.env.GOOGLE_TRANSLATION_KEY
+      delete process.env.GOOGLE_TRANSLATION_PROJECT_ID
+      delete process.env.GOOGLE_TRANSLATION_LOCATION
+    }
   })
 
   it('reuses cached OAuth token for 15 minutes', async () => {

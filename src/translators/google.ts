@@ -105,7 +105,7 @@ function readServiceAccountCredentials(keyOrPath: string): GoogleServiceAccountC
     const envDir = process.env.I18N_TRANSLATOR_ENV_DIR
     resolvedPath = envDir ? join(envDir, keyOrPath) : resolve(keyOrPath)
   }
-  
+
   console.error(`Google Translate v3: Loading credentials from file: ${resolvedPath}`)
   let fileContent: string
   try {
@@ -196,13 +196,20 @@ export const GoogleTranslator: Translator = {
   name: 'google',
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const credentialsPath = opts.apiConfig.key
-    const endpoint = (opts.apiConfig.endpoint || opts.apiConfig.url || 'https://translation.googleapis.com').replace(/\/+$/, '')
+    const credentialsPath =
+      opts.apiConfig.key ||
+      (opts.apiConfig as { apiKey?: string }).apiKey ||
+      process.env.GOOGLE_TRANSLATION_KEY
+    const endpoint =
+      (opts.apiConfig.endpoint ||
+        opts.apiConfig.url ||
+        process.env.GOOGLE_TRANSLATION_URL ||
+        'https://translation.googleapis.com').replace(/\/+$/, '')
     const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
     const retry = opts.apiConfig.retry
     const model = opts.apiConfig.googleModel
-    const projectId = opts.apiConfig.googleProjectId
-    const location = opts.apiConfig.googleLocation || 'global'
+    const projectId = opts.apiConfig.googleProjectId || process.env.GOOGLE_TRANSLATION_PROJECT_ID
+    const location = opts.apiConfig.googleLocation || process.env.GOOGLE_TRANSLATION_LOCATION || 'global'
     const langMap = opts.apiConfig.langMap || {}
 
     if (!credentialsPath) throw new Error("Google Translate v3: missing 'key' (path to service credential JSON)")

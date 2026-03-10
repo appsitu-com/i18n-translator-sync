@@ -41,6 +41,22 @@ describe('azure stub', () => {
     })
     expect(out).toEqual(['X', 'Y', 'Z'])
   })
+
+  it('accepts apiKey alias and falls back region from env when config region is empty', async () => {
+    process.env.AZURE_TRANSLATION_REGION = 'westeurope'
+
+    const out = await AzureTranslator.translateMany(['x'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig: {
+        apiKey: 'AZ',
+        region: '',
+        endpoint: ''
+      }
+    })
+
+    expect(out).toEqual(['X'])
+  })
 })
 
 // Tests using real Azure API keys from translator.env

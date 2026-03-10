@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { ConfigProvider } from '../core/coreConfig';
 import { TRANSLATOR_JSON } from '../core/constants';
+import { substituteEnvVarsInObject } from '../core/util/envSubstitution';
 
 type EngineSection = 'azure' | 'google' | 'deepl' | 'gemini' | 'copy';
 
@@ -35,7 +36,15 @@ export class VsCodeConfigProvider implements ConfigProvider {
     try {
       if (fs.existsSync(configPath)) {
         const configContent = fs.readFileSync(configPath, 'utf8');
-        this.config = JSON.parse(configContent);
+        const rawConfig = JSON.parse(configContent);
+
+        // Substitute environment variables in the translator section
+        if (rawConfig.translator) {
+          console.log(`[CONFIG] Substituting environment variables in translator config`);
+          rawConfig.translator = substituteEnvVarsInObject(rawConfig.translator);
+        }
+
+        this.config = rawConfig;
         console.log(`Loaded VSCode configuration from: ${configPath}`);
       }
     } catch (error) {
@@ -58,10 +67,13 @@ export class VsCodeConfigProvider implements ConfigProvider {
       let engineConfig: any = {};
 
       if (section === 'azure') {
+        const keyFromEnv = process.env.AZURE_TRANSLATION_KEY
+        const masked = keyFromEnv && keyFromEnv.length > 8 ? `${keyFromEnv.substring(0, 4)}...${keyFromEnv.substring(keyFromEnv.length - 4)}` : keyFromEnv ? '[too short]' : '[not set]'
+        console.log(`[CONFIG] Azure config from process.env - key: ${masked}, region: ${process.env.AZURE_TRANSLATION_REGION}`)
         engineConfig = {
-          key: process.env.AZURE_TRANSLATION_KEY,
+          key: keyFromEnv,
           region: process.env.AZURE_TRANSLATION_REGION,
-          url: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
+          endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
         };
       } else if (section === 'google') {
         engineConfig = {
@@ -90,8 +102,12 @@ export class VsCodeConfigProvider implements ConfigProvider {
       // Check if config has translator-specific values
       const translatorConfigs = this.config.translator;
       if (translatorConfigs && translatorConfigs[section]) {
-        // Merge with default config
+        console.log(`[CONFIG] Merging translator.json config for ${section}:`, JSON.stringify({ ...translatorConfigs[section], key: '[REDACTED]', apiKey: '[REDACTED]' }, null, 2))
+
+        // Keep translator.json values as-is (after env substitution).
+        // Engine clients are responsible for interpreting aliases/fallbacks.
         engineConfig = { ...engineConfig, ...translatorConfigs[section] };
+        console.log(`[CONFIG] Final merged config for ${section}:`, JSON.stringify({ ...engineConfig, key: engineConfig.key ? '[REDACTED]' : undefined, apiKey: engineConfig.apiKey ? '[REDACTED]' : undefined }, null, 2))
       }
 
       this.engineConfigCache[section] = engineConfig;

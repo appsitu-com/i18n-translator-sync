@@ -66,14 +66,17 @@ export const initTranslatorEnv = async (
         // Log which environment variables were successfully loaded
         const loadedKeys = Object.keys(result.parsed || {})
         logger.info(`Successfully loaded ${loadedKeys.length} environment variables from ${translatorEnvFile}`)
+        logger.debug(`Loaded keys from file: ${loadedKeys.join(', ')}`)
 
         // Log the presence of translation service keys (without exposing values)
         const translationKeys = ['GOOGLE_TRANSLATION_KEY', 'GOOGLE_TRANSLATION_PROJECT_ID', 'AZURE_TRANSLATION_KEY', 'DEEPL_TRANSLATION_KEY', 'GEMINI_API_KEY', 'OPENROUTER_API_KEY']
         for (const key of translationKeys) {
           if (process.env[key]) {
-            logger.debug(`✓ ${key} is configured`)
+            const value = process.env[key] || ''
+            const masked = value.length > 8 ? `${value.substring(0, 4)}...${value.substring(value.length - 4)}` : '[too short]'
+            logger.debug(`✓ ${key} is configured in process.env: ${masked}`)
           } else {
-            logger.warn(`✗ ${key} is not configured.`)
+            logger.warn(`✗ ${key} is not configured in process.env`)
             logger.warn(`If you intend to use this translation service, please set this key in your translator.env file.`)
           }
         }
@@ -287,12 +290,9 @@ export function resolveEnvObjectWithDecryption<T = any>(
   const out: any = {}
   for (const [k, v] of Object.entries(obj as any)) {
     const resolved = resolveEnvObjectWithDecryption(v, logger, getPassphrase, workspacePath)
-    // Resolve file paths for 'key' field if workspacePath is provided
-    if (k === 'key' && typeof resolved === 'string' && workspacePath && !path.isAbsolute(resolved)) {
-      out[k] = path.resolve(workspacePath, resolved)
-    } else {
-      out[k] = resolved
-    }
+    // Do not coerce generic `key` fields into filesystem paths.
+    // Some engines (e.g., Azure) use `key` for API credentials, not file paths.
+    out[k] = resolved
   }
 
   return out as T
@@ -325,12 +325,9 @@ export function resolveEnvDeep<T = any>(obj: T, logger: Logger, workspacePath?: 
   const out: any = {}
   for (const [k, v] of Object.entries(obj as any)) {
     const resolved = resolveEnvDeep(v, logger, workspacePath)
-    // Resolve file paths for 'key' field if workspacePath is provided
-    if (k === 'key' && typeof resolved === 'string' && workspacePath && !path.isAbsolute(resolved)) {
-      out[k] = path.resolve(workspacePath, resolved)
-    } else {
-      out[k] = resolved
-    }
+    // Do not coerce generic `key` fields into filesystem paths.
+    // Some engines (e.g., Azure) use `key` for API credentials, not file paths.
+    out[k] = resolved
   }
   return out as T
 }

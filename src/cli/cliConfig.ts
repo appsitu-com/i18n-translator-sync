@@ -4,6 +4,7 @@ import JSON5 from 'json5';
 import { ConfigProvider } from '../core/coreConfig';
 import { FileSystem } from '../core/util/fs';
 import { Logger } from '../core/util/baseLogger';
+import { substituteEnvVarsInObject } from '../core/util/envSubstitution';
 
 /**
  * CLI configuration provider
@@ -31,7 +32,15 @@ export class CliConfigProvider implements ConfigProvider {
     try {
       if (await this.fs.fileExists(this.fs.createUri(this.configPath))) {
         const content = await this.fs.readFile(this.fs.createUri(this.configPath));
-        this.config = JSON5.parse(content);
+        const rawConfig = JSON5.parse(content);
+
+        // Substitute environment variables in the translator section
+        if (rawConfig.translator) {
+          this.logger.debug(`Substituting environment variables in translator config`);
+          rawConfig.translator = substituteEnvVarsInObject(rawConfig.translator);
+        }
+
+        this.config = rawConfig;
         this.logger.debug(`Loaded project configuration from ${this.configPath}`);
       } else {
         this.logger.warn(`Project configuration file not found: ${this.configPath}`);
@@ -73,7 +82,7 @@ export class CliConfigProvider implements ConfigProvider {
         engineConfig = {
           key: process.env.AZURE_TRANSLATION_KEY,
           region: process.env.AZURE_TRANSLATION_REGION,
-          url: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
+          endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
         };
       } else if (section === 'google') {
         engineConfig = {
@@ -102,7 +111,8 @@ export class CliConfigProvider implements ConfigProvider {
       // Check if config has translator-specific values
       const translatorConfigs = this.config.translator;
       if (translatorConfigs && translatorConfigs[section]) {
-        // Merge with default config
+        // Keep translator.json values as-is (after env substitution).
+        // Engine clients are responsible for interpreting aliases/fallbacks.
         engineConfig = { ...engineConfig, ...translatorConfigs[section] };
       }
 
