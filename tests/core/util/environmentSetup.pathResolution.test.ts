@@ -84,7 +84,7 @@ describe('Environment Setup - File Path Resolution', () => {
 
     it('should preserve api keys that are not file paths', () => {
       const config = {
-        key: 'G2BxK8ASiq6pJsJ342mBTFQkOz8cCDd4Wv4lQgPiJjuDz4d6LrfZJQQJ99CCAC4f1cMXJ3w3AAAbACOGWizE'
+        key: 'test-azure-api-key-not-a-file-path'
       }
 
       const resolved = resolveEnvDeep(config, mockLogger, '/workspace')
