@@ -56,7 +56,7 @@ describe('GeminiTranslator stub', () => {
     expect(postJson).toHaveBeenCalledTimes(1)
 
     const callArgs = vi.mocked(postJson).mock.calls[0]
-    expect(callArgs[0]).toContain('https://test-endpoint/models/gemini-1.5-pro:generateContent')
+    expect(callArgs[0]).toContain('https://test-endpoint/models/gemini-pro:generateContent')
     expect(callArgs[0]).toContain('key=test-api-key')
 
     const body = callArgs[1]
