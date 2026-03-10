@@ -322,96 +322,105 @@ export class TranslatorPipeline {
         fileType
       })
 
-      // Translate the segments using the executor
-      const fwdResult = await this.executor.translateSegments(
-        extraction.segments,
-        contexts,
-        engineName,
-        sourceLocale,
-        targetLocale,
-        configProvider,
-        srcUri.fsPath,
-        false,
-        passphrase
-      )
-
-      const fwd = fwdResult.translations
-
-      // Log translation with statistics on same line
-      const statsMsg = fwdResult.stats.total > 0
-        ? ` - API: ${fwdResult.stats.apiCalls}, Cache: ${fwdResult.stats.cacheHits}, Total: ${fwdResult.stats.total}`
-        : ''
-      this.logger.info(`Translating: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}] (${engineName})${statsMsg}`)
-
-      // Write forward translation output using the executor
-      await this.executor.writeTranslation(targetUri, extraction.rebuild(fwd), srcUri.fsPath, false)
-      // No additional logging after writing the file
-
-      // Handle back translation if enabled
-      if (enableBackTranslation) {
-        // Get source path to determine if it's file-based or directory-based
-        const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
-
-        // Create back-translation URI
-        const backUri = createBackTranslationUri(
-          this.fileSystem,
-          workspacePath,
+      try {
+        // Translate the segments using the executor
+        const fwdResult = await this.executor.translateSegments(
+          extraction.segments,
+          contexts,
+          engineName,
+          sourceLocale,
           targetLocale,
-          rel,
-          config,
-          sourcePath || undefined
+          configProvider,
+          srcUri.fsPath,
+          false,
+          passphrase
         )
 
-        // Check if back-translation is needed
-        const backTranslationNeeded = forceTranslation ||
-                                     await this.needsTranslation(targetUri, backUri) ||
-                                     translationNeeded; // If forward translation was updated, back translation is needed too
+        const fwd = fwdResult.translations
 
-        if (!backTranslationNeeded) {
-          this.logger.info(`Skipping up-to-date back-translation: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}]`)
-          continue;
-        }
+        // Log translation with statistics on same line
+        const statsMsg = fwdResult.stats.total > 0
+          ? ` - API: ${fwdResult.stats.apiCalls}, Cache: ${fwdResult.stats.cacheHits}, Total: ${fwdResult.stats.total}`
+          : ''
+        this.logger.info(`Translating: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}] (${engineName})${statsMsg}`)
 
-        const backEngine = pickEngine({
-          source: targetLocale,
-          target: sourceLocale,
-          defaults,
-          overrides,
-          fileType
-        })
+        // Write forward translation output using the executor
+        await this.executor.writeTranslation(targetUri, extraction.rebuild(fwd), srcUri.fsPath, false)
+        // No additional logging after writing the file
 
-        // If using copy engine for forward translation, just copy the segments again
-        let back: string[]
-        let backStatsMsg = ''
+        // Handle back translation if enabled
+        if (enableBackTranslation) {
+          // Get source path to determine if it's file-based or directory-based
+          const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
 
-        if (engineName === 'copy') {
-          back = fwd.slice()
-        } else {
-          const backResult = await this.executor.translateSegments(
-            fwd,
-            contexts,
-            backEngine,
+          // Create back-translation URI
+          const backUri = createBackTranslationUri(
+            this.fileSystem,
+            workspacePath,
             targetLocale,
-            sourceLocale,
-            configProvider,
-            srcUri.fsPath,
-            true,
-            passphrase
+            rel,
+            config,
+            sourcePath || undefined
           )
-          back = backResult.translations
 
-          // Prepare statistics message for back-translation
-          if (backResult.stats.total > 0) {
-            backStatsMsg = ` - API: ${backResult.stats.apiCalls}, Cache: ${backResult.stats.cacheHits}, Total: ${backResult.stats.total}`
+          // Check if back-translation is needed
+          const backTranslationNeeded = forceTranslation ||
+                                       await this.needsTranslation(targetUri, backUri) ||
+                                       translationNeeded; // If forward translation was updated, back translation is needed too
+
+          if (!backTranslationNeeded) {
+            this.logger.info(`Skipping up-to-date back-translation: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}]`)
+          } else {
+            const backEngine = pickEngine({
+              source: targetLocale,
+              target: sourceLocale,
+              defaults,
+              overrides,
+              fileType
+            })
+
+            try {
+              // If using copy engine for forward translation, just copy the segments again
+              let back: string[]
+              let backStatsMsg = ''
+
+              if (engineName === 'copy') {
+                back = fwd.slice()
+              } else {
+                const backResult = await this.executor.translateSegments(
+                  fwd,
+                  contexts,
+                  backEngine,
+                  targetLocale,
+                  sourceLocale,
+                  configProvider,
+                  srcUri.fsPath,
+                  true,
+                  passphrase
+                )
+                back = backResult.translations
+
+                // Prepare statistics message for back-translation
+                if (backResult.stats.total > 0) {
+                  backStatsMsg = ` - API: ${backResult.stats.apiCalls}, Cache: ${backResult.stats.cacheHits}, Total: ${backResult.stats.total}`
+                }
+              }
+
+              // Log back-translation with statistics on same line
+              this.logger.info(`Back-translating: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}] (${backEngine})${backStatsMsg}`)
+
+              // Write back translation output using the executor
+              await this.executor.writeTranslation(backUri, extraction.rebuild(back), srcUri.fsPath, true)
+              // No additional logging after writing the file
+            } catch (error) {
+              this.logger.error(`Error back-translating: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}] (${backEngine}): ${error instanceof Error ? error.message : String(error)}`)
+              throw error
+            }
           }
         }
-
-        // Log back-translation with statistics on same line
-        this.logger.info(`Back-translating: ${path.basename(srcUri.fsPath)} [${targetLocale} → ${sourceLocale}] (${backEngine})${backStatsMsg}`)
-
-        // Write back translation output using the executor
-        await this.executor.writeTranslation(backUri, extraction.rebuild(back), srcUri.fsPath, true)
-        // No additional logging after writing the file
+      } catch (error) {
+        this.logger.error(`Error translating: ${path.basename(srcUri.fsPath)} [${sourceLocale} → ${targetLocale}] (${engineName}): ${error instanceof Error ? error.message : String(error)}`)
+        throw error
       }
     }
   }

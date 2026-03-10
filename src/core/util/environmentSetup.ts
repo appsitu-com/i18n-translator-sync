@@ -57,7 +57,26 @@ export const initTranslatorEnv = async (
     } else {
       logger.info(`Loading environment from: ${translatorEnvFile}`)
       // Load environment variables from translator.env in the workspace
-      dotenv.config({ path: translatorEnvFile, quiet: true })
+      const result = dotenv.config({ path: translatorEnvFile, quiet: true })
+
+      if (result.error) {
+        logger.error(`Failed to load environment file: ${result.error.message}`)
+      } else {
+        // Log which environment variables were successfully loaded
+        const loadedKeys = Object.keys(result.parsed || {})
+        logger.info(`Successfully loaded ${loadedKeys.length} environment variables from ${translatorEnvFile}`)
+
+        // Log the presence of translation service keys (without exposing values)
+        const translationKeys = ['GOOGLE_TRANSLATION_KEY', 'GOOGLE_TRANSLATION_PROJECT_ID', 'AZURE_TRANSLATION_KEY', 'DEEPL_TRANSLATION_KEY', 'GEMINI_API_KEY', 'OPENROUTER_API_KEY']
+        for (const key of translationKeys) {
+          if (process.env[key]) {
+            logger.debug(`✓ ${key} is configured`)
+          } else {
+            logger.warn(`✗ ${key} is not configured.`)
+            logger.warn(`If you intend to use this translation service, please set this key in your translator.env file.`)
+          }
+        }
+      }
     }
   } catch (error) {
     logger.error(`Error initializing environment: ${error}`)

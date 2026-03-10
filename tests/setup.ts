@@ -17,23 +17,23 @@ const testLogger = {
 
 // Load environment variables before running tests (once per process).
 // Priority:
-// 1) workspace translator.env (used by extension/integration tests)
-// 2) test-project/translator.env (fallback for local test fixtures)
+// 1) test-project/translator.env (matches manual extension testing in test-project workspace)
+// 2) workspace translator.env (fallback)
 const TEST_ENV_LOADED_FLAG = 'I18N_TRANSLATOR_TEST_ENV_LOADED';
 
 if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
   const workspaceEnvFile = path.resolve(__dirname, '../translator.env');
   const testProjectEnvFile = path.resolve(__dirname, '../test-project/translator.env');
 
-  if (fs.existsSync(workspaceEnvFile)) {
-    const result = dotenv.config({ path: workspaceEnvFile, override: true });
-    if (result.error) {
-      console.error('Error loading translator.env:', result.error);
-    }
-  } else if (fs.existsSync(testProjectEnvFile)) {
+  if (fs.existsSync(testProjectEnvFile)) {
     const result = dotenv.config({ path: testProjectEnvFile, override: true });
     if (result.error) {
       console.error('Error loading test-project/translator.env:', result.error);
+    }
+  } else if (fs.existsSync(workspaceEnvFile)) {
+    const result = dotenv.config({ path: workspaceEnvFile, override: true });
+    if (result.error) {
+      console.error('Error loading translator.env:', result.error);
     }
   } else {
     console.warn('No translator.env file found for tests, using fallback initialization');

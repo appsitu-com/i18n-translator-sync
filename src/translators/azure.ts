@@ -22,8 +22,16 @@ export const AzureTranslator: Translator = {
     // Use langMap from config, fallback to no mapping if not provided
     const langMap = opts.apiConfig.langMap || {}
 
-    if (!key) throw new Error(`Azure Translator: missing 'key'`)
-    if (!region) throw new Error(`Azure Translator: missing 'region'`)
+    if (!key) {
+      console.error(`Azure Translator: missing 'key'`)
+      throw new Error(`Azure Translator: missing 'key'`)
+    }
+    if (!region) {
+      console.error(`Azure Translator: missing 'region'`)
+      throw new Error(`Azure Translator: missing 'region'`)
+    }
+
+    console.error(`Azure Translator: Using credentials - Region: ${region}`)
 
     const headers = {
       'Ocp-Apim-Subscription-Key': key,
