@@ -1,4 +1,5 @@
 import type { BulkTranslateOpts, Translator } from './types'
+import type { IGoogleConfig } from '../core/config'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
@@ -88,12 +89,7 @@ function readServiceAccountCredentials(keyOrPath: string): GoogleServiceAccountC
   // Try to parse as JSON string first
   if (keyOrPath.trim().startsWith('{')) {
     console.error('Google Translate v3: Credentials provided as inline JSON')
-    try {
-      return parseServiceAccountCredentials(keyOrPath)
-    } catch (error) {
-      // If it looks like JSON but failed to parse, throw immediately
-      throw error
-    }
+    return parseServiceAccountCredentials(keyOrPath)
   }
 
   // Otherwise, treat as file path
@@ -196,23 +192,17 @@ export const GoogleTranslator: Translator = {
   name: 'google',
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const credentialsPath =
-      opts.apiConfig.key ||
-      (opts.apiConfig as { apiKey?: string }).apiKey ||
-      process.env.GOOGLE_TRANSLATION_KEY
-    const endpoint =
-      (opts.apiConfig.endpoint ||
-        opts.apiConfig.url ||
-        process.env.GOOGLE_TRANSLATION_URL ||
-        'https://translation.googleapis.com').replace(/\/+$/, '')
-    const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
-    const retry = opts.apiConfig.retry
-    const model = opts.apiConfig.googleModel
-    const projectId = opts.apiConfig.googleProjectId || process.env.GOOGLE_TRANSLATION_PROJECT_ID
-    const location = opts.apiConfig.googleLocation || process.env.GOOGLE_TRANSLATION_LOCATION || 'global'
-    const langMap = opts.apiConfig.langMap || {}
+    const cfg = opts.apiConfig as IGoogleConfig
+    const credentialsPath = cfg.apiKey
+    const endpoint = (cfg.endpoint ?? 'https://translation.googleapis.com').replace(/\/+$/, '')
+    const timeout = Number(cfg.timeoutMs ?? 30_000)
+    const retry = cfg.retry
+    const model = cfg.googleModel
+    const projectId = cfg.googleProjectId
+    const location = cfg.googleLocation ?? 'global'
+    const langMap = cfg.langMap ?? {}
 
-    if (!credentialsPath) throw new Error("Google Translate v3: missing 'key' (path to service credential JSON)")
+    if (!credentialsPath) throw new Error("Google Translate v3: missing 'apiKey' (path to service credential JSON)")
     if (!projectId) throw new Error("Google Translate v3: missing 'googleProjectId'")
 
     console.error(`Google Translate v3: Credential source from config: ${describeCredentialSource(credentialsPath)}`)

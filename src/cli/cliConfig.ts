@@ -73,54 +73,6 @@ export class CliConfigProvider implements ConfigProvider {
    * Get a configuration value
    */
   get<T>(section: string, defaultValue?: T): T {
-    // Special handling for translation engine configs
-    if (section === 'azure' || section === 'google' || section === 'deepl' || section === 'gemini' || section === 'copy') {
-      // For translation engines, create a default configuration if not specified
-      let engineConfig: any = {};
-
-      if (section === 'azure') {
-        engineConfig = {
-          key: process.env.AZURE_TRANSLATION_KEY,
-          region: process.env.AZURE_TRANSLATION_REGION,
-          endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
-        };
-      } else if (section === 'google') {
-        engineConfig = {
-          key: process.env.GOOGLE_TRANSLATION_KEY,
-          endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
-          googleProjectId: process.env.GOOGLE_TRANSLATION_PROJECT_ID,
-          googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global'
-        };
-      } else if (section === 'deepl') {
-        engineConfig = {
-          key: process.env.DEEPL_TRANSLATION_KEY,
-          url: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
-          free: true
-        };
-      } else if (section === 'gemini') {
-        engineConfig = {
-          key: process.env.GEMINI_API_KEY,
-          geminiModel: 'gemini-1.5-pro',
-          temperature: 0.1,
-          maxOutputTokens: 1024
-        };
-      } else if (section === 'copy') {
-        engineConfig = {}; // Copy engine doesn't need any config
-      }
-
-      // Check if config has translator-specific values
-      const translatorConfigs = this.config.translator;
-      if (translatorConfigs && translatorConfigs[section]) {
-        // Keep translator.json values as-is (after env substitution).
-        // Engine clients are responsible for interpreting aliases/fallbacks.
-        engineConfig = { ...engineConfig, ...translatorConfigs[section] };
-      }
-
-      this.logger.debug(`Loaded ${section} translator config: ${JSON.stringify({ ...engineConfig, key: engineConfig.key ? '***' : undefined })}`);
-
-      return engineConfig as T;
-    }
-
     // Split the section by dots
     const parts = section.split('.');
 

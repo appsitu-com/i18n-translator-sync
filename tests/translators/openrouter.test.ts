@@ -33,7 +33,7 @@ describe('OpenRouterTranslator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: 'test-api-key',
+        apiKey: 'test-api-key',
         endpoint: 'https://openrouter.ai/api/v1/chat/completions'
       }
     }
@@ -253,7 +253,7 @@ describe('OpenRouterTranslator', () => {
           ...defaultOpts,
           apiConfig: {
             ...defaultOpts.apiConfig,
-            key: ''
+            apiKey: ''
           }
         }
 
@@ -261,7 +261,7 @@ describe('OpenRouterTranslator', () => {
         const contexts = [null]
 
         await expect(OpenRouterTranslator.translateMany(texts, contexts, optsWithoutKey)).rejects.toThrow(
-          "OpenRouter Translator: missing 'key'"
+          "OpenRouter Translator: missing 'apiKey'"
         )
       })
 
@@ -283,7 +283,7 @@ describe('OpenRouterTranslator', () => {
         const optsWithoutEndpoint: BulkTranslateOpts = {
           ...defaultOpts,
           apiConfig: {
-            key: 'test-key',
+            apiKey: 'test-key',
             endpoint: '' // Empty endpoint to test default
           }
         }
@@ -335,7 +335,7 @@ describe('OpenRouterTranslator', () => {
       vi.stubGlobal('fetch', mockFetch)
 
       apiConfig = {
-        key: 'test-api-key',
+        apiKey: 'test-api-key',
         endpoint: 'https://openrouter.ai/api/v1/chat/completions',
         openrouterModel: 'anthropic/claude-3-haiku',
         temperature: 0.1,

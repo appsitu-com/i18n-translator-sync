@@ -8,7 +8,6 @@ import { NodeFileSystem } from '../../src/core/util/fs';
 import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { CopyTranslator } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
-import { TranslatorEngine } from '../../src/translators/types';
 import { TranslatorPipeline } from '../../src/core/pipeline';
 import { SQLiteCache } from '../../src/core/cache/sqlite';
 
@@ -87,7 +86,7 @@ describe('CLI Copy Translator Tests', () => {
     }
   });
 
-  it('should work even without configuration due to fallback in CliConfigProvider', async () => {
+  it('should return undefined for engine key without special handling', async () => {
     // Test with the configProvider from a clean setup (empty translator section)
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -104,16 +103,13 @@ describe('CLI Copy Translator Tests', () => {
     const cleanConfigProvider = new CliConfigProvider(fileSystem, logger, configPath);
     await cleanConfigProvider.load();
 
-    // Get the copy engine config
+    // Engine config is no longer resolved through configProvider.get()
+    // The new config system uses loadTranslatorConfig() instead
     const result = cleanConfigProvider.get<Record<string, unknown>>('copy');
 
-    // The CLI config provider has special handling for translation engines
-    // It will return an empty object for 'copy' engine even if not configured
-    expect(result).toBeDefined();
-    expect(Object.keys(result).length).toBe(0);
-
-    // This is why the CLI works without explicitly registering the copy translator
-    // or having a translator.copy section in the config
+    // Without special engine handling, 'copy' is just a dot-path lookup
+    // which returns undefined since there's no top-level 'copy' key
+    expect(result).toBeUndefined();
   });
 
   it('should register copy translator when initializing the CLI adapter', async () => {
@@ -145,26 +141,25 @@ describe('CLI Copy Translator Tests', () => {
     expect(copyTranslatorRegistered).toBe(true);
   });
 
-  it('should work properly with empty configuration when copy translator is registered', async () => {
+  it('should work with copy translator registered and no engine config required', async () => {
     // Register the copy translator
     registerTranslator(CopyTranslator);
 
-    // Create a private method accessor to test the private getEngineConfig method
-    const getEngineConfig = vi.fn().mockImplementation((engineName: TranslatorEngine, configProvider: any) => {
-      const raw = configProvider.get(engineName);
-      if (!raw) {
-        throw new Error(`Missing configuration for translation engine '${engineName}'`);
-      }
-      return raw;
-    });
+    // Engine config for copy is no longer resolved through configProvider.get()
+    // The copy translator doesn't need any API config - the executor handles it directly
+    const copyTranslator = CopyTranslator;
+    expect(copyTranslator.name).toBe('copy');
 
-    // Test that no error is thrown when copy engine is requested after registration
-    const config = getEngineConfig('copy', configProvider);
-    expect(config).toBeDefined();
-    expect(Object.keys(config).length).toBe(0); // Empty config is fine for copy translator
+    // Verify copy translator returns input unchanged
+    const result = await copyTranslator.translateMany(['hello'], [null], {
+      source: 'en',
+      target: 'fr',
+      apiConfig: {} as any
+    });
+    expect(result).toEqual(['hello']);
   });
 
-  it('should work when translator.copy section is present in config', async () => {
+  it('should resolve translator.copy section via dot-path navigation', async () => {
     // Create a config with translator.copy section
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -179,18 +174,8 @@ describe('CLI Copy Translator Tests', () => {
     configProvider = new CliConfigProvider(fileSystem, logger, configPath);
     await configProvider.load();
 
-    // Create a private method accessor to test the private getEngineConfig method
-    const getEngineConfig = vi.fn().mockImplementation((engineName: TranslatorEngine, configProvider: any) => {
-      const raw = configProvider.get(engineName);
-      if (!raw) {
-        throw new Error(`Missing configuration for translation engine '${engineName}'`);
-      }
-      return raw;
-    });
-
-    // Test that no error is thrown even without registering the translator
-    // because the config has a translator.copy section
-    const engineConfig = getEngineConfig('copy', configProvider);
+    // With the new config system, engine configs are under 'translator.copy'
+    const engineConfig = configProvider.get('translator.copy');
     expect(engineConfig).toBeDefined();
   });
 });

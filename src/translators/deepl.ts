@@ -1,4 +1,5 @@
 import type { Translator, BulkTranslateOpts } from './types'
+import type { IDeepLConfig } from '../core/config'
 import { postJson } from '../util/http'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
@@ -6,19 +7,17 @@ export const DeepLTranslator: Translator = {
   name: 'deepl',
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const authKey = opts.apiConfig.key as string
-    const free = !!opts.apiConfig.free
+    const cfg = opts.apiConfig as IDeepLConfig
+    const authKey = cfg.apiKey
+    const free = !!cfg.free
     const base =
-      (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') ||
-      (free ? 'https://api-free.deepl.com' : 'https://api.deepl.com')
-    const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
-    const formality = opts.apiConfig.formality as string | undefined
-    const model_type = opts.apiConfig.deeplModel as string | undefined
+      (cfg.endpoint ?? (free ? 'https://api-free.deepl.com' : 'https://api.deepl.com')).replace(/\/+$/, '')
+    const timeout = Number(cfg.timeoutMs ?? 30_000)
+    const formality = cfg.formality
+    const model_type = cfg.deeplModel
+    const langMap = cfg.langMap ?? {}
 
-    // Use langMap from config, fallback to no mapping if not provided
-    const langMap = opts.apiConfig.langMap || {}
-
-    if (!authKey) throw new Error(`DeepL: missing 'key'`)
+    if (!authKey) throw new Error(`DeepL: missing 'apiKey'`)
     const headers = { Authorization: `DeepL-Auth-Key ${authKey}` }
 
     // DeepL documents uppercase locale codes

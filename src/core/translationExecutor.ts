@@ -1,6 +1,5 @@
 import { IUri } from './util/fs'
-import { TranslatorEngine } from '../translators/types'
-import { GetPassphraseFunction } from './util/environmentSetup'
+import { TranslatorEngine, EngineConfig } from '../translators/types'
 import { TranslationStats } from '../bulkTranslate'
 
 /**
@@ -42,10 +41,9 @@ export interface ITranslationExecutor {
    * @param engineName Translation engine to use
    * @param sourceLocale Source language locale
    * @param targetLocale Target language locale
-   * @param configProvider Configuration provider for engine settings
+   * @param engineConfig Resolved engine configuration from ITranslatorConfig
    * @param sourceFile Source file path for context
    * @param isBackTranslation Whether this is a back-translation
-   * @param passphrase Optional passphrase for API key decryption
    * @returns Object with translated segments and statistics
    */
   translateSegments(
@@ -54,10 +52,9 @@ export interface ITranslationExecutor {
     engineName: TranslatorEngine,
     sourceLocale: string,
     targetLocale: string,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T },
+    engineConfig: EngineConfig | undefined,
     sourceFile: string,
     isBackTranslation: boolean,
-    passphrase?: string
   ): Promise<{ translations: string[]; stats: TranslationStats }>
 
   /**

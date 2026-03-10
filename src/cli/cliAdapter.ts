@@ -102,11 +102,12 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
         outputPath = path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
       } else {
         // Load config to get default csvPath
-        const config = await loadProjectConfig(
+        const config = loadProjectConfig(
           this.workspacePath,
           this.configProvider,
           this.logger,
-          this.fileSystem
+          undefined,
+          this.translatorConfig
         );
         const defaultCsvPath = config.csvExportPath || 'translator.csv';
         outputPath = path.isAbsolute(defaultCsvPath)

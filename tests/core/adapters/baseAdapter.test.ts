@@ -21,6 +21,7 @@ vi.mock('../../../src/core/translatorManager', () => {
       bulkTranslate: vi.fn().mockResolvedValue(5),
       pushToMateCat: vi.fn().mockResolvedValue(undefined),
       pullFromMateCat: vi.fn().mockResolvedValue(undefined),
+      setTranslatorEngines: vi.fn(),
       dispose: vi.fn()
     }))
   };
@@ -37,18 +38,20 @@ vi.mock('../../../src/core/cache/sqlite', () => ({
   }))
 }));
 
-vi.mock('../../../src/core/config', () => ({
-  loadProjectConfig: vi.fn().mockResolvedValue({
-    sourcePaths: ['i18n/en'],
-    sourceLocale: 'en',
-    targetLocales: ['fr', 'de'],
-    enableBackTranslation: false,
-    defaultMarkdownEngine: 'azure',
-    defaultJsonEngine: 'google',
-    engineOverrides: {}
-  }),
-  ConfigProvider: vi.fn()
+// vi.mock factories are hoisted above variable declarations, so use vi.hoisted()
+const { mockLoadTranslatorConfig } = vi.hoisted(() => ({
+  mockLoadTranslatorConfig: vi.fn().mockReturnValue({
+    config: { translator: undefined },
+    errors: []
+  })
 }));
+vi.mock('../../../src/core/config', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../../src/core/config')>();
+  return {
+    ...actual,
+    loadTranslatorConfig: mockLoadTranslatorConfig
+  };
+});
 
 // Test implementation of TranslatorAdapter
 class TestTranslatorAdapter extends TranslatorAdapter {
@@ -86,6 +89,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
       this.translatorManager.bulkTranslate = this.translatorManager.bulkTranslate || vi.fn().mockResolvedValue(5);
       this.translatorManager.pushToMateCat = this.translatorManager.pushToMateCat || vi.fn().mockResolvedValue(undefined);
       this.translatorManager.pullFromMateCat = this.translatorManager.pullFromMateCat || vi.fn().mockResolvedValue(undefined);
+      this.translatorManager.setTranslatorEngines = this.translatorManager.setTranslatorEngines || vi.fn();
       this.translatorManager.dispose = this.translatorManager.dispose || vi.fn();
     }
   }
@@ -118,6 +122,12 @@ describe('TranslatorAdapter', () => {
   beforeEach(() => {
     // Reset mocks
     vi.clearAllMocks();
+
+    // Re-set loadTranslatorConfig mock (restoreMocks clears mockReturnValue)
+    mockLoadTranslatorConfig.mockReturnValue({
+      config: { translator: undefined },
+      errors: []
+    });
 
     // Create mock objects
     mockLogger = {
@@ -343,7 +353,7 @@ describe('TranslatorAdapter', () => {
       await adapter.initialize();
       await adapter.start();
 
-      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockReturnValue({
         sourceDir: '',
         targetDir: '',
         sourcePaths: ['i18n/en'],
@@ -412,7 +422,7 @@ describe('TranslatorAdapter', () => {
         completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
       }) as any);
 
-      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockReturnValue({
         sourceDir: '',
         targetDir: '',
         sourcePaths: ['i18n/en'],
@@ -448,7 +458,7 @@ describe('TranslatorAdapter', () => {
         completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
       }) as any);
 
-      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockReturnValue({
         sourceDir: '',
         targetDir: '',
         sourcePaths: ['i18n/en'],
@@ -486,7 +496,7 @@ describe('TranslatorAdapter', () => {
         completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
       }) as any);
 
-      vi.spyOn(coreConfig, 'loadProjectConfig').mockResolvedValue({
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockReturnValue({
         sourceDir: '',
         targetDir: '',
         sourcePaths: ['i18n/en'],
@@ -527,6 +537,15 @@ describe('TranslatorAdapter', () => {
       // Initialize and start the adapter
       await adapter.initialize();
       await adapter.start();
+
+      // Mock loadProjectConfig for the config change handler
+      vi.spyOn(coreConfig, 'loadProjectConfig').mockReturnValue({
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        translationEngine: 'copy',
+        sourcePaths: [],
+        enableBackTranslation: false
+      });
 
       // Get the translator manager
       const translatorManager = adapter.getTranslatorManager();

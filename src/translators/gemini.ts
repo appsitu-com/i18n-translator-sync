@@ -1,4 +1,5 @@
 import type { Translator, BulkTranslateOpts } from './types'
+import type { IGeminiConfig } from '../core/config'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
@@ -7,20 +8,17 @@ export const GeminiTranslator: Translator = {
   name: 'gemini',
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const key = opts.apiConfig.key as string
-    const endpoint =
-      (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') ||
-      'https://generativelanguage.googleapis.com/v1'
-    const timeout = Number(opts.apiConfig.timeoutMs ?? 60000) // Longer timeout for LLM
-    const model = opts.apiConfig.geminiModel || 'gemini-pro'
-    const temperature = opts.apiConfig.temperature ?? 0.1
-    const maxOutputTokens = opts.apiConfig.maxOutputTokens ?? 1024
-    const retry = opts.apiConfig.retry
+    const cfg = opts.apiConfig as IGeminiConfig
+    const apiKey = cfg.apiKey
+    const endpoint = (cfg.endpoint ?? 'https://generativelanguage.googleapis.com/v1beta').replace(/\/+$/, '')
+    const timeout = Number(cfg.timeoutMs ?? 60_000)
+    const model = cfg.geminiModel ?? 'gemini-pro'
+    const temperature = cfg.temperature ?? 0.1
+    const maxOutputTokens = cfg.maxOutputTokens ?? 1024
+    const retry = cfg.retry
+    const langMap = cfg.langMap ?? {}
 
-    // Use langMap from config, fallback to no mapping if not provided
-    const langMap = opts.apiConfig.langMap || {}
-
-    if (!key) throw new Error(`Gemini Translate: missing 'key'`)
+    if (!apiKey) throw new Error(`Gemini Translate: missing 'apiKey'`)
 
     const promptResponses = await Promise.all(
       texts.map(async (text, idx) => {
@@ -29,7 +27,7 @@ export const GeminiTranslator: Translator = {
 
         const prompt = `Translate the following text from ${normalizeLocaleWithMap(opts.sourceLocale, langMap)} to ${normalizeLocaleWithMap(opts.targetLocale, langMap)}${contextInfo}.\n\nText to translate: "${text}"\n\nTranslation:`
 
-        const url = `${endpoint}/models/${model}:generateContent?key=${encodeURIComponent(key)}`
+        const url = `${endpoint}/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`
         const body = {
           contents: [
             {
@@ -45,11 +43,10 @@ export const GeminiTranslator: Translator = {
         try {
           const json = await withRetry(retry, () => postJson<any>(url, body, {}, timeout))
           const response = json?.candidates?.[0]?.content?.parts?.[0]?.text || text
-          // Clean up the response - remove quotes and extra whitespace
           return response.trim().replace(/^["']|["']$/g, '').trim()
         } catch (error: any) {
           console.error(`Gemini translation error: ${error.message}`, error)
-          return text // Return original text on error
+          return text
         }
       })
     )

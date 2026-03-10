@@ -12,7 +12,7 @@ describe('integration: openrouter translator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: openRouterKey,
+        apiKey: openRouterKey,
         endpoint: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
         openrouterModel: 'anthropic/claude-3-haiku',
         temperature: 0,

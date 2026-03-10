@@ -1,6 +1,6 @@
 import { ITranslationExecutor, TranslationCommand } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
-import { TranslatorEngine } from '../translators/types'
+import { TranslatorEngine, EngineConfig } from '../translators/types'
 import { TranslationStats } from '../bulkTranslate'
 
 /**
@@ -83,10 +83,9 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     engineName: TranslatorEngine,
     sourceLocale: string,
     targetLocale: string,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T },
+    _engineConfig: EngineConfig | undefined,
     sourceFile: string,
     isBackTranslation: boolean,
-    _passphrase?: string
   ): Promise<{ translations: string[]; stats: TranslationStats }> {
     // Capture the translation command
     this._commands.push({

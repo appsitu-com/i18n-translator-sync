@@ -1,4 +1,5 @@
 import type { Translator, BulkTranslateOpts } from './types'
+import type { IMyMemoryConfig } from '../core/config'
 import { withRetry } from '../util/retry'
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
@@ -58,12 +59,12 @@ export class MyMemoryTranslator implements Translator {
   }
 
   async translateMany(texts: string[], _contexts: string[], opts: BulkTranslateOpts) {
-    const cfg = opts.apiConfig
+    const cfg = opts.apiConfig as IMyMemoryConfig
     const endpoint = (cfg.endpoint ?? 'https://api.mymemory.translated.net/get').replace(/\/+$/, '')
     const email = cfg.email
-    const key = cfg.key
+    const apiKey = cfg.apiKey
 
-    const timeoutMs = cfg.timeoutMs ?? 15000
+    const timeoutMs = cfg.timeoutMs ?? 15_000
     const maxRetries = cfg.retry?.maxRetries ?? 2
     const delayMs = cfg.retry?.delayMs ?? 100
     const backoffFactor = cfg.retry?.backoffFactor ?? 2
@@ -88,7 +89,7 @@ export class MyMemoryTranslator implements Translator {
           url.searchParams.set('q', q)
           url.searchParams.set('langpair', `${from}|${to}`)
           if (email) url.searchParams.set('de', email)
-          if (key) url.searchParams.set('key', key)
+          if (apiKey) url.searchParams.set('key', apiKey)
 
           const res = await fetchWithTimeout(url.toString(), timeoutMs)
           const txt = await res.text()

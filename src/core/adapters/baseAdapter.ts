@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { TranslatorManager } from '../translatorManager';
-import { loadProjectConfig } from '../coreConfig';
+import { loadProjectConfig, toProjectConfig } from '../coreConfig';
 import { Logger } from '../util/baseLogger';
 import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
@@ -11,6 +11,7 @@ import { TRANSLATOR_DIR } from '../constants';
 import { initTranslatorEnv } from '../util/environmentSetup';
 import { registerAllTranslators } from '../../translators/translatorRegistry';
 import { IPassphraseManager } from '../secrets/passphraseManager';
+import { loadTranslatorConfig, type ITranslatorEngines, type ITranslatorConfig } from '../config';
 
 /**
  * Base adapter for the TranslatorManager that can be extended for different environments
@@ -19,6 +20,8 @@ export abstract class TranslatorAdapter {
   protected translatorManager?: TranslatorManager;
   protected cache?: SQLiteCache;
   protected running = false;
+  protected translatorEngines?: ITranslatorEngines;
+  protected translatorConfig?: ITranslatorConfig;
 
   /**
    * Create a translator adapter
@@ -114,11 +117,12 @@ export abstract class TranslatorAdapter {
 
     try {
       // Load project config to check autoImport setting
-      const projectConfig = await loadProjectConfig(
+      const projectConfig = loadProjectConfig(
         this.workspacePath,
         this.configProvider,
         this.logger,
-        this.fileSystem
+        undefined,
+        this.translatorConfig
       );
 
       if (!projectConfig.autoImport) {
@@ -170,16 +174,25 @@ export abstract class TranslatorAdapter {
           this.fileSystem
         );
 
+        // Reload typed engine configurations
+        const passphraseManager = this.getPassphraseManager();
+        const getPassphrase = passphraseManager
+          ? () => passphraseManager.getPassphrase()
+          : undefined;
+        const { config: translatorConfig } = loadTranslatorConfig(
+          this.workspacePath,
+          this.logger,
+          getPassphrase
+        );
+        this.translatorConfig = translatorConfig;
+        this.translatorEngines = translatorConfig.translator;
+        this.translatorManager.setTranslatorEngines(this.translatorEngines);
+
         // Stop current watching
         await this.translatorManager.stopWatching();
 
-        // Load new project configuration
-        const projectConfig = await loadProjectConfig(
-          this.workspacePath,
-          this.configProvider,
-          this.logger,
-          this.fileSystem
-        );
+        // Load new project configuration (reuses already-parsed translatorConfig)
+        const projectConfig = toProjectConfig(translatorConfig, this.configProvider);
 
         // Start watching with new configuration
         await this.translatorManager.startWatching(projectConfig);
@@ -214,6 +227,19 @@ export abstract class TranslatorAdapter {
         this.fileSystem
       );
 
+      // Load typed engine configurations from translator.json + env vars
+      const passphraseManager = this.getPassphraseManager();
+      const getPassphrase = passphraseManager
+        ? () => passphraseManager.getPassphrase()
+        : undefined;
+      const { config: translatorConfig } = loadTranslatorConfig(
+        this.workspacePath,
+        this.logger,
+        getPassphrase
+      );
+      this.translatorConfig = translatorConfig;
+      this.translatorEngines = translatorConfig.translator;
+
       // Get cache (using await since it's now async)
       this.cache = await this.getCache();
       if (!this.cache) {
@@ -242,8 +268,8 @@ export abstract class TranslatorAdapter {
           watcher,
           this.configProvider,
           undefined,
-          this.getPassphraseManager(),
-          onConfigChanged
+          onConfigChanged,
+          this.translatorEngines
         );
       }
     } catch (error: any) {
@@ -280,12 +306,13 @@ export abstract class TranslatorAdapter {
     }
 
     try {
-      // Load project configuration
-      const projectConfig = await loadProjectConfig(
+      // Load project configuration (reuses already-parsed translatorConfig)
+      const projectConfig = loadProjectConfig(
         this.workspacePath,
         this.configProvider,
         this.logger,
-        this.fileSystem
+        undefined,
+        this.translatorConfig
       );
 
       // Start watching (guard for test environments where startWatching may be mocked out)
@@ -394,12 +421,13 @@ export abstract class TranslatorAdapter {
     if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before translateFile()');
 
     try {
-      // Load project configuration
-      const projectConfig = await loadProjectConfig(
+      // Load project configuration (reuses already-parsed translatorConfig)
+      const projectConfig = loadProjectConfig(
         this.workspacePath,
         this.configProvider,
         this.logger,
-        this.fileSystem
+        undefined,
+        this.translatorConfig
       );
 
       // Create the absolute path to the file
@@ -451,11 +479,12 @@ export abstract class TranslatorAdapter {
 
     try {
       // Load project configuration
-      const projectConfig = await loadProjectConfig(
+      const projectConfig = loadProjectConfig(
         this.workspacePath,
         this.configProvider,
         this.logger,
-        this.fileSystem
+        undefined,
+        this.translatorConfig
       );
 
       // Log the operation mode based on the force parameter
@@ -510,11 +539,12 @@ export abstract class TranslatorAdapter {
     try {
       this.logger.info('Starting cache purge operation...');
 
-      const projectConfig = await loadProjectConfig(
+      const projectConfig = loadProjectConfig(
         this.workspacePath,
         this.configProvider,
         this.logger,
-        this.fileSystem
+        undefined,
+        this.translatorConfig
       );
 
       const csvExportPath = projectConfig.csvExportPath || 'translator.csv';

@@ -108,7 +108,7 @@ function isEnvFileConfigured(envFilePath: string): boolean {
     }
 
     return false
-  } catch (error) {
+  } catch {
     // If there's any error reading the file, assume it's not properly configured
     return false
   }
@@ -518,9 +518,15 @@ async function purgeCache(): Promise<void> {
       }
     )
   } catch (error) {
-    const msg = `Failed to purge cache: ${error}`
-    channel.appendLine(msg)
-    vscode.window.showErrorMessage(msg)
+    if (error instanceof Error && error.message.includes('not initialized')) {
+      const msg = 'To perform a Purge, run "Translator: Start" command first'
+      channel.appendLine(msg)
+      vscode.window.showWarningMessage(msg)
+    } else {
+      const msg = `Failed to purge cache: ${error}`
+      channel.appendLine(msg)
+      vscode.window.showErrorMessage(msg)
+    }
   }
 }
 

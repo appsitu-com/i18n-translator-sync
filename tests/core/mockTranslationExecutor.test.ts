@@ -5,7 +5,6 @@ import { TranslatorManager } from '../../src/core/translatorManager'
 import { Logger } from '../../src/core/util/baseLogger'
 import { TranslationCache } from '../../src/core/cache/sqlite'
 import { TranslateProjectConfig, ConfigProvider } from '../../src/core/coreConfig'
-import { IPassphraseManager } from '../../src/core/secrets/passphraseManager'
 
 // Mock dependencies
 vi.mock('../../src/core/cache/sqlite')
@@ -16,7 +15,6 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
   let mockLogger: Logger
   let mockCache: TranslationCache
   let mockFs: any
-  let mockPassphraseManager: IPassphraseManager
   let pipeline: TranslatorPipeline
 
   beforeEach(() => {
@@ -60,14 +58,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
     } as unknown as Logger
     mockCache = {} as TranslationCache
 
-    mockPassphraseManager = {
-      loadPassphrase: vi.fn().mockResolvedValue(undefined),
-      setPassphrase: vi.fn(),
-      getPassphrase: vi.fn().mockReturnValue('secret'),
-      hasPassphrase: vi.fn().mockReturnValue(false)
-    }
-
-    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor, mockPassphraseManager)
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor)
   })
 
   describe('Translation Command Capture', () => {
@@ -90,17 +81,10 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         enableBackTranslation: false
       }
 
-      const configProvider = {
-        get: vi.fn().mockReturnValue({}),
-        update: vi.fn()
-      }
-
       const sourceUri = mockFs.createUri('/workspace/i18n/en/messages.json')
 
-      const translateSpy = vi.spyOn(mockExecutor, 'translateSegments')
-
       // Process the file
-      await pipeline.processFile(sourceUri, '/workspace', config, configProvider)
+      await pipeline.processFile(sourceUri, '/workspace', config, undefined)
 
       // Verify translation commands were captured
       expect(mockExecutor.commands.length).toBe(4) // 2 translations + 2 writes
@@ -124,12 +108,6 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         isBackTranslation: false,
         sourceFile: sourceUri.fsPath
       })
-
-      // Passphrase should be forwarded to executor calls
-      expect(mockPassphraseManager.loadPassphrase).toHaveBeenCalled()
-      const translateCalls = translateSpy.mock.calls
-      expect(translateCalls[0][8]).toBe('secret')
-      expect(translateCalls[1][8]).toBe('secret')
     })
 
     it('should capture back-translation commands when enabled', async () => {
@@ -149,13 +127,9 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         enableBackTranslation: true
       }
 
-      const configProvider = {
-        get: vi.fn().mockReturnValue({}),
-        update: vi.fn()
-      }
       const sourceUri = mockFs.createUri('/workspace/i18n/en/messages.json')
 
-      await pipeline.processFile(sourceUri, '/workspace', config, configProvider)
+      await pipeline.processFile(sourceUri, '/workspace', config, undefined)
 
       // Debug: Log actual commands captured
       console.log('Commands captured:', mockExecutor.commands.length)
@@ -200,13 +174,9 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         enableBackTranslation: true
       }
 
-      const configProvider = {
-        get: vi.fn().mockReturnValue({}),
-        update: vi.fn()
-      }
       const sourceUri = mockFs.createUri('/workspace/i18n/en/messages.json')
 
-      await pipeline.processFile(sourceUri, '/workspace', config, configProvider)
+      await pipeline.processFile(sourceUri, '/workspace', config, undefined)
 
       const summary = mockExecutor.getSummary()
 
@@ -248,11 +218,6 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         enableBackTranslation: false
       }
 
-      const configProvider = {
-        get: vi.fn().mockReturnValue({}),
-        update: vi.fn()
-      }
-
       // Process multiple files
       const files = [
         '/workspace/i18n/en/messages.json',
@@ -262,7 +227,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
 
       for (const filePath of files) {
         const sourceUri = mockFs.createUri(filePath)
-        await pipeline.processFile(sourceUri, '/workspace', config, configProvider)
+        await pipeline.processFile(sourceUri, '/workspace', config, undefined)
       }
 
       // Verify all files are captured
@@ -291,17 +256,12 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         enableBackTranslation: false
       }
 
-      const configProvider = {
-        get: vi.fn().mockReturnValue({}),
-        update: vi.fn()
-      }
-
       // Process two files
       const file1 = '/workspace/i18n/en/messages.json'
       const file2 = '/workspace/i18n/en/errors.json'
 
-      await pipeline.processFile(mockFs.createUri(file1), '/workspace', config, configProvider)
-      await pipeline.processFile(mockFs.createUri(file2), '/workspace', config, configProvider)
+      await pipeline.processFile(mockFs.createUri(file1), '/workspace', config, undefined)
+      await pipeline.processFile(mockFs.createUri(file2), '/workspace', config, undefined)
 
       // Filter commands for specific file
       const file1Commands = mockExecutor.getCommandsForFile(file1)

@@ -12,7 +12,7 @@ describe('integration: deepl translator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: deeplKey,
+        apiKey: deeplKey,
         endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
         free: true,
         timeoutMs: 60000

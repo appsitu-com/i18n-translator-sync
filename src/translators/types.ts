@@ -1,52 +1,30 @@
-import { RetryOptions } from "../util/retry"
+import type {
+  IAzureConfig,
+  IGoogleConfig,
+  IDeepLConfig,
+  IGeminiConfig,
+  IOpenRouterConfig,
+  IMyMemoryConfig,
+  ICopyConfig,
+  TranslatorEngine
+} from '../core/config'
 
-export interface TranslatorApiConfig {
-  key: string
-  endpoint: string
-  url?: string
-  timeoutMs?: number
-  retry?: RetryOptions
+/** Union of all typed engine configurations from the Zod schema. */
+export type EngineConfig =
+  | IAzureConfig
+  | IGoogleConfig
+  | IDeepLConfig
+  | IGeminiConfig
+  | IOpenRouterConfig
+  | IMyMemoryConfig
+  | ICopyConfig
 
-  // Language mapping configuration
-  langMap?: Record<string, string>
-
-  // engine: 'azure'
-  region?: string
-
-  // textType?: string; // I think it will autodetect HTML vs plain text when unspecified
-  category?: string
-  batchSize?: number
-  azureModel?: string
-
-  // engine: 'google'
-  googleModel?: string
-  googleProjectId?: string
-  googleLocation?: string
-
-  // engine: 'deepl'
-  free?: boolean
-  formality?: string
-  deeplModel?: string
-
-  // engine: 'gemini'
-  geminiModel?: string
-  temperature?: number
-  maxOutputTokens?: number
-
-  // engine: 'openrouter'
-  openrouterModel?: string
-  systemPrompt?: string
-
-  // engine: 'mymemory'
-  email?: string
-}
-
-export type TranslatorEngine = 'azure' | 'google' | 'deepl' | 'mymemory' | 'gemini' | 'openrouter' | 'copy'
+export type { TranslatorEngine }
 
 export interface BulkTranslateOpts {
   sourceLocale: string
   targetLocale: string
-  apiConfig: TranslatorApiConfig
+  apiConfig: EngineConfig
 }
 
 export interface Translator {

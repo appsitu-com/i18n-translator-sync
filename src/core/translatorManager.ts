@@ -3,11 +3,11 @@ import { Logger } from './util/baseLogger';
 import { TranslationCache } from './cache/sqlite';
 import { Disposable, FileRenameEvent, WorkspaceWatcher } from './util/watcher';
 import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
+import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './pipeline';
 import { MateCatService, MateCatSettings } from './matecat';
 import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
-import { IPassphraseManager } from './secrets/passphraseManager';
 import * as path from 'path';
 
 /**
@@ -20,6 +20,7 @@ export class TranslatorManager {
   private isWatching: boolean = false;
   private mateCatService: MateCatService | null = null;
   private onConfigChanged?: () => Promise<void>;
+  private translatorEngines?: ITranslatorEngines;
 
   constructor(
     private fileSystem: FileSystem,
@@ -29,12 +30,13 @@ export class TranslatorManager {
     private workspaceWatcher: WorkspaceWatcher,
     private configProvider: ConfigProvider,
     executor?: ITranslationExecutor,
-    passphraseManager?: IPassphraseManager,
-    onConfigChanged?: () => Promise<void>
+    onConfigChanged?: () => Promise<void>,
+    translatorEngines?: ITranslatorEngines
   ) {
     this.cache = cache;
-    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, passphraseManager);
+    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor);
     this.onConfigChanged = onConfigChanged;
+    this.translatorEngines = translatorEngines;
 
     // Initialize MateCat integration
     this.initializeMateCat();
@@ -52,6 +54,13 @@ export class TranslatorManager {
       this.logger.error(`Failed to initialize MateCat: ${error}`);
       this.mateCatService = null;
     }
+  }
+
+  /**
+   * Update the translator engine configurations (e.g. after config reload)
+   */
+  setTranslatorEngines(engines: ITranslatorEngines | undefined): void {
+    this.translatorEngines = engines;
   }
 
   /**
@@ -244,7 +253,7 @@ export class TranslatorManager {
         uri,
         this.workspacePath,
         config,
-        this.configProvider
+        this.translatorEngines
       );
 
       await this.autoExportCacheIfEnabled(config);
@@ -325,7 +334,7 @@ export class TranslatorManager {
             file.newUri,
             this.workspacePath,
             config,
-            this.configProvider
+            this.translatorEngines
           );
 
           this.logger.info(`Successfully handled rename from ${oldPath} to ${newPath}`);
@@ -450,7 +459,7 @@ export class TranslatorManager {
                 fileUri,
                 this.workspacePath,
                 config,
-                this.configProvider,
+                this.translatorEngines,
                 force // Force translation flag
               );
 
@@ -538,7 +547,7 @@ export class TranslatorManager {
                 sourceUri,
                 this.workspacePath,
                 config,
-                this.configProvider
+                this.translatorEngines
               );
 
               filesProcessed++;
@@ -566,7 +575,7 @@ export class TranslatorManager {
                     fileUri,
                     this.workspacePath,
                     config,
-                    this.configProvider
+                    this.translatorEngines
                   );
 
                   filesProcessed++;
@@ -695,7 +704,7 @@ export class TranslatorManager {
       fileUri,
       this.workspacePath,
       config,
-      this.configProvider,
+      this.translatorEngines,
       force
     );
 

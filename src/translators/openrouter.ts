@@ -1,4 +1,5 @@
 import type { Translator, BulkTranslateOpts } from './types'
+import type { IOpenRouterConfig } from '../core/config'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
 // JSON Schema for enforcing structured output
@@ -21,25 +22,22 @@ export const OpenRouterTranslator: Translator = {
   name: 'openrouter',
 
   async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const key = opts.apiConfig.key as string
-    const endpoint =
-      (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') ||
-      'https://openrouter.ai/api/v1/chat/completions'
-    const model = opts.apiConfig.openrouterModel || 'anthropic/claude-3-haiku'
-    const temperature = opts.apiConfig.temperature ?? 0.1
-    const maxTokens = opts.apiConfig.maxOutputTokens ?? 2048
-    const systemPrompt = opts.apiConfig.systemPrompt || 'You are a professional translator that provides accurate, contextually appropriate translations while preserving the original meaning and tone.'
+    const cfg = opts.apiConfig as IOpenRouterConfig
+    const apiKey = cfg.apiKey
+    const endpoint = (cfg.endpoint || 'https://openrouter.ai/api/v1/chat/completions').replace(/\/+$/, '')
+    const model = cfg.openrouterModel ?? 'anthropic/claude-3-haiku'
+    const temperature = cfg.temperature ?? 0.1
+    const maxTokens = cfg.maxOutputTokens ?? 2048
+    const systemPrompt = cfg.systemPrompt ?? 'You are a professional translator that provides accurate, contextually appropriate translations while preserving the original meaning and tone.'
+    const langMap = cfg.langMap ?? {}
 
-    // Use langMap from config, fallback to no mapping if not provided
-    const langMap = opts.apiConfig.langMap || {}
-
-    if (!key) throw new Error(`OpenRouter Translator: missing 'key'`)
+    if (!apiKey) throw new Error(`OpenRouter Translator: missing 'apiKey'`)
 
     const sourceLanguage = normalizeLocaleWithMap(opts.sourceLocale, langMap)
     const targetLanguage = normalizeLocaleWithMap(opts.targetLocale, langMap)
 
     const headers = {
-      'Authorization': `Bearer ${key}`,
+      'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
       'HTTP-Referer': 'https://github.com/appsitu-com/i18n-translator-sync',
       'X-Title': 'VSCode i18n Translator Extension'

@@ -20,7 +20,7 @@ describe('integration: google translator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: googleCredentials,
+        apiKey: googleCredentials,
         endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
         googleProjectId,
         googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
@@ -46,7 +46,7 @@ describe('integration: google translator', () => {
         sourceLocale: 'en',
         targetLocale: 'es',
         apiConfig: {
-          key: googleCredentials,
+          apiKey: googleCredentials,
           endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
           googleProjectId,
           googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',

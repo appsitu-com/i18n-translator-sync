@@ -4,7 +4,6 @@ import { TranslatorPipeline } from '../../src/core/pipeline'
 import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
 import { TranslateProjectConfig } from '../../src/core/coreConfig'
 import { registerAllTranslators } from '../../src/translators/translatorRegistry'
-import { IPassphraseManager } from '../../src/core/secrets/passphraseManager'
 
 describe('TranslatorPipeline', () => {
   let pipeline: TranslatorPipeline
@@ -12,7 +11,6 @@ describe('TranslatorPipeline', () => {
   let mockLogger: any
   let mockCache: any
   let mockExecutor: MockTranslationExecutor
-  let mockPassphraseManager: IPassphraseManager
   let config: TranslateProjectConfig
 
   beforeEach(() => {
@@ -62,13 +60,6 @@ describe('TranslatorPipeline', () => {
     // Create mock executor
     mockExecutor = new MockTranslationExecutor(mockFs)
 
-    mockPassphraseManager = {
-      loadPassphrase: vi.fn().mockResolvedValue(undefined),
-      setPassphrase: vi.fn(),
-      getPassphrase: vi.fn().mockReturnValue('secret'),
-      hasPassphrase: vi.fn().mockReturnValue(false)
-    }
-
     // Test configuration
     config = {
       sourceDir: '',
@@ -83,7 +74,7 @@ describe('TranslatorPipeline', () => {
     }
 
     // Create pipeline instance with mock executor
-    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor, mockPassphraseManager)
+    pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor)
   })
 
   afterEach(() => {
@@ -96,26 +87,15 @@ describe('TranslatorPipeline', () => {
     mockFs.readFile.mockResolvedValueOnce(jsonContent)
 
     const src = mockFs.createUri('/ws/i18n/en/demo.json')
-    const configProvider = { get: vi.fn().mockReturnValue('copy') }
 
     const translateSpy = vi.spyOn(mockExecutor, 'translateSegments')
 
-    await pipeline.processFile(src, '/ws', config, configProvider, {
-      targetLocales: ['fr-FR'],
-      sourceLocale: 'en',
-      enableBackTranslation: true
-    })
+    await pipeline.processFile(src, '/ws', config, undefined)
 
     // Should have 2 write commands: forward and back translation
     expect(mockExecutor.writeCommands).toHaveLength(2)
     // Should also write to filesystem through executor
     expect(mockFs.writeFile).toHaveBeenCalledTimes(2)
-
-    // Passphrase should be forwarded to executor calls
-    expect(mockPassphraseManager.loadPassphrase).toHaveBeenCalled()
-    const passphrases = translateSpy.mock.calls.map((call) => call[8])
-    expect(passphrases.length).toBeGreaterThan(0)
-    passphrases.forEach((value) => expect(value).toBe('secret'))
   })
 
   it('processes forward and back translations for YAML', async () => {
@@ -124,13 +104,8 @@ describe('TranslatorPipeline', () => {
     mockFs.readFile.mockResolvedValueOnce(yamlContent)
 
     const src = mockFs.createUri('/ws/i18n/en/demo.yaml')
-    const configProvider = { get: vi.fn().mockReturnValue('copy') }
 
-    await pipeline.processFile(src, '/ws', config, configProvider, {
-      targetLocales: ['fr-FR'],
-      sourceLocale: 'en',
-      enableBackTranslation: true
-    })
+    await pipeline.processFile(src, '/ws', config, undefined)
 
     // Should have 2 write commands: forward and back translation
     expect(mockExecutor.writeCommands).toHaveLength(2)
@@ -144,13 +119,8 @@ describe('TranslatorPipeline', () => {
     mockFs.readFile.mockResolvedValueOnce(yamlContent)
 
     const src = mockFs.createUri('/ws/i18n/en/demo.yml')
-    const configProvider = { get: vi.fn().mockReturnValue('copy') }
 
-    await pipeline.processFile(src, '/ws', config, configProvider, {
-      targetLocales: ['fr-FR'],
-      sourceLocale: 'en',
-      enableBackTranslation: true
-    })
+    await pipeline.processFile(src, '/ws', config, undefined)
 
     // Should have 2 write commands: forward and back translation
     expect(mockExecutor.writeCommands).toHaveLength(2)
@@ -258,8 +228,6 @@ describe('TranslatorPipeline translation trigger conditions', () => {
     engineOverrides: {}
   }
 
-  const configProvider = { get: vi.fn().mockReturnValue('copy') }
-
   function createStatAwareFileSystem(): any {
     return {
       readFile: vi.fn().mockResolvedValue(JSON.stringify({ title: 'Hello' })),
@@ -310,7 +278,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
     const executor = new MockTranslationExecutor(fs)
     const pipeline = new TranslatorPipeline(fs, logger, cache as any, '/test/workspace', executor)
 
-    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
+    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, undefined, false)
 
     expect(executor.translationCommands.length).toBe(1)
   })
@@ -330,7 +298,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
     const executor = new MockTranslationExecutor(fs)
     const pipeline = new TranslatorPipeline(fs, logger, cache as any, '/test/workspace', executor)
 
-    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
+    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, undefined, false)
 
     expect(executor.translationCommands.length).toBe(1)
   })
@@ -357,7 +325,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
     const executor = new MockTranslationExecutor(fs)
     const pipeline = new TranslatorPipeline(fs, logger, cache as any, '/test/workspace', executor)
 
-    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, configProvider, false)
+    await pipeline.processFile(fs.createUri(srcPath), workspacePath, config, undefined, false)
 
     expect(executor.translationCommands.length).toBe(1)
   })

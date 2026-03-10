@@ -12,7 +12,7 @@ describe('integration: gemini translator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: geminiKey,
+        apiKey: geminiKey,
         endpoint: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1',
         geminiModel: process.env.GEMINI_MODEL || 'gemini-pro',
         temperature: 0,

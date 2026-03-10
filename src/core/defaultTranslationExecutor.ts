@@ -2,9 +2,8 @@ import { ITranslationExecutor } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
-import { TranslatorEngine, TranslatorApiConfig } from '../translators/types'
+import { TranslatorEngine, EngineConfig } from '../translators/types'
 import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
-import { resolveEnvDeep, resolveEnvObjectWithDecryption } from './util/environmentSetup'
 
 /**
  * Default implementation that actually performs translations and writes files
@@ -26,10 +25,9 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     engineName: TranslatorEngine,
     sourceLocale: string,
     targetLocale: string,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T },
+    engineConfig: EngineConfig | undefined,
     sourceFile: string,
     _isBackTranslation: boolean,
-    passphrase?: string
   ): Promise<{ translations: string[]; stats: TranslationStats }> {
     // If using copy engine, just return original segments
     if (engineName === 'copy') {
@@ -43,8 +41,9 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       }
     }
 
-    // Get engine configuration
-    const apiConfig = this.getEngineConfig(engineName, configProvider, passphrase)
+    if (!engineConfig) {
+      throw new Error(`No configuration found for engine '${engineName}'`)
+    }
 
     // Perform actual translation
     return await bulkTranslateWithEngine(
@@ -54,7 +53,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       {
         source: sourceLocale,
         target: targetLocale,
-        apiConfig
+        apiConfig: engineConfig
       },
       this.cache,
       sourceFile
@@ -78,38 +77,6 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     } catch (error) {
       this.logger.error(`Failed to write file ${targetUri.fsPath}: ${error}`)
       throw error
-    }
-  }
-
-  /**
-   * Get engine configuration for the given engine name
-   *
-   * @param engineName The name of the translation engine
-   * @param configProvider The configuration provider
-   * @param passphrase Optional passphrase for API key decryption
-   * @returns The resolved API configuration
-   */
-  private getEngineConfig(
-    engineName: TranslatorEngine,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T },
-    passphrase?: string
-  ): TranslatorApiConfig {
-    const rawConfig = configProvider.get(engineName)
-
-    if (!rawConfig) {
-      throw new Error(`Missing configuration for translation engine '${engineName}'`)
-    }
-
-    // Resolve environment variables in configuration
-    if (passphrase) {
-      // Create a simple passphrase getter function
-      const getPassphrase = () => passphrase;
-
-      // Use version with passphrase for decryption
-      return resolveEnvObjectWithDecryption(rawConfig, this.logger, getPassphrase, this.workspacePath) as TranslatorApiConfig;
-    } else {
-      // Fallback to synchronous version (may fail for encrypted values)
-      return resolveEnvDeep(rawConfig, this.logger, this.workspacePath) as TranslatorApiConfig;
     }
   }
 

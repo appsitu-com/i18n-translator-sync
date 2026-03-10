@@ -13,7 +13,7 @@ describe('integration: azure translator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: azureKey,
+        apiKey: azureKey,
         region: azureRegion,
         endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com',
         timeoutMs: 60000

@@ -46,7 +46,7 @@ describe('GeminiTranslator stub', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: 'test-api-key',
+        apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
         region: '' // Not used by Gemini
       }
@@ -86,7 +86,7 @@ describe('GeminiTranslator stub', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: 'test-api-key',
+        apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
         region: ''
       }
@@ -106,7 +106,7 @@ describe('GeminiTranslator stub', () => {
       sourceLocale: 'en',
       targetLocale: 'fr',
       apiConfig: {
-        key: 'test-api-key',
+        apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
         region: ''
       }
@@ -146,7 +146,7 @@ describe('gemini api', () => {
 
   it('translates text with real API', async () => {
     const apiConfig = {
-      key: process.env.GEMINI_API_KEY as string,
+      apiKey: process.env.GEMINI_API_KEY as string,
       endpoint: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta',
       region: ''
     }

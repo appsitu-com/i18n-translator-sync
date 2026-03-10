@@ -36,7 +36,7 @@ describe('deepl stub', () => {
     const out = await DeepLTranslator.translateMany(texts, ctxs, {
       sourceLocale: 'en',
       targetLocale: 'fr',
-      apiConfig: { key: 'DEEPL', free: true, endpoint: 'https://api-free.deepl.com' }
+      apiConfig: { apiKey: 'DEEPL', free: true, endpoint: 'https://api-free.deepl.com' }
     })
     // Upper-cased echo
     expect(out).toEqual(['SAVE', 'OPEN', 'CANCEL', 'TITLE'])
@@ -74,7 +74,7 @@ describe('deepl api', () => {
     }
 
     apiConfig = {
-      key: process.env.DEEPL_TRANSLATION_KEY,
+      apiKey: process.env.DEEPL_TRANSLATION_KEY,
       endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
       free: true
     }

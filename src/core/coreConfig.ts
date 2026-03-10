@@ -1,66 +1,25 @@
-import * as fs from 'fs'
-import * as path from 'path'
-import JSON5 from 'json5'
-import { z } from 'zod'
-import { TranslatorEngine } from '../translators/types'
+import {
+  TranslatorConfigSchema,
+  type ITranslatorConfig,
+  type TranslatorEngine
+} from './config'
+import { loadTranslatorConfig, type GetPassphrase } from './config'
 import { FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
-import { formatZodError } from './util/formatZodError'
-import { TRANSLATOR_JSON } from './constants'
 
-const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const
+// ---------------------------------------------------------------------------
+// TranslateProjectConfig — the project-level subset of ITranslatorConfig
+// (everything except the nested `translator` engine credentials block)
+// ---------------------------------------------------------------------------
 
-// Define the schema for validation
-const translatorEngineEnum = z.enum(ENGINES) as z.ZodType<TranslatorEngine>
+/**
+ * Zod schema for the project-level config fields.
+ * Derived from the canonical TranslatorConfigSchema by omitting `translator`.
+ */
+export const TranslateConfigSchema = TranslatorConfigSchema.omit({ translator: true })
 
-// Zod schema for validating translator.json
-export const TranslateConfigSchema = z.object({
-  sourceDir: z.string().optional().default('').describe('Base directory for source paths (prepended to sourcePaths)'),
-  targetDir: z.string().optional().default('').describe('Base directory for target paths (prepended to generated target paths)'),
-  sourcePaths: z.array(z.string()).describe('Source language paths to scan for files to translate'),
-  sourceLocale: z.string().describe('Source locale (e.g., "en")'),
-  targetLocales: z.array(z.string()).describe('Target locales to generate translations for (e.g., ["fr", "es", "de"])'),
-  enableBackTranslation: z.boolean().describe('Enable back translation'),
-  defaultMarkdownEngine: translatorEngineEnum.describe('Default engine for markdown files'),
-  defaultJsonEngine: translatorEngineEnum.describe('Default engine for JSON files'),
-  engineOverrides: z
-    .record(z.string(), z.array(z.string()))
-    .describe('Engine overrides for specific locales. Key is engine name, value is array of locale patterns'),
-  excludeKeys: z
-    .array(z.string())
-    .optional()
-    .default([])
-    .describe('Key names to exclude from translation (copied unchanged). Matches at any depth.'),
-  excludeKeyPaths: z
-    .array(z.string())
-    .optional()
-    .default([])
-    .describe('Exact dotted key paths to exclude from translation (e.g. "meta.version").'),
-  copyOnlyFiles: z
-    .array(z.string())
-    .optional()
-    .default([])
-    .describe('File names (not paths) to copy verbatim instead of translating (e.g. "index.ts").'),
-  csvExportPath: z
-    .string()
-    .optional()
-    .default('translator.csv')
-    .describe('Path to the CSV file for cache export operations.'),
-  autoExport: z
-    .boolean()
-    .optional()
-    .default(true)
-    .describe('Automatically export cache to CSV after translations complete.'),
-  autoImport: z
-    .boolean()
-    .optional()
-    .default(false)
-    .describe('Automatically import translations from CSV when database is first created.')
-})
-
-
-// Infer the type from the schema - should match our interface
-export type TranslateProjectConfig = z.infer<typeof TranslateConfigSchema>
+/** Project-level configuration (no engine credentials). */
+export type TranslateProjectConfig = Omit<ITranslatorConfig, 'translator'>
 
 // Interface for platform-specific configuration
 export interface ConfigProvider {
@@ -81,125 +40,106 @@ export interface ConfigProvider {
 }
 
 /**
- * Default configuration values
+ * Default project configuration values, derived from the Zod schema defaults.
  */
-export const defaultConfig: TranslateProjectConfig = {
-  sourceDir: '',
-  targetDir: '',
-  sourcePaths: ['i18n/en'],
-  sourceLocale: 'en',
-  targetLocales: [],
-  enableBackTranslation: false,
-  defaultMarkdownEngine: 'azure',
-  defaultJsonEngine: 'google',
-  engineOverrides: {} as Record<string, string[]>,
-  excludeKeys: [] as string[],
-  excludeKeyPaths: [] as string[],
-  copyOnlyFiles: [] as string[],
-  csvExportPath: 'translator.csv',
-  autoExport: true,
-  autoImport: false
+export const defaultConfig: TranslateProjectConfig =
+  TranslateConfigSchema.parse({})
+
+/**
+ * Extract a TranslateProjectConfig from a fully-loaded ITranslatorConfig,
+ * falling back to VS Code / platform settings via the ConfigProvider for
+ * fields that are absent in translator.json.
+ */
+export function toProjectConfig(
+  config: ITranslatorConfig,
+  configProvider: ConfigProvider
+): TranslateProjectConfig {
+  return {
+    sourceDir: config.sourceDir || defaultConfig.sourceDir,
+    targetDir: config.targetDir || defaultConfig.targetDir,
+    sourcePaths: config.sourcePaths?.length
+      ? config.sourcePaths
+      : defaultConfig.sourcePaths,
+    sourceLocale:
+      config.sourceLocale ||
+      configProvider.get<string>(
+        'translator.sourceLocale',
+        defaultConfig.sourceLocale
+      ),
+    targetLocales:
+      config.targetLocales?.length
+        ? config.targetLocales
+        : configProvider.get<string[]>(
+            'translator.targetLocales',
+            defaultConfig.targetLocales
+          ),
+    enableBackTranslation:
+      config.enableBackTranslation ??
+      configProvider.get<boolean>(
+        'translator.enableBackTranslation',
+        defaultConfig.enableBackTranslation
+      ),
+    defaultMarkdownEngine:
+      config.defaultMarkdownEngine ||
+      configProvider.get<TranslatorEngine>(
+        'translator.defaultMarkdownEngine',
+        defaultConfig.defaultMarkdownEngine
+      ),
+    defaultJsonEngine:
+      config.defaultJsonEngine ||
+      configProvider.get<TranslatorEngine>(
+        'translator.defaultJsonEngine',
+        defaultConfig.defaultJsonEngine
+      ),
+    engineOverrides:
+      Object.keys(config.engineOverrides ?? {}).length > 0
+        ? config.engineOverrides
+        : Object.fromEntries(
+            Object.entries(
+              configProvider.get<Record<string, string | string[]>>(
+                'translator.engineOverrides',
+                {}
+              )
+            ).map(([engine, localesStr]) => [
+              engine,
+              typeof localesStr === 'string'
+                ? localesStr.split(',').map((s) => s.trim())
+                : Array.isArray(localesStr)
+                  ? localesStr
+                  : []
+            ])
+          ),
+    excludeKeys: config.excludeKeys ?? defaultConfig.excludeKeys,
+    excludeKeyPaths: config.excludeKeyPaths ?? defaultConfig.excludeKeyPaths,
+    copyOnlyFiles: config.copyOnlyFiles ?? defaultConfig.copyOnlyFiles,
+    csvExportPath: config.csvExportPath ?? defaultConfig.csvExportPath,
+    autoExport: config.autoExport ?? defaultConfig.autoExport,
+    autoImport: config.autoImport ?? defaultConfig.autoImport
+  }
 }
 
 /**
- * Load project configuration from translator.json
- * @param rootPath The root path of the project
- * @param configProvider The configuration provider
- * @param logger The logger instance
- * @param fileSystem The file system instance
- * @returns The loaded project configuration
+ * Load project configuration from translator.json.
+ *
+ * When a pre-loaded `ITranslatorConfig` is provided the file is NOT re-parsed;
+ * only the configProvider fallback logic is applied.  Otherwise the full
+ * loadTranslatorConfig pipeline runs (env + JSON + Zod validation).
+ *
+ * @param rootPath        Workspace / project root
+ * @param configProvider  Platform-specific config provider (VS Code settings, etc.)
+ * @param logger          Diagnostic logger
+ * @param _fileSystem     (unused — kept for backward compatibility)
+ * @param preloaded       Optional pre-loaded config to avoid re-parsing translator.json
+ * @param getPassphrase   Optional passphrase supplier for encrypted keys
  */
-export async function loadProjectConfig(
+export function loadProjectConfig(
   rootPath: string,
   configProvider: ConfigProvider,
   logger: Logger,
-  fileSystem?: FileSystem
-): Promise<TranslateProjectConfig> {
-  const configPath = path.join(rootPath, TRANSLATOR_JSON)
-  let projectConfig: Partial<TranslateProjectConfig> = {}
-
-  // Log the configuration file path being checked
-  logger.info(`Checking for configuration file: ${configPath}`)
-
-  try {
-    // Check if config file exists before attempting to read it
-    const configExists = fileSystem
-      ? await fileSystem.fileExists(fileSystem.createUri(configPath))
-      : fs.existsSync(configPath)
-
-    if (configExists) {
-      logger.info(`Loading configuration from: ${configPath}`)
-
-      // Read the config file
-      const configContent = fileSystem
-        ? await fileSystem.readFile(fileSystem.createUri(configPath))
-        : fs.readFileSync(configPath, 'utf8')
-
-      const parsedConfig = JSON5.parse(configContent)
-
-      // Validate the configuration
-      const validationResult = TranslateConfigSchema.safeParse(parsedConfig)
-
-      if (!validationResult.success) {
-        // Format errors for better user feedback
-        const errors = formatZodError(validationResult.error)
-
-        // Show error notification
-        const errorMessage = `Invalid translator.json configuration:\n${errors.join('\n')}`
-        logger.error(errorMessage)
-
-        // Still use what we can from the config, even with errors
-        projectConfig = parsedConfig
-      } else {
-        // Config is valid
-        projectConfig = validationResult.data
-      }
-    }
-  } catch (error: any) {
-    const errorMessage = `Error loading translator.json: ${error.message || error}`
-    logger.error(errorMessage)
-  }
-
-  // Get section defaults from the configuration provider
-  return {
-    sourceDir: projectConfig.sourceDir || defaultConfig.sourceDir,
-    targetDir: projectConfig.targetDir || defaultConfig.targetDir,
-    sourcePaths: projectConfig.sourcePaths || defaultConfig.sourcePaths,
-    sourceLocale:
-      projectConfig.sourceLocale || configProvider.get<string>('translator.sourceLocale', defaultConfig.sourceLocale),
-    targetLocales:
-      projectConfig.targetLocales ||
-      configProvider.get<string[]>('translator.targetLocales', defaultConfig.targetLocales),
-    enableBackTranslation:
-      projectConfig.enableBackTranslation ??
-      configProvider.get<boolean>('translator.enableBackTranslation', defaultConfig.enableBackTranslation),
-    defaultMarkdownEngine:
-      projectConfig.defaultMarkdownEngine ||
-      configProvider.get<TranslatorEngine>('translator.defaultMarkdownEngine', defaultConfig.defaultMarkdownEngine),
-    defaultJsonEngine:
-      projectConfig.defaultJsonEngine ||
-      configProvider.get<TranslatorEngine>('translator.defaultJsonEngine', defaultConfig.defaultJsonEngine),
-    engineOverrides:
-      projectConfig.engineOverrides ||
-      // Convert from legacy string format to string[] format
-      Object.fromEntries(
-        Object.entries(configProvider.get<Record<string, string | string[]>>('translator.engineOverrides', {})).map(
-          ([engine, localesStr]) => [
-            engine,
-            typeof localesStr === 'string'
-              ? localesStr.split(',').map((s) => s.trim())
-              : Array.isArray(localesStr)
-              ? localesStr
-              : []
-          ]
-        )
-      ),
-    // These fields are translator.json-only (no VS Code settings fallback)
-    excludeKeys: projectConfig.excludeKeys ?? defaultConfig.excludeKeys,
-    excludeKeyPaths: projectConfig.excludeKeyPaths ?? defaultConfig.excludeKeyPaths,
-    copyOnlyFiles: projectConfig.copyOnlyFiles ?? defaultConfig.copyOnlyFiles,
-    csvExportPath: projectConfig.csvExportPath ?? defaultConfig.csvExportPath,
-    autoExport: projectConfig.autoExport ?? defaultConfig.autoExport,
-    autoImport: projectConfig.autoImport ?? defaultConfig.autoImport
-  }
+  _fileSystem?: FileSystem,
+  preloaded?: ITranslatorConfig,
+  getPassphrase?: GetPassphrase
+): TranslateProjectConfig {
+  const config = preloaded ?? loadTranslatorConfig(rootPath, logger, getPassphrase).config
+  return toProjectConfig(config, configProvider)
 }

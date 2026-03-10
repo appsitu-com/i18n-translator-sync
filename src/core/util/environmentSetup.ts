@@ -304,7 +304,7 @@ export function resolveEnvObjectWithDecryption<T = any>(
  * @param logger The logger instance
  * @param workspacePath Optional workspace path for resolving relative file paths
  */
-export function resolveEnvString(v: unknown, logger: Logger, workspacePath?: string): unknown {
+export function resolveEnvString(v: unknown, logger: Logger, _workspacePath?: string): unknown {
   if (typeof v !== 'string') return v
   const envRef = /^env:([A-Z0-9_]+)$/i.exec(v)
   if (envRef) {

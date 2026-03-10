@@ -1,4 +1,5 @@
 import type { Translator, BulkTranslateOpts } from './types'
+import type { IAzureConfig } from '../core/config'
 import { postJson } from '../util/http'
 import { randomUUID } from 'crypto'
 import { withRetry } from '../util/retry'
@@ -8,43 +9,30 @@ export const AzureTranslator: Translator = {
   name: 'azure',
 
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const endpoint =
-      ((opts.apiConfig.endpoint as string | undefined) ||
-        ((opts.apiConfig as { url?: string }).url as string | undefined) ||
-        process.env.AZURE_TRANSLATION_URL)?.replace(/\/+$/, '') ||
-      'https://api.cognitive.microsofttranslator.com'
-    const key = opts.apiConfig.key as string | undefined
-    const apiKey = (opts.apiConfig as { apiKey?: string }).apiKey as string | undefined
-    const region = (opts.apiConfig.region as string | undefined) || process.env.AZURE_TRANSLATION_REGION
+    const cfg = opts.apiConfig as IAzureConfig
+    const endpoint = (cfg.endpoint ?? 'https://api.cognitive.microsofttranslator.com').replace(/\/+$/, '')
+    const apiKey = cfg.apiKey
+    const region = cfg.region
 
-    // Log what we received (masked)
-    const keyToUse = key || apiKey || process.env.AZURE_TRANSLATION_KEY
-    const masked = keyToUse && keyToUse.length > 8 ? `${keyToUse.substring(0, 4)}...${keyToUse.substring(keyToUse.length - 4)}` : keyToUse || '[not provided]'
-    console.error(`[AZURE] Received config - key field: ${key ? 'present' : 'missing'}, apiKey field: ${apiKey ? 'present' : 'missing'}, actual value: ${masked}`)
-    console.error(`[AZURE] Config region: ${region}`)
+    const category = cfg.azureModel ? `custom:${cfg.azureModel}` : undefined
+    const timeout = Number(cfg.timeoutMs ?? 30_000)
+    const retry = cfg.retry
+    const langMap = cfg.langMap ?? {}
 
-    // can use a customised translation model
-    const category = opts.apiConfig.azureModel ? `custom:${opts.apiConfig.azureModel}` : undefined
-    // const textType = (opts.apiConfig.textType as string | undefined) ?? 'plain'
-    const timeout = Number(opts.apiConfig.timeoutMs ?? 30000)
-    const retry = opts.apiConfig.retry
-
-    // Use langMap from config, fallback to no mapping if not provided
-    const langMap = opts.apiConfig.langMap || {}
-
-    if (!keyToUse) {
-      console.error(`Azure Translator: missing 'key' (checked both 'key' and 'apiKey' fields)`)
-      throw new Error(`Azure Translator: missing 'key' (checked both 'key' and 'apiKey' fields)`)
+    if (!apiKey) {
+      throw new Error(`Azure Translator: missing 'apiKey'`)
     }
     if (!region) {
-      console.error(`Azure Translator: missing 'region'`)
       throw new Error(`Azure Translator: missing 'region'`)
     }
 
+    const masked = apiKey.length > 8
+      ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}`
+      : apiKey
     console.error(`Azure Translator: Using credentials - Region: ${region}, Key: ${masked}`)
 
     const headers = {
-      'Ocp-Apim-Subscription-Key': keyToUse,
+      'Ocp-Apim-Subscription-Key': apiKey,
       'Ocp-Apim-Subscription-Region': region,
       'Content-type': 'application/json',
       'X-ClientTraceId': randomUUID()

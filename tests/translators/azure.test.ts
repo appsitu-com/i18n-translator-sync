@@ -33,7 +33,7 @@ describe('azure stub', () => {
       sourceLocale: 'en-GB',
       targetLocale: 'fr-FR',
       apiConfig: {
-        key: 'AZ',
+        apiKey: 'AZ',
         region: 'westeurope',
         batchSize: 2,
         endpoint: 'https://api.cognitive.microsofttranslator.com'
@@ -42,20 +42,18 @@ describe('azure stub', () => {
     expect(out).toEqual(['X', 'Y', 'Z'])
   })
 
-  it('accepts apiKey alias and falls back region from env when config region is empty', async () => {
-    process.env.AZURE_TRANSLATION_REGION = 'westeurope'
-
-    const out = await AzureTranslator.translateMany(['x'], [null], {
-      sourceLocale: 'en',
-      targetLocale: 'fr',
-      apiConfig: {
-        apiKey: 'AZ',
-        region: '',
-        endpoint: ''
-      }
-    })
-
-    expect(out).toEqual(['X'])
+  it('requires region to be set in config', async () => {
+    await expect(
+      AzureTranslator.translateMany(['x'], [null], {
+        sourceLocale: 'en',
+        targetLocale: 'fr',
+        apiConfig: {
+          apiKey: 'AZ',
+          region: '',
+          endpoint: ''
+        }
+      })
+    ).rejects.toThrow("missing 'region'")
   })
 })
 
@@ -86,7 +84,7 @@ describe('azure api', () => {
     }
 
     apiConfig = {
-      key: process.env.AZURE_TRANSLATION_KEY,
+      apiKey: process.env.AZURE_TRANSLATION_KEY,
       region: process.env.AZURE_TRANSLATION_REGION || 'westus',
       endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
     }

@@ -67,7 +67,7 @@ describe('google v3 stub', () => {
       sourceLocale: 'en',
       targetLocale: 'fr',
       apiConfig: {
-        key: credentialsPath,
+        apiKey: credentialsPath,
         endpoint: 'https://translation.googleapis.com',
         googleProjectId: 'demo-project',
         googleLocation: 'global'
@@ -109,7 +109,7 @@ describe('google v3 stub', () => {
           sourceLocale: 'en',
           targetLocale: 'fr',
           apiConfig: {
-            key: credentialsPath,
+            apiKey: credentialsPath,
             endpoint: 'https://translation.googleapis.com'
           }
         })
@@ -123,26 +123,16 @@ describe('google v3 stub', () => {
     }
   })
 
-  it('falls back to env vars when key and project are not provided in apiConfig', async () => {
-    process.env.GOOGLE_TRANSLATION_KEY = credentialsPath
-    process.env.GOOGLE_TRANSLATION_PROJECT_ID = 'env-project'
-    process.env.GOOGLE_TRANSLATION_LOCATION = 'global'
-
-    try {
-      const out = await GoogleTranslator.translateMany(['env'], [null], {
+  it('throws when apiKey is not provided in apiConfig', async () => {
+    await expect(
+      GoogleTranslator.translateMany(['env'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
         apiConfig: {
           endpoint: ''
         }
       })
-
-      expect(out).toEqual(['ENV'])
-    } finally {
-      delete process.env.GOOGLE_TRANSLATION_KEY
-      delete process.env.GOOGLE_TRANSLATION_PROJECT_ID
-      delete process.env.GOOGLE_TRANSLATION_LOCATION
-    }
+    ).rejects.toThrow("missing 'apiKey'")
   })
 
   it('reuses cached OAuth token for 15 minutes', async () => {
@@ -153,7 +143,7 @@ describe('google v3 stub', () => {
       sourceLocale: 'en',
       targetLocale: 'fr',
       apiConfig: {
-        key: cacheCredentialsPath,
+        apiKey: cacheCredentialsPath,
         endpoint: 'https://translation.googleapis.com',
         googleProjectId: 'demo-project',
         googleLocation: 'global'
@@ -186,7 +176,7 @@ describe('google v3 stub', () => {
       sourceLocale: 'en',
       targetLocale: 'fr',
       apiConfig: {
-        key: jsonString,
+        apiKey: jsonString,
         endpoint: 'https://translation.googleapis.com',
         googleProjectId: 'demo-project',
         googleLocation: 'global'
@@ -202,7 +192,7 @@ describe('google v3 stub', () => {
       sourceLocale: 'en',
       targetLocale: 'fr',
       apiConfig: {
-        key: credentialsPath,
+        apiKey: credentialsPath,
         endpoint: 'https://translation.googleapis.com',
         googleProjectId: 'demo-project',
         googleLocation: 'global'
@@ -218,7 +208,7 @@ describe('google v3 stub', () => {
         sourceLocale: 'en',
         targetLocale: 'fr',
         apiConfig: {
-          key: '{invalid json',
+          apiKey: '{invalid json',
           endpoint: 'https://translation.googleapis.com',
           googleProjectId: 'demo-project'
         }
@@ -237,7 +227,7 @@ describe('google v3 stub', () => {
         sourceLocale: 'en',
         targetLocale: 'fr',
         apiConfig: {
-          key: incompleteJson,
+          apiKey: incompleteJson,
           endpoint: 'https://translation.googleapis.com',
           googleProjectId: 'demo-project'
         }
@@ -251,7 +241,7 @@ describe('google v3 stub', () => {
         sourceLocale: 'en',
         targetLocale: 'fr',
         apiConfig: {
-          key: '/nonexistent/path/to/creds.json',
+          apiKey: '/nonexistent/path/to/creds.json',
           endpoint: 'https://translation.googleapis.com',
           googleProjectId: 'demo-project'
         }

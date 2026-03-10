@@ -1,25 +1,56 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { TRANSLATOR_JSON } from '../../src/core/constants'
-import { loadProjectConfig, defaultConfig, TranslateConfigSchema, type ConfigProvider, type TranslateProjectConfig } from '../../src/core/coreConfig'
-import { FileSystem, IUri } from '../../src/core/util/fs'
+import { loadProjectConfig, defaultConfig, toProjectConfig, TranslateConfigSchema, type ConfigProvider, type TranslateProjectConfig } from '../../src/core/coreConfig'
 import { Logger } from '../../src/core/util/baseLogger'
+import type { ITranslatorConfig } from '../../src/core/config'
 
-// Mock modules
-vi.mock('fs', () => ({
-  existsSync: vi.fn(),
-  readFileSync: vi.fn()
+// Mock loadTranslatorConfig from the config module
+const { mockLoadTranslatorConfig } = vi.hoisted(() => ({
+  mockLoadTranslatorConfig: vi.fn()
 }))
+
+vi.mock('../../src/core/config', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/core/config')>()
+  return {
+    ...actual,
+    loadTranslatorConfig: mockLoadTranslatorConfig
+  }
+})
 
 describe('Config', () => {
   let mockLogger: Logger
-  let mockFileSystem: FileSystem
   let mockConfigProvider: ConfigProvider
 
+  /** Helper to build a partial ITranslatorConfig (merged with defaults) */
+  function makeConfig(overrides: Partial<ITranslatorConfig> = {}): ITranslatorConfig {
+    return {
+      sourceDir: '',
+      targetDir: '',
+      sourcePaths: ['i18n/en'],
+      sourceLocale: 'en',
+      targetLocales: [],
+      enableBackTranslation: false,
+      defaultMarkdownEngine: 'azure',
+      defaultJsonEngine: 'google',
+      engineOverrides: {},
+      excludeKeys: [],
+      excludeKeyPaths: [],
+      copyOnlyFiles: [],
+      csvExportPath: 'translator.csv',
+      autoExport: true,
+      autoImport: false,
+      translator: undefined,
+      ...overrides
+    } as ITranslatorConfig
+  }
+
   beforeEach(() => {
-    // Reset all mocks
     vi.clearAllMocks()
 
-    // Create mock logger
+    mockLoadTranslatorConfig.mockReturnValue({
+      config: makeConfig(),
+      errors: []
+    })
+
     mockLogger = {
       info: vi.fn(),
       warn: vi.fn(),
@@ -29,26 +60,8 @@ describe('Config', () => {
       show: vi.fn()
     }
 
-    // Create mock file system
-    mockFileSystem = {
-      readFile: vi.fn(),
-      writeFile: vi.fn(),
-      deleteFile: vi.fn(),
-      fileExists: vi.fn(),
-      createDirectory: vi.fn(),
-      readDirectory: vi.fn(),
-      createUri: vi.fn().mockImplementation((fsPath: string): IUri => ({
-        fsPath,
-        scheme: 'file',
-        path: fsPath
-      })),
-      joinPath: vi.fn(),
-      stat: vi.fn()
-    }
-
-    // Create mock config provider
     mockConfigProvider = {
-      get: vi.fn().mockImplementation((section: string, defaultValue: any) => defaultValue),
+      get: vi.fn().mockImplementation((_section: string, defaultValue: any) => defaultValue),
       update: vi.fn()
     }
   })
@@ -147,110 +160,71 @@ describe('Config', () => {
 
   describe('loadProjectConfig', () => {
     const rootPath = '/test/project'
-    const configPath = '/test/project/translator.json'
 
-    it('should load valid configuration from file', async () => {
-      const configContent = {
-        sourceDir: 'src/locales',
-        targetDir: 'dist/locales',
-        sourceLocale: 'en-US',
-        targetLocales: ['fr-FR', 'es-ES'],
-        defaultMarkdownEngine: 'deepl' as const
-      }
+    it('should delegate to loadTranslatorConfig and return project config', () => {
+      mockLoadTranslatorConfig.mockReturnValue({
+        config: makeConfig({
+          sourceDir: 'src/locales',
+          targetDir: 'dist/locales',
+          sourceLocale: 'en-US',
+          targetLocales: ['fr-FR', 'es-ES'],
+          defaultMarkdownEngine: 'deepl'
+        }),
+        errors: []
+      })
 
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
-      vi.mocked(mockFileSystem.readFile).mockResolvedValue(JSON.stringify(configContent))
+      const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
-
-      expect(mockFileSystem.fileExists).toHaveBeenCalledWith(expect.objectContaining({
-        fsPath: expect.stringContaining(TRANSLATOR_JSON)
-      }))
-      expect(mockFileSystem.readFile).toHaveBeenCalledWith(expect.objectContaining({
-        fsPath: expect.stringContaining(TRANSLATOR_JSON)
-      }))
+      expect(mockLoadTranslatorConfig).toHaveBeenCalledWith(rootPath, mockLogger, undefined)
       expect(result.sourceDir).toBe('src/locales')
       expect(result.targetDir).toBe('dist/locales')
       expect(result.sourceLocale).toBe('en-US')
       expect(result.targetLocales).toEqual(['fr-FR', 'es-ES'])
       expect(result.defaultMarkdownEngine).toBe('deepl')
+      // Should not include translator credentials
+      expect((result as any).translator).toBeUndefined()
     })
 
-    it('should use default configuration when file does not exist', async () => {
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(false)
+    it('should return defaults when loadTranslatorConfig returns empty config', () => {
+      // Default mock already returns makeConfig() which has default values
+      const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
-
-      expect(mockFileSystem.fileExists).toHaveBeenCalled()
-      expect(mockFileSystem.readFile).not.toHaveBeenCalled()
       expect(result).toMatchObject(defaultConfig)
     })
 
-    it('should handle invalid JSON in config file', async () => {
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
-      vi.mocked(mockFileSystem.readFile).mockResolvedValue('invalid json {')
+    it('should use preloaded config and skip loadTranslatorConfig', () => {
+      const preloaded = makeConfig({
+        sourceDir: 'preloaded/src',
+        sourceLocale: 'de'
+      })
 
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
+      const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger, undefined, preloaded)
 
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error loading translator.json')
-      )
-      expect(result).toMatchObject(defaultConfig)
+      expect(mockLoadTranslatorConfig).not.toHaveBeenCalled()
+      expect(result.sourceDir).toBe('preloaded/src')
+      expect(result.sourceLocale).toBe('de')
     })
 
-    it('should handle invalid configuration schema', async () => {
-      const invalidConfig = {
-        sourceLocale: 123, // invalid type
-        defaultMarkdownEngine: 'invalidEngine' // invalid value
-      }
+    it('should merge project config with provider defaults', () => {
+      mockLoadTranslatorConfig.mockReturnValue({
+        config: makeConfig({ sourceDir: 'custom/src', sourceLocale: '', targetLocales: [] }),
+        errors: []
+      })
 
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
-      vi.mocked(mockFileSystem.readFile).mockResolvedValue(JSON.stringify(invalidConfig))
-
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid translator.json configuration')
-      )
-      // Should still return some config (with invalid parts used as-is since they're truthy)
-      expect(result.sourceLocale).toBe(123) // uses the invalid value from parsed config since it's truthy
-    })
-
-    it('should merge project config with provider defaults', async () => {
-      const projectConfig = {
-        sourceDir: 'custom/src'
-      }
-
-      // Configure provider to return specific defaults
       vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
         if (section === 'translator.sourceLocale') return 'custom-locale'
         if (section === 'translator.targetLocales') return ['custom-target']
         return defaultValue
       })
 
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
-      vi.mocked(mockFileSystem.readFile).mockResolvedValue(JSON.stringify(projectConfig))
+      const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
-
-      expect(result.sourceDir).toBe('custom/src') // from project config
-      expect(result.sourceLocale).toBe('custom-locale') // from provider
-      expect(result.targetLocales).toEqual(['custom-target']) // from provider
+      expect(result.sourceDir).toBe('custom/src')
+      expect(result.sourceLocale).toBe('custom-locale')
+      expect(result.targetLocales).toEqual(['custom-target'])
     })
 
-    it('should handle file system errors gracefully', async () => {
-      vi.mocked(mockFileSystem.fileExists).mockRejectedValue(new Error('File system error'))
-
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
-
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Error loading translator.json')
-      )
-      expect(result).toMatchObject(defaultConfig)
-    })
-
-    it('should convert legacy engine overrides format', async () => {
-      // Configure provider to return legacy string format
+    it('should convert legacy engine overrides format from provider', () => {
       vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
         if (section === 'translator.engineOverrides') {
           return {
@@ -261,83 +235,60 @@ describe('Config', () => {
         return defaultValue
       })
 
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(false)
-
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
+      const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
       expect(result.engineOverrides).toEqual({
         'deepl': ['fr', 'de', 'it'],
         'google': ['es']
       })
     })
+  })
 
-    it('should parse JSON5 with comments in translator.json', async () => {
-      const json5Content = `
-        {
-          // Source configuration
-          sourceDir: 'src/locales',
+  describe('toProjectConfig', () => {
+    it('should prefer config values over provider defaults', () => {
+      const config = makeConfig({
+        sourceLocale: 'fr',
+        targetLocales: ['de', 'es']
+      })
 
-          // Target configuration
-          targetDir: 'dist/locales',
+      vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
+        if (section === 'translator.sourceLocale') return 'en'
+        if (section === 'translator.targetLocales') return ['ja']
+        return defaultValue
+      })
 
-          // List of source paths
-          sourcePaths: ['i18n/en'],
+      const result = toProjectConfig(config, mockConfigProvider)
 
-          // Source language code
-          sourceLocale: 'en',
-
-          /* Target languages to translate to */
-          targetLocales: ['fr', 'es'],
-
-          // Which engine to use by default
-          defaultMarkdownEngine: 'azure',
-          defaultJsonEngine: 'google',
-
-          // No back translation for this project
-          enableBackTranslation: false,
-
-          // Engine-specific overrides
-          engineOverrides: {}
-        }
-      `
-
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
-      vi.mocked(mockFileSystem.readFile).mockResolvedValue(json5Content)
-
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
-
-      expect(result.sourceDir).toBe('src/locales')
-      expect(result.targetDir).toBe('dist/locales')
-      expect(result.sourcePaths).toEqual(['i18n/en'])
-      expect(result.sourceLocale).toBe('en')
-      expect(result.targetLocales).toEqual(['fr', 'es'])
-      expect(result.defaultMarkdownEngine).toBe('azure')
-      expect(result.defaultJsonEngine).toBe('google')
-      expect(result.enableBackTranslation).toBe(false)
+      expect(result.sourceLocale).toBe('fr')
+      expect(result.targetLocales).toEqual(['de', 'es'])
     })
 
-    it('should parse JSON5 with single quotes', async () => {
-      const json5Content = `
-        {
-          sourcePaths: ['src/en.json'],
-          sourceLocale: 'en',
-          targetLocales: ['fr'],
-          defaultMarkdownEngine: 'google',
-          defaultJsonEngine: 'deepl',
-          enableBackTranslation: false,
-          engineOverrides: {}
-        }
-      `
+    it('should fall back to configProvider when config fields are empty', () => {
+      const config = makeConfig({
+        sourceLocale: '',
+        targetLocales: []
+      })
 
-      vi.mocked(mockFileSystem.fileExists).mockResolvedValue(true)
-      vi.mocked(mockFileSystem.readFile).mockResolvedValue(json5Content)
+      vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
+        if (section === 'translator.sourceLocale') return 'ja'
+        if (section === 'translator.targetLocales') return ['ko', 'zh']
+        return defaultValue
+      })
 
-      const result = await loadProjectConfig(rootPath, mockConfigProvider, mockLogger, mockFileSystem)
+      const result = toProjectConfig(config, mockConfigProvider)
 
-      expect(result.sourcePaths).toEqual(['src/en.json'])
-      expect(result.sourceLocale).toBe('en')
-      expect(result.targetLocales).toEqual(['fr'])
-      expect(result.defaultJsonEngine).toBe('deepl')
+      expect(result.sourceLocale).toBe('ja')
+      expect(result.targetLocales).toEqual(['ko', 'zh'])
+    })
+
+    it('should strip the translator block from the result', () => {
+      const config = makeConfig({
+        translator: { azure: { key: 'secret', region: 'eastus' } } as any
+      })
+
+      const result = toProjectConfig(config, mockConfigProvider)
+
+      expect((result as any).translator).toBeUndefined()
     })
   })
 })

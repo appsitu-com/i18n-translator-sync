@@ -7,6 +7,7 @@ import { loadContextCsvForJson } from './contextCsv'
 import { pickEngine } from '../translators/registry'
 import { generateContextCsvWarnings } from './contextCsvWarnings'
 import { TranslateProjectConfig } from './coreConfig'
+import type { ITranslatorEngines } from './config'
 import {
   getRelativePath,
   createTargetUri,
@@ -15,7 +16,6 @@ import {
 } from './util/pathOperations'
 import { ITranslationExecutor } from './translationExecutor'
 import { DefaultTranslationExecutor } from './defaultTranslationExecutor'
-import { IPassphraseManager } from './secrets/passphraseManager'
 
 /**
  * Core translator pipeline service
@@ -25,21 +25,18 @@ export class TranslatorPipeline {
   private logger: Logger
   private cache: TranslationCache
   private executor: ITranslationExecutor
-  private passphraseManager?: IPassphraseManager
 
   constructor(
     fileSystem: FileSystem,
     logger: Logger,
     cache: TranslationCache,
     workspacePath: string,
-    executor?: ITranslationExecutor,
-    passphraseManager?: IPassphraseManager
+    executor?: ITranslationExecutor
   ) {
     this.fileSystem = fileSystem
     this.logger = logger
     this.cache = cache
     this.executor = executor || new DefaultTranslationExecutor(fileSystem, logger, cache, workspacePath)
-    this.passphraseManager = passphraseManager
   }
 
   /**
@@ -150,18 +147,6 @@ export class TranslatorPipeline {
     }
   }
 
-  private async resolvePassphrase(): Promise<string | undefined> {
-    if (!this.passphraseManager) {
-      return undefined
-    }
-
-    if (!this.passphraseManager.hasPassphrase()) {
-      await this.passphraseManager.loadPassphrase()
-    }
-
-    return this.passphraseManager.getPassphrase()
-  }
-
   /**
    * Translate segments using specified engine
    */
@@ -234,7 +219,7 @@ export class TranslatorPipeline {
     srcUri: IUri,
     workspacePath: string,
     config: TranslateProjectConfig,
-    configProvider: { get: <T>(section: string, defaultValue?: T) => T },
+    translatorEngines: ITranslatorEngines | undefined,
     forceTranslation: boolean = false
   ): Promise<void> {
     // Use values from config
@@ -280,7 +265,6 @@ export class TranslatorPipeline {
 
     // Load translation contexts for JSON files
     const contexts = await this.loadJsonContexts(extraction, srcUri)
-    const passphrase = await this.resolvePassphrase()
 
     const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
     if (!sourcePath) {
@@ -330,10 +314,9 @@ export class TranslatorPipeline {
           engineName,
           sourceLocale,
           targetLocale,
-          configProvider,
+          translatorEngines?.[engineName],
           srcUri.fsPath,
           false,
-          passphrase
         )
 
         const fwd = fwdResult.translations
@@ -393,10 +376,9 @@ export class TranslatorPipeline {
                   backEngine,
                   targetLocale,
                   sourceLocale,
-                  configProvider,
+                  translatorEngines?.[backEngine],
                   srcUri.fsPath,
                   true,
-                  passphrase
                 )
                 back = backResult.translations
 

@@ -296,12 +296,13 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   /**
    * Get the project configuration (public accessor for extension commands)
    */
-  async getProjectConfig() {
-    return await loadProjectConfig(
+  getProjectConfig() {
+    return loadProjectConfig(
       this.workspacePath,
       this.configProvider,
       this.logger,
-      this.fileSystem
+      undefined,
+      this.translatorConfig
     )
   }
 

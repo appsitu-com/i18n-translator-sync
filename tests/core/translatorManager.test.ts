@@ -106,7 +106,6 @@ describe('TranslatorManager', () => {
       workspaceWatcher,
       configProvider,
       undefined,
-      undefined,
       undefined
     );
   });
@@ -243,7 +242,7 @@ describe('TranslatorManager', () => {
         testUri,
         '/workspace',
         defaultProjectConfig,
-        expect.any(Object)
+        undefined
       );
 
       // Should log the action
@@ -358,7 +357,6 @@ describe('TranslatorManager', () => {
         workspaceWatcher,
         configProvider,
         undefined,
-        undefined,
         configChangeCallback
       );
 
@@ -459,7 +457,6 @@ describe('TranslatorManager', () => {
         '/workspace',
         workspaceWatcher,
         configProvider,
-        undefined,
         undefined,
         undefined // No callback
       );
