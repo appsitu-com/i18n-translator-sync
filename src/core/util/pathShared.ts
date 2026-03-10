@@ -25,14 +25,33 @@ export function normalizePath(pathStr: string): string {
 export function toWorkspaceRelativePosix(filePath: string, workspacePath: string): string {
   if (!filePath) return '';
 
-  // Convert to absolute path if needed
-  const absolutePath = path.isAbsolute(filePath) ? filePath : path.resolve(workspacePath, filePath);
+  // Normalize backslashes to forward slashes first for cross-platform handling
+  let normalizedFilePath = filePath.replace(/\\/g, '/');
+  let normalizedWorkspacePath = workspacePath.replace(/\\/g, '/');
 
-  // Make relative to workspace
-  const relativePath = path.relative(workspacePath, absolutePath);
+  // Handle Windows drive letters (e.g., C:/) by removing them for relative path calculation
+  const driveLetterRegex = /^[A-Za-z]:\//;
+  const filePathHasDrive = driveLetterRegex.test(normalizedFilePath);
+  const workspacePathHasDrive = driveLetterRegex.test(normalizedWorkspacePath);
 
-  // Convert backslashes to forward slashes for cross-platform consistency
-  return relativePath.split(path.sep).join('/');
+  // If both have drive letters, remove them for comparison
+  if (filePathHasDrive && workspacePathHasDrive) {
+    normalizedFilePath = normalizedFilePath.replace(driveLetterRegex, '');
+    normalizedWorkspacePath = normalizedWorkspacePath.replace(driveLetterRegex, '');
+  }
+
+  // If file path starts with workspace path, make it relative
+  if (normalizedFilePath.startsWith(normalizedWorkspacePath)) {
+    let relativePath = normalizedFilePath.slice(normalizedWorkspacePath.length);
+    // Remove leading slash
+    if (relativePath.startsWith('/')) {
+      relativePath = relativePath.slice(1);
+    }
+    return relativePath;
+  }
+
+  // If it's already relative or path operations fail, return the normalized path
+  return normalizedFilePath;
 }
 
 /**
