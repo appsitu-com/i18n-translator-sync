@@ -22,9 +22,11 @@ jobs:
       - run: pnpm test:cov
         env:
           AZURE_TRANSLATION_KEY: ${{ secrets.AZURE_TRANSLATION_KEY }}
+          AZURE_TRANSLATION_REGION: ${{ secrets.AZURE_TRANSLATION_REGION }}
           DEEPL_TRANSLATION_KEY: ${{ secrets.DEEPL_TRANSLATION_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GOOGLE_TRANSLATION_KEY: ${{ secrets.GOOGLE_TRANSLATION_KEY }}
+          GOOGLE_TRANSLATION_PROJECT_ID: ${{ secrets.GOOGLE_TRANSLATION_PROJECT_ID }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
