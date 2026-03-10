@@ -10,9 +10,9 @@ export const GeminiTranslator: Translator = {
     const key = opts.apiConfig.key as string
     const endpoint =
       (opts.apiConfig.endpoint as string | undefined)?.replace(/\/+$/, '') ||
-      'https://generativelanguage.googleapis.com/v1beta'
+      'https://generativelanguage.googleapis.com/v1'
     const timeout = Number(opts.apiConfig.timeoutMs ?? 60000) // Longer timeout for LLM
-    const model = opts.apiConfig.geminiModel || 'gemini-1.5-pro'
+    const model = opts.apiConfig.geminiModel || 'gemini-pro'
     const temperature = opts.apiConfig.temperature ?? 0.1
     const maxOutputTokens = opts.apiConfig.maxOutputTokens ?? 1024
     const retry = opts.apiConfig.retry

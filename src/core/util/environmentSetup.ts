@@ -56,6 +56,7 @@ export const initTranslatorEnv = async (
       logger.warn(`Environment file not found: ${translatorEnvFile}. Run "Translator: Start" to create it.`)
     } else {
       logger.info(`Loading environment from: ${translatorEnvFile}`)
+      process.env.I18N_TRANSLATOR_ENV_DIR = path.dirname(translatorEnvFile)
       // Load environment variables from translator.env in the workspace
       const result = dotenv.config({ path: translatorEnvFile, quiet: true })
 

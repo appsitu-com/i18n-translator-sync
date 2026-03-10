@@ -24,14 +24,17 @@ const TEST_ENV_LOADED_FLAG = 'I18N_TRANSLATOR_TEST_ENV_LOADED';
 if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
   const workspaceEnvFile = path.resolve(__dirname, '../translator.env');
   const testProjectEnvFile = path.resolve(__dirname, '../test-project/translator.env');
+  const translatorEnvDirVar = 'I18N_TRANSLATOR_ENV_DIR';
 
   if (fs.existsSync(testProjectEnvFile)) {
     const result = dotenv.config({ path: testProjectEnvFile, override: true });
+    process.env[translatorEnvDirVar] = path.dirname(testProjectEnvFile);
     if (result.error) {
       console.error('Error loading test-project/translator.env:', result.error);
     }
   } else if (fs.existsSync(workspaceEnvFile)) {
     const result = dotenv.config({ path: workspaceEnvFile, override: true });
+    process.env[translatorEnvDirVar] = path.dirname(workspaceEnvFile);
     if (result.error) {
       console.error('Error loading translator.env:', result.error);
     }

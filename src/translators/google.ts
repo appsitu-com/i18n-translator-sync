@@ -3,7 +3,7 @@ import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { resolve, isAbsolute, join } from 'node:path'
 import { createSign } from 'node:crypto'
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -28,6 +28,14 @@ interface CachedToken {
 }
 
 const tokenCache = new Map<string, CachedToken>()
+
+/**
+ * Clear the OAuth token cache. Useful for testing.
+ * @internal
+ */
+export function clearTokenCache(): void {
+  tokenCache.clear()
+}
 
 interface GoogleV3TranslateResponse {
   translations?: Array<{
@@ -89,11 +97,19 @@ function readServiceAccountCredentials(keyOrPath: string): GoogleServiceAccountC
   }
 
   // Otherwise, treat as file path
-  const resolvedPath = resolve(keyOrPath)
+  // Resolve relative paths against the translator.env directory if available
+  let resolvedPath: string
+  if (isAbsolute(keyOrPath)) {
+    resolvedPath = keyOrPath
+  } else {
+    const envDir = process.env.I18N_TRANSLATOR_ENV_DIR
+    resolvedPath = envDir ? join(envDir, keyOrPath) : resolve(keyOrPath)
+  }
+  
   console.error(`Google Translate v3: Loading credentials from file: ${resolvedPath}`)
   let fileContent: string
   try {
-    fileContent = readFileSync(keyOrPath, 'utf-8')
+    fileContent = readFileSync(resolvedPath, 'utf-8')
     console.error('Google Translate v3: Successfully read credentials file')
   } catch (error) {
     throw new Error(`Google Translate v3: failed to read service credentials from '${keyOrPath}': ${String(error)}`)

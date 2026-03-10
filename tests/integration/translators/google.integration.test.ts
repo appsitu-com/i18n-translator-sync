@@ -1,16 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { existsSync, readFileSync } from 'node:fs';
-import path from 'node:path';
-import { GoogleTranslator } from '../../../src/translators/google';
+import { GoogleTranslator, clearTokenCache } from '../../../src/translators/google';
 import { requireEnv } from './testEnv';
 
-const googleCredentialPathRaw = requireEnv('GOOGLE_TRANSLATION_KEY');
+// Can be either inline JSON string or file path to credentials JSON
+const googleCredentials = requireEnv('GOOGLE_TRANSLATION_KEY');
 const googleProjectId = requireEnv('GOOGLE_TRANSLATION_PROJECT_ID');
-const googleCredentialPath = path.resolve(process.cwd(), googleCredentialPathRaw);
-
-if (!existsSync(googleCredentialPath)) {
-  throw new Error(`Google credentials file not found for integration tests: ${googleCredentialPath}`);
-}
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
@@ -26,7 +20,7 @@ describe('integration: google translator', () => {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: googleCredentialPath,
+        key: googleCredentials,
         endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
         googleProjectId,
         googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
@@ -41,7 +35,8 @@ describe('integration: google translator', () => {
   }, 70000);
 
   it('creates OAuth token with real credentials and reuses it from in-memory cache', async () => {
-    const credentialsJson = readFileSync(googleCredentialPath, 'utf-8');
+    // Clear any cached tokens from previous tests
+    clearTokenCache();
 
     const originalFetch = globalThis.fetch;
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
@@ -51,7 +46,7 @@ describe('integration: google translator', () => {
         sourceLocale: 'en',
         targetLocale: 'es',
         apiConfig: {
-          key: credentialsJson,
+          key: googleCredentials,
           endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
           googleProjectId,
           googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
