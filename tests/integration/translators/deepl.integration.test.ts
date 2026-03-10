@@ -1,20 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { DeepLTranslator } from '../../../src/translators/deepl';
+import { requireEnv } from './testEnv';
 
-const deeplKey = process.env.DEEPL_TRANSLATION_KEY;
-const runLiveTranslatorTests = process.env.RUN_LIVE_TRANSLATOR_TESTS === '1';
-const hasDeepLConfig = Boolean(runLiveTranslatorTests && deeplKey);
-const itIfDeepLConfigured = hasDeepLConfig ? it : it.skip;
+const deeplKey = requireEnv('DEEPL_TRANSLATION_KEY');
 
 describe('integration: deepl translator', () => {
-  itIfDeepLConfigured('makes a real API call and returns translated text', async () => {
+  it('makes a real API call and returns translated text', async () => {
     const sourceText = 'Good morning, friend!';
 
     const result = await DeepLTranslator.translateMany([sourceText], [null], {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: deeplKey as string,
+        key: deeplKey,
         endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
         free: true,
         timeoutMs: 60000

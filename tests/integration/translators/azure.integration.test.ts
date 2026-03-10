@@ -1,22 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { AzureTranslator } from '../../../src/translators/azure';
+import { requireEnv } from './testEnv';
 
-const azureKey = process.env.AZURE_TRANSLATION_KEY;
-const azureRegion = process.env.AZURE_TRANSLATION_REGION;
-const runLiveTranslatorTests = process.env.RUN_LIVE_TRANSLATOR_TESTS === '1';
-const hasAzureConfig = Boolean(runLiveTranslatorTests && azureKey && azureRegion);
-const itIfAzureConfigured = hasAzureConfig ? it : it.skip;
+const azureKey = requireEnv('AZURE_TRANSLATION_KEY');
+const azureRegion = requireEnv('AZURE_TRANSLATION_REGION');
 
 describe('integration: azure translator', () => {
-  itIfAzureConfigured('makes a real API call and returns translated text', async () => {
+  it('makes a real API call and returns translated text', async () => {
     const sourceText = 'Good morning, friend!';
 
     const result = await AzureTranslator.translateMany([sourceText], [null], {
       sourceLocale: 'en',
       targetLocale: 'es',
       apiConfig: {
-        key: azureKey as string,
-        region: azureRegion as string,
+        key: azureKey,
+        region: azureRegion,
         endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com',
         timeoutMs: 60000
       }
