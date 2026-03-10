@@ -1,10 +1,10 @@
 import * as path from 'path'
 import { FileSystem, IUri } from './fs'
 import { TranslateProjectConfig } from '../coreConfig'
-import { normalizePath, containsLocale, replaceLocaleInPath } from './pathShared'
+import { normalizePath, containsLocale, replaceLocaleInPath, replaceLocaleInPathForBackTranslation } from './pathShared'
 
 // Re-export shared utilities for backward compatibility
-export { normalizePath, containsLocale, replaceLocaleInPath }
+export { normalizePath, containsLocale, replaceLocaleInPath, replaceLocaleInPathForBackTranslation }
 
 /**
  * Find the source path that contains the given file
@@ -103,22 +103,24 @@ export function getRelativePath(
 
 /**
  * Create path for a translated output file based on configuration
+ * @param translationSourceLocale - The locale we're translating FROM
+ * @param translationTargetLocale - The locale we're translating TO
  */
 export function createTargetPath(
   workspacePath: string,
-  sourceLocale: string,
-  targetLocale: string,
+  translationSourceLocale: string,
+  translationTargetLocale: string,
   relativePath: string,
   config: TranslateProjectConfig,
   sourcePath: string
 ): string {
   // If source and target locales are the same, we should error to prevent overwriting source files
-  if (sourceLocale.toLowerCase() === targetLocale.toLowerCase()) {
-    throw new Error(`Target locale "${targetLocale}" is the same as source locale "${sourceLocale}". This would overwrite source files.`);
+  if (translationSourceLocale.toLowerCase() === translationTargetLocale.toLowerCase()) {
+    throw new Error(`Translation target locale "${translationTargetLocale}" is the same as translation source locale "${translationSourceLocale}". This would overwrite source files.`);
   }
 
-  // Replace source locale with target locale in the path
-  const targetPath = replaceLocaleInPath(sourcePath, sourceLocale, targetLocale);
+  // Replace translation source locale with translation target locale in the path
+  const targetPath = replaceLocaleInPath(sourcePath, translationSourceLocale, translationTargetLocale);
 
   // Verify the target path is actually different from the source path
   if (normalizePath(targetPath) === normalizePath(sourcePath)) {
@@ -126,8 +128,8 @@ export function createTargetPath(
   }
 
   // Also check any non-matching paths for problems - they should contain a locale to be valid
-  if (!containsLocale(sourcePath, sourceLocale)) {
-    throw new Error(`Source path "${sourcePath}" doesn't contain the source locale "${sourceLocale}". Unable to determine proper target path.`);
+  if (!containsLocale(sourcePath, translationSourceLocale)) {
+    throw new Error(`Source path "${sourcePath}" doesn't contain the translation source locale "${translationSourceLocale}". Unable to determine proper target path.`);
   }
 
   // Determine base path for target
@@ -137,7 +139,7 @@ export function createTargetPath(
   const isSourcePathFile = path.extname(sourcePath) !== '';
 
   if (isSourcePathFile) {
-    // For file source paths, the target path already includes the filename
+    // For file source paths, the translation target path already includes the filename
     const result = path.join(basePath, targetPath);
     return result.replace(/\\/g, '/');
   } else {
@@ -149,60 +151,74 @@ export function createTargetPath(
 
 /**
  * Create path for back-translation output file
+ * Back translation uses the same path structure as the source, but replaces
+ * the source locale with forwardTranslationTargetLocale_backTranslationTargetLocale.
+ * Example: i18n/en/messages.json → i18n/fr_en/messages.json (where fr was translation target, en is back translation target)
+ *
+ * @param workspacePath - Root workspace path
+ * @param forwardTranslationTargetLocale - The locale we translated TO in forward translation (e.g., "fr")
+ * @param relativePath - Relative path of the file within the source directory
+ * @param config - Translation configuration (contains sourceLocale = back translation target)
+ * @param sourcePath - Original source path pattern (e.g., "i18n/en" or "i18n/en.json")
  */
 export function createBackTranslationPath(
   workspacePath: string,
-  locale: string,
+  forwardTranslationTargetLocale: string,
   relativePath: string,
   config: TranslateProjectConfig,
   sourcePath?: string
 ): string {
-  // Determine if source is file-based by checking if sourcePath has extension
-  const isSourcePathFile = sourcePath ? path.extname(sourcePath) !== '' : false;
-
-  // If target directory is configured, use it for back-translation as well
-  if (config.targetDir) {
-    const targetBasePath = path.join(workspacePath, config.targetDir);
-
-    if (isSourcePathFile) {
-      // For file sources: i18n/{locale}_en.json
-      const result = path.join(targetBasePath, 'i18n', `${locale}_en.json`);
-      return result.replace(/\\/g, '/');
-    } else {
-      // For directory sources: i18n/{locale}_en/{relativePath}
-      const result = path.join(targetBasePath, 'i18n', `${locale}_en`, relativePath);
-      return result.replace(/\\/g, '/');
-    }
+  if (!sourcePath) {
+    throw new Error('sourcePath is required for createBackTranslationPath');
   }
 
-  // Default behavior
+  const backTranslationTargetLocale = config.sourceLocale;
+
+  // Replace source locale with forwardTranslationTargetLocale_backTranslationTargetLocale in the source path
+  const backTranslationSourcePath = replaceLocaleInPathForBackTranslation(
+    sourcePath,
+    backTranslationTargetLocale,
+    forwardTranslationTargetLocale
+  );
+
+  // Determine base path for back translation
+  const basePath = config.targetDir ?
+    path.join(workspacePath, config.targetDir) :
+    workspacePath;
+
+  // Check if the source path is a file (has extension)
+  const isSourcePathFile = path.extname(sourcePath) !== '';
+
+  let result: string;
   if (isSourcePathFile) {
-    // For file sources: i18n/{locale}_en.json
-    const result = path.join(workspacePath, 'i18n', `${locale}_en.json`);
-    return result.replace(/\\/g, '/');
+    // For file source paths, the back translation path already includes the filename
+    result = path.join(basePath, backTranslationSourcePath);
   } else {
-    // For directory sources: i18n/{locale}_en/{relativePath}
-    const result = path.join(workspacePath, 'i18n', `${locale}_en`, relativePath);
-    return result.replace(/\\/g, '/');
+    // For directory source paths, append the relative path
+    result = path.join(basePath, backTranslationSourcePath, relativePath);
   }
+
+  return result.replace(/\\/g, '/');
 }
 
 /**
  * Create URI for a translated output file based on configuration
+ * @param translationSourceLocale - The locale we're translating FROM
+ * @param translationTargetLocale - The locale we're translating TO
  */
 export function createTargetUri(
   fs: FileSystem,
   workspacePath: string,
-  sourceLocale: string,
-  targetLocale: string,
+  translationSourceLocale: string,
+  translationTargetLocale: string,
   relativePath: string,
   config: TranslateProjectConfig,
   sourcePath: string
 ): IUri {
   const targetPath = createTargetPath(
     workspacePath,
-    sourceLocale,
-    targetLocale,
+    translationSourceLocale,
+    translationTargetLocale,
     relativePath,
     config,
     sourcePath
@@ -213,18 +229,19 @@ export function createTargetUri(
 
 /**
  * Create URI for back-translation output file
+ * @param forwardTranslationTargetLocale - The locale we translated TO in forward translation
  */
 export function createBackTranslationUri(
   fs: FileSystem,
   workspacePath: string,
-  locale: string,
+  forwardTranslationTargetLocale: string,
   relativePath: string,
   config: TranslateProjectConfig,
   sourcePath?: string
 ): IUri {
   const backTranslationPath = createBackTranslationPath(
     workspacePath,
-    locale,
+    forwardTranslationTargetLocale,
     relativePath,
     config,
     sourcePath

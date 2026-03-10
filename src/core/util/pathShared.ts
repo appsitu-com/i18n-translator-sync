@@ -55,18 +55,21 @@ export function containsLocale(pathStr: string, locale: string): boolean {
 }
 
 /**
- * Replaces the source locale with target locale in a path
+ * Replaces the translation source locale with translation target locale in a path
+ * @param pathStr - The path to transform
+ * @param translationSourceLocale - The locale we're translating FROM
+ * @param translationTargetLocale - The locale we're translating TO
  */
-export function replaceLocaleInPath(pathStr: string, sourceLocale: string, targetLocale: string): string {
+export function replaceLocaleInPath(pathStr: string, translationSourceLocale: string, translationTargetLocale: string): string {
   const normalizedPath = pathStr.replace(/\\/g, '/');
-  const normalizedSourceLocale = sourceLocale.toLowerCase();
+  const normalizedTranslationSourceLocale = translationSourceLocale.toLowerCase();
 
   // Handle folder in path case
-  const folderPattern = new RegExp(`/${normalizedSourceLocale}/`, 'i');
+  const folderPattern = new RegExp(`/${normalizedTranslationSourceLocale}/`, 'i');
   if (folderPattern.test(normalizedPath)) {
     return normalizedPath.replace(
       folderPattern,
-      `/${targetLocale}/`
+      `/${translationTargetLocale}/`
     );
   }
 
@@ -75,8 +78,47 @@ export function replaceLocaleInPath(pathStr: string, sourceLocale: string, targe
   const dir = path.dirname(normalizedPath);
   const basename = path.basename(normalizedPath, ext);
 
-  if (basename.toLowerCase() === normalizedSourceLocale) {
-    return path.join(dir, `${targetLocale}${ext}`).replace(/\\/g, '/');
+  if (basename.toLowerCase() === normalizedTranslationSourceLocale) {
+    return path.join(dir, `${translationTargetLocale}${ext}`).replace(/\\/g, '/');
+  }
+
+  // Return original if no replacement was made
+  return normalizedPath;
+}
+
+/**
+ * Replaces the back translation source locale with back translation target locale + "_" + back translation source locale in a path.
+ * Used for back-translation paths where we reverse the translation direction.
+ * Example: i18n/en/messages.json with forwardTargetLocale=fr, backSourceLocale=en → i18n/fr_en/messages.json
+ * @param pathStr - The path to transform
+ * @param backTranslationSourceLocale - The locale we're translating back TO (original sourceLocale)
+ * @param forwardTranslationTargetLocale - The locale we translated TO in forward translation
+ */
+export function replaceLocaleInPathForBackTranslation(
+  pathStr: string,
+  backTranslationSourceLocale: string,
+  forwardTranslationTargetLocale: string
+): string {
+  const normalizedPath = pathStr.replace(/\\/g, '/');
+  const normalizedBackTranslationSourceLocale = backTranslationSourceLocale.toLowerCase();
+  const backTranslationTargetLocale = `${forwardTranslationTargetLocale}_${backTranslationSourceLocale}`;
+
+  // Handle folder in path case
+  const folderPattern = new RegExp(`/${normalizedBackTranslationSourceLocale}/`, 'i');
+  if (folderPattern.test(normalizedPath)) {
+    return normalizedPath.replace(
+      folderPattern,
+      `/${backTranslationTargetLocale}/`
+    );
+  }
+
+  // Handle filename case (replace basename)
+  const ext = path.extname(normalizedPath);
+  const dir = path.dirname(normalizedPath);
+  const basename = path.basename(normalizedPath, ext);
+
+  if (basename.toLowerCase() === normalizedBackTranslationSourceLocale) {
+    return path.join(dir, `${backTranslationTargetLocale}${ext}`).replace(/\\/g, '/');
   }
 
   // Return original if no replacement was made
