@@ -72,12 +72,11 @@ You can choose to make any language your source language - it does not need to b
 
 See related info on [English and Translation Engines](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/NonEnglishSourceLanguage.md) .
 
-## Target Naming
+## Source file & folder names
 
-Source files and folder names must contain the source locale code (e.g., "en" for English).
-To compute the file path for each target locale, the source file path must contain the target locale code.
+Source files and folder names must contain the source locale code (e.g., "en" for English). This is used to compute the file path for each target locale.
 
-Examples - Replacing 'en' (English) with 'fr' (French):
+### Examples - Replacing 'en' (English) with 'fr' (French):
   - File: **en**-msg.json ⇒ **fr**-msg.json
   - Folder: **en**/messages.json ⇒ **fr**/messages.json
 
@@ -89,24 +88,53 @@ Being able to translate multiple source folder is very handy for projects like m
 
 Source folders would normally only contain files you intend to translate but there is one useful exception - See [TypeScript i18n file translation](#typescript-i18n-file-translation) below.
 
+### Example `translate.json` configuration
+
+- where `packages` are subprojects and `sourcePaths` is your source language folders and files.
+
+`sourcePaths: ["packages/app/i18n/en", "packages/api/app/i18n/en.json", "packages/content/markdown/en/" ]`
+- `"packages/app/i18n/en"` => Translates English source folder in your front end application.
+- `"packages/api/i18n/en.json"` => Translates JSON files in this folder from your backend end API.
+- `"packages/content/markdown/en/"` => Translate markdown content files
+
+This will generate translated files replacing `en` with each of your target locales.
+
+- `targetLocales: ["fr", "zh-Hans", "ar"]` will translate to French, Chinese (Simplified) and Arabic.
+
+**Example:**
+- `"packages/app/i18n/fr"` => **French** for front end application.
+- `"packages/api/i18n/fr.json"` => **French** JSON files for backend end API.
+- `"packages/content/markdown/fr/"` => **French** markdown content files
+
 ## Smart Folder Syncing
 
-Translated folders are kept "in sync" so if you rename or delete files in a source folder, the corresponding files will be renamed and deleted in all target folders. This is a **major time saver** when maintaining translated content and a key reason we developed this tool.
+Translated folders are kept "in sync" so if you rename or delete files in a source folder, the corresponding files will be auto renamed and deleted in all target folders. This is a **major time saver** when maintaining translated content and a key reason we developed the "i18n Translation **Sync**" tool.
 
 ## Back Translations!
 
 AI translations are admittedly "draft" translations but this feature can significantly improve your early MVP translation quality.
+When you enable "back translation", each target language is translated back to the source language. This creates an additional translation file or folder per target locale that you can review to assess translation quality.
 
-When you enable "back translation", each target language is translated back to the source language. This creates an additional translation file or folder per target locale that you can review to assess translation quality. You might even wish to add a developer mode switch in your apps, to view back translations inside your app.
+### Setting `enableBackTranslation: true` in `translator.json` will generate back translations:
 
-Often tweaking your input source text can improve resulting translations. Using this feature, you can repeatedly adjust your input source text and instantly check back translations to assess resulting translation quality across all your target languages.
+**Example:**
+- `"packages/app/i18n/en` => Original English source text.
+- `"packages/app/i18n/fr"` => Forward translation English => French.
+- `"packages/app/i18n/fr_en"` => _Back translation_ of **English => French => English** to compare with Original English text.
+
+So enabling this feature is like adding a new locale code `fr_en` to your system.
+
+### Using back translation to improve the AI translation quality
+
+Tweaking your input source text can often significantly improve AI translation quality as you find terms that are less ambiguous to the AI engine. Using this feature, you can iteratively adjust input source text and instantly check the back translations to assess  translation quality across all your target languages.
+
+> Suggestion: Add a `back translation` switch for software developers to display back translations inside your app.
 
 <!-- TODO: Add screenshot showing back translation comparison -->
 
 ## Translation Memory
 
-The i18n Translator uses a **SQLite-based translation memory database** for professional translation workflows.
-This is not just a performance cache - it's a foundational feature we'll develop for managing professional translations.
+The i18n Translator stores translations in a locale **translation memory database**.  This is not only boosts performance - it's a foundational feature we'll eventually develop to integrate with professional translation services.
 
 **Current capabilities:**
 - **Reduces AI costs** - Only translates new or changed content
@@ -120,30 +148,67 @@ This is not just a performance cache - it's a foundational feature we'll develop
 - **Auto import** - If enabled, when a co-worker first pulls a CSV file from Git and runs "Translator: Start", this setting will auto import the CSV file into their new cache database
 
 **Coming soon** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
-- Integration with Computer-Assisted Translation (CAT) tools to convert your draft AI translations into production grade professional translations.
+- Integration with Computer-Assisted Translation Services (CATS) tools to convert your draft AI translations into production grade professional human assisted translations.
 
 <!-- TODO: Add diagram showing translation memory workflow -->
-
-## Locale Code Mapping
-
-AI translation engines may use different locale codes so we support mapping your preferred locale code to the API's required codes.
-
-Examples:
-
-| Engine | Example Chinese codes |
-| ------ | --------------------- |
-| Google | `zh-CN`, `zh-TW`      |
-| Azure  | `zh-Hans`, `zh-Hant`  |
-| DeepL  | `ZH`, `ZH-TW`         |
-
-See the "translators" > "langMap" in [translator.json](https://github.com/appsitu-com/i18n-translator-sync/blob/main/samples/translator.json) for examples of engine specific language code mapping.
-
-_Did we get all the engine code mappings correct?_ If not, submit a PR with the correct mappings.
 
 ## Exclude Translation
 
 You can exclude specific file names, keys or key paths from translation.
 The next section on TypeScript translation demonstrates these features.
+
+Examples:
+- `"excludeKeys": ["native", "code"]` => In JSON and YAML files, don't translate `'code'` or `'native'` fields.
+- `"copyOnlyFiles": ["index.ts"]` =>  When `index.ts` files exist in a source folder, just copy them to all target folders - don't translate them.
+
+## Locale Code Mapping
+
+AI translation engines may use different locale codes to that used by your app, so we support mapping your preferred locale codes to the API's required codes using a `langMap` setting in `translator.json` for each AI engine.
+
+See the "translators" > "langMap" in [translator.json](https://github.com/appsitu-com/i18n-translator-sync/blob/main/samples/translator.json) for examples of engine specific language code mapping.
+
+_Did we get all the engine code mappings correct?_ If not, submit a PR with the correct mappings.
+
+Examples:
+
+| Engine | Engine Required codes |
+| ------ | --------------------- |
+| Google | `zh-CN`, `zh-TW`      |
+| Azure  | `zh-Hans`, `zh-Hant`  |
+| DeepL  | `ZH`, `ZH-TW`         |
+
+- `"zh-Hans": "zh-CN"`  -- Maps the code used by your app (`zh-Hans`) => Code required by AI engine (`zh-CN`).
+
+```json
+ "translator": {
+    "copy": {},
+    "google": {
+      ...
+      "langMap": {
+        "zh-Hans": "zh-CN",  // Code used by your app => Code required by AI engine
+        "zh-Hant": "zh-TW",
+        "zh-HK": "zh-TW",
+      }
+    },
+    "azure": {
+      ...
+      "langMap": {
+        "zh-CN": "zh-Hans",
+        "zh-TW": "zh-Hant",
+        "zh-HK": "zh-Hant"
+      }
+    },
+    "deepl": {
+      ...
+      "langMap": {
+        "zh-Hans": "ZH",
+        "zh-Hant": "ZH-TW",
+        "zh-HK": "ZH-TW",
+      }
+    }
+  }
+```
+
 
 ## TypeScript i18n File Translation
 
