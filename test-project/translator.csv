@@ -479,42 +479,325 @@ i18n/en/config.yaml,9,google,en,fr,Support for nested structures,,Support pour l
 i18n/en/config.yaml,9,google,en,hi,Support for nested structures,,नेस्टेड संरचनाओं के लिए समर्थन,1772684377
 i18n/en/config.yaml,9,google,en,ur,Support for nested structures,,گھریلو ڈھانچے کے لئے معاونت,1772684378
 i18n/en/config.yaml,9,google,en,zh-CN,Support for nested structures,,支持嵌套结构,1773012027
-i18n/en/messages.json,0,google,en,de,"Hello, World! Updated Again and Again",,Hallo Welt! Immer wieder aktualisiert,1772684387
-i18n/en/messages.json,0,google,en,de,"Hello, World! Updated Again",,Hallo Welt! Erneut aktualisiert,1773031255
-i18n/en/messages.json,0,azure,es,en,"¡Hola, Mundo! Actualizado una y otra vez",,"Hello, World! Updated over and over again",1772684385
-i18n/en/messages.json,0,google,fr,en,Bonjour le monde ! Mise à jour régulière,,Hello world! Regular updates,1772684386
-i18n/en/messages.json,0,google,hi,en,हैलो वर्ल्ड! बार-बार अपडेट किया गया,,Hello World! Updated frequently,1772684386
-i18n/en/messages.json,0,google,ur,en,ہیلو، دنیا! بار بار اپ ڈیٹ کیا گیا۔,,"Hello, world! Updated frequently.",1772684387
-i18n/en/messages.json,0,google,de,en,Hallo Welt! Immer wieder aktualisiert,,Hello world! Updated regularly,1772684387
-i18n/en/messages.json,0,google,zh-CN,en,你好，世界！不断更新,,"Hello, world! (Continuously updating)",1773012030
-i18n/en/messages.json,0,azure,es,en,"¡Hola, Mundo! Actualizado de nuevo",,"Hello, World! Updated again",1773031251
-i18n/en/messages.json,0,google,fr,en,Bonjour le monde ! Nouvelle mise à jour,,Hello world! New update,1773031253
-i18n/en/messages.json,0,google,hi,en,हैलो वर्ल्ड! फिर से अपडेट किया गया,,Hello World! Updated Again,1773031254
-i18n/en/messages.json,0,google,ur,en,ہیلو، دنیا! دوبارہ اپ ڈیٹ کیا گیا۔,,"Hello, world! Updated again.",1773031254
-i18n/en/messages.json,0,google,de,en,Hallo Welt! Erneut aktualisiert,,Hello world! Updated again,1773031255
-i18n/en/messages.json,0,google,zh-CN,en,你好，世界！又更新啦！,,"Hello, world! It's updated again!",1773031256
-i18n/en/messages.json,0,azure,en,es,"Hello, World! Updated Again and Again",,"¡Hola, Mundo! Actualizado una y otra vez",1772684385
-i18n/en/messages.json,0,azure,en,es,"Hello, World! Updated Again",,"¡Hola, Mundo! Actualizado de nuevo",1773031249
-i18n/en/messages.json,0,google,en,fr,"Hello, World! Updated Again and Again",,Bonjour le monde ! Mise à jour régulière,1772684385
-i18n/en/messages.json,0,google,en,fr,"Hello, World! Updated Again",,Bonjour le monde ! Nouvelle mise à jour,1773031252
-i18n/en/messages.json,0,google,en,hi,"Hello, World! Updated Again and Again",,हैलो वर्ल्ड! बार-बार अपडेट किया गया,1772684386
-i18n/en/messages.json,0,google,en,hi,"Hello, World! Updated Again",,हैलो वर्ल्ड! फिर से अपडेट किया गया,1773031253
-i18n/en/messages.json,0,google,en,ur,"Hello, World! Updated Again and Again",,ہیلو، دنیا! بار بار اپ ڈیٹ کیا گیا۔,1772684386
-i18n/en/messages.json,0,google,en,ur,"Hello, World! Updated Again",,ہیلو، دنیا! دوبارہ اپ ڈیٹ کیا گیا۔,1773031254
-i18n/en/messages.json,0,google,en,zh-CN,"Hello, World! Updated Again and Again",,你好，世界！不断更新,1773012029
-i18n/en/messages.json,0,google,en,zh-CN,"Hello, World! Updated Again",,你好，世界！又更新啦！,1773031256
+i18n/en/document.md,0,google,en,de,Sample Markdown File,,Beispiel-Markdown-Datei,1773120441
+i18n/en/document.md,0,azure,es,en,Archivo de Markdown de Ejemplo,,Example Markdown File,1773120437
+i18n/en/document.md,0,google,fr,en,Exemple de fichier Markdown,,Example Markdown file,1773120439
+i18n/en/document.md,0,google,hi,en,नमूना मार्कडाउन फ़ाइल,,Sample Markdown File,1773120440
+i18n/en/document.md,0,google,ur,en,نمونہ مارک ڈاؤن فائل,,Sample Markdown file,1773120441
+i18n/en/document.md,0,google,de,en,Beispiel-Markdown-Datei,,Example Markdown file,1773120442
+i18n/en/document.md,0,google,zh-CN,en,Markdown 示例文件,,Markdown sample files,1773120443
+i18n/en/document.md,0,azure,en,es,Sample Markdown File,,Archivo de Markdown de Ejemplo,1773120436
+i18n/en/document.md,0,google,en,fr,Sample Markdown File,,Exemple de fichier Markdown,1773120438
+i18n/en/document.md,0,google,en,hi,Sample Markdown File,,नमूना मार्कडाउन फ़ाइल,1773120439
+i18n/en/document.md,0,google,en,ur,Sample Markdown File,,نمونہ مارک ڈاؤن فائل,1773120440
+i18n/en/document.md,0,google,en,zh-CN,Sample Markdown File,,Markdown 示例文件,1773120442
+i18n/en/document.md,2,google,en,de,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"Dies ist eine Demonstration der Markdown-Übersetzung. Die Erweiterung kann Überschriften, Absätze und andere Markdown-Elemente übersetzen.",1773120441
+i18n/en/document.md,2,azure,es,en,"Esto es una demostración de la traducción de Markdown. La extensión puede traducir encabezados, párrafos y otros elementos de Markdown.",,"This is a demonstration of Markdown's translation. The extension can translate headings, paragraphs, and other Markdown elements.",1773120437
+i18n/en/document.md,2,google,fr,en,"Ceci est une démonstration de la traduction Markdown. L'extension peut traduire les titres, les paragraphes et d'autres éléments Markdown.",,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",1773120439
+i18n/en/document.md,2,google,hi,en,"यह मार्कडाउन अनुवाद का एक उदाहरण है। यह एक्सटेंशन शीर्षकों, पैराग्राफों और अन्य मार्कडाउन तत्वों का अनुवाद कर सकता है।",,"This is an example of Markdown translation. This extension can translate headings, paragraphs, and other Markdown elements.",1773120440
+i18n/en/document.md,2,google,ur,en,یہ مارک ڈاؤن ترجمہ کا ایک مظاہرہ ہے۔ ایکسٹینشن عنوانات، پیراگراف اور دیگر مارک ڈاؤن عناصر کا ترجمہ کر سکتی ہے۔,,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",1773120441
+i18n/en/document.md,2,google,de,en,"Dies ist eine Demonstration der Markdown-Übersetzung. Die Erweiterung kann Überschriften, Absätze und andere Markdown-Elemente übersetzen.",,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",1773120442
+i18n/en/document.md,2,google,zh-CN,en,这是一个 Markdown 翻译演示。该扩展程序可以翻译标题、段落和其他 Markdown 元素。,,"This is a Markdown translation demo. This extension can translate headings, paragraphs, and other Markdown elements.",1773120443
+i18n/en/document.md,2,azure,en,es,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"Esto es una demostración de la traducción de Markdown. La extensión puede traducir encabezados, párrafos y otros elementos de Markdown.",1773120436
+i18n/en/document.md,2,google,en,fr,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"Ceci est une démonstration de la traduction Markdown. L'extension peut traduire les titres, les paragraphes et d'autres éléments Markdown.",1773120438
+i18n/en/document.md,2,google,en,hi,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,"यह मार्कडाउन अनुवाद का एक उदाहरण है। यह एक्सटेंशन शीर्षकों, पैराग्राफों और अन्य मार्कडाउन तत्वों का अनुवाद कर सकता है।",1773120439
+i18n/en/document.md,2,google,en,ur,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,یہ مارک ڈاؤن ترجمہ کا ایک مظاہرہ ہے۔ ایکسٹینشن عنوانات، پیراگراف اور دیگر مارک ڈاؤن عناصر کا ترجمہ کر سکتی ہے۔,1773120440
+i18n/en/document.md,2,google,en,zh-CN,"This is a demonstration of Markdown translation. The extension can translate headings, paragraphs, and other Markdown elements.",,这是一个 Markdown 翻译演示。该扩展程序可以翻译标题、段落和其他 Markdown 元素。,1773120442
+i18n/en/document.md,3,google,en,de,Features,,Merkmale,1773120441
+i18n/en/document.md,3,azure,es,en,Características,,Features,1773120437
+i18n/en/document.md,3,google,fr,en,Caractéristiques,,Features,1773120439
+i18n/en/document.md,3,google,hi,en,विशेषताएँ,,features,1773120440
+i18n/en/document.md,3,google,ur,en,خصوصیات,,Features,1773120441
+i18n/en/document.md,3,google,de,en,Merkmale,,Features,1773120442
+i18n/en/document.md,3,google,zh-CN,en,特征,,feature,1773120443
+i18n/en/document.md,3,azure,en,es,Features,,Características,1773120436
+i18n/en/document.md,3,google,en,fr,Features,,Caractéristiques,1773120438
+i18n/en/document.md,3,google,en,hi,Features,,विशेषताएँ,1773120439
+i18n/en/document.md,3,google,en,ur,Features,,خصوصیات,1773120440
+i18n/en/document.md,3,google,en,zh-CN,Features,,特征,1773120442
+i18n/en/document.md,4,google,en,de,Translates regular text in Markdown,,Übersetzt normalen Text in Markdown,1773120441
+i18n/en/document.md,4,azure,es,en,Traduce texto normal en Markdown,,Translate regular text in Markdown,1773120437
+i18n/en/document.md,4,google,fr,en,Traduit du texte normal en Markdown,,Translated from normal text into Markdown,1773120439
+i18n/en/document.md,4,google,hi,en,मार्कडाउन में सामान्य टेक्स्ट का अनुवाद करता है,,Translates normal text into Markdown,1773120440
+i18n/en/document.md,4,google,ur,en,مارک ڈاؤن میں باقاعدہ متن کا ترجمہ کرتا ہے۔,,Translates regular text into Markdown.,1773120441
+i18n/en/document.md,4,google,de,en,Übersetzt normalen Text in Markdown,,Translates normal text to Markdown,1773120442
+i18n/en/document.md,4,google,zh-CN,en,将普通文本翻译成 Markdown 格式,,Translate plain text into Markdown format,1773120443
+i18n/en/document.md,4,azure,en,es,Translates regular text in Markdown,,Traduce texto normal en Markdown,1773120436
+i18n/en/document.md,4,google,en,fr,Translates regular text in Markdown,,Traduit du texte normal en Markdown,1773120438
+i18n/en/document.md,4,google,en,hi,Translates regular text in Markdown,,मार्कडाउन में सामान्य टेक्स्ट का अनुवाद करता है,1773120439
+i18n/en/document.md,4,google,en,ur,Translates regular text in Markdown,,مارک ڈاؤن میں باقاعدہ متن کا ترجمہ کرتا ہے۔,1773120440
+i18n/en/document.md,4,google,en,zh-CN,Translates regular text in Markdown,,将普通文本翻译成 Markdown 格式,1773120442
+i18n/en/document.md,5,google,en,de,Preserves Markdown formatting,,Behält die Markdown-Formatierung bei,1773120441
+i18n/en/document.md,5,azure,es,en,Preserva el formato Markdown,,Preserve Markdown formatting,1773120437
+i18n/en/document.md,5,google,fr,en,Préserve la mise en forme Markdown,,Preserves Markdown formatting,1773120439
+i18n/en/document.md,5,google,hi,en,मार्कडाउन फॉर्मेटिंग को सुरक्षित रखता है,,Preserves Markdown formatting,1773120440
+i18n/en/document.md,5,google,ur,en,مارک ڈاؤن فارمیٹنگ کو محفوظ رکھتا ہے۔,,Markdown preserves formatting.,1773120441
+i18n/en/document.md,5,google,de,en,Behält die Markdown-Formatierung bei,,Retains Markdown formatting,1773120442
+i18n/en/document.md,5,google,zh-CN,en,保留 Markdown 格式,,Preserve Markdown formatting,1773120443
+i18n/en/document.md,5,azure,en,es,Preserves Markdown formatting,,Preserva el formato Markdown,1773120436
+i18n/en/document.md,5,google,en,fr,Preserves Markdown formatting,,Préserve la mise en forme Markdown,1773120438
+i18n/en/document.md,5,google,en,hi,Preserves Markdown formatting,,मार्कडाउन फॉर्मेटिंग को सुरक्षित रखता है,1773120439
+i18n/en/document.md,5,google,en,ur,Preserves Markdown formatting,,مارک ڈاؤن فارمیٹنگ کو محفوظ رکھتا ہے۔,1773120440
+i18n/en/document.md,5,google,en,zh-CN,Preserves Markdown formatting,,保留 Markdown 格式,1773120442
+i18n/en/document.md,6,google,en,de,Handles lists and nested elements,,Verarbeitet Listen und verschachtelte Elemente,1773120441
+i18n/en/document.md,6,azure,es,en,Maneja listas y elementos anidados,,Handle lists and nested items,1773120437
+i18n/en/document.md,6,google,fr,en,Gère les listes et les éléments imbriqués,,Handles lists and nested elements,1773120439
+i18n/en/document.md,6,google,hi,en,सूचियों और नेस्टेड तत्वों को संभालता है,,Handles lists and nested elements,1773120440
+i18n/en/document.md,6,google,ur,en,فہرستوں اور گھریلو عناصر کو ہینڈل کرتا ہے۔,,Handles lists and nested elements.,1773120441
+i18n/en/document.md,6,google,de,en,Verarbeitet Listen und verschachtelte Elemente,,Processes lists and nested elements,1773120442
+i18n/en/document.md,6,google,zh-CN,en,处理列表和嵌套元素,,Handling lists and nested elements,1773120443
+i18n/en/document.md,6,azure,en,es,Handles lists and nested elements,,Maneja listas y elementos anidados,1773120436
+i18n/en/document.md,6,google,en,fr,Handles lists and nested elements,,Gère les listes et les éléments imbriqués,1773120438
+i18n/en/document.md,6,google,en,hi,Handles lists and nested elements,,सूचियों और नेस्टेड तत्वों को संभालता है,1773120439
+i18n/en/document.md,6,google,en,ur,Handles lists and nested elements,,فہرستوں اور گھریلو عناصر کو ہینڈل کرتا ہے۔,1773120440
+i18n/en/document.md,6,google,en,zh-CN,Handles lists and nested elements,,处理列表和嵌套元素,1773120442
+i18n/en/document.md,7,google,en,de,Code Examples,,Codebeispiele,1773120441
+i18n/en/document.md,7,azure,es,en,Ejemplos de código,,Code Examples,1773120437
+i18n/en/document.md,7,google,fr,en,Exemples de code,,Code examples,1773120439
+i18n/en/document.md,7,google,hi,en,कोड उदाहरण,,code example,1773120440
+i18n/en/document.md,7,google,ur,en,کوڈ کی مثالیں۔,,Code examples,1773120441
+i18n/en/document.md,7,google,de,en,Codebeispiele,,Code examples,1773120442
+i18n/en/document.md,7,google,zh-CN,en,代码示例,,Code Example,1773120443
+i18n/en/document.md,7,azure,en,es,Code Examples,,Ejemplos de código,1773120436
+i18n/en/document.md,7,google,en,fr,Code Examples,,Exemples de code,1773120438
+i18n/en/document.md,7,google,en,hi,Code Examples,,कोड उदाहरण,1773120439
+i18n/en/document.md,7,google,en,ur,Code Examples,,کوڈ کی مثالیں۔,1773120440
+i18n/en/document.md,7,google,en,zh-CN,Code Examples,,代码示例,1773120442
+i18n/en/document.md,8,google,en,de,This is a blockquote that will be translated.,,"Dies ist ein Blockzitat, das übersetzt wird.",1773120441
+i18n/en/document.md,8,azure,es,en,Esta es una cita bloqueada que se traducirá.,,This is a blocked appointment that will be translated.,1773120437
+i18n/en/document.md,8,google,fr,en,Ceci est une citation qui sera traduite.,,This is a quote that will be translated.,1773120439
+i18n/en/document.md,8,google,hi,en,यह एक ब्लॉक कोट है जिसका अनुवाद किया जाएगा।,,This is a block quote that will be translated.,1773120440
+i18n/en/document.md,8,google,ur,en,یہ ایک بلاک اقتباس ہے جس کا ترجمہ کیا جائے گا۔,,This is a block quote that will be translated.,1773120441
+i18n/en/document.md,8,google,de,en,"Dies ist ein Blockzitat, das übersetzt wird.",,This is a block quote that is being translated.,1773120442
+i18n/en/document.md,8,google,zh-CN,en,这是一段需要翻译的引用。,,This is a quote that needs to be translated.,1773120443
+i18n/en/document.md,8,azure,en,es,This is a blockquote that will be translated.,,Esta es una cita bloqueada que se traducirá.,1773120436
+i18n/en/document.md,8,google,en,fr,This is a blockquote that will be translated.,,Ceci est une citation qui sera traduite.,1773120438
+i18n/en/document.md,8,google,en,hi,This is a blockquote that will be translated.,,यह एक ब्लॉक कोट है जिसका अनुवाद किया जाएगा।,1773120439
+i18n/en/document.md,8,google,en,ur,This is a blockquote that will be translated.,,یہ ایک بلاک اقتباس ہے جس کا ترجمہ کیا جائے گا۔,1773120440
+i18n/en/document.md,8,google,en,zh-CN,This is a blockquote that will be translated.,,这是一段需要翻译的引用。,1773120442
+i18n/en/document.md,9,google,en,de,Tables,,Tabellen,1773120441
+i18n/en/document.md,9,azure,es,en,Tablas,,Tables,1773120437
+i18n/en/document.md,9,google,fr,en,Tables,,Tables,1773120439
+i18n/en/document.md,9,google,hi,en,टेबल,,Table,1773120440
+i18n/en/document.md,9,google,ur,en,میزیں,,Tables,1773120441
+i18n/en/document.md,9,google,de,en,Tabellen,,tables,1773120442
+i18n/en/document.md,9,google,zh-CN,en,表格,,sheet,1773120443
+i18n/en/document.md,9,azure,en,es,Tables,,Tablas,1773120436
+i18n/en/document.md,9,google,en,fr,Tables,,Tables,1773120438
+i18n/en/document.md,9,google,en,hi,Tables,,टेबल,1773120439
+i18n/en/document.md,9,google,en,ur,Tables,,میزیں,1773120440
+i18n/en/document.md,9,google,en,zh-CN,Tables,,表格,1773120442
+i18n/en/document.md,10,google,en,de,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| Überschrift 1 | Überschrift 2 |
+
+----------|----------|
+
+Wert 1 | Wert 2 |
+
+Wert 3 | Wert 4 |",1773120441
+i18n/en/document.md,10,azure,es,en,"| Cabecera 1 | Cabecera 2 |
+|----------|----------|
+| Valor 1 | Valor 2 |
+| Valor 3 | Valor 4 |",,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1 | Value 2 |
+| Value 3 | Value 4 |",1773120437
+i18n/en/document.md,10,google,fr,en,"| En-tête 1 | En-tête 2 |
+
+|----------|----------|
+
+| Valeur 1 | Valeur 2 |
+
+| Valeur 3 | Valeur 4 |",,"| Header 1 | Header 2 |
+
+|----------|----------|
+
+| Value 1 | Value 2 |
+
+| Value 3 | Value 4 |",1773120439
+i18n/en/document.md,10,google,hi,en,"| शीर्षक 1 | शीर्षक 2 |
+
+|----------|----------|
+
+| मान 1 | मान 2 |
+
+| मान 3 | मान 4 |",,"| Heading 1 | Heading 2 |
+
+|----------|----------|
+
+| Value 1 | Value 2 |
+
+| Value 3 | Value 4 |",1773120440
+i18n/en/document.md,10,google,ur,en,"| ہیڈر 1 | ہیڈر 2 |
+|------------|------------|
+| قدر 1 | قدر 2 |
+| قدر 3 | قدر 4 |",,"| Header 1 | Header 2 |
+|------------|------------|
+| Value 1 | Value 2 |
+| Value 3 | Value 4 |",1773120441
+i18n/en/document.md,10,google,de,en,"| Überschrift 1 | Überschrift 2 |
+
+----------|----------|
+
+Wert 1 | Wert 2 |
+
+Wert 3 | Wert 4 |",,"| Heading 1 | Heading 2 |
+
+--------|----------|
+
+Value 1 | Value 2 |
+
+Value 3 | Value 4 |",1773120442
+i18n/en/document.md,10,google,zh-CN,en,"| 标题 1 | 标题 2 |
+
+|----------|----------|
+
+| 值 1 | 值 2 |
+
+| 值 3 | 值 4 |",,"| Title 1 | Title 2 |
+
+|----------|----------|
+
+| Value 1 | Value 2 |
+
+| Value 3 | Value 4 |",1773120443
+i18n/en/document.md,10,azure,en,es,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| Cabecera 1 | Cabecera 2 |
+|----------|----------|
+| Valor 1 | Valor 2 |
+| Valor 3 | Valor 4 |",1773120436
+i18n/en/document.md,10,google,en,fr,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| En-tête 1 | En-tête 2 |
+
+|----------|----------|
+
+| Valeur 1 | Valeur 2 |
+
+| Valeur 3 | Valeur 4 |",1773120438
+i18n/en/document.md,10,google,en,hi,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| शीर्षक 1 | शीर्षक 2 |
+
+|----------|----------|
+
+| मान 1 | मान 2 |
+
+| मान 3 | मान 4 |",1773120439
+i18n/en/document.md,10,google,en,ur,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| ہیڈر 1 | ہیڈر 2 |
+|------------|------------|
+| قدر 1 | قدر 2 |
+| قدر 3 | قدر 4 |",1773120440
+i18n/en/document.md,10,google,en,zh-CN,"| Header 1 | Header 2 |
+|----------|----------|
+| Value 1  | Value 2  |
+| Value 3  | Value 4  |",,"| 标题 1 | 标题 2 |
+
+|----------|----------|
+
+| 值 1 | 值 2 |
+
+| 值 3 | 值 4 |",1773120442
+i18n/en/document.md,11,google,en,de,Links,,Links,1773120441
+i18n/en/document.md,11,azure,es,en,Enlaces,,Links,1773120437
+i18n/en/document.md,11,google,fr,en,Links,,Links,1773120439
+i18n/en/document.md,11,google,hi,en,लिंक,,Link,1773120440
+i18n/en/document.md,11,google,ur,en,لنکس,,Links,1773120441
+i18n/en/document.md,11,google,de,en,Links,,Left,1773120442
+i18n/en/document.md,11,google,zh-CN,en,链接,,Link,1773120443
+i18n/en/document.md,11,azure,en,es,Links,,Enlaces,1773120436
+i18n/en/document.md,11,google,en,fr,Links,,Links,1773120438
+i18n/en/document.md,11,google,en,hi,Links,,लिंक,1773120439
+i18n/en/document.md,11,google,en,ur,Links,,لنکس,1773120440
+i18n/en/document.md,11,google,en,zh-CN,Links,,链接,1773120442
+i18n/en/document.md,12,google,en,de,Website link,,Website-Link,1773120441
+i18n/en/document.md,12,azure,es,en,Enlace a la página web,,Link to the website,1773120437
+i18n/en/document.md,12,google,fr,en,Lien vers le site Web,,Link to the website,1773120439
+i18n/en/document.md,12,google,hi,en,वेबसाइट लिंक,,Website Link,1773120440
+i18n/en/document.md,12,google,ur,en,ویب سائٹ کا لنک,,Website link,1773120441
+i18n/en/document.md,12,google,de,en,Website-Link,,Website link,1773120442
+i18n/en/document.md,12,google,zh-CN,en,网站链接,,Website link,1773120443
+i18n/en/document.md,12,azure,en,es,Website link,,Enlace a la página web,1773120436
+i18n/en/document.md,12,google,en,fr,Website link,,Lien vers le site Web,1773120438
+i18n/en/document.md,12,google,en,hi,Website link,,वेबसाइट लिंक,1773120439
+i18n/en/document.md,12,google,en,ur,Website link,,ویب سائٹ کا لنک,1773120440
+i18n/en/document.md,12,google,en,zh-CN,Website link,,网站链接,1773120442
+i18n/en/document.md,13,google,en,de,Visit our website,,Besuchen Sie unsere Website,1773120441
+i18n/en/document.md,13,azure,es,en,Visita nuestra página web,,Visit Website,1773120437
+i18n/en/document.md,13,google,fr,en,Visitez notre site web,,Visit our website,1773120439
+i18n/en/document.md,13,google,hi,en,हमारी वेबसाइट पर पधारें,,visit our website,1773120440
+i18n/en/document.md,13,google,ur,en,ہماری ویب سائٹ ملاحظہ کریں۔,,Visit our website.,1773120441
+i18n/en/document.md,13,google,de,en,Besuchen Sie unsere Website,,Visit our website,1773120442
+i18n/en/document.md,13,google,zh-CN,en,访问我们的网站,,Visit our website,1773120443
+i18n/en/document.md,13,azure,en,es,Visit our website,,Visita nuestra página web,1773120436
+i18n/en/document.md,13,google,en,fr,Visit our website,,Visitez notre site web,1773120438
+i18n/en/document.md,13,google,en,hi,Visit our website,,हमारी वेबसाइट पर पधारें,1773120439
+i18n/en/document.md,13,google,en,ur,Visit our website,,ہماری ویب سائٹ ملاحظہ کریں۔,1773120440
+i18n/en/document.md,13,google,en,zh-CN,Visit our website,,访问我们的网站,1773120442
+i18n/en/document.md,14,google,en,de,Image title,,Bildtitel,1773120441
+i18n/en/document.md,14,azure,es,en,Título de la imagen,,Image Title,1773120437
+i18n/en/document.md,14,google,fr,en,Titre de l'image,,Image title,1773120439
+i18n/en/document.md,14,google,hi,en,छवि शीर्षक,,Image caption,1773120440
+i18n/en/document.md,14,google,ur,en,تصویر کا عنوان,,Image caption,1773120441
+i18n/en/document.md,14,google,de,en,Bildtitel,,Image title,1773120442
+i18n/en/document.md,14,google,zh-CN,en,图片标题,,Image title,1773120443
+i18n/en/document.md,14,azure,en,es,Image title,,Título de la imagen,1773120436
+i18n/en/document.md,14,google,en,fr,Image title,,Titre de l'image,1773120438
+i18n/en/document.md,14,google,en,hi,Image title,,छवि शीर्षक,1773120439
+i18n/en/document.md,14,google,en,ur,Image title,,تصویر کا عنوان,1773120440
+i18n/en/document.md,14,google,en,zh-CN,Image title,,图片标题,1773120442
+i18n/en/document.md,15,google,en,de,Image description,,Bildbeschreibung,1773120441
+i18n/en/document.md,15,azure,es,en,Descripción de la imagen,,Image description,1773120437
+i18n/en/document.md,15,google,fr,en,Description de l'image,,Image description,1773120439
+i18n/en/document.md,15,google,hi,en,छवि विवरण,,Image description,1773120440
+i18n/en/document.md,15,google,ur,en,تصویر کی تفصیل,,Image description,1773120441
+i18n/en/document.md,15,google,de,en,Bildbeschreibung,,Image description,1773120442
+i18n/en/document.md,15,google,zh-CN,en,图片描述,,Image description,1773120443
+i18n/en/document.md,15,azure,en,es,Image description,,Descripción de la imagen,1773120436
+i18n/en/document.md,15,google,en,fr,Image description,,Description de l'image,1773120438
+i18n/en/document.md,15,google,en,hi,Image description,,छवि विवरण,1773120439
+i18n/en/document.md,15,google,en,ur,Image description,,تصویر کی تفصیل,1773120440
+i18n/en/document.md,15,google,en,zh-CN,Image description,,图片描述,1773120442
+i18n/en/messages.json,0,google,en,de,"Hello, World!",,Hallo Welt!,1773120447
+i18n/en/messages.json,0,azure,es,en,"¡Hola, Mundo!",,"Hello, World!",1773120444
+i18n/en/messages.json,0,azure,en,es,"Hello, World!",,"¡Hola, Mundo!",1773120444
+i18n/en/messages.json,0,google,en,fr,"Hello, World!",,Bonjour le monde!,1773120445
+i18n/en/messages.json,0,google,en,hi,"Hello, World!",,हैलो वर्ल्ड!,1773120446
+i18n/en/messages.json,0,google,en,ur,"Hello, World!",,ہیلو، دنیا!,1773120446
+i18n/en/messages.json,0,google,en,zh-CN,"Hello, World!",,你好世界！,1773120448
 i18n/en/messages.json,1,google,en,de,Welcome to the test project,,Willkommen zum Testprojekt,1772684387
+i18n/en/messages.json,1,google,en,de,Drink it Freddy,,"Trink es, Freddy!",1773120447
 i18n/en/messages.json,1,azure,es,en,Bienvenido al proyecto de prueba,,Welcome to the test project,1772684385
 i18n/en/messages.json,1,google,fr,en,Bienvenue dans le projet test,,Welcome to the test project,1772684386
 i18n/en/messages.json,1,google,hi,en,टेस्ट प्रोजेक्ट में आपका स्वागत है,,Welcome to the test project,1772684386
 i18n/en/messages.json,1,google,ur,en,ٹیسٹ پروجیکٹ میں خوش آمدید,,Welcome to the test project.,1772684387
 i18n/en/messages.json,1,google,de,en,Willkommen zum Testprojekt,,Welcome to the test project,1772684387
 i18n/en/messages.json,1,google,zh-CN,en,欢迎来到测试项目,,Welcome to the test project,1773012030
+i18n/en/messages.json,1,azure,es,en,"Bébelo, Freddy",,"Drink it, Freddy",1773120444
+i18n/en/messages.json,1,google,fr,en,"Bois-le, Freddy",,"Bois-le, Freddy",1773120445
+i18n/en/messages.json,1,google,hi,en,इसे पी लो फ्रेडी,,Drink it up Freddie,1773120446
+i18n/en/messages.json,1,google,ur,en,فریڈی اسے پیو,,"Freddy, drink it.",1773120447
+i18n/en/messages.json,1,google,de,en,"Trink es, Freddy!",,"Drink it, Freddy!",1773120448
+i18n/en/messages.json,1,google,zh-CN,en,喝吧，弗雷迪,,"Drink up, Freddy.",1773120448
 i18n/en/messages.json,1,azure,en,es,Welcome to the test project,,Bienvenido al proyecto de prueba,1772684385
+i18n/en/messages.json,1,azure,en,es,Drink it Freddy,,"Bébelo, Freddy",1773120444
 i18n/en/messages.json,1,google,en,fr,Welcome to the test project,,Bienvenue dans le projet test,1772684385
+i18n/en/messages.json,1,google,en,fr,Drink it Freddy,,"Bois-le, Freddy",1773120445
 i18n/en/messages.json,1,google,en,hi,Welcome to the test project,,टेस्ट प्रोजेक्ट में आपका स्वागत है,1772684386
+i18n/en/messages.json,1,google,en,hi,Drink it Freddy,,इसे पी लो फ्रेडी,1773120446
 i18n/en/messages.json,1,google,en,ur,Welcome to the test project,,ٹیسٹ پروجیکٹ میں خوش آمدید,1772684386
+i18n/en/messages.json,1,google,en,ur,Drink it Freddy,,فریڈی اسے پیو,1773120446
 i18n/en/messages.json,1,google,en,zh-CN,Welcome to the test project,,欢迎来到测试项目,1773012029
+i18n/en/messages.json,1,google,en,zh-CN,Drink it Freddy,,喝吧，弗雷迪,1773120448
 i18n/en/messages.json,2,google,en,de,This is a demonstration of JSON translation,,Dies ist eine Demonstration der JSON-Übersetzung.,1772684387
 i18n/en/messages.json,2,azure,es,en,Esto es una demostración de la traducción JSON,,This is a demonstration of JSON translation,1772684385
 i18n/en/messages.json,2,google,fr,en,Ceci est une démonstration de la traduction JSON,,This is a demonstration of JSON translation,1772684386
@@ -551,29 +834,9 @@ i18n/en/messages.json,4,google,en,fr,OK,,D'ACCORD,1772684385
 i18n/en/messages.json,4,google,en,hi,OK,,ठीक है,1772684386
 i18n/en/messages.json,4,google,en,ur,OK,,ٹھیک ہے,1772684386
 i18n/en/messages.json,4,google,en,zh-CN,OK,,好的,1773012029
-i18n/en/messages.json,5,google,en,de,Cancel,,Stornieren,1772684387
-i18n/en/messages.json,5,azure,es,en,Cancelar,,Cancel,1772684385
-i18n/en/messages.json,5,google,fr,en,Annuler,,Cancel,1772684386
-i18n/en/messages.json,5,google,hi,en,रद्द करना,,Cancel,1772684386
-i18n/en/messages.json,5,google,ur,en,منسوخ کریں۔,,Cancel.,1772684387
-i18n/en/messages.json,5,google,de,en,Stornieren,,Cancel,1772684387
 i18n/en/messages.json,5,google,zh-CN,en,取消,,Cancel,1773012030
-i18n/en/messages.json,5,azure,en,es,Cancel,,Cancelar,1772684385
-i18n/en/messages.json,5,google,en,fr,Cancel,,Annuler,1772684385
-i18n/en/messages.json,5,google,en,hi,Cancel,,रद्द करना,1772684386
-i18n/en/messages.json,5,google,en,ur,Cancel,,منسوخ کریں۔,1772684386
 i18n/en/messages.json,5,google,en,zh-CN,Cancel,,取消,1773012029
-i18n/en/messages.json,6,google,en,de,Save,,Speichern,1772684387
-i18n/en/messages.json,6,azure,es,en,Salvar,,Save,1772684385
-i18n/en/messages.json,6,google,fr,en,Sauvegarder,,To safeguard,1772684386
-i18n/en/messages.json,6,google,hi,en,बचाना,,save,1772684386
-i18n/en/messages.json,6,google,ur,en,محفوظ کریں۔,,Save.,1772684387
-i18n/en/messages.json,6,google,de,en,Speichern,,Save,1772684387
 i18n/en/messages.json,6,google,zh-CN,en,节省,,save,1773012030
-i18n/en/messages.json,6,azure,en,es,Save,,Salvar,1772684385
-i18n/en/messages.json,6,google,en,fr,Save,,Sauvegarder,1772684385
-i18n/en/messages.json,6,google,en,hi,Save,,बचाना,1772684386
-i18n/en/messages.json,6,google,en,ur,Save,,محفوظ کریں۔,1772684386
 i18n/en/messages.json,6,google,en,zh-CN,Save,,节省,1773012029
 i18n/en/messages.json,7,google,en,de,Delete,,Löschen,1772684387
 i18n/en/messages.json,7,azure,es,en,Borrar,,Delete,1772684385
@@ -1249,18 +1512,22 @@ i18n/en/ts-example/locales.ts,9,google,en,fr,Hindi,,hindi,1772684397
 i18n/en/ts-example/locales.ts,9,google,en,hi,Hindi,,हिंदी,1772684397
 i18n/en/ts-example/locales.ts,9,google,en,ur,Hindi,,ہندی,1772684398
 i18n/en/ts-example/locales.ts,9,google,en,zh-CN,Hindi,,印地语,1773012032
-i18n/en/ts-example/messages.ts,0,google,en,de,"Hello, world!",,Hallo Welt!,1772684402
-i18n/en/ts-example/messages.ts,0,azure,es,en,"¡Hola, mundo!",,"Hello, world!",1772684400
+i18n/en/ts-example/messages.ts,0,google,en,de,"Gidday, world!",,Hallo Welt!,1773153568
 i18n/en/ts-example/messages.ts,0,google,fr,en,Bonjour le monde!,,Hello world!,1772684401
 i18n/en/ts-example/messages.ts,0,google,hi,en,हैलो वर्ल्ड!,,Hello World!,1772684401
 i18n/en/ts-example/messages.ts,0,google,ur,en,ہیلو، دنیا!,,"Hello, world!",1772684402
 i18n/en/ts-example/messages.ts,0,google,de,en,Hallo Welt!,,Hello World!,1772684402
 i18n/en/ts-example/messages.ts,0,google,zh-CN,en,你好世界！,,Hello World!,1773012034
-i18n/en/ts-example/messages.ts,0,azure,en,es,"Hello, world!",,"¡Hola, mundo!",1772684400
-i18n/en/ts-example/messages.ts,0,google,en,fr,"Hello, world!",,Bonjour le monde!,1772684400
-i18n/en/ts-example/messages.ts,0,google,en,hi,"Hello, world!",,हैलो वर्ल्ड!,1772684401
-i18n/en/ts-example/messages.ts,0,google,en,ur,"Hello, world!",,ہیلو، دنیا!,1772684401
-i18n/en/ts-example/messages.ts,0,google,en,zh-CN,"Hello, world!",,你好世界！,1773012033
+i18n/en/ts-example/messages.ts,0,azure,es,en,"¡Salud, mundo!",,"Cheers, world!",1773153562
+i18n/en/ts-example/messages.ts,0,google,fr,en,Salut le monde !,,Hello world!,1773153563
+i18n/en/ts-example/messages.ts,0,google,hi,en,"शुभ दिन, दुनिया!",,"Good day, world!",1773153567
+i18n/en/ts-example/messages.ts,0,google,ur,en,گِڈے، دنیا!,,"Hello, world!",1773153568
+i18n/en/ts-example/messages.ts,0,google,zh-CN,en,大家好，世界！,,"Hello, world!",1773153569
+i18n/en/ts-example/messages.ts,0,azure,en,es,"Gidday, world!",,"¡Salud, mundo!",1773153561
+i18n/en/ts-example/messages.ts,0,google,en,fr,"Gidday, world!",,Salut le monde !,1773153563
+i18n/en/ts-example/messages.ts,0,google,en,hi,"Gidday, world!",,"शुभ दिन, दुनिया!",1773153563
+i18n/en/ts-example/messages.ts,0,google,en,ur,"Gidday, world!",,گِڈے، دنیا!,1773153567
+i18n/en/ts-example/messages.ts,0,google,en,zh-CN,"Gidday, world!",,大家好，世界！,1773153569
 i18n/en/ts-example/messages.ts,1,google,en,de,"Goodbye, world!",,"Auf Wiedersehen, Welt!",1772684402
 i18n/en/ts-example/messages.ts,1,azure,es,en,"¡Adiós, mundo!",,"Goodbye, world!",1772684400
 i18n/en/ts-example/messages.ts,1,google,fr,en,"Au revoir, monde !",,"Goodbye, world!",1772684401
