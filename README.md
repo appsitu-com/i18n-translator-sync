@@ -52,7 +52,6 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 | `Translator: Export Cache to CSV`       | Exports the translation memory cache to a CSV file                    |
 | `Translator: Import Cache from CSV`     | Imports translations from a CSV file into the cache                   |
 | `Translator: Purge`                     | Removes all unused translations from translation cache                |
-| `Translator: Purge Unused Translations` | Removes cache entries that are no longer referenced by source files   |
 | `Translator: Show output`               | Opens the translator service output logs for debugging                |
 
 ## Instant Translation to Over 135 Languages
