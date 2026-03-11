@@ -408,10 +408,6 @@ function displayGitTaggingCommand(version) {
   console.log(`  git commit -m "Release version ${version}"`);
   console.log(`  git tag -a v${version} -m "Version ${version}"`);
   console.log(`  git push origin main --tags`);
-  console.log('\nThis will:');
-  console.log(' 1. Commit the version change to package.json');
-  console.log(' 2. Create an annotated tag for the release');
-  console.log(' 3. Push the changes and tags to the remote repository');
   console.log('========================================\n');
 }
 
