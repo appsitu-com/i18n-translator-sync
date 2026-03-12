@@ -19,8 +19,16 @@ const writeFileAsync = promisify(fs.writeFile);
 function createReadlineInterface() {
   return readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stderr
   });
+}
+
+/**
+ * Write informational text to stderr so stdout can remain machine-readable.
+ * @param {string} message
+ */
+function writeInfo(message) {
+  process.stderr.write(`${message}\n`);
 }
 
 /**
@@ -92,7 +100,7 @@ async function promptCustomVersion(currentVersion) {
       if (versionRegex.test(answer.trim())) {
         resolve(answer.trim());
       } else {
-        console.warn('Invalid version format. Using current version.');
+        console.error('Invalid version format. Using current version.');
         resolve(currentVersion);
       }
     });
@@ -153,15 +161,11 @@ function calculateNewVersion(currentVersion, updateType) {
  * @param {string} version - The version to tag with
  */
 function displayGitTaggingCommand(version) {
-  console.log('\n========================================');
-  console.log('NEXT STEPS:');
-  console.log('========================================');
-  console.log('To create a git tag for this release, run:');
-  console.log(`\n  git add package.json`);
-  console.log(`  git commit -m "Release version ${version}"`);
-  console.log(`  git tag -a v${version} -m "Version ${version}"`);
-  console.log(`  git push origin main --tags`);
-  console.log('========================================\n');
+  writeInfo('Generated git commands for this release:');
+  process.stdout.write('git add package.json\n');
+  process.stdout.write(`git commit -m "Release version ${version}"\n`);
+  process.stdout.write(`git tag -a v${version} -m "Version ${version}"\n`);
+  process.stdout.write('git push origin main --tags\n');
 }
 
 /**
@@ -171,7 +175,7 @@ function displayGitTaggingCommand(version) {
 async function updateVersion() {
   try {
     const currentVersion = await getCurrentVersion();
-    console.log(`Current version: ${currentVersion}`);
+    writeInfo(`Current version: ${currentVersion}`);
 
     const updateType = await promptVersionType();
 
@@ -180,18 +184,18 @@ async function updateVersion() {
       newVersion = await promptCustomVersion(currentVersion);
     } else {
       newVersion = calculateNewVersion(currentVersion, updateType);
-      console.log(`New version will be: ${newVersion}`);
+      writeInfo(`New version will be: ${newVersion}`);
     }
 
     // Update package.json
     if (newVersion !== currentVersion) {
       await updatePackageJsonVersion(newVersion);
-      console.log(`Version updated to ${newVersion} in package.json`);
+      writeInfo(`Version updated to ${newVersion} in package.json`);
 
       // Display git tagging commands for the new version
       displayGitTaggingCommand(newVersion);
     } else {
-      console.log('Version unchanged');
+      writeInfo('Version unchanged');
     }
 
     return newVersion;
