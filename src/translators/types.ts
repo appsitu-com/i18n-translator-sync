@@ -19,6 +19,8 @@ export type EngineConfig =
   | IMyMemoryConfig
   | ICopyConfig
 
+export type ResolvedTranslatorEngine = Exclude<TranslatorEngine, 'auto'>
+
 export type { TranslatorEngine }
 
 export interface BulkTranslateOpts {

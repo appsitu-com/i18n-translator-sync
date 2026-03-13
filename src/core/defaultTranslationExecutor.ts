@@ -2,7 +2,7 @@ import { ITranslationExecutor } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
-import { TranslatorEngine, EngineConfig } from '../translators/types'
+import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
 import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
 
 /**
@@ -22,7 +22,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
   async translateSegments(
     segments: string[],
     contexts: (string | null)[],
-    engineName: TranslatorEngine,
+    engineName: ResolvedTranslatorEngine,
     sourceLocale: string,
     targetLocale: string,
     engineConfig: EngineConfig | undefined,

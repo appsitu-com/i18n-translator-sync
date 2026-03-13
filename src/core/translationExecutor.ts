@@ -1,5 +1,5 @@
 import { IUri } from './util/fs'
-import { TranslatorEngine, EngineConfig } from '../translators/types'
+import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
 import { TranslationStats } from '../bulkTranslate'
 
 /**
@@ -13,7 +13,7 @@ export interface TranslationCommand {
   /** Context information for segments (for translate operations) */
   contexts?: (string | null)[]
   /** Translation engine to use */
-  engine?: TranslatorEngine
+  engine?: ResolvedTranslatorEngine
   /** Source locale */
   sourceLocale?: string
   /** Target locale */
@@ -49,7 +49,7 @@ export interface ITranslationExecutor {
   translateSegments(
     segments: string[],
     contexts: (string | null)[],
-    engineName: TranslatorEngine,
+    engineName: ResolvedTranslatorEngine,
     sourceLocale: string,
     targetLocale: string,
     engineConfig: EngineConfig | undefined,

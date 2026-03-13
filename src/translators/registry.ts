@@ -1,4 +1,4 @@
-import type { Translator, TranslatorEngine } from './types'
+import type { ResolvedTranslatorEngine, Translator, TranslatorEngine } from './types'
 
 const DEFAULT_TRANSLATION_LIMIT = Number.MAX_SAFE_INTEGER
 const DEFAULT_TRANSLATION_MAX_CHARS = Number.MAX_SAFE_INTEGER
@@ -24,7 +24,7 @@ function toLanguageCode(locale: string): string {
   return locale.toLowerCase().split(/[-_]/)[0]
 }
 
-function selectEngine(sourceLocale: string, targetLocale: string): TranslatorEngine {
+function selectEngine(sourceLocale: string, targetLocale: string): ResolvedTranslatorEngine {
   const normalizedSourceLocale = toLanguageCode(sourceLocale)
   const normalizedTargetLocale = toLanguageCode(targetLocale)
 
@@ -86,7 +86,7 @@ export function pickEngine(params: {
   defaults: { md: string; json: string }
   overrides: Record<string, string>
   fileType: string
-}): TranslatorEngine {
+}): ResolvedTranslatorEngine {
   const key = `${params.source}:${params.target}`
   const defaultEngine = params.defaults[params.fileType as keyof typeof params.defaults] || params.defaults.json
   const selectedEngine = (params.overrides[key] ?? defaultEngine) as TranslatorEngine

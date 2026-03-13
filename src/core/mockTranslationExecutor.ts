@@ -1,6 +1,6 @@
 import { ITranslationExecutor, TranslationCommand } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
-import { TranslatorEngine, EngineConfig } from '../translators/types'
+import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
 import { TranslationStats } from '../bulkTranslate'
 
 /**
@@ -53,7 +53,7 @@ export class MockTranslationExecutor implements ITranslationExecutor {
   /**
    * Get translation pairs (source → target locale combinations)
    */
-  get translationPairs(): ReadonlyArray<{ source: string; target: string; engine: TranslatorEngine; isBackTranslation: boolean; sourceFile: string }> {
+  get translationPairs(): ReadonlyArray<{ source: string; target: string; engine: ResolvedTranslatorEngine; isBackTranslation: boolean; sourceFile: string }> {
     return this.translationCommands.map(cmd => ({
       source: cmd.sourceLocale!,
       target: cmd.targetLocale!,
@@ -80,7 +80,7 @@ export class MockTranslationExecutor implements ITranslationExecutor {
   async translateSegments(
     segments: string[],
     contexts: (string | null)[],
-    engineName: TranslatorEngine,
+    engineName: ResolvedTranslatorEngine,
     sourceLocale: string,
     targetLocale: string,
     _engineConfig: EngineConfig | undefined,
