@@ -10,7 +10,7 @@ import { z } from 'zod'
  * @returns Array of formatted error messages
  */
 export function formatZodError(error: z.ZodError): string[] {
-  const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'copy'] as const;
+  const ENGINES = ['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto'] as const;
 
   return error.issues.map((issue) => {
     const fieldName = issue.path.join('.');

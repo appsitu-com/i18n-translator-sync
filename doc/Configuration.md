@@ -36,8 +36,8 @@ The extension now supports a project-specific configuration file called `transla
 | `sourceLocale` | `string` | Source locale | `"en"` |
 | `targetLocales` | `string[]` | Target locales to generate translations for | `['fr-FR', 'fr-CA']` |
 | `enableBackTranslation` | `boolean` | Enable back translation | `false` |
-| `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy) | `"azure"` |
-| `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy) | `"google"` |
+| `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy, auto) | `"azure"` |
+| `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy, auto) | `"google"` |
 | `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales | `{"deepl": ["fr", "de"]}` |
 | `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `[]` |
 | `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation (e.g. `"meta.version"`). | `[]` |
@@ -66,6 +66,15 @@ Example:
 Each locale pattern can be either:
 - A single locale code (e.g., "fr") - this will be used for both translations to and from the source locale
 - A locale pair (e.g., "es:en") - this specifies a specific translation direction (Spanish to English)
+
+## Auto Engine Selection
+
+Set `defaultMarkdownEngine`, `defaultJsonEngine`, or an `engineOverrides` value to `"auto"` to let the pipeline choose the engine from locale pairs.
+
+Selection rules (using normalized language codes from locales like `fr-FR` -> `fr`):
+- `deepl` for target languages: `de`, `fr`, `es`, `it`, `nl`, `pl`, `pt`, `ru`
+- `google` for target languages: `zh`, `ja`, `ko`, `th`, `vi`, `ar`, `hi`
+- `google` fallback for all other targets
 
 ## TypeScript File Support
 

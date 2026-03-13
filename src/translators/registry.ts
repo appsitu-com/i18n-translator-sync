@@ -16,6 +16,36 @@ export interface RegisteredTranslator {
 
 const REGISTRY = new Map<string, RegisteredTranslator>()
 
+const EUROPEAN_TARGET_LANGUAGES = new Set(['de', 'fr', 'es', 'it', 'nl', 'pl', 'pt', 'ru'])
+const ASIAN_TARGET_LANGUAGES = new Set(['zh', 'ja', 'ko', 'th', 'vi'])
+const GOOGLE_PRIORITY_TARGET_LANGUAGES = new Set(['ar', 'hi'])
+
+function toLanguageCode(locale: string): string {
+  return locale.toLowerCase().split(/[-_]/)[0]
+}
+
+function selectEngine(sourceLocale: string, targetLocale: string): TranslatorEngine {
+  const normalizedSourceLocale = toLanguageCode(sourceLocale)
+  const normalizedTargetLocale = toLanguageCode(targetLocale)
+
+  // Keep source locale available for pair-based routing expansion.
+  void normalizedSourceLocale
+
+  if (EUROPEAN_TARGET_LANGUAGES.has(normalizedTargetLocale)) {
+    return 'deepl'
+  }
+
+  if (ASIAN_TARGET_LANGUAGES.has(normalizedTargetLocale)) {
+    return 'google'
+  }
+
+  if (GOOGLE_PRIORITY_TARGET_LANGUAGES.has(normalizedTargetLocale)) {
+    return 'google'
+  }
+
+  return 'google'
+}
+
 function normalizePositiveInteger(value: number | undefined, fallback: number): number {
   if (typeof value !== 'number') {
     return fallback
@@ -59,5 +89,11 @@ export function pickEngine(params: {
 }): TranslatorEngine {
   const key = `${params.source}:${params.target}`
   const defaultEngine = params.defaults[params.fileType as keyof typeof params.defaults] || params.defaults.json
-  return (params.overrides[key] ?? defaultEngine) as TranslatorEngine
+  const selectedEngine = (params.overrides[key] ?? defaultEngine) as TranslatorEngine
+
+  if (selectedEngine === 'auto') {
+    return selectEngine(params.source, params.target)
+  }
+
+  return selectedEngine
 }

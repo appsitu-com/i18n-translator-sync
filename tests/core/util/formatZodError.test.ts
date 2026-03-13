@@ -5,7 +5,7 @@ import { z } from 'zod'
 describe('formatZodError', () => {
   it('should format defaultMarkdownEngine validation errors', () => {
     const schema = z.object({
-      defaultMarkdownEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'copy'])
+      defaultMarkdownEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto'])
     })
 
     const result = schema.safeParse({ defaultMarkdownEngine: 'invalid' })
@@ -15,13 +15,13 @@ describe('formatZodError', () => {
       const formatted = formatZodError(result.error)
       expect(formatted).toHaveLength(1)
       expect(formatted[0]).toContain('defaultMarkdownEngine:')
-      expect(formatted[0]).toContain('(must be one of: azure, google, deepl, gemini, copy)')
+      expect(formatted[0]).toContain('(must be one of: azure, google, deepl, gemini, openrouter, mymemory, copy, auto)')
     }
   })
 
   it('should format defaultJsonEngine validation errors', () => {
     const schema = z.object({
-      defaultJsonEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'copy'])
+      defaultJsonEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto'])
     })
 
     const result = schema.safeParse({ defaultJsonEngine: 'badengine' })
@@ -31,7 +31,7 @@ describe('formatZodError', () => {
       const formatted = formatZodError(result.error)
       expect(formatted).toHaveLength(1)
       expect(formatted[0]).toContain('defaultJsonEngine:')
-      expect(formatted[0]).toContain('(must be one of: azure, google, deepl, gemini, copy)')
+      expect(formatted[0]).toContain('(must be one of: azure, google, deepl, gemini, openrouter, mymemory, copy, auto)')
     }
   })
 
@@ -124,8 +124,8 @@ describe('formatZodError', () => {
 
   it('should handle multiple validation errors', () => {
     const schema = z.object({
-      defaultMarkdownEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'copy']),
-      defaultJsonEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'copy']),
+      defaultMarkdownEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto']),
+      defaultJsonEngine: z.enum(['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto']),
       sourceLocale: z.string()
     })
 

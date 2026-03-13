@@ -252,5 +252,29 @@ describe('translators/registry', () => {
         overrides, fileType: 'json'
       })).toBe('google')
     })
+
+    it('should resolve auto default to deepl for supported european targets', () => {
+      const result = pickEngine({
+        source: 'en-US',
+        target: 'fr-FR',
+        defaults: { md: 'auto', json: 'google' },
+        overrides: {},
+        fileType: 'md'
+      })
+
+      expect(result).toBe('deepl')
+    })
+
+    it('should resolve auto override using locale language codes', () => {
+      const result = pickEngine({
+        source: 'en_US',
+        target: 'ja-JP',
+        defaults: { md: 'azure', json: 'azure' },
+        overrides: { 'en_US:ja-JP': 'auto' },
+        fileType: 'json'
+      })
+
+      expect(result).toBe('google')
+    })
   })
 })

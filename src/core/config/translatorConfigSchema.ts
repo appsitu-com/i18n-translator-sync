@@ -138,7 +138,8 @@ const ENGINES = [
   'gemini',
   'openrouter',
   'mymemory',
-  'copy'
+  'copy',
+  'auto'
 ] as const
 
 export const TranslatorEngineSchema = z.enum(ENGINES)

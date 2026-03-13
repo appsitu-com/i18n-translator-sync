@@ -10,13 +10,13 @@
 [![Release](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml)
 [![Publish](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml) -->
 
-Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save. Your translations stay in sync automatically with smart folder mirroring, translation memory, and support for Azure, Google, DeepL, and Gemini AI engines.
+Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save. Your translations stay in sync automatically with smart folder mirroring, translation memory, and support for Azure, Google, DeepL, and Gemini engines, including an `auto` router mode.
 
 <!-- TODO: Add demo GIF here showing translation in action -->
 
 **Quick Feature Overview:**
 - ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
-- ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, and copy-only mode
+- ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
 - ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
@@ -299,8 +299,9 @@ The Translator may fail to auto-start if it finds invalid or missing values in `
 
 See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/Configuration.md) for full details.
 
-- Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `copy`
+- Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `copy`, `auto`
 - `copy` engine is just that. It won't translate anything. It just copies a file from source to target.
+- `auto` chooses an engine from the locale pair using the target locale language code: `deepl` for `de|fr|es|it|nl|pl|pt|ru`, otherwise `google` (including `zh|ja|ko|th|vi|ar|hi`). Locale variants such as `fr-FR` or `pt-BR` are supported.
 
 | Option                  | Type                       | Description                                                                             | Example                         |
 | ----------------------- | -------------------------- | --------------------------------------------------------------------------------------- | ------------------------------- |
@@ -308,8 +309,8 @@ See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator
 | `sourceLocale`          | `string`                   | Source locale                                                                           | `"en"`                          |
 | `targetLocales`         | `string[]`                 | Target locales to generate translations for                                             | `['fr-FR', 'fr-CA']`            |
 | `enableBackTranslation` | `boolean`                  | Enable back translation                                                                 | `false`                         |
-| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy)            | `"azure"`                       |
-| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy)       | `"google"`                      |
+| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy, auto)            | `"azure"`                       |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy, auto)       | `"google"`                      |
 | `engineOverrides`       | `Record<string, string[]>` | Engine overrides for specific locales (forward translation).                            | `{"deepl": ["fr", "de"]}`       |
 | `engineOverrides`       | `Record<string, string[]>` | Engine overrides for specific locales (back translation).                               | `{"azure": ["fr:en", "de:en"]}` |
 | `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `["code", "native"]`            |

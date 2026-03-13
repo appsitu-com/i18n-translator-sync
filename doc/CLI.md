@@ -87,8 +87,8 @@ The CLI uses the same configuration as the VSCode extension. You need to create 
   "sourceLocale": "en",
   "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
   "enableBackTranslation": true,
-  "defaultMarkdownEngine": "azure",
-  "defaultJsonEngine": "google",
+  "defaultMarkdownEngine": "auto",
+  "defaultJsonEngine": "auto",
   "engineOverrides": {
     "deepl": ["fr", "de"],
     "azure": ["es:en", "ja:en"],
@@ -96,6 +96,11 @@ The CLI uses the same configuration as the VSCode extension. You need to create 
   }
 }
 ```
+
+Valid engine codes for `defaultMarkdownEngine`, `defaultJsonEngine`, and `engineOverrides` keys are:
+`azure`, `google`, `deepl`, `gemini`, `copy`, `auto`.
+
+When using `auto`, locales are normalized (`fr-FR` -> `fr`, `pt-BR` -> `pt`) before selecting the engine.
 
 You also need to set up your API keys in a `translator.env` file:
 

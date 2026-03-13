@@ -19,7 +19,7 @@ import path from 'path'
 // ---------------------------------------------------------------------------
 describe('TranslatorEngineSchema', () => {
   it('accepts all valid engine names', () => {
-    for (const name of ['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy']) {
+    for (const name of ['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto']) {
       expect(TranslatorEngineSchema.safeParse(name).success).toBe(true)
     }
   })
