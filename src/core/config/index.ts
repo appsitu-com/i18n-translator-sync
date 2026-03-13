@@ -26,6 +26,7 @@ export {
   snapshotEnvVars,
   resolveConfigEnvVars,
   loadTranslatorConfig,
+  MissingEnvironmentValueError,
   type GetPassphrase,
   type LoadConfigResult
 } from './configLoader'

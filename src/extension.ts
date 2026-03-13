@@ -5,6 +5,7 @@ import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
 import { StatusBarManager, VSCodeStatusBarManager, TranslatorState } from './vscode/statusBar'
 import { VSCodeLogger } from './vscode/vscodeLogger'
 import { TRANSLATOR_JSON, TRANSLATOR_ENV, TRANSLATOR_DIR } from './core/constants'
+import { MissingEnvironmentValueError } from './core/config'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
@@ -249,6 +250,30 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
         .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
     }
   } catch (error: any) {
+    if (error instanceof MissingEnvironmentValueError) {
+      const action = 'Set in translator.env'
+      vscode.window
+        .showErrorMessage(
+          `Missing environment value "${error.variableName}". Set this variable in translator.env or your environment.`,
+          action
+        )
+        .then((selection) => {
+          if (
+            selection === action &&
+            vscode.workspace.workspaceFolders &&
+            vscode.workspace.workspaceFolders.length > 0
+          ) {
+            const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, TRANSLATOR_ENV)
+            if (fs.existsSync(envFile)) {
+              vscode.workspace.openTextDocument(envFile).then((doc) => {
+                vscode.window.showTextDocument(doc)
+              })
+            }
+          }
+        })
+      return
+    }
+
     // Show error and offer to open env file
     vscode.window
       .showErrorMessage(`Error starting translator: ${error?.message || String(error)}`, 'Configure API Keys')

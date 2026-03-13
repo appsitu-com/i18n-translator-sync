@@ -12,6 +12,19 @@ import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
 /** Function that returns a passphrase for decrypting encrypted env values. */
 export type GetPassphrase = () => string | undefined
 
+export class MissingEnvironmentValueError extends Error {
+  constructor(public readonly variableName: string) {
+    super(
+      `Missing required environment value "${variableName}". Set it in process.env, translator.env, or directly in translator.json.`
+    )
+    this.name = 'MissingEnvironmentValueError'
+  }
+}
+
+interface EnvValueAccessor {
+  get(name: string): string
+}
+
 // ---------------------------------------------------------------------------
 // Step 1 — Load environment variables
 // ---------------------------------------------------------------------------
@@ -74,20 +87,22 @@ export function resolveConfigEnvVars(
   logger: Logger,
   getPassphrase?: GetPassphrase
 ): unknown {
+  const envAccessor = createEnvValueAccessor(envVars)
+
   if (typeof value === 'string') {
-    return resolveString(value, envVars, logger, getPassphrase)
+    return resolveString(value, envAccessor, logger, getPassphrase)
   }
 
   if (Array.isArray(value)) {
     return value.map((item) =>
-      resolveConfigEnvVars(item, envVars, logger, getPassphrase)
+      resolveValue(item, envAccessor, logger, getPassphrase)
     )
   }
 
   if (value !== null && typeof value === 'object') {
     const out: Record<string, unknown> = {}
     for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
-      out[k] = resolveConfigEnvVars(v, envVars, logger, getPassphrase)
+      out[k] = resolveValue(v, envAccessor, logger, getPassphrase)
     }
     return out
   }
@@ -170,20 +185,20 @@ export function loadTranslatorConfig(
  */
 function resolveString(
   value: string,
-  envVars: IEnvVars,
+  envAccessor: EnvValueAccessor,
   logger: Logger,
   getPassphrase?: GetPassphrase
 ): string {
   // env:VAR_NAME — whole-string reference
   const envRef = /^env:([A-Z0-9_]+)$/i.exec(value)
   if (envRef) {
-    const raw = lookupEnvVar(envRef[1], envVars)
+    const raw = envAccessor.get(envRef[1])
     return decryptIfNeeded(raw, envRef[1], logger, getPassphrase)
   }
 
   // ${VAR_NAME} — inline substitution (one or more)
   const resolved = value.replace(/\$\{([A-Z0-9_]+)\}/gi, (_match, varName: string) => {
-    const raw = lookupEnvVar(varName, envVars)
+    const raw = envAccessor.get(varName)
     return decryptIfNeeded(raw, varName, logger, getPassphrase)
   })
 
@@ -194,10 +209,44 @@ function resolveString(
  * Look up a variable first from our typed IEnvVars snapshot,
  * falling back to process.env for any vars not in the schema.
  */
-function lookupEnvVar(name: string, envVars: IEnvVars): string {
-  const typed = (envVars as Record<string, string | undefined>)[name]
-  if (typed !== undefined) return typed
-  return process.env[name] ?? ''
+function resolveValue(
+  value: unknown,
+  envAccessor: EnvValueAccessor,
+  logger: Logger,
+  getPassphrase?: GetPassphrase
+): unknown {
+  if (typeof value === 'string') {
+    return resolveString(value, envAccessor, logger, getPassphrase)
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => resolveValue(item, envAccessor, logger, getPassphrase))
+  }
+
+  if (value !== null && typeof value === 'object') {
+    const out: Record<string, unknown> = {}
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = resolveValue(v, envAccessor, logger, getPassphrase)
+    }
+    return out
+  }
+
+  return value
+}
+
+function createEnvValueAccessor(envVars: IEnvVars): EnvValueAccessor {
+  return {
+    get(name: string): string {
+      const typed = (envVars as Record<string, string | undefined>)[name]
+      const resolved = typed ?? process.env[name]
+
+      if (resolved === undefined || resolved === '') {
+        throw new MissingEnvironmentValueError(name)
+      }
+
+      return resolved
+    }
+  }
 }
 
 /**

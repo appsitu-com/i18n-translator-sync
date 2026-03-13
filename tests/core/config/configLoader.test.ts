@@ -6,7 +6,8 @@ import {
   loadEnvVars,
   snapshotEnvVars,
   resolveConfigEnvVars,
-  loadTranslatorConfig
+  loadTranslatorConfig,
+  MissingEnvironmentValueError
 } from '../../../src/core/config/configLoader'
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { Logger } from '../../../src/core/util/baseLogger'
@@ -178,9 +179,8 @@ describe('resolveConfigEnvVars', () => {
     expect(resolveConfigEnvVars(null, envVars, logger)).toBeNull()
   })
 
-  it('replaces unknown vars with empty string', () => {
-    const result = resolveConfigEnvVars('${UNKNOWN_VAR}', envVars, logger)
-    expect(result).toBe('')
+  it('throws for unknown vars', () => {
+    expect(() => resolveConfigEnvVars('${UNKNOWN_VAR}', envVars, logger)).toThrow(MissingEnvironmentValueError)
   })
 })
 
@@ -302,6 +302,23 @@ describe('loadTranslatorConfig', () => {
     const { errors } = loadTranslatorConfig(tmpDir, logger)
 
     expect(errors.length).toBeGreaterThan(0)
+  })
+
+  it('throws when translator.json references a missing env var', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, 'translator.json'),
+      JSON.stringify({
+        translator: {
+          copy: {},
+          azure: {
+            apiKey: '${AZURE_TRANSLATION_KEY}'
+          }
+        }
+      })
+    )
+
+    const logger = createTestLogger()
+    expect(() => loadTranslatorConfig(tmpDir, logger)).toThrow(MissingEnvironmentValueError)
   })
 
   it('applies engine defaults for partially-configured engines', () => {
