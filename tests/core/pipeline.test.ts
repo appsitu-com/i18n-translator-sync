@@ -137,6 +137,54 @@ describe('TranslatorPipeline', () => {
     // Should delete forward and back translation files
     expect(mockFs.deleteFile).toHaveBeenCalledTimes(2)
   })
+
+  it('copies back-translation copy-only files even when forward copy is skipped', async () => {
+    const copyConfig: TranslateProjectConfig = {
+      ...config,
+      copyOnlyFiles: ['index.ts'],
+      targetLocales: ['fr-FR', 'de-DE']
+    }
+
+    const sourceContent = 'export const value = 1\n'
+    const srcPath = '/ws/i18n/en/index.ts'
+
+    mockFs.readFile.mockResolvedValue(sourceContent)
+    mockFs.fileExists.mockImplementation(async (uri: { fsPath: string }) => {
+      if (uri.fsPath === '/ws/i18n/fr-FR/index.ts' || uri.fsPath === '/ws/i18n/de-DE/index.ts') {
+        return true
+      }
+      return false
+    })
+
+    mockFs.stat.mockImplementation(async (uri: { fsPath: string }) => {
+      if (uri.fsPath === srcPath) {
+        return { mtime: 100 }
+      }
+      return { mtime: 200 }
+    })
+
+    const src = mockFs.createUri(srcPath)
+
+    await pipeline.processFile(src, '/ws', copyConfig, undefined)
+
+    expect(mockFs.writeFile).toHaveBeenCalledTimes(2)
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      expect.objectContaining({ fsPath: '/ws/i18n/fr-FR_en/index.ts' }),
+      sourceContent
+    )
+    expect(mockFs.writeFile).toHaveBeenCalledWith(
+      expect.objectContaining({ fsPath: '/ws/i18n/de-DE_en/index.ts' }),
+      sourceContent
+    )
+    expect(mockFs.writeFile).not.toHaveBeenCalledWith(
+      expect.objectContaining({ fsPath: '/ws/i18n/fr-FR/index.ts' }),
+      sourceContent
+    )
+    expect(mockFs.writeFile).not.toHaveBeenCalledWith(
+      expect.objectContaining({ fsPath: '/ws/i18n/de-DE/index.ts' }),
+      sourceContent
+    )
+  })
 })
 
 describe('TranslatorPipeline - pruneEmptyDirs', () => {

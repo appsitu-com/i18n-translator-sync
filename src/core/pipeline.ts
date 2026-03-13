@@ -83,34 +83,39 @@ export class TranslatorPipeline {
     const content = await this.fileSystem.readFile(srcUri)
     const rel = getRelativePath(srcUri.fsPath, workspacePath, config)
     const sourceLocale = config.sourceLocale
+    const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
+
+    if (!sourcePath) {
+      throw new Error(`File ${srcUri.fsPath} is not in any configured source path`)
+    }
 
     for (const targetLocale of config.targetLocales) {
-      const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
-      if (!sourcePath) {
-        throw new Error(`File ${srcUri.fsPath} is not in any configured source path`)
-      }
-
       const targetUri = createTargetUri(
         this.fileSystem, workspacePath, sourceLocale, targetLocale, rel, config, sourcePath
       )
 
       const copyNeeded = forceTranslation || await this.needsTranslation(srcUri, targetUri)
-      if (!copyNeeded) {
+      if (copyNeeded) {
+        await this.ensureDirFor(targetUri)
+        await this.fileSystem.writeFile(targetUri, content)
+        this.logger.info(`Copied (copy-only): ${path.basename(srcUri.fsPath)} → ${targetLocale}`)
+      } else {
         this.logger.info(`Skipping up-to-date copy-only file: ${path.basename(srcUri.fsPath)} [${targetLocale}]`)
-        continue
       }
-
-      await this.ensureDirFor(targetUri)
-      await this.fileSystem.writeFile(targetUri, content)
-      this.logger.info(`Copied (copy-only): ${path.basename(srcUri.fsPath)} → ${targetLocale}`)
 
       if (config.enableBackTranslation) {
         const backUri = createBackTranslationUri(
           this.fileSystem, workspacePath, targetLocale, rel, config, sourcePath
         )
-        await this.ensureDirFor(backUri)
-        await this.fileSystem.writeFile(backUri, content)
-        this.logger.info(`Copied (copy-only back): ${path.basename(srcUri.fsPath)} → ${targetLocale}_${sourceLocale}`)
+        const backCopyNeeded = forceTranslation || await this.needsTranslation(srcUri, backUri)
+
+        if (backCopyNeeded) {
+          await this.ensureDirFor(backUri)
+          await this.fileSystem.writeFile(backUri, content)
+          this.logger.info(`Copied (copy-only back): ${path.basename(srcUri.fsPath)} → ${targetLocale}_${sourceLocale}`)
+        } else {
+          this.logger.info(`Skipping up-to-date copy-only back file: ${path.basename(srcUri.fsPath)} [${targetLocale}_${sourceLocale}]`)
+        }
       }
     }
   }
