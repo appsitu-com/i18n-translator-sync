@@ -18,12 +18,12 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: pnpm/action-setup@v4
         with:
           version: 9
-      - uses: actions/setup-node@v4
-        with: { node-version: '22', cache: 'pnpm' }
+      - uses: actions/setup-node@v5
+        with: { node-version: '24', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - name: Prepare native dependencies
         if: runner.os == 'Linux'
@@ -48,7 +48,7 @@ jobs:
       - name: Package extension
         run: pnpm package --version=${{ steps.version.outputs.VERSION }} --ci --target=${{ matrix.target }}
       - name: Upload VSIX artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: vsix-${{ matrix.target }}
           path: releases/i18n-translator-vscode-${{ steps.version.outputs.VERSION }}-${{ matrix.target }}.vsix
@@ -60,7 +60,7 @@ jobs:
       contents: write
     steps:
       - name: Download VSIX artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: vsix-*
           merge-multiple: true
