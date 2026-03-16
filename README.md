@@ -128,7 +128,7 @@ So enabling this feature is like adding a new locale code `fr_en` to your system
 
 Tweaking your input source text can often significantly improve AI translation quality as you find terms that are less ambiguous to the AI engine. Using this feature, you can iteratively adjust input source text and instantly check the back translations to assess  translation quality across all your target languages.
 
-> Suggestion: Add a `back translation` switch for software developers to display back translations inside your app.
+> 💡 Idea: Add a `back translation` switch for software developers to display back translations inside your app.
 
 <!-- TODO: Add screenshot showing back translation comparison -->
 
