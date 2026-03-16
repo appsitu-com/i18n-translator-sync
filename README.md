@@ -148,7 +148,7 @@ The i18n Translator stores translations in a locale **translation memory databas
 - **Auto import** - If enabled, when a co-worker first pulls a CSV file from Git and runs "Translator: Start", this setting will auto import the CSV file into their new cache database
 
 **Coming soon** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
-- Integration with Computer-Assisted Translation Services (CATS) tools to convert your draft AI translations into production grade professional human assisted translations.
+- Integration with Computer-Assisted Translation (CAT) tools to convert your draft AI translations into production grade professional human assisted translations.
 
 <!-- TODO: Add diagram showing translation memory workflow -->
 
