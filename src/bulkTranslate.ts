@@ -24,6 +24,15 @@ function isTranslatableText(text: string): boolean {
   return text.trim().length > 0
 }
 
+function extractWhitespaceAffixes(text: string): { prefix: string; core: string; suffix: string } {
+  const prefixMatch = text.match(/^\s*/)
+  const suffixMatch = text.match(/\s*$/)
+  const prefix = prefixMatch?.[0] ?? ''
+  const suffix = suffixMatch?.[0] ?? ''
+  const core = text.slice(prefix.length, text.length - suffix.length)
+  return { prefix, core, suffix }
+}
+
 function buildTranslationChunks(
   texts: string[],
   contexts: string[],
@@ -103,16 +112,37 @@ export async function bulkTranslateWithEngine(
   // Previous version used \u0001 (SOH control character) which wasn't readable
   const SEPARATOR = '::'; // Using :: as a more readable separator
 
-  for (let i = 0; i < texts.length; i++) {
-    const t = texts[i]
+  const normalizedInputs = texts.map((t, i) => {
+    const c = (contexts[i] ?? '').toString()
     if (!isTranslatableText(t)) {
+      return {
+        pos: i,
+        context: c,
+        translatable: false as const,
+        original: t
+      }
+    }
+
+    const { prefix, core, suffix } = extractWhitespaceAffixes(t)
+    return {
+      pos: i,
+      context: c,
+      translatable: true as const,
+      original: t,
+      prefix,
+      core,
+      suffix
+    }
+  })
+
+  for (const input of normalizedInputs) {
+    if (!input.translatable) {
       continue
     }
-    const c = (contexts[i] ?? '').toString()
-    const k = `${t}${SEPARATOR}${c}`
+    const k = `${input.core}${SEPARATOR}${input.context}`
     if (!seen.has(k)) {
       seen.add(k)
-      uniq.push({ t, c, pos: i })
+      uniq.push({ t: input.core, c: input.context, pos: input.pos })
     }
   }
 
@@ -176,9 +206,14 @@ export async function bulkTranslateWithEngine(
     misses.forEach((m, i) => cached.set(`${m.t}${SEPARATOR}${m.c}`, { translation: translated[i], textPos: m.pos }))
   }
 
-  const translations = texts.map((t, i) => {
-    const entry = cached.get(`${t}${SEPARATOR}${(contexts[i] ?? '').toString()}`)
-    return entry?.translation ?? t
+  const translations = normalizedInputs.map((input) => {
+    if (!input.translatable) {
+      return input.original
+    }
+
+    const entry = cached.get(`${input.core}${SEPARATOR}${input.context}`)
+    const translatedCore = entry?.translation ?? input.core
+    return `${input.prefix}${translatedCore}${input.suffix}`
   })
 
   // Note: For the copy engine, apiCalls represents the number of "identity mappings" created

@@ -196,4 +196,55 @@ describe('bulkTranslateWithEngine()', () => {
       })
     )
   })
+
+  it('translates trimmed core text and restores original prefix/suffix whitespace', async () => {
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    const out = await bulkTranslateWithEngine(
+      ['  A  ', '\tB\n', 'C'],
+      [null, null, null],
+      'fake',
+      { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
+      cache as unknown as TranslationCache
+    )
+
+    expect(out.translations).toEqual(['  [A]  ', '\t[B]\n', '[C]'])
+    expect(cache.getMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        texts: ['A', 'B', 'C'],
+        contexts: ['', '', '']
+      })
+    )
+  })
+
+  it('dedupes by trimmed core text while preserving each input whitespace', async () => {
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    const out = await bulkTranslateWithEngine(
+      ['  A  ', 'A'],
+      [null, null],
+      'fake',
+      { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
+      cache as unknown as TranslationCache
+    )
+
+    expect(out.translations).toEqual(['  [A]  ', '[A]'])
+    expect(out.stats).toEqual({
+      apiCalls: 1,
+      cacheHits: 0,
+      total: 1
+    })
+    expect(cache.getMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        texts: ['A'],
+        contexts: ['']
+      })
+    )
+  })
 })
