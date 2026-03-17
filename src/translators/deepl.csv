@@ -1,109 +1,109 @@
 language_name,language_code,supports_source,supports_target
 Afrikaans,AF,true,true
-Aragonese,AN,true,true
+Albanian,SQ,true,true
 Arabic,AR,true,true
+Aragonese,AN,true,true
+Armenian,HY,true,true
 Assamese,AS,true,true
 Aymara,AY,true,true
 Azerbaijani,AZ,true,true
 Bashkir,BA,true,true
-Belarusian,BE,true,true
-Bulgarian,BG,true,true
-Bengali,BN,true,true
-Breton,BR,true,true
-Bosnian,BS,true,true
-Catalan,CA,true,true
-Czech,CS,true,true
-Welsh,CY,true,true
-Danish,DA,true,true
-German,DE,true,true
-Greek,EL,true,true
-English,EN,true,false
-English (British),EN-GB,false,true
-English (American),EN-US,false,true
-Esperanto,EO,true,true
-Spanish,ES,true,true
-Spanish (Latin American),ES-419,false,true
-Estonian,ET,true,true
 Basque,EU,true,true
-Persian,FA,true,true
+Belarusian,BE,true,true
+Bengali,BN,true,true
+Bosnian,BS,true,true
+Breton,BR,true,true
+Bulgarian,BG,true,true
+Burmese,MY,true,true
+Catalan,CA,true,true
+Chinese (simplified),ZH-HANS,false,true
+Chinese (traditional),ZH-HANT,false,true
+Chinese,ZH,true,true
+Croatian,HR,true,true
+Czech,CS,true,true
+Danish,DA,true,true
+Dutch,NL,true,true
+English (American),EN-US,false,true
+English (British),EN-GB,false,true
+English,EN,true,false
+Esperanto,EO,true,true
+Estonian,ET,true,true
 Finnish,FI,true,true
 French,FR,true,true
-Irish,GA,true,true
 Galician,GL,true,true
+Georgian,KA,true,true
+German,DE,true,true
+Greek,EL,true,true
 Guarani,GN,true,true
 Gujarati,GU,true,true
+Haitian Creole,HT,true,true
 Hausa,HA,true,true
 Hebrew,HE,true,true
 Hindi,HI,true,true
-Croatian,HR,true,true
-Haitian Creole,HT,true,true
 Hungarian,HU,true,true
-Armenian,HY,true,true
-Indonesian,ID,true,true
-Igbo,IG,true,true
 Icelandic,IS,true,true
+Igbo,IG,true,true
+Indonesian,ID,true,true
+Irish,GA,true,true
 Italian,IT,true,true
 Japanese,JA,true,true
 Javanese,JV,true,true
-Georgian,KA,true,true
 Kazakh,KK,true,true
 Korean,KO,true,true
 Kyrgyz,KY,true,true
 Latin,LA,true,true
-Luxembourgish,LB,true,true
+Latvian,LV,true,true
 Lingala,LN,true,true
 Lithuanian,LT,true,true
-Latvian,LV,true,true
-Malagasy,MG,true,true
-Maori,MI,true,true
+Luxembourgish,LB,true,true
 Macedonian,MK,true,true
-Malayalam,ML,true,true
-Mongolian,MN,true,true
-Marathi,MR,true,true
+Malagasy,MG,true,true
 Malay,MS,true,true
+Malayalam,ML,true,true
 Maltese,MT,true,true
-Burmese,MY,true,true
-Norwegian (bokmål),NB,true,true
+Maori,MI,true,true
+Marathi,MR,true,true
+Mongolian,MN,true,true
 Nepali,NE,true,true
-Dutch,NL,true,true
+Norwegian (bokmål),NB,true,true
 Occitan,OC,true,true
 Oromo,OM,true,true
-Punjabi,PA,true,true
-Polish,PL,true,true
 Pashto,PS,true,true
-Portuguese,PT,true,false
+Persian,FA,true,true
+Polish,PL,true,true
 Portuguese (Brazilian),PT-BR,false,true
 Portuguese (European),PT-PT,false,true
+Portuguese,PT,true,false
+Punjabi,PA,true,true
 Quechua,QU,true,true
 Romanian,RO,true,true
 Russian,RU,true,true
 Sanskrit,SA,true,true
-Slovak,SK,true,true
-Slovenian,SL,true,true
-Albanian,SQ,true,true
 Serbian,SR,true,true
 Sesotho,ST,true,true
+Slovak,SK,true,true
+Slovenian,SL,true,true
+Spanish (Latin American),ES-419,false,true
+Spanish,ES,true,true
 Sundanese,SU,true,true
-Swedish,SV,true,true
 Swahili,SW,true,true
-Tamil,TA,true,true
-Telugu,TE,true,true
-Tajik,TG,true,true
-Thai,TH,true,true
-Turkmen,TK,true,true
+Swedish,SV,true,true
 Tagalog,TL,true,true
+Tajik,TG,true,true
+Tamil,TA,true,true
+Tatar,TT,true,true
+Telugu,TE,true,true
+Thai,TH,true,true
+Tsonga,TS,true,true
 Tswana,TN,true,true
 Turkish,TR,true,true
-Tsonga,TS,true,true
-Tatar,TT,true,true
+Turkmen,TK,true,true
 Ukrainian,UK,true,true
 Urdu,UR,true,true
 Uzbek,UZ,true,true
 Vietnamese,VI,true,true
+Welsh,CY,true,true
 Wolof,WO,true,true
 Xhosa,XH,true,true
 Yiddish,YI,true,true
-Chinese,ZH,true,true
-Chinese (simplified),ZH-HANS,false,true
-Chinese (traditional),ZH-HANT,false,true
 Zulu,ZU,true,true

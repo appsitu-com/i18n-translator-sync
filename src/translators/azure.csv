@@ -1,138 +1,138 @@
 language_name,native_name,language_code,dir
 Afrikaans,Afrikaans,af,ltr
+Albanian,Shqip,sq,ltr
 Amharic,አማርኛ,am,ltr
 Arabic,العربية,ar,rtl
+Armenian,Հայերեն,hy,ltr
 Assamese,অসমীয়া,as,ltr
 Azerbaijani,Azərbaycan,az,ltr
-Bashkir,Bashkir,ba,ltr
-Belarusian,беларуская,be,ltr
-Bulgarian,Български,bg,ltr
-Bhojpuri,भोजपुरी,bho,ltr
 Bangla,বাংলা,bn,ltr
-Tibetan,བོད་སྐད་,bo,ltr
+Bashkir,Bashkir,ba,ltr
+Basque,Euskara,eu,ltr
+Belarusian,беларуская,be,ltr
+Bhojpuri,भोजपुरी,bho,ltr
 Bodo,बड़ो,brx,ltr
 Bosnian,Bosanski,bs,ltr
+Bulgarian,Български,bg,ltr
+Cantonese (Traditional),粵語 (繁體),yue,ltr
 Catalan,Català,ca,ltr
+Chhattisgarhi,छत्तीसगढ़ी,hne,ltr
+Chinese (Literary),中文 (文言文),lzh,ltr
+Chinese Simplified,中文 (简体),zh-Hans,ltr
+Chinese Traditional,繁體中文 (繁體),zh-Hant,ltr
+Croatian,Hrvatski,hr,ltr
 Czech,Čeština,cs,ltr
-Welsh,Cymraeg,cy,ltr
 Danish,Dansk,da,ltr
-German,Deutsch,de,ltr
-Dogri,डोगरी,doi,ltr
-Lower Sorbian,Dolnoserbšćina,dsb,ltr
+Dari,دری,prs,rtl
 Divehi,ދިވެހިބަސް,dv,rtl
-Greek,Ελληνικά,el,ltr
+Dogri,डोगरी,doi,ltr
+Dutch,Nederlands,nl,ltr
 English,English,en,ltr
-Spanish,Español,es,ltr
 Estonian,Eesti,et,ltr
-Basque,Euskara,eu,ltr
-Persian,فارسی,fa,rtl
-Finnish,Suomi,fi,ltr
-Filipino,Filipino,fil,ltr
-Fijian,Na Vosa Vakaviti,fj,ltr
 Faroese,Føroyskt,fo,ltr
-French,Français,fr,ltr
+Fijian,Na Vosa Vakaviti,fj,ltr
+Filipino,Filipino,fil,ltr
+Finnish,Suomi,fi,ltr
 French (Canada),Français (Canada),fr-CA,ltr
-Irish,Gaeilge,ga,ltr
+French,Français,fr,ltr
 Galician,Galego,gl,ltr
-Konkani,कोंकणी,gom,ltr
+Ganda,Ganda,lug,ltr
+Georgian,ქართული,ka,ltr
+German,Deutsch,de,ltr
+Greek,Ελληνικά,el,ltr
 Gujarati,ગુજરાતી,gu,ltr
+Haitian Creole,Haitian Creole,ht,ltr
 Hausa,Hausa,ha,ltr
 Hebrew,עברית,he,rtl
 Hindi,हिन्दी,hi,ltr
-Chhattisgarhi,छत्तीसगढ़ी,hne,ltr
-Croatian,Hrvatski,hr,ltr
-Upper Sorbian,Hornjoserbšćina,hsb,ltr
-Haitian Creole,Haitian Creole,ht,ltr
+Hmong Daw,Hmong Daw,mww,ltr
 Hungarian,Magyar,hu,ltr
-Armenian,Հայերեն,hy,ltr
-Indonesian,Indonesia,id,ltr
-Igbo,Ásụ̀sụ́ Ìgbò,ig,ltr
-Inuinnaqtun,Inuinnaqtun,ikt,ltr
 Icelandic,Íslenska,is,ltr
-Italian,Italiano,it,ltr
-Inuktitut,ᐃᓄᒃᑎᑐᑦ,iu,ltr
+Igbo,Ásụ̀sụ́ Ìgbò,ig,ltr
+Indonesian,Indonesia,id,ltr
+Inuinnaqtun,Inuinnaqtun,ikt,ltr
 Inuktitut (Latin),Inuktitut (Latin),iu-Latn,ltr
+Inuktitut,ᐃᓄᒃᑎᑐᑦ,iu,ltr
+Irish,Gaeilge,ga,ltr
+Italian,Italiano,it,ltr
 Japanese,日本語,ja,ltr
-Georgian,ქართული,ka,ltr
+Kannada,ಕನ್ನಡ,kn,ltr
+Kashmiri,کٲشُر,ks,rtl
 Kazakh,Қазақ Тілі,kk,ltr
 Khmer,ខ្មែរ,km,ltr
-Kurdish (Northern),Kurdî (Bakur),kmr,ltr
-Kannada,ಕನ್ನಡ,kn,ltr
+Kinyarwanda,Kinyarwanda,rw,ltr
+Klingon (Latin),Klingon (Latin),tlh-Latn,ltr
+Klingon (pIqaD),Klingon (pIqaD),tlh-Piqd,ltr
+Konkani,कोंकणी,gom,ltr
 Korean,한국어,ko,ltr
-Kashmiri,کٲشُر,ks,rtl
 Kurdish (Central),Kurdî (Navîn),ku,rtl
+Kurdish (Northern),Kurdî (Bakur),kmr,ltr
 Kyrgyz,Кыргызча,ky,ltr
-Luxembourgish,Lëtzebuergesch,lb,ltr
-Lingala,Lingála,ln,ltr
 Lao,ລາວ,lo,ltr
-Lithuanian,Lietuvių,lt,ltr
-Ganda,Ganda,lug,ltr
 Latvian,Latviešu,lv,ltr
-Chinese (Literary),中文 (文言文),lzh,ltr
+Lingala,Lingála,ln,ltr
+Lithuanian,Lietuvių,lt,ltr
+Lower Sorbian,Dolnoserbšćina,dsb,ltr
+Luxembourgish,Lëtzebuergesch,lb,ltr
+Macedonian,Македонски,mk,ltr
 Maithili,मैथिली,mai,ltr
 Malagasy,Malagasy,mg,ltr
-Māori,Te Reo Māori,mi,ltr
-Macedonian,Македонски,mk,ltr
+Malay,Melayu,ms,ltr
 Malayalam,മലയാളം,ml,ltr
+Maltese,Malti,mt,ltr
+Manipuri,ꯃꯩꯇꯩꯂꯣꯟ,mni,ltr
+Māori,Te Reo Māori,mi,ltr
+Marathi,मराठी,mr,ltr
 Mongolian (Cyrillic),Монгол,mn-Cyrl,ltr
 Mongolian (Traditional),ᠮᠣᠩᠭᠣᠯ ᠬᠡᠯᠡ,mn-Mong,ltr
-Manipuri,ꯃꯩꯇꯩꯂꯣꯟ,mni,ltr
-Marathi,मराठी,mr,ltr
-Malay,Melayu,ms,ltr
-Maltese,Malti,mt,ltr
-Hmong Daw,Hmong Daw,mww,ltr
 Myanmar (Burmese),မြန်မာ,my,ltr
-Norwegian,Norsk Bokmål,nb,ltr
 Nepali,नेपाली,ne,ltr
-Dutch,Nederlands,nl,ltr
-Sesotho sa Leboa,Sesotho sa Leboa,nso,ltr
+Norwegian,Norsk Bokmål,nb,ltr
 Nyanja,Nyanja,nya,ltr
 Odia,ଓଡ଼ିଆ,or,ltr
-Querétaro Otomi,Hñähñu,otq,ltr
-Punjabi,ਪੰਜਾਬੀ,pa,ltr
-Polish,Polski,pl,ltr
-Dari,دری,prs,rtl
 Pashto,پښتو,ps,rtl
+Persian,فارسی,fa,rtl
+Polish,Polski,pl,ltr
 Portuguese (Brazil),Português (Brasil),pt,ltr
 Portuguese (Portugal),Português (Portugal),pt-PT,ltr
+Punjabi,ਪੰਜਾਬੀ,pa,ltr
+Querétaro Otomi,Hñähñu,otq,ltr
 Romanian,Română,ro,ltr
-Russian,Русский,ru,ltr
 Rundi,Rundi,run,ltr
-Kinyarwanda,Kinyarwanda,rw,ltr
+Russian,Русский,ru,ltr
+Samoan,Gagana Sāmoa,sm,ltr
+Serbian (Cyrillic),Српски (ћирилица),sr-Cyrl,ltr
+Serbian (Latin),Srpski (latinica),sr-Latn,ltr
+Sesotho sa Leboa,Sesotho sa Leboa,nso,ltr
+Sesotho,Sesotho,st,ltr
+Setswana,Setswana,tn,ltr
+Shona,chiShona,sn,ltr
 Sindhi,سنڌي,sd,rtl
 Sinhala,සිංහල,si,ltr
 Slovak,Slovenčina,sk,ltr
 Slovenian,Slovenščina,sl,ltr
-Samoan,Gagana Sāmoa,sm,ltr
-Shona,chiShona,sn,ltr
 Somali,Soomaali,so,ltr
-Albanian,Shqip,sq,ltr
-Serbian (Cyrillic),Српски (ћирилица),sr-Cyrl,ltr
-Serbian (Latin),Srpski (latinica),sr-Latn,ltr
-Sesotho,Sesotho,st,ltr
-Swedish,Svenska,sv,ltr
+Spanish,Español,es,ltr
 Swahili,Kiswahili,sw,ltr
+Swedish,Svenska,sv,ltr
+Tahitian,Reo Tahiti,ty,ltr
 Tamil,தமிழ்,ta,ltr
+Tatar,Татар,tt,ltr
 Telugu,తెలుగు,te,ltr
 Thai,ไทย,th,ltr
+Tibetan,བོད་སྐད་,bo,ltr
 Tigrinya,ትግር,ti,ltr
-Turkmen,Türkmen Dili,tk,ltr
-Klingon (Latin),Klingon (Latin),tlh-Latn,ltr
-Klingon (pIqaD),Klingon (pIqaD),tlh-Piqd,ltr
-Setswana,Setswana,tn,ltr
 Tongan,Lea Fakatonga,to,ltr
 Turkish,Türkçe,tr,ltr
-Tatar,Татар,tt,ltr
-Tahitian,Reo Tahiti,ty,ltr
-Uyghur,ئۇيغۇرچە,ug,rtl
+Turkmen,Türkmen Dili,tk,ltr
 Ukrainian,Українська,uk,ltr
+Upper Sorbian,Hornjoserbšćina,hsb,ltr
 Urdu,اردو,ur,rtl
+Uyghur,ئۇيغۇرچە,ug,rtl
 Uzbek (Latin),O‘Zbek,uz,ltr
 Vietnamese,Tiếng Việt,vi,ltr
+Welsh,Cymraeg,cy,ltr
 Xhosa,isiXhosa,xh,ltr
 Yoruba,Èdè Yorùbá,yo,ltr
 Yucatec Maya,Yucatec Maya,yua,ltr
-Cantonese (Traditional),粵語 (繁體),yue,ltr
-Chinese Simplified,中文 (简体),zh-Hans,ltr
-Chinese Traditional,繁體中文 (繁體),zh-Hant,ltr
 Zulu,Isi-Zulu,zu,ltr

@@ -3,195 +3,195 @@ Abkhaz,ab,true,true
 Acehnese,ace,true,true
 Acholi,ach,true,true
 Afrikaans,af,true,true
-Twi,ak,true,true
+Albanian,sq,true,true
 Alur,alz,true,true
 Amharic,am,true,true
 Arabic,ar,true,true
+Armenian,hy,true,true
 Assamese,as,true,true
 Awadhi,awa,true,true
 Aymara,ay,true,true
 Azerbaijani,az,true,true
-Bashkir,ba,true,true
 Balinese,ban,true,true
+Bambara,bm,true,true
+Bashkir,ba,true,true
+Basque,eu,true,true
+Batak Karo,btx,true,true
+Batak Simalungun,bts,true,true
 Batak Toba,bbc,true,true
 Belarusian,be,true,true
 Bemba,bem,true,true
+Bengali,bn,true,true
 Betawi,bew,true,true
-Bulgarian,bg,true,true
 Bhojpuri,bho,true,true
 Bikol,bik,true,true
-Bambara,bm,true,true
-Bengali,bn,true,true
-Breton,br,true,true
 Bosnian,bs,true,true
-Batak Simalungun,bts,true,true
-Batak Karo,btx,true,true
+Breton,br,true,true
+Bulgarian,bg,true,true
 Buryat,bua,true,true
+Cantonese,yue,true,true
 Catalan,ca,true,true
 Cebuano,ceb,true,true
-Kiga,cgg,true,true
-Meadow Mari,chm,true,true
-Kurdish (Sorani),ckb,true,true
-Hakha Chin,cnh,true,true
+Chichewa,ny,true,true
+Chinese (Simplified),zh-CN,true,true
+Chinese (Simplified),zh,true,true
+Chinese (Traditional),zh-TW,true,true
+Chuvash,cv,true,true
 Corsican,co,true,true
 Crimean Tatar,crh,true,true
-Seychellois Creole,crs,true,true
+Croatian,hr,true,true
 Czech,cs,true,true
-Chuvash,cv,true,true
-Welsh,cy,true,true
 Danish,da,true,true
-German,de,true,true
+Dhivehi,dv,true,true
 Dinka,din,true,true
 Dogri,doi,true,true
 Dombe,dov,true,true
-Dhivehi,dv,true,true
+Dutch,nl,true,true
 Dzongkha,dz,true,true
-Ewe,ee,true,true
-Greek,el,true,true
 English,en,true,true
 Esperanto,eo,true,true
-Spanish,es,true,true
 Estonian,et,true,true
-Basque,eu,true,true
-Persian,fa,true,true
-Fulani,ff,true,true
-Finnish,fi,true,true
-Filipino,fil,true,true
+Ewe,ee,true,true
 Fijian,fj,true,true
-French,fr,true,true
+Filipino,fil,true,true
+Filipino,tl,true,true
+Finnish,fi,true,true
 French (Canada),fr-CA,true,true
+French,fr,true,true
 Frisian,fy,true,true
-Irish,ga,true,true
+Fulani,ff,true,true
 Ga,gaa,true,true
-Scots Gaelic,gd,true,true
 Galician,gl,true,true
+Georgian,ka,true,true
+German,de,true,true
+Greek,el,true,true
 Guarani,gn,true,true
-Konkani,gom,true,true
 Gujarati,gu,true,true
+Haitian Creole,ht,true,true
+Hakha Chin,cnh,true,true
 Hausa,ha,true,true
 Hawaiian,haw,true,true
 Hebrew,he,true,true
-Hindi,hi,true,true
+Hebrew,iw,true,true
 Hiligaynon,hil,true,true
+Hindi,hi,true,true
 Hmong,hmn,true,true
-Croatian,hr,true,true
-Hunsrik,hrx,true,true
-Haitian Creole,ht,true,true
 Hungarian,hu,true,true
-Armenian,hy,true,true
-Indonesian,id,true,true
+Hunsrik,hrx,true,true
+Icelandic,is,true,true
 Igbo,ig,true,true
 Ilocano,ilo,true,true
-Icelandic,is,true,true
+Indonesian,id,true,true
+Irish,ga,true,true
 Italian,it,true,true
-Hebrew,iw,true,true
 Japanese,ja,true,true
 Javanese,jv,true,true
 Javanese,jw,true,true
-Georgian,ka,true,true
+Kannada,kn,true,true
+Kapampangan,pam,true,true
 Kazakh,kk,true,true
 Khmer,km,true,true
-Kannada,kn,true,true
+Kiga,cgg,true,true
+Kinyarwanda,rw,true,true
+Kituba,ktu,true,true
+Konkani,gom,true,true
 Korean,ko,true,true
 Krio,kri,true,true
-Kituba,ktu,true,true
 Kurdish (Kurmanji),ku,true,true
+Kurdish (Sorani),ckb,true,true
 Kyrgyz,ky,true,true
-Latin,la,true,true
-Luxembourgish,lb,true,true
-Luganda,lg,true,true
-Limburgish,li,true,true
-Ligurian,lij,true,true
-Lombard,lmo,true,true
-Lingala,ln,true,true
 Lao,lo,true,true
-Lithuanian,lt,true,true
 Latgalian,ltg,true,true
-Luo,luo,true,true
-Mizo,lus,true,true
+Latin,la,true,true
 Latvian,lv,true,true
+Ligurian,lij,true,true
+Limburgish,li,true,true
+Lingala,ln,true,true
+Lithuanian,lt,true,true
+Lombard,lmo,true,true
+Luganda,lg,true,true
+Luo,luo,true,true
+Luxembourgish,lb,true,true
+Macedonian,mk,true,true
 Maithili,mai,true,true
 Makassar,mak,true,true
 Malagasy,mg,true,true
-Maori,mi,true,true
-Minang,min,true,true
-Macedonian,mk,true,true
-Malayalam,ml,true,true
-Mongolian,mn,true,true
-Meiteilon (Manipuri),mni-Mtei,true,true
-Marathi,mr,true,true
-Malay,ms,true,true
 Malay (Jawi),ms-Arab,true,true
+Malay,ms,true,true
+Malayalam,ml,true,true
 Maltese,mt,true,true
+Maori,mi,true,true
+Marathi,mr,true,true
+Meadow Mari,chm,true,true
+Meiteilon (Manipuri),mni-Mtei,true,true
+Minang,min,true,true
+Mizo,lus,true,true
+Mongolian,mn,true,true
 Myanmar (Burmese),my,true,true
-Nepali,ne,true,true
-Nepalbhasa (Newari),new,true,true
-Dutch,nl,true,true
-Norwegian,no,true,true
 Ndebele (South),nr,true,true
-Sepedi,nso,true,true
+Nepalbhasa (Newari),new,true,true
+Nepali,ne,true,true
+Norwegian,no,true,true
 Nuer,nus,true,true
-Chichewa,ny,true,true
 Occitan,oc,true,true
-Oromo,om,true,true
 Odia (Oriya),or,true,true
-Punjabi (Gurmukhi),pa,true,true
-Punjabi (Shahmukhi),pa-Arab,true,true
+Oromo,om,true,true
 Pangasinan,pag,true,true
-Kapampangan,pam,true,true
 Papiamento,pap,true,true
-Polish,pl,true,true
 Pashto,ps,true,true
+Persian,fa,true,true
+Polish,pl,true,true
 Portuguese (Brazil),pt,true,true
 Portuguese (Portugal),pt-PT,true,true
+Punjabi (Gurmukhi),pa,true,true
+Punjabi (Shahmukhi),pa-Arab,true,true
 Quechua,qu,true,true
-Rundi,rn,true,true
-Romanian,ro,true,true
 Romani,rom,true,true
+Romanian,ro,true,true
+Rundi,rn,true,true
 Russian,ru,true,true
-Kinyarwanda,rw,true,true
-Sanskrit,sa,true,true
-Sicilian,scn,true,true
-Sindhi,sd,true,true
+Samoan,sm,true,true
 Sango,sg,true,true
+Sanskrit,sa,true,true
+Scots Gaelic,gd,true,true
+Sepedi,nso,true,true
+Serbian,sr,true,true
+Sesotho,st,true,true
+Seychellois Creole,crs,true,true
 Shan,shn,true,true
+Shona,sn,true,true
+Sicilian,scn,true,true
+Silesian,szl,true,true
+Sindhi,sd,true,true
 Sinhala,si,true,true
 Slovak,sk,true,true
 Slovenian,sl,true,true
-Samoan,sm,true,true
-Shona,sn,true,true
 Somali,so,true,true
-Albanian,sq,true,true
-Serbian,sr,true,true
-Swati,ss,true,true
-Sesotho,st,true,true
+Spanish,es,true,true
 Sundanese,su,true,true
-Swedish,sv,true,true
 Swahili,sw,true,true
-Silesian,szl,true,true
+Swati,ss,true,true
+Swedish,sv,true,true
+Tajik,tg,true,true
 Tamil,ta,true,true
+Tatar,tt,true,true
 Telugu,te,true,true
 Tetum,tet,true,true
-Tajik,tg,true,true
 Thai,th,true,true
 Tigrinya,ti,true,true
-Turkmen,tk,true,true
-Filipino,tl,true,true
+Tsonga,ts,true,true
 Tswana,tn,true,true
 Turkish,tr,true,true
-Tsonga,ts,true,true
-Tatar,tt,true,true
-Uyghur,ug,true,true
+Turkmen,tk,true,true
+Twi,ak,true,true
 Ukrainian,uk,true,true
 Urdu,ur,true,true
+Uyghur,ug,true,true
 Uzbek,uz,true,true
 Vietnamese,vi,true,true
+Welsh,cy,true,true
 Xhosa,xh,true,true
 Yiddish,yi,true,true
 Yoruba,yo,true,true
 Yucatec Maya,yua,true,true
-Cantonese,yue,true,true
-Chinese (Simplified),zh,true,true
-Chinese (Simplified),zh-CN,true,true
-Chinese (Traditional),zh-TW,true,true
 Zulu,zu,true,true
