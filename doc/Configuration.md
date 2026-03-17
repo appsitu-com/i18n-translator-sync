@@ -38,7 +38,7 @@ The extension now supports a project-specific configuration file called `transla
 | `enableBackTranslation` | `boolean` | Enable back translation | `false` |
 | `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy, auto) | `"azure"` |
 | `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy, auto) | `"google"` |
-| `engineOverrides` | `Record<string, string[]>` | Engine overrides for specific locales | `{"deepl": ["fr", "de"]}` |
+| `engineOverrides` | `Record<string, string[]>` | Engine overrides keyed by engine code (`azure`, `google`, `deepl`, `gemini`, `copy`, `auto`) | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
 | `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `[]` |
 | `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation (e.g. `"meta.version"`). | `[]` |
 | `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating (e.g. `"index.ts"`). | `[]` |
@@ -74,6 +74,7 @@ The `engineOverrides` configuration allows you to specify which translation engi
 Example:
 ```json
 "engineOverrides": {
+  "auto": ["en:ja", "en:ko"],
   "deepl": ["fr", "de"],        // Use DeepL for French and German
   "azure": ["es:en", "ja:en"],   // Use Azure for Spanish->English and Japanese->English
   "gemini": ["zh-CN"]          // Use Gemini for Chinese
@@ -84,14 +85,21 @@ Each locale pattern can be either:
 - A single locale code (e.g., "fr") - this will be used for both translations to and from the source locale
 - A locale pair (e.g., "es:en") - this specifies a specific translation direction (Spanish to English)
 
+You can also use `"auto"` as an override key to route only selected locale pairs through automatic engine selection.
+
 ## Auto Engine Selection
 
 Set `defaultMarkdownEngine`, `defaultJsonEngine`, or an `engineOverrides` value to `"auto"` to let the pipeline choose the engine from locale pairs.
 
+Selection precedence:
+- `engineOverrides` exact pair match (for example, `"en:ja"`) is applied first.
+- If the selected engine is `"auto"`, routing uses normalized language codes.
+- If no override matches, the file-type default (`defaultMarkdownEngine` or `defaultJsonEngine`) is used, and if that default is `"auto"`, the same routing rules apply.
+
 Selection rules (using normalized language codes from locales like `fr-FR` -> `fr`):
 - `deepl` for target languages: `de`, `fr`, `es`, `it`, `nl`, `pl`, `pt`, `ru`
 - `google` for target languages: `zh`, `ja`, `ko`, `th`, `vi`, `ar`, `hi`
-- `google` fallback for all other targets
+- for all other target languages: `azure` for markdown/MDX, `google` for JSON/YAML/TypeScript
 
 ## TypeScript File Support
 
