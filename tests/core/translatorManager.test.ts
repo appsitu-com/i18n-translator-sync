@@ -5,6 +5,7 @@ import { FileSystem } from '../../src/core/util/fs';
 import { Logger } from '../../src/core/util/baseLogger';
 import { FileWatcher, WorkspaceWatcher } from '../../src/core/util/watcher';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
+import * as path from 'path';
 
 // Mock dependencies
 const createMockFileSystem = () => ({
@@ -153,6 +154,23 @@ describe('TranslatorManager', () => {
       expect(logger.warn).toHaveBeenCalledWith('Already watching for file changes');
       expect(workspaceWatcher.createFileSystemWatcher).not.toHaveBeenCalled();
     });
+
+    it('auto-exports cache after initial scan when files were processed', async () => {
+      const processExistingSourceFilesSpy = vi
+        .spyOn(translatorManager as any, 'processExistingSourceFiles')
+        .mockResolvedValue(2)
+
+      await translatorManager.startWatching({
+        ...defaultProjectConfig,
+        autoExport: true,
+        csvExportPath: 'translator.csv'
+      } as TranslateProjectConfig)
+
+      expect(processExistingSourceFilesSpy).toHaveBeenCalled()
+      const expectedCsvPath = path.join('/workspace', 'translator.csv')
+      expect(cache.exportCSV).toHaveBeenCalledWith(expectedCsvPath)
+      expect(logger.info).toHaveBeenCalledWith(`Auto-exported cache to ${expectedCsvPath}`)
+    })
   });
 
   describe('stopWatching', () => {
