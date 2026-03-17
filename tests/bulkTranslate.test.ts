@@ -3,6 +3,7 @@ import { bulkTranslateWithEngine } from '../src/bulkTranslate'
 import { deregisterTranslator, registerTranslator } from '../src/translators/registry'
 import type { Translator } from '../src/translators/types'
 import type { TranslationCache } from '../src/core/cache/sqlite'
+import type { IGoogleConfig } from '../src/core/config'
 
 class FakeTranslator implements Translator {
   name = 'fake'
@@ -133,7 +134,10 @@ describe('bulkTranslateWithEngine()', () => {
       putMany: vi.fn(async () => {})
     }
 
-    const apiConfig = {
+    const apiConfig: IGoogleConfig = {
+      endpoint: 'https://translation.googleapis.com',
+      googleLocation: 'global',
+      timeoutMs: 30000,
       langMap: {
         en: 'EN-US',
         fr: 'FR'
@@ -160,5 +164,36 @@ describe('bulkTranslateWithEngine()', () => {
       { sourceLocale: 'EN-US', targetLocale: 'FR' },
       { sourceLocale: 'FR', targetLocale: 'EN-US' }
     ])
+  })
+
+  it('skips whitespace-only strings and keeps them unchanged', async () => {
+    chunkedTranslator.calls.length = 0
+
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    const out = await bulkTranslateWithEngine(
+      ['   ', 'A', '\n\t'],
+      [null, null, null],
+      'fake-chunked',
+      { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
+      cache as unknown as TranslationCache
+    )
+
+    expect(out.translations).toEqual(['   ', '[A]', '\n\t'])
+    expect(out.stats).toEqual({
+      apiCalls: 1,
+      cacheHits: 0,
+      total: 1
+    })
+    expect(chunkedTranslator.calls).toEqual([1])
+    expect(cache.getMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        texts: ['A'],
+        contexts: ['']
+      })
+    )
   })
 })

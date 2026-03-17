@@ -1,4 +1,5 @@
-# Supported Languages & Scripts Matrix
+# Supported Languages & Scripts by engine
+
 
 | Language name                      | google     | azure    | deepl   | nllb     |
 | ---------------------------------- | ---------- | -------- | ------- | -------- |
@@ -320,6 +321,3 @@
 | Yucatec Maya                       | yua        | yua      |         |          |
 | Yue Chinese                        |            |          |         | yue_Hant |
 | Zulu                               | zu         | zu       | ZU      | zul_Latn |
-
-Generated rows: 318
-

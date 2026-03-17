@@ -20,6 +20,10 @@ interface TranslationChunk {
   contexts: string[]
 }
 
+function isTranslatableText(text: string): boolean {
+  return text.trim().length > 0
+}
+
 function buildTranslationChunks(
   texts: string[],
   contexts: string[],
@@ -101,11 +105,25 @@ export async function bulkTranslateWithEngine(
 
   for (let i = 0; i < texts.length; i++) {
     const t = texts[i]
+    if (!isTranslatableText(t)) {
+      continue
+    }
     const c = (contexts[i] ?? '').toString()
     const k = `${t}${SEPARATOR}${c}`
     if (!seen.has(k)) {
       seen.add(k)
       uniq.push({ t, c, pos: i })
+    }
+  }
+
+  if (!uniq.length) {
+    return {
+      translations: texts.slice(),
+      stats: {
+        apiCalls: 0,
+        cacheHits: 0,
+        total: 0
+      }
     }
   }
 
