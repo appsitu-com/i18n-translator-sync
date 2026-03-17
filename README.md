@@ -334,6 +334,7 @@ The Translator may fail to auto-start if it finds invalid or missing values in `
 ## `translator.json` Configuration
 
 See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/Configuration.md) for full details.
+See [Supported Languages Matrix](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/SupportedLanguages.md) for engine-by-engine language codes.
 
 - Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `openrouter`, `nllb`, `copy`, `auto`
 - `copy` engine is just that. It won't translate anything. It just copies a file from source to target.

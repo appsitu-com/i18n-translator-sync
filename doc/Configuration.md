@@ -30,6 +30,8 @@ The extension now supports a project-specific configuration file called `transla
 
 ### Configuration Options
 
+See [Supported Languages Matrix](./SupportedLanguages.md) for language codes by translation engine.
+
 | Option | Type | Description | Default |
 |--------|------|-------------|---------|
 | `sourcePaths` | `string[]` | Source language directories to scan for files to translate OR single source files | `["i18n/en", "i18n/en.json"]` |
