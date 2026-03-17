@@ -31,20 +31,33 @@ class MaxCharsFakeTranslator implements Translator {
   }
 }
 
+class LocaleCaptureTranslator implements Translator {
+  name = 'fake-langmap'
+  readonly calls: Array<{ sourceLocale: string; targetLocale: string }> = []
+
+  async translateMany(_texts: string[], _contexts: (string | null | undefined)[], opts: { sourceLocale: string; targetLocale: string }) {
+    this.calls.push({ sourceLocale: opts.sourceLocale, targetLocale: opts.targetLocale })
+    return ['[mapped]']
+  }
+}
+
 describe('bulkTranslateWithEngine()', () => {
   const chunkedTranslator = new ChunkedFakeTranslator()
   const maxCharsTranslator = new MaxCharsFakeTranslator()
+  const localeCaptureTranslator = new LocaleCaptureTranslator()
 
   beforeAll(() => {
     registerTranslator(new FakeTranslator())
     registerTranslator(chunkedTranslator, { limit: 2 })
     registerTranslator(maxCharsTranslator, { limit: 10, maxchars: 5 })
+    registerTranslator(localeCaptureTranslator)
   })
 
   afterAll(() => {
     deregisterTranslator('fake')
     deregisterTranslator('fake-chunked')
     deregisterTranslator('fake-maxchars')
+    deregisterTranslator('fake-langmap')
   })
 
   it('uses cache for hits and engine for misses', async () => {
@@ -110,5 +123,42 @@ describe('bulkTranslateWithEngine()', () => {
     expect(out.translations).toEqual(['[AA]', '[BB]', '[C]', '[DD]'])
     expect(maxCharsTranslator.calls).toEqual([3, 1])
     expect(cache.putMany).toHaveBeenCalledTimes(1)
+  })
+
+  it('applies langMap to both source and target locales for forward and back translation calls', async () => {
+    localeCaptureTranslator.calls.length = 0
+
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    const apiConfig = {
+      langMap: {
+        en: 'EN-US',
+        fr: 'FR'
+      }
+    }
+
+    await bulkTranslateWithEngine(
+      ['hello'],
+      [null],
+      'fake-langmap',
+      { source: 'en', target: 'fr', apiConfig, rootDir: process.cwd() },
+      cache as unknown as TranslationCache
+    )
+
+    await bulkTranslateWithEngine(
+      ['bonjour'],
+      [null],
+      'fake-langmap',
+      { source: 'fr', target: 'en', apiConfig, rootDir: process.cwd() },
+      cache as unknown as TranslationCache
+    )
+
+    expect(localeCaptureTranslator.calls).toEqual([
+      { sourceLocale: 'EN-US', targetLocale: 'FR' },
+      { sourceLocale: 'FR', targetLocale: 'EN-US' }
+    ])
   })
 })

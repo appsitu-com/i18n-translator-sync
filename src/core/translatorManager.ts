@@ -77,7 +77,10 @@ export class TranslatorManager {
     this.logger.info('Starting to watch for file changes');
 
     // Process all existing files first
-    await this.processExistingSourceFiles(config);
+    const filesProcessed = await this.processExistingSourceFiles(config);
+    if (filesProcessed > 0 && (config.autoExport ?? true)) {
+      await this.exportCache(config);
+    }
 
     // Create file watchers for each source path
     for (const sourcePath of config.sourcePaths) {
@@ -257,7 +260,7 @@ export class TranslatorManager {
         this.translatorEngines
       );
 
-      await this.autoExportCacheIfEnabled(config);
+      await this.exportCache(config);
 
       this.logger.info(`Successfully processed file: ${uri.fsPath}`);
     } catch (error) {
@@ -268,12 +271,7 @@ export class TranslatorManager {
     }
   }
 
-  private async autoExportCacheIfEnabled(config: TranslateProjectConfig): Promise<void> {
-    const shouldAutoExport = config.autoExport ?? true;
-    if (!shouldAutoExport) {
-      return;
-    }
-
+  private async exportCache(config: TranslateProjectConfig): Promise<void> {
     const csvExportPath = config.csvExportPath || 'translator.csv';
     const csvPath = toAbsPath(csvExportPath, this.workspacePath);
 
@@ -522,7 +520,7 @@ export class TranslatorManager {
    * This is called when the watcher starts to ensure all files are up to date
    * @param config The project configuration
    */
-  private async processExistingSourceFiles(config: TranslateProjectConfig): Promise<void> {
+  private async processExistingSourceFiles(config: TranslateProjectConfig): Promise<number> {
     this.logger.info('Scanning existing source files...');
 
     try {
@@ -590,8 +588,10 @@ export class TranslatorManager {
       }
 
       this.logger.info(`Initial scan complete: processed ${filesProcessed} files`);
+      return filesProcessed;
     } catch (error) {
       this.logger.error(`Error scanning source files: ${error instanceof Error ? error.message : String(error)}`);
+      return 0;
     }
   }
 

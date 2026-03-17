@@ -13,7 +13,8 @@
   "copyOnlyFiles": ["index.ts"],
   "engineOverrides": {
     "copy": ["en-US"],
-    "google": ["fr", "de", "zh-CN"],
+    "google": ["zh-CN"],
+    "deepl": ["fr", "de", "zh-CN"],
     "azure": ["es"]
   },
   "translator": {
@@ -28,6 +29,18 @@
       "apiKey": "${AZURE_TRANSLATION_KEY}",
       "region": "${AZURE_TRANSLATION_REGION}",
       "endpoint": "${AZURE_TRANSLATION_URL}"
+    },
+    "deepl": {
+      "apiKey": "${DEEPL_TRANSLATION_KEY}",
+      "endpoint": "${DEEPL_TRANSLATION_URL}",
+
+      // Locale mappings for DeepL (uses uppercase language codes)
+      "langMap": {
+        "en": "EN-US",
+        "zh-CN": "ZH-HANS",
+        "zh-TW": "ZH-HANT",
+        "zh-HK": "ZH-HANT"
+      }
     }
   }
 }

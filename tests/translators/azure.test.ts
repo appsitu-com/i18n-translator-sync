@@ -95,7 +95,8 @@ describe('azure api', () => {
     const out = await AzureTranslator.translateMany(texts, [null, null], {
       sourceLocale: 'en-GB',
       targetLocale: 'fr-FR',
-      apiConfig
+      apiConfig,
+      rootDir: process.cwd()
     })
 
     expect(out.map((text) => text.toLowerCase())).toEqual(['bonjour', 'monde'])

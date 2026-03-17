@@ -45,6 +45,46 @@ describe('deepl stub', () => {
     // At least contains these, but exact number may vary if implementation changes
     expect(contexts).toEqual(['button', 'headline', 'menu'])
   })
+
+  it('maps both source and target locales using langMap', async () => {
+    await DeepLTranslator.translateMany(['hello'], [null], {
+      sourceLocale: 'fr',
+      targetLocale: 'en',
+      apiConfig: {
+        apiKey: 'DEEPL',
+        free: true,
+        endpoint: 'https://api-free.deepl.com',
+        langMap: {
+          en: 'EN-US',
+          fr: 'FR'
+        }
+      }
+    })
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0].body.source_lang).toBe('FR')
+    expect(calls[0].body.target_lang).toBe('EN-US')
+  })
+
+  it('normalizes mapped source regional variants to base DeepL source language', async () => {
+    await DeepLTranslator.translateMany(['hello'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig: {
+        apiKey: 'DEEPL',
+        free: true,
+        endpoint: 'https://api-free.deepl.com',
+        langMap: {
+          en: 'EN-US',
+          fr: 'FR'
+        }
+      }
+    })
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0].body.source_lang).toBe('EN-US')
+    expect(calls[0].body.target_lang).toBe('FR')
+  })
 })
 
 // Tests using real DeepL API keys from translator.env

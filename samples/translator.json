@@ -77,41 +77,13 @@
       "apiKey": "${DEEPL_TRANSLATION_KEY}",
       "endpoint": "${DEEPL_TRANSLATION_URL}",
 
-      // Locale mappings for DeepL (uses uppercase language codes)
+      // Locale mappings for DeepL
       "langMap": {
-        "ar": "AR",
-        "bg": "BG",
-        "cs": "CS",
-        "da": "DA",
-        "de": "DE",
-        "el": "EL",
-        "en": "EN",
-        "es": "ES",
-        "et": "ET",
-        "fi": "FI",
-        "fr": "FR",
-        "hu": "HU",
-        "id": "ID",
-        "it": "IT",
-        "ja": "JA",
-        "ko": "KO",
-        "lt": "LT",
-        "lv": "LV",
-        "nb": "NB",
-        "nl": "NL",
-        "pl": "PL",
-        "pt": "PT",
-        "pt-BR": "PT-BR",
-        "pt-PT": "PT-PT",
-        "ro": "RO",
-        "ru": "RU",
-        "sk": "SK",
-        "sl": "SL",
-        "sv": "SV",
-        "tr": "TR",
-        "uk": "UK",
-        "zh": "ZH"
-      }
+        "en": "EN-US",
+        "zh-CN": "ZH-HANS",
+        "zh-TW": "ZH-HANT",
+        "zh-HK": "ZH-HANT"
+       }
     },
 
     // Google Gemini API (LLM-based translation)
