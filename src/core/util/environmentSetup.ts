@@ -66,14 +66,14 @@ export const initTranslatorEnv = async (
         // Log which environment variables were successfully loaded
         const loadedKeys = Object.keys(result.parsed || {})
         logger.info(`Successfully loaded ${loadedKeys.length} environment variables from ${translatorEnvFile}`)
-        logger.debug(`Loaded keys from file: ${loadedKeys.join(', ')}`)
+        logger.debug(`Loaded keys from file:\n  - ${loadedKeys.join('\n  - ')}`)
 
         // Log the presence of translation service keys (without exposing values)
         const translationKeys = ['GOOGLE_TRANSLATION_KEY', 'GOOGLE_TRANSLATION_PROJECT_ID', 'AZURE_TRANSLATION_KEY', 'DEEPL_TRANSLATION_KEY', 'GEMINI_API_KEY', 'OPENROUTER_API_KEY']
         for (const key of translationKeys) {
           if (process.env[key]) {
             const value = process.env[key] || ''
-            const masked = value.length > 8 ? `${value.substring(0, 4)}...${value.substring(value.length - 4)}` : '[too short]'
+            const masked = value.length > 20 ? `${value.substring(0, 4)}...${value.substring(value.length - 4)}` : '[too short]'
             logger.debug(`✓ ${key} is configured in process.env: ${masked}`)
           } else {
             logger.warn(`✗ ${key} is not configured in process.env`)
