@@ -46,10 +46,7 @@ describe('Config', () => {
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mockLoadTranslatorConfig.mockReturnValue({
-      config: makeConfig(),
-      errors: []
-    })
+    mockLoadTranslatorConfig.mockReturnValue(makeConfig())
 
     mockLogger = {
       info: vi.fn(),
@@ -162,16 +159,15 @@ describe('Config', () => {
     const rootPath = '/test/project'
 
     it('should delegate to loadTranslatorConfig and return project config', () => {
-      mockLoadTranslatorConfig.mockReturnValue({
-        config: makeConfig({
+      mockLoadTranslatorConfig.mockReturnValue(
+        makeConfig({
           sourceDir: 'src/locales',
           targetDir: 'dist/locales',
           sourceLocale: 'en-US',
           targetLocales: ['fr-FR', 'es-ES'],
           defaultMarkdownEngine: 'deepl'
-        }),
-        errors: []
-      })
+        })
+      )
 
       const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
@@ -206,10 +202,9 @@ describe('Config', () => {
     })
 
     it('should merge project config with provider defaults', () => {
-      mockLoadTranslatorConfig.mockReturnValue({
-        config: makeConfig({ sourceDir: 'custom/src', sourceLocale: '', targetLocales: [] }),
-        errors: []
-      })
+      mockLoadTranslatorConfig.mockReturnValue(
+        makeConfig({ sourceDir: 'custom/src', sourceLocale: '', targetLocales: [] })
+      )
 
       vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
         if (section === 'translator.sourceLocale') return 'custom-locale'

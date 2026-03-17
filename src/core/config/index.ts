@@ -27,6 +27,6 @@ export {
   resolveConfigEnvVars,
   loadTranslatorConfig,
   MissingEnvironmentValueError,
-  type GetPassphrase,
-  type LoadConfigResult
+  InvalidTranslatorConfigError,
+  type GetPassphrase
 } from './configLoader'

@@ -7,7 +7,8 @@ import {
   snapshotEnvVars,
   resolveConfigEnvVars,
   loadTranslatorConfig,
-  MissingEnvironmentValueError
+  MissingEnvironmentValueError,
+  InvalidTranslatorConfigError
 } from '../../../src/core/config/configLoader'
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { Logger } from '../../../src/core/util/baseLogger'
@@ -215,9 +216,8 @@ describe('loadTranslatorConfig', () => {
 
   it('returns defaults when no files exist', () => {
     const logger = createTestLogger()
-    const { config, errors } = loadTranslatorConfig(tmpDir, logger)
+    const config = loadTranslatorConfig(tmpDir, logger)
 
-    expect(errors).toEqual([])
     expect(config.sourceLocale).toBe('en')
     expect(config.defaultMarkdownEngine).toBe('azure')
     expect(config.defaultJsonEngine).toBe('google')
@@ -246,9 +246,8 @@ describe('loadTranslatorConfig', () => {
     fs.writeFileSync(path.join(tmpDir, 'translator.json'), configJson)
 
     const logger = createTestLogger()
-    const { config, errors } = loadTranslatorConfig(tmpDir, logger)
+    const config = loadTranslatorConfig(tmpDir, logger)
 
-    expect(errors).toEqual([])
     expect(config.sourceLocale).toBe('fr')
     expect(config.targetLocales).toEqual(['en', 'de'])
     expect(config.translator?.azure?.apiKey).toBe('my-secret-key')
@@ -284,13 +283,13 @@ describe('loadTranslatorConfig', () => {
     )
 
     const logger = createTestLogger()
-    const { config } = loadTranslatorConfig(tmpDir, logger)
+    const config = loadTranslatorConfig(tmpDir, logger)
 
     expect(config.translator?.google?.apiKey).toBe('/existing/creds.json')
     expect(config.translator?.google?.googleProjectId).toBe('proj-from-env')
   })
 
-  it('reports validation errors for invalid config', () => {
+  it('throws validation errors for invalid config', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'translator.json'),
       JSON.stringify({
@@ -299,9 +298,7 @@ describe('loadTranslatorConfig', () => {
     )
 
     const logger = createTestLogger()
-    const { errors } = loadTranslatorConfig(tmpDir, logger)
-
-    expect(errors.length).toBeGreaterThan(0)
+    expect(() => loadTranslatorConfig(tmpDir, logger)).toThrow(InvalidTranslatorConfigError)
   })
 
   it('throws when translator.json references a missing env var', () => {
@@ -333,7 +330,7 @@ describe('loadTranslatorConfig', () => {
     )
 
     const logger = createTestLogger()
-    const { config } = loadTranslatorConfig(tmpDir, logger)
+    const config = loadTranslatorConfig(tmpDir, logger)
 
     expect(config.translator?.gemini?.apiKey).toBe('gem-key')
     expect(config.translator?.gemini?.geminiModel).toBe('gemini-pro')
@@ -357,7 +354,7 @@ describe('loadTranslatorConfig', () => {
     )
 
     const logger = createTestLogger()
-    const { config } = loadTranslatorConfig(tmpDir, logger)
+    const config = loadTranslatorConfig(tmpDir, logger)
 
     expect(config.translator?.azure?.langMap).toEqual({
       'zh-CN': 'zh-Hans',
@@ -376,9 +373,8 @@ describe('loadTranslatorConfig', () => {
     )
 
     const logger = createTestLogger()
-    const { config, errors } = loadTranslatorConfig(tmpDir, logger)
+    const config = loadTranslatorConfig(tmpDir, logger)
 
-    expect(errors).toEqual([])
     expect(config.sourceLocale).toBe('es')
   })
 })

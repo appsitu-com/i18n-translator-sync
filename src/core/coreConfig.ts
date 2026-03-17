@@ -140,6 +140,6 @@ export function loadProjectConfig(
   preloaded?: ITranslatorConfig,
   getPassphrase?: GetPassphrase
 ): TranslateProjectConfig {
-  const config = preloaded ?? loadTranslatorConfig(rootPath, logger, getPassphrase).config
+  const config = preloaded ?? loadTranslatorConfig(rootPath, logger, getPassphrase)
   return toProjectConfig(config, configProvider)
 }

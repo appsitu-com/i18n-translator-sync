@@ -8,6 +8,7 @@ import { TRANSLATOR_ENV, TRANSLATOR_JSON } from '../constants'
 import { Logger } from '../util/baseLogger'
 import { formatZodError } from '../util/formatZodError'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
+import { validateEndpoints } from '../util/endpointValidator'
 
 /** Function that returns a passphrase for decrypting encrypted env values. */
 export type GetPassphrase = () => string | undefined
@@ -18,6 +19,13 @@ export class MissingEnvironmentValueError extends Error {
       `Missing required environment value "${variableName}". Set it in process.env, translator.env, or directly in translator.json.`
     )
     this.name = 'MissingEnvironmentValueError'
+  }
+}
+
+export class InvalidTranslatorConfigError extends Error {
+  constructor(public readonly errors: string[]) {
+    super(`Invalid ${TRANSLATOR_JSON}:\n${errors.join('\n')}`)
+    this.name = 'InvalidTranslatorConfigError'
   }
 }
 
@@ -115,11 +123,6 @@ export function resolveConfigEnvVars(
 // Step 3 — Parse + validate → ITranslatorConfig
 // ---------------------------------------------------------------------------
 
-export interface LoadConfigResult {
-  config: ITranslatorConfig
-  errors: string[]
-}
-
 /**
  * End-to-end config loader:
  *   1. Load translator.env → process.env → IEnvVars
@@ -130,13 +133,13 @@ export interface LoadConfigResult {
  * @param rootDir        Workspace / project root
  * @param logger         Diagnostic logger
  * @param getPassphrase  Optional passphrase supplier for encrypted keys
- * @returns The validated config and any validation errors
+ * @returns The validated config
  */
 export function loadTranslatorConfig(
   rootDir: string,
   logger: Logger,
   getPassphrase?: GetPassphrase
-): LoadConfigResult {
+): ITranslatorConfig {
   // 1. Load env vars
   const envVars = loadEnvVars(rootDir, logger)
 
@@ -159,18 +162,14 @@ export function loadTranslatorConfig(
   const result = TranslatorConfigSchema.safeParse(resolved)
 
   if (result.success) {
-    return { config: result.data, errors: [] }
+    // 5. Validate endpoint domains after env substitution and schema parsing
+    validateEndpoints(result.data)
+    return result.data
   }
 
   const errors = formatZodError(result.error)
   logger.error(`Invalid ${TRANSLATOR_JSON}:\n${errors.join('\n')}`)
-
-  // Fall back to parsing what we can (defaults will fill gaps)
-  const fallback = TranslatorConfigSchema.safeParse({})
-  return {
-    config: fallback.success ? fallback.data : ({} as ITranslatorConfig),
-    errors
-  }
+  throw new InvalidTranslatorConfigError(errors)
 }
 
 // ---------------------------------------------------------------------------

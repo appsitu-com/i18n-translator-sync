@@ -179,7 +179,7 @@ export abstract class TranslatorAdapter {
         const getPassphrase = passphraseManager
           ? () => passphraseManager.getPassphrase()
           : undefined;
-        const { config: translatorConfig } = loadTranslatorConfig(
+        const translatorConfig = loadTranslatorConfig(
           this.workspacePath,
           this.logger,
           getPassphrase
@@ -232,7 +232,7 @@ export abstract class TranslatorAdapter {
       const getPassphrase = passphraseManager
         ? () => passphraseManager.getPassphrase()
         : undefined;
-      const { config: translatorConfig } = loadTranslatorConfig(
+      const translatorConfig = loadTranslatorConfig(
         this.workspacePath,
         this.logger,
         getPassphrase
