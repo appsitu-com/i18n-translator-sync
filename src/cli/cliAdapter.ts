@@ -7,6 +7,7 @@ import { WorkspaceWatcher } from '../core/util/watcher';
 import { EnvPassphraseManager } from '../core/secrets/envPassphraseManager';
 import { loadProjectConfig } from '../core/coreConfig';
 import * as path from 'path';
+import { toAbsPath } from '../core/util/pathShared';
 
 /**
  * CLI adapter for the TranslatorManager
@@ -31,7 +32,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
     const fileSystem = new NodeFileSystem();
     const configProvider = new CliConfigProvider(nodeFileSystem, logger, configPath);
 
-    super(workspacePath, logger, fileSystem, configProvider);
+    super(workspacePath, logger, fileSystem, configProvider, configPath);
     this.cliConfigProvider = configProvider;
   }
 
@@ -99,7 +100,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
       // Determine the CSV path
       let outputPath: string;
       if (csvPath) {
-        outputPath = path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
+        outputPath = toAbsPath(csvPath, this.workspacePath);
       } else {
         // Load config to get default csvPath
         const config = loadProjectConfig(
@@ -110,9 +111,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
           this.translatorConfig
         );
         const defaultCsvPath = config.csvExportPath || 'translator.csv';
-        outputPath = path.isAbsolute(defaultCsvPath)
-          ? defaultCsvPath
-          : path.join(this.workspacePath, defaultCsvPath);
+        outputPath = toAbsPath(defaultCsvPath, this.workspacePath);
       }
 
       this.logger.info(`Exporting cache to ${outputPath}...`);
@@ -138,7 +137,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
       }
 
       // Resolve the CSV path
-      const inputPath = path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
+      const inputPath = toAbsPath(csvPath, this.workspacePath);
 
       this.logger.info(`Importing cache from ${inputPath}...`);
       const count = await cache.importCSV(inputPath);

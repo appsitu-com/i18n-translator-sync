@@ -9,6 +9,7 @@ import { MateCatService, MateCatSettings } from './matecat';
 import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
 import * as path from 'path';
+import { toAbsPath } from './util/pathShared';
 
 /**
  * TranslatorManager manages the translation process for both CLI and VSCode extension
@@ -274,9 +275,7 @@ export class TranslatorManager {
     }
 
     const csvExportPath = config.csvExportPath || 'translator.csv';
-    const csvPath = path.isAbsolute(csvExportPath)
-      ? csvExportPath
-      : path.join(this.workspacePath, csvExportPath);
+    const csvPath = toAbsPath(csvExportPath, this.workspacePath);
 
     await this.cache.exportCSV(csvPath);
     this.logger.info(`Auto-exported cache to ${csvPath}`);

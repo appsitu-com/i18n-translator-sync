@@ -9,6 +9,8 @@ import { Logger } from '../util/baseLogger'
 import { formatZodError } from '../util/formatZodError'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
 import { validateEndpoints } from '../util/endpointValidator'
+import { createEngineOverrides } from '../util/engines'
+import { pickEngine } from '../../translators/registry'
 
 /** Function that returns a passphrase for decrypting encrypted env values. */
 export type GetPassphrase = () => string | undefined
@@ -138,13 +140,14 @@ export function resolveConfigEnvVars(
 export function loadTranslatorConfig(
   rootDir: string,
   logger: Logger,
-  getPassphrase?: GetPassphrase
+  getPassphrase?: GetPassphrase,
+  configFilePath?: string
 ): ITranslatorConfig {
   // 1. Load env vars
   const envVars = loadEnvVars(rootDir, logger)
 
   // 2. Read translator.json
-  const configPath = path.join(rootDir, TRANSLATOR_JSON)
+  const configPath = configFilePath ?? path.join(rootDir, TRANSLATOR_JSON)
   let rawJson: unknown = {}
 
   if (fs.existsSync(configPath)) {
@@ -162,14 +165,76 @@ export function loadTranslatorConfig(
   const result = TranslatorConfigSchema.safeParse(resolved)
 
   if (result.success) {
+    const config: ITranslatorConfig = { ...result.data, rootDir }
     // 5. Validate endpoint domains after env substitution and schema parsing
-    validateEndpoints(result.data)
-    return result.data
+    validateEndpoints(config)
+    logConfiguredEnginePlan(config, logger)
+    return config
   }
 
   const errors = formatZodError(result.error)
   logger.error(`Invalid ${TRANSLATOR_JSON}:\n${errors.join('\n')}`)
   throw new InvalidTranslatorConfigError(errors)
+}
+
+/**
+ * Log engine selection for all configured translation pairs.
+ * Includes forward and back-translation pairs (when enabled).
+ */
+export function logConfiguredEnginePlan(
+  config: ITranslatorConfig,
+  logger: Logger
+): void {
+  const sourceLocale = config.sourceLocale
+  const targetLocales = config.targetLocales
+
+  if (targetLocales.length === 0) {
+    logger.info('Engine plan: no target locales configured')
+    return
+  }
+
+  const defaults = {
+    md: config.defaultMarkdownEngine,
+    json: config.defaultJsonEngine
+  }
+  const overrides = createEngineOverrides(config.engineOverrides)
+
+  for (const targetLocale of targetLocales) {
+    logEnginePair(sourceLocale, targetLocale, defaults, overrides, logger, false)
+
+    if (config.enableBackTranslation) {
+      logEnginePair(targetLocale, sourceLocale, defaults, overrides, logger, true)
+    }
+  }
+}
+
+function logEnginePair(
+  source: string,
+  target: string,
+  defaults: { md: string; json: string },
+  overrides: Record<string, string>,
+  logger: Logger,
+  isBackTranslation: boolean
+): void {
+  const markdownEngine = pickEngine({
+    source,
+    target,
+    defaults,
+    overrides,
+    fileType: 'md'
+  })
+  const structuredEngine = pickEngine({
+    source,
+    target,
+    defaults,
+    overrides,
+    fileType: 'json'
+  })
+  const direction = isBackTranslation ? 'back' : 'forward'
+
+  logger.info(
+    `Engine plan [${direction}] ${source} -> ${target}: md=${markdownEngine}, json/yaml/ts=${structuredEngine}`
+  )
 }
 
 // ---------------------------------------------------------------------------

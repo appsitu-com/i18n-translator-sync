@@ -27,6 +27,8 @@ export interface BulkTranslateOpts {
   sourceLocale: string
   targetLocale: string
   apiConfig: EngineConfig
+  /** Absolute path to the workspace / project root used to resolve relative paths in engine config. */
+  rootDir: string
 }
 
 export interface Translator {

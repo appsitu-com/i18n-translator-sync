@@ -34,48 +34,35 @@ pnpm add -D i18n-translator-sync
 
 ## Usage
 
-The CLI provides three main commands:
-
-### Start Watching
-
-Start watching for changes in the source files and automatically translate them:
+The CLI uses a single command with flags.
 
 ```bash
-i18n-translator start [options]
+i18n-translator [workspace] [options]
 ```
 
-Options:
-- `-c, --config <path>`: Path to config file (translator.json) (default: "translator.json")
-- `-w, --workspace <path>`: Path to workspace root (default: current directory)
-- `-v, --verbose`: Enable verbose logging
+- `workspace`: Optional path to the workspace root. Defaults to the current directory.
 
-This will start a file watcher that monitors your source files and translates them when they change. Press Ctrl+C to stop the watcher.
+### Core Options
 
-### Push Translations
+- `--config <path>`: Path to a custom config file (defaults to `<workspace>/translator.json`).
+- `--watch`: Run in watch mode (default behavior).
+- `--no-watch`: Disable watch mode.
+- `--bulk-translate`: Run one bulk translation pass and exit.
+- `--force`: Force translation even when targets appear up to date.
 
-Push translations to target languages:
+### Cache Options
 
-```bash
-i18n-translator push [options]
-```
+- `--export-cache [path]`: Export cache to CSV and exit.
+- `--import-cache <path>`: Import cache from CSV and exit.
+- `--purge-cache`: Purge unused cache entries and exit.
 
-Options:
-- `-c, --config <path>`: Path to config file (translator.json) (default: "translator.json")
-- `-w, --workspace <path>`: Path to workspace root (default: current directory)
-- `-v, --verbose`: Enable verbose logging
+Execution precedence when multiple action flags are supplied:
 
-### Pull Translations
-
-Pull translations from source:
-
-```bash
-i18n-translator pull [options]
-```
-
-Options:
-- `-c, --config <path>`: Path to config file (translator.json) (default: "translator.json")
-- `-w, --workspace <path>`: Path to workspace root (default: current directory)
-- `-v, --verbose`: Enable verbose logging
+1. `--export-cache`
+2. `--import-cache`
+3. `--purge-cache`
+4. `--bulk-translate`
+5. watch mode (`--watch` / default)
 
 ## Configuration
 
@@ -125,29 +112,53 @@ DEEPL_TRANSLATION_URL='https://api-free.deepl.com'
 GEMINI_API_KEY='your-key'
 ```
 
+### Path Resolution Rules
+
+- The workspace root is the `workspace` argument (or current directory when omitted).
+- `translator.env` is loaded from the workspace root.
+- By default, `translator.json` is loaded from `<workspace>/translator.json`.
+- If `--config <path>` is provided, that file is used for all config parsing paths in CLI mode.
+- Relative paths in config and translator engine settings are resolved from the workspace root.
+
 ## Examples
 
-### Watch Mode
+### Watch Mode (Default)
 
 ```bash
 # Start watching in the current directory
-i18n-translator start
+i18n-translator
 
-# Start watching in a specific directory with verbose output
-i18n-translator start -w /path/to/project -v
+# Start watching a specific workspace directory
+i18n-translator /path/to/project
 
 # Start with a custom config file
-i18n-translator start -c custom-config.json
+i18n-translator /path/to/project --config ./configs/translator.staging.json
 ```
 
-### One-time Translations
+### One-time Translation
 
 ```bash
-# Push translations for all files
-i18n-translator push
+# Run bulk translation once and exit
+i18n-translator /path/to/project --bulk-translate
 
-# Pull translations with verbose output
-i18n-translator pull -v
+# Force full re-translation and exit
+i18n-translator /path/to/project --bulk-translate --force
+```
+
+### Cache Operations
+
+```bash
+# Export cache to default CSV path from config
+i18n-translator /path/to/project --export-cache
+
+# Export cache to a specific CSV path
+i18n-translator /path/to/project --export-cache ./cache/translations.csv
+
+# Import cache
+i18n-translator /path/to/project --import-cache ./cache/translations.csv
+
+# Purge unused cache entries
+i18n-translator /path/to/project --purge-cache
 ```
 
 ## Integration with NPM Scripts
@@ -157,9 +168,10 @@ You can add these commands to your `package.json` scripts:
 ```json
 {
   "scripts": {
-    "translate:watch": "i18n-translator start",
-    "translate:push": "i18n-translator push",
-    "translate:pull": "i18n-translator pull"
+    "translate:watch": "i18n-translator .",
+    "translate:bulk": "i18n-translator . --bulk-translate",
+    "translate:force": "i18n-translator . --bulk-translate --force",
+    "translate:export-cache": "i18n-translator . --export-cache"
   }
 }
 ```
@@ -168,14 +180,16 @@ Then run them with:
 
 ```bash
 npm run translate:watch
-npm run translate:push
-npm run translate:pull
+npm run translate:bulk
+npm run translate:force
+npm run translate:export-cache
 ```
 
 Or with pnpm:
 
 ```bash
 pnpm translate:watch
-pnpm translate:push
-pnpm translate:pull
+pnpm translate:bulk
+pnpm translate:force
+pnpm translate:export-cache
 ```

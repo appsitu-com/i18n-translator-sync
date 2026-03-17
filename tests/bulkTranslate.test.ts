@@ -57,7 +57,7 @@ describe('bulkTranslateWithEngine()', () => {
       ['A', 'B'],
       [null, null],
       'fake',
-      { source: 'en', target: 'fr', apiConfig: {} },
+      { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
       cache as unknown as TranslationCache
     )
 
@@ -82,7 +82,7 @@ describe('bulkTranslateWithEngine()', () => {
       ['A', 'B', 'C', 'D', 'E'],
       [null, null, null, null, null],
       'fake-chunked',
-      { source: 'en', target: 'fr', apiConfig: {} },
+      { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
       cache as unknown as TranslationCache
     )
 
@@ -103,7 +103,7 @@ describe('bulkTranslateWithEngine()', () => {
       ['AA', 'BB', 'C', 'DD'],
       [null, null, null, null],
       'fake-maxchars',
-      { source: 'en', target: 'fr', apiConfig: {} },
+      { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
       cache as unknown as TranslationCache
     )
 

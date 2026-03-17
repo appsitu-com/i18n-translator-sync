@@ -50,6 +50,23 @@ The extension now supports a project-specific configuration file called `transla
 
 For backward compatibility, the extension will still read from VSCode settings if no `translator.json` file is found or if certain options are not specified in the file.
 
+## Path Resolution (VSCode + CLI)
+
+Path resolution is intentionally consistent across VSCode and CLI.
+
+- A single runtime root directory is decided first:
+  - VSCode: the first workspace folder.
+  - CLI: the `workspace` argument (or current directory when omitted).
+- Relative paths in config are resolved from that root directory.
+- `translator.env` is loaded from that root directory.
+- In CLI mode, `--config <path>` selects which translator JSON file is parsed, while relative path values inside that config are still resolved from the CLI workspace root.
+
+Examples of values resolved from root directory:
+
+- `csvExportPath`
+- relative credential paths such as `GOOGLE_TRANSLATION_KEY='.translator/gkey.json'`
+- other engine-specific relative file paths
+
 ## Engine Overrides
 
 The `engineOverrides` configuration allows you to specify which translation engine to use for specific language pairs. The key is the engine name, and the value is an array of locale patterns.

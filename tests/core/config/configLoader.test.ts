@@ -7,6 +7,7 @@ import {
   snapshotEnvVars,
   resolveConfigEnvVars,
   loadTranslatorConfig,
+  logConfiguredEnginePlan,
   MissingEnvironmentValueError,
   InvalidTranslatorConfigError
 } from '../../../src/core/config/configLoader'
@@ -376,5 +377,58 @@ describe('loadTranslatorConfig', () => {
     const config = loadTranslatorConfig(tmpDir, logger)
 
     expect(config.sourceLocale).toBe('es')
+  })
+
+  it('logs engine plan for forward and back translation pairs', () => {
+    fs.writeFileSync(
+      path.join(tmpDir, 'translator.json'),
+      JSON.stringify({
+        sourceLocale: 'en',
+        targetLocales: ['fr'],
+        enableBackTranslation: true,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'google',
+        engineOverrides: {
+          deepl: ['en:fr']
+        }
+      })
+    )
+
+    const logger = createTestLogger()
+    loadTranslatorConfig(tmpDir, logger)
+
+    const infoMessages = logger.messages.filter((m) => m.startsWith('[info] Engine plan'))
+    expect(infoMessages.some((m) => m.includes('[forward] en -> fr'))).toBe(true)
+    expect(infoMessages.some((m) => m.includes('[back] fr -> en'))).toBe(true)
+  })
+})
+
+describe('logConfiguredEnginePlan', () => {
+  it('logs message when no target locales are configured', () => {
+    const logger = createTestLogger()
+
+    logConfiguredEnginePlan(
+      {
+        sourceDir: '',
+        targetDir: '',
+        sourcePaths: ['i18n/en'],
+        sourceLocale: 'en',
+        targetLocales: [],
+        enableBackTranslation: false,
+        defaultMarkdownEngine: 'azure',
+        defaultJsonEngine: 'google',
+        engineOverrides: {},
+        excludeKeys: [],
+        excludeKeyPaths: [],
+        copyOnlyFiles: [],
+        csvExportPath: 'translator.csv',
+        autoExport: true,
+        autoImport: false,
+        translator: undefined
+      },
+      logger
+    )
+
+    expect(logger.messages.some((m) => m.includes('no target locales configured'))).toBe(true)
   })
 })

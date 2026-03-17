@@ -68,7 +68,7 @@ export async function bulkTranslateWithEngine(
   texts: string[],
   contexts: (string | null | undefined)[],
   engineName: string,
-  opts: { source: string; target: string; apiConfig: EngineConfig },
+  opts: { source: string; target: string; apiConfig: EngineConfig; rootDir: string },
   cache: TranslationCache,
   sourcePath?: string
 ): Promise<{ translations: string[]; stats: TranslationStats }> {
@@ -134,7 +134,8 @@ export async function bulkTranslateWithEngine(
       const chunkTranslated = await engine.translateMany(chunkTexts, chunkContexts, {
         sourceLocale: srcNorm,
         targetLocale: tgtNorm,
-        apiConfig: opts.apiConfig
+        apiConfig: opts.apiConfig,
+        rootDir: opts.rootDir
       })
       translated.push(...chunkTranslated)
     }

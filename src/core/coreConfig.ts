@@ -19,7 +19,7 @@ import { Logger } from './util/baseLogger'
 export const TranslateConfigSchema = TranslatorConfigSchema.omit({ translator: true })
 
 /** Project-level configuration (no engine credentials). */
-export type TranslateProjectConfig = Omit<ITranslatorConfig, 'translator'>
+export type TranslateProjectConfig = Omit<ITranslatorConfig, 'translator' | 'rootDir'>
 
 // Interface for platform-specific configuration
 export interface ConfigProvider {

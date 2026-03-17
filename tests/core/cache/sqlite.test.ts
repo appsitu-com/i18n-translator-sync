@@ -380,7 +380,7 @@ describe('NodeSQLiteCache wrapper', () => {
 
   it('delegates all methods to underlying SQLiteCache', async () => {
     const logger = createMockLogger()
-    const cache = new NodeSQLiteCache(logger, dbPath)
+    const cache = new NodeSQLiteCache(logger, dbPath, dir)
 
     // Test initialize (no-op)
     await cache.initialize()

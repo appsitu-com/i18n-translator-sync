@@ -5,6 +5,18 @@ import * as path from 'path'
  */
 
 /**
+ * Resolve a user-supplied path to an absolute path.
+ * Returns the path unchanged if already absolute;
+ * otherwise joins it with `rootDir`.
+ *
+ * This is the single path-resolution utility for the entire app —
+ * works for both VS Code (workspace root) and CLI (cwd or explicit dir) contexts.
+ */
+export function toAbsPath(filePath: string, rootDir: string): string {
+  return path.isAbsolute(filePath) ? filePath : path.join(rootDir, filePath)
+}
+
+/**
  * Normalize a path string for consistent comparison across platforms
  */
 export function normalizePath(pathStr: string): string {

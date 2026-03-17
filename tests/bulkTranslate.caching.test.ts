@@ -57,7 +57,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       texts,
       contexts,
       'copy', // Use copy engine for deterministic behavior
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -74,7 +74,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       texts,
       contexts,
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -92,7 +92,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       texts,
       contexts,
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -105,7 +105,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       textsWithNew,
       contexts,
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -123,7 +123,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       [text],
       ['button'],
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -136,7 +136,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       [text],
       ['menu'],
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -150,7 +150,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       [text],
       ['button'],
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -167,7 +167,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       texts,
       contexts,
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -187,7 +187,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       segment,
       context,
       'copy',
-      { source: 'en', target: 'es', apiConfig: {} },
+      { source: 'en', target: 'es', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -202,7 +202,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       segment,
       context,
       'copy',
-      { source: 'en', target: 'es', apiConfig: {} },
+      { source: 'en', target: 'es', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -224,7 +224,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       [text],
       [null],
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 
@@ -237,7 +237,7 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
       [text],
       [null],
       'copy',
-      { source: 'en', target: 'en', apiConfig: {} },
+      { source: 'en', target: 'en', apiConfig: {}, rootDir: process.cwd() },
       cache
     )
 

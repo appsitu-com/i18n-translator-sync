@@ -53,7 +53,8 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       {
         source: sourceLocale,
         target: targetLocale,
-        apiConfig: engineConfig
+        apiConfig: engineConfig,
+        rootDir: this.workspacePath
       },
       this.cache,
       sourceFile

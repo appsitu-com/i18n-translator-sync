@@ -26,6 +26,7 @@ export {
   snapshotEnvVars,
   resolveConfigEnvVars,
   loadTranslatorConfig,
+  logConfiguredEnginePlan,
   MissingEnvironmentValueError,
   InvalidTranslatorConfigError,
   type GetPassphrase

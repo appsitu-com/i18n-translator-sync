@@ -139,7 +139,8 @@ describe('CLITranslatorAdapter', () => {
       testWorkspacePath,
       expect.any(ConsoleLogger),
       expect.any(NodeFileSystem),
-      expect.any(Object) // ConfigProvider
+      expect.any(Object), // ConfigProvider
+      testConfigPath
     );
   });
 

@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import { toAbsPath } from '../util/pathShared';
 import { TranslatorManager } from '../translatorManager';
 import { loadProjectConfig, toProjectConfig } from '../coreConfig';
 import { Logger } from '../util/baseLogger';
@@ -30,7 +31,8 @@ export abstract class TranslatorAdapter {
     protected readonly workspacePath: string,
     protected readonly logger: Logger,
     protected readonly fileSystem: FileSystem,
-    protected readonly configProvider: ConfigProvider
+    protected readonly configProvider: ConfigProvider,
+    protected readonly translatorConfigPath?: string
   ) {}
 
   /**
@@ -76,25 +78,18 @@ export abstract class TranslatorAdapter {
   }
 
   /**
-   * Resolve a CSV path to an absolute path under the workspace when needed
-   */
-  private resolveCsvPath(csvPath: string): string {
-    return path.isAbsolute(csvPath) ? csvPath : path.join(this.workspacePath, csvPath);
-  }
-
-  /**
    * Resolve which CSV file should be used for startup auto-import.
    * Prefer translations.csv to match startup import behavior, then fall back to configured csvExportPath.
    */
   private async resolveAutoImportCsvPath(csvExportPath: string): Promise<string | undefined> {
-    const preferredCsvPath = this.resolveCsvPath('translations.csv');
+    const preferredCsvPath = toAbsPath('translations.csv', this.workspacePath);
     const preferredUri = this.fileSystem.createUri(preferredCsvPath);
 
     if (await this.fileSystem.fileExists(preferredUri)) {
       return preferredCsvPath;
     }
 
-    const configuredCsvPath = this.resolveCsvPath(csvExportPath || 'translator.csv');
+    const configuredCsvPath = toAbsPath(csvExportPath || 'translator.csv', this.workspacePath);
     if (path.resolve(configuredCsvPath) === path.resolve(preferredCsvPath)) {
       return undefined;
     }
@@ -182,7 +177,8 @@ export abstract class TranslatorAdapter {
         const translatorConfig = loadTranslatorConfig(
           this.workspacePath,
           this.logger,
-          getPassphrase
+          getPassphrase,
+          this.translatorConfigPath
         );
         this.translatorConfig = translatorConfig;
         this.translatorEngines = translatorConfig.translator;
@@ -235,7 +231,8 @@ export abstract class TranslatorAdapter {
       const translatorConfig = loadTranslatorConfig(
         this.workspacePath,
         this.logger,
-        getPassphrase
+        getPassphrase,
+        this.translatorConfigPath
       );
       this.translatorConfig = translatorConfig;
       this.translatorEngines = translatorConfig.translator;
@@ -431,7 +428,7 @@ export abstract class TranslatorAdapter {
       );
 
       // Create the absolute path to the file
-      const absolutePath = path.isAbsolute(filePath) ? filePath : path.join(this.workspacePath, filePath);
+      const absolutePath = toAbsPath(filePath, this.workspacePath);
       const uri = this.fileSystem.createUri(absolutePath);
 
       // Check if file exists
@@ -507,9 +504,7 @@ export abstract class TranslatorAdapter {
       const shouldAutoExport = projectConfig.autoExport ?? true;
       const csvExportPath = projectConfig.csvExportPath || 'translator.csv';
       if (shouldAutoExport && this.cache) {
-        const csvPath = path.isAbsolute(csvExportPath)
-          ? csvExportPath
-          : path.join(this.workspacePath, csvExportPath);
+        const csvPath = toAbsPath(csvExportPath, this.workspacePath);
         try {
           await this.cache.exportCSV(csvPath);
           this.logger.info(`Auto-exported cache to ${csvPath}`);
@@ -549,9 +544,7 @@ export abstract class TranslatorAdapter {
 
       const csvExportPath = projectConfig.csvExportPath || 'translator.csv';
       const shouldAutoExport = projectConfig.autoExport ?? true;
-      const csvPath = path.isAbsolute(csvExportPath)
-        ? csvExportPath
-        : path.join(this.workspacePath, csvExportPath);
+      const csvPath = toAbsPath(csvExportPath, this.workspacePath);
 
       let backupPath: string | undefined;
       if (fs.existsSync(csvPath)) {

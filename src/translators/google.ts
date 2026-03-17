@@ -4,7 +4,7 @@ import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { readFileSync } from 'node:fs'
-import { resolve, isAbsolute, join } from 'node:path'
+import { toAbsPath } from '../core/util/pathShared'
 import { createSign } from 'node:crypto'
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -44,13 +44,14 @@ interface GoogleV3TranslateResponse {
   }>
 }
 
-function describeCredentialSource(keyOrPath: string): string {
-  const trimmed = keyOrPath.trim()
-  if (trimmed.startsWith('{')) {
-    return 'inline-json'
-  }
+function resolveCredentialPath(keyOrPath: string, rootDir: string): string | null {
+  if (keyOrPath.trim().startsWith('{')) return null
+  return toAbsPath(keyOrPath, rootDir)
+}
 
-  return `file-path (${resolve(keyOrPath)})`
+function describeCredentialSource(keyOrPath: string, rootDir: string): string {
+  const resolved = resolveCredentialPath(keyOrPath, rootDir)
+  return resolved === null ? 'inline-json' : `file-path (${resolved})`
 }
 
 function toBase64Url(value: string): string {
@@ -85,21 +86,12 @@ function parseServiceAccountCredentials(credentialsJson: string): GoogleServiceA
   }
 }
 
-function readServiceAccountCredentials(keyOrPath: string): GoogleServiceAccountCredentials {
-  // Try to parse as JSON string first
-  if (keyOrPath.trim().startsWith('{')) {
+function readServiceAccountCredentials(keyOrPath: string, rootDir: string): GoogleServiceAccountCredentials {
+  const resolvedPath = resolveCredentialPath(keyOrPath, rootDir)
+
+  if (resolvedPath === null) {
     console.error('Google Translate v3: Credentials provided as inline JSON')
     return parseServiceAccountCredentials(keyOrPath)
-  }
-
-  // Otherwise, treat as file path
-  // Resolve relative paths against the translator.env directory if available
-  let resolvedPath: string
-  if (isAbsolute(keyOrPath)) {
-    resolvedPath = keyOrPath
-  } else {
-    const envDir = process.env.I18N_TRANSLATOR_ENV_DIR
-    resolvedPath = envDir ? join(envDir, keyOrPath) : resolve(keyOrPath)
   }
 
   console.error(`Google Translate v3: Loading credentials from file: ${resolvedPath}`)
@@ -140,15 +132,15 @@ function buildJwtAssertion(credentials: GoogleServiceAccountCredentials): string
   return `${unsignedToken}.${signature}`
 }
 
-async function requestGoogleAccessToken(pathToCredentials: string, timeoutMs: number): Promise<string> {
+async function requestGoogleAccessToken(pathToCredentials: string, rootDir: string, timeoutMs: number): Promise<string> {
   const cached = tokenCache.get(pathToCredentials)
   if (cached && cached.expiresAtMs > Date.now()) {
-    console.error(`Google Translate v3: Using cached token (${describeCredentialSource(pathToCredentials)})`)
+    console.error(`Google Translate v3: Using cached token (${describeCredentialSource(pathToCredentials, rootDir)})`)
     return cached.accessToken
   }
 
-  console.error(`Google Translate v3: Requesting new access token (${describeCredentialSource(pathToCredentials)})`)
-  const credentials = readServiceAccountCredentials(pathToCredentials)
+  console.error(`Google Translate v3: Requesting new access token (${describeCredentialSource(pathToCredentials, rootDir)})`)
+  const credentials = readServiceAccountCredentials(pathToCredentials, rootDir)
   const assertion = buildJwtAssertion(credentials)
   const tokenUrl = credentials.token_uri || GOOGLE_TOKEN_URL
   const body = new URLSearchParams({
@@ -205,8 +197,9 @@ export const GoogleTranslator: Translator = {
     if (!credentialsPath) throw new Error("Google Translate v3: missing 'apiKey' (path to service credential JSON)")
     if (!projectId) throw new Error("Google Translate v3: missing 'googleProjectId'")
 
-    console.error(`Google Translate v3: Credential source from config: ${describeCredentialSource(credentialsPath)}`)
-    const token = await withRetry(retry, () => requestGoogleAccessToken(credentialsPath, timeout))
+    const rootDir = opts.rootDir
+    console.error(`Google Translate v3: Credential source from config: ${describeCredentialSource(credentialsPath, rootDir)}`)
+    const token = await withRetry(retry, () => requestGoogleAccessToken(credentialsPath, rootDir, timeout))
 
     const parent = `projects/${projectId}/locations/${location}`
     const url = `${endpoint}/v3/${parent}:translateText`

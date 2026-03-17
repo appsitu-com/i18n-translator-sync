@@ -74,9 +74,8 @@ export interface TranslationCache {
 export class NodeSQLiteCache implements TranslationCache {
   private cache: SQLiteCache
 
-  constructor(logger: Logger, dbPath: string, workspacePath?: string) {
-    const resolvedWorkspacePath = workspacePath ?? process.cwd()
-    this.cache = new SQLiteCache(dbPath, resolvedWorkspacePath, logger)
+  constructor(logger: Logger, dbPath: string, workspacePath: string) {
+    this.cache = new SQLiteCache(dbPath, workspacePath, logger)
   }
 
   async initialize(): Promise<void> {

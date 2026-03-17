@@ -54,6 +54,40 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 | `Translator: Purge`                     | Removes all unused translations from translation cache                |
 | `Translator: Show output`               | Opens the translator service output logs for debugging                |
 
+## CLI Quick Reference
+
+The CLI uses a single command form:
+
+```bash
+i18n-translator [workspace] [options]
+```
+
+- `workspace` defaults to the current directory.
+- `--config <path>` selects a custom translator config file.
+- `--bulk-translate` runs one translation pass and exits.
+- `--watch` (default) runs continuously; `--no-watch` disables watching.
+- `--force` forces translation even when targets look up to date.
+
+Common commands:
+
+```bash
+# watch mode (default)
+i18n-translator .
+
+# one-time bulk translation
+i18n-translator . --bulk-translate
+
+# force full re-translation
+i18n-translator . --bulk-translate --force
+
+# cache operations
+i18n-translator . --export-cache
+i18n-translator . --import-cache ./translator.csv
+i18n-translator . --purge-cache
+```
+
+For complete CLI details, see [doc/CLI.md](doc/CLI.md).
+
 ## Instant Translation to Over 135 Languages
 
 <!-- TODO: Add screenshot of multi-language translation in action -->

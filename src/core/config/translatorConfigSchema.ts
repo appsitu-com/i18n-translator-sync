@@ -244,7 +244,15 @@ export const TranslatorConfigSchema = z.object({
 // Inferred TypeScript types
 // ---------------------------------------------------------------------------
 
-export type ITranslatorConfig = z.infer<typeof TranslatorConfigSchema>
+/**
+ * Zod-validated translator config augmented with the runtime rootDir
+ * that was passed to loadTranslatorConfig(). This is the single source of
+ * truth for resolving relative paths anywhere in the app.
+ */
+export type ITranslatorConfig = z.infer<typeof TranslatorConfigSchema> & {
+  /** Absolute path to the workspace / project root (VS Code or CLI). */
+  rootDir: string
+}
 
 export type IAzureConfig = z.infer<typeof AzureConfigSchema>
 export type IGoogleConfig = z.infer<typeof GoogleConfigSchema>

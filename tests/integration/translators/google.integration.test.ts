@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { resolve } from 'node:path';
 import { GoogleTranslator, clearTokenCache } from '../../../src/translators/google';
 import { requireEnv } from './testEnv';
 
 // Can be either inline JSON string or file path to credentials JSON
 const googleCredentials = requireEnv('GOOGLE_TRANSLATION_KEY');
 const googleProjectId = requireEnv('GOOGLE_TRANSLATION_PROJECT_ID');
+
+/** Credentials in translator.env are relative to the test-project folder. */
+const testProjectDir = resolve(process.cwd(), 'test-project');
 
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
@@ -25,7 +29,8 @@ describe('integration: google translator', () => {
         googleProjectId,
         googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
         timeoutMs: 60000
-      }
+      },
+      rootDir: testProjectDir
     });
 
     expect(result).toHaveLength(1);
@@ -51,7 +56,8 @@ describe('integration: google translator', () => {
           googleProjectId,
           googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
           timeoutMs: 60000
-        }
+        },
+        rootDir: testProjectDir
       };
 
       const first = await GoogleTranslator.translateMany(['Good morning'], [null], opts);
