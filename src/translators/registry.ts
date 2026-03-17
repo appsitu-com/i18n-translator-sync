@@ -24,7 +24,11 @@ function toLanguageCode(locale: string): string {
   return locale.toLowerCase().split(/[-_]/)[0]
 }
 
-function selectEngine(sourceLocale: string, targetLocale: string): ResolvedTranslatorEngine {
+function selectEngine(
+  sourceLocale: string,
+  targetLocale: string,
+  fileType: 'md' | 'json'
+): ResolvedTranslatorEngine {
   const normalizedSourceLocale = toLanguageCode(sourceLocale)
   const normalizedTargetLocale = toLanguageCode(targetLocale)
 
@@ -43,7 +47,8 @@ function selectEngine(sourceLocale: string, targetLocale: string): ResolvedTrans
     return 'google'
   }
 
-  return 'google'
+  // For locales outside explicit language groups, use document type defaults.
+  return fileType === 'md' ? 'azure' : 'google'
 }
 
 function normalizePositiveInteger(value: number | undefined, fallback: number): number {
@@ -88,11 +93,12 @@ export function pickEngine(params: {
   fileType: string
 }): ResolvedTranslatorEngine {
   const key = `${params.source}:${params.target}`
+  const autoRouteFileType: 'md' | 'json' = params.fileType === 'md' ? 'md' : 'json'
   const defaultEngine = params.defaults[params.fileType as keyof typeof params.defaults] || params.defaults.json
   const selectedEngine = (params.overrides[key] ?? defaultEngine) as TranslatorEngine
 
   if (selectedEngine === 'auto') {
-    return selectEngine(params.source, params.target)
+    return selectEngine(params.source, params.target, autoRouteFileType)
   }
 
   return selectedEngine

@@ -335,7 +335,7 @@ The Translator may fail to auto-start if it finds invalid or missing values in `
 
 See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/Configuration.md) for full details.
 
-- Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `copy`, `auto`
+- Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `openrouter`, `nllb`, `copy`, `auto`
 - `copy` engine is just that. It won't translate anything. It just copies a file from source to target.
 - `auto` chooses an engine from the locale pair and document type using normalized locale codes:
   - `deepl` for targets `de|fr|es|it|nl|pl|pt|ru`;
@@ -350,8 +350,8 @@ See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator
 | `sourceLocale`          | `string`                   | Source locale                                                                                                              | `"en"`                                       |
 | `targetLocales`         | `string[]`                 | Target locales to generate translations for                                                                                | `['fr-FR', 'fr-CA']`                         |
 | `enableBackTranslation` | `boolean`                  | Enable back translation                                                                                                    | `false`                                      |
-| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy, auto)                                         | `"azure"`                                    |
-| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy, auto)                                    | `"google"`                                   |
+| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)                                         | `"azure"`                                    |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)                                    | `"google"`                                   |
 | `engineOverrides`       | `Record<string, string[]>` | Overrides default engine key for a locale or locale-pair. | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
 | `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth.                                    | `["code", "native"]`                         |
 | `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                                                        | `["meta.version"]`                           |

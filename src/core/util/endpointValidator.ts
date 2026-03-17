@@ -183,6 +183,17 @@ export function validateEndpoints(config: ITranslatorConfig): void {
     }
   }
 
+  // Check NLLB endpoint (OpenRouter-based)
+  if (translator.nllb?.endpoint) {
+    if (!isEndpointAllowed(translator.nllb.endpoint, ALLOWED_DOMAINS.openrouter)) {
+      throw new UntrustedEndpointError(
+        'nllb',
+        translator.nllb.endpoint,
+        ALLOWED_DOMAINS.openrouter
+      )
+    }
+  }
+
   // Check MyMemory endpoint
   if (translator.mymemory?.endpoint) {
     if (!isEndpointAllowed(translator.mymemory.endpoint, ALLOWED_DOMAINS.mymemory)) {

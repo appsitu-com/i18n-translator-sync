@@ -276,5 +276,26 @@ describe('translators/registry', () => {
 
       expect(result).toBe('google')
     })
+
+    it('should route auto fallback to azure for markdown and google for structured files', () => {
+      const markdownResult = pickEngine({
+        source: 'en',
+        target: 'sv',
+        defaults: { md: 'auto', json: 'auto' },
+        overrides: {},
+        fileType: 'md'
+      })
+
+      const structuredResult = pickEngine({
+        source: 'en',
+        target: 'sv',
+        defaults: { md: 'auto', json: 'auto' },
+        overrides: {},
+        fileType: 'json'
+      })
+
+      expect(markdownResult).toBe('azure')
+      expect(structuredResult).toBe('google')
+    })
   })
 })

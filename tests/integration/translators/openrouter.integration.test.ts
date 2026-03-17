@@ -1,12 +1,17 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { OpenRouterTranslator } from '../../../src/translators/openrouter';
 import { requireEnv } from './testEnv';
 
 const openRouterKey = requireEnv('OPENROUTER_API_KEY');
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('integration: openrouter translator', () => {
   it('makes a real API call and returns translated text', async () => {
     const sourceText = 'Good morning, friend!';
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await OpenRouterTranslator.translateMany([sourceText], [null], {
       sourceLocale: 'en',
@@ -15,10 +20,22 @@ describe('integration: openrouter translator', () => {
         apiKey: openRouterKey,
         endpoint: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
         openrouterModel: 'anthropic/claude-3-haiku',
+        langMap: {
+          en: 'English',
+          es: 'Spanish'
+        },
         temperature: 0,
         maxOutputTokens: 256
       }
     });
+
+    const loggedErrors = consoleErrorSpy.mock.calls
+      .map((args) => args.map((value) => String(value)).join(' '))
+      .join('\n');
+
+    if (loggedErrors.length > 0) {
+      throw new Error(`OpenRouter integration failure: ${loggedErrors}`);
+    }
 
     expect(result).toHaveLength(1);
     expect(result[0]).toBeTypeOf('string');

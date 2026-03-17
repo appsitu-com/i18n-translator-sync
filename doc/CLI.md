@@ -86,7 +86,7 @@ The CLI uses the same configuration as the VSCode extension. You need to create 
 ```
 
 Valid engine codes for `defaultMarkdownEngine`, `defaultJsonEngine`, and `engineOverrides` keys are:
-`azure`, `google`, `deepl`, `gemini`, `copy`, `auto`.
+`azure`, `google`, `deepl`, `gemini`, `openrouter`, `nllb`, `copy`, `auto`.
 
 When using `auto`, locales are normalized (`fr-FR` -> `fr`, `pt-BR` -> `pt`) before selecting the engine.
 

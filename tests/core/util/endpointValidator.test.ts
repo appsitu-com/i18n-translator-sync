@@ -262,6 +262,21 @@ describe('validateEndpoints', () => {
     )
   })
 
+  it('does not throw for NLLB with trusted OpenRouter endpoint', () => {
+    const config: Partial<ITranslatorConfig> = {
+      sourceLocale: 'en',
+      targetLocales: ['fr'],
+      translator: {
+        nllb: {
+          apiKey: 'test-key',
+          endpoint: 'https://openrouter.ai/api/v1/chat/completions'
+        }
+      }
+    }
+
+    expect(() => validateEndpoints(config as ITranslatorConfig)).not.toThrow()
+  })
+
   it('does not throw for MyMemory with trusted endpoint', () => {
     const config: Partial<ITranslatorConfig> = {
       sourceLocale: 'en',

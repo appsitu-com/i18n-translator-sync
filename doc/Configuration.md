@@ -36,9 +36,9 @@ The extension now supports a project-specific configuration file called `transla
 | `sourceLocale` | `string` | Source locale | `"en"` |
 | `targetLocales` | `string[]` | Target locales to generate translations for | `['fr-FR', 'fr-CA']` |
 | `enableBackTranslation` | `boolean` | Enable back translation | `false` |
-| `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, copy, auto) | `"azure"` |
-| `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, copy, auto) | `"google"` |
-| `engineOverrides` | `Record<string, string[]>` | Engine overrides keyed by engine code (`azure`, `google`, `deepl`, `gemini`, `copy`, `auto`) | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
+| `defaultMarkdownEngine` | `string` | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, nllb, copy, auto) | `"azure"` |
+| `defaultJsonEngine` | `string` | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, openrouter, nllb, copy, auto) | `"google"` |
+| `engineOverrides` | `Record<string, string[]>` | Engine overrides keyed by engine code (`azure`, `google`, `deepl`, `gemini`, `openrouter`, `nllb`, `copy`, `auto`) | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
 | `excludeKeys` | `string[]` | Key names to exclude from translation (copied unchanged). Matches at any nesting depth. | `[]` |
 | `excludeKeyPaths` | `string[]` | Exact dotted key paths to exclude from translation (e.g. `"meta.version"`). | `[]` |
 | `copyOnlyFiles` | `string[]` | File names (not paths) to copy verbatim instead of translating (e.g. `"index.ts"`). | `[]` |

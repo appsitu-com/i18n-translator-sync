@@ -97,6 +97,25 @@ export const OpenRouterConfigSchema = z.object({
   langMap: LangMapSchema
 })
 
+/** NLLB via OpenRouter */
+export const NllbConfigSchema = z.object({
+  apiKey: z.string().optional(),
+  endpoint: z
+    .string()
+    .optional()
+    .default('https://openrouter.ai/api/v1/chat/completions'),
+  nllbModel: z
+    .string()
+    .optional()
+    .default('meta-llama/nllb-200-1.3B'),
+  temperature: z.number().min(0).max(2).optional().default(0),
+  maxOutputTokens: z.number().int().min(1).optional().default(4096),
+  separator: z.string().optional().default('<<<SEP>>>'),
+  timeoutMs: z.number().int().min(0).optional().default(60_000),
+  retry: RetrySchema,
+  langMap: LangMapSchema
+})
+
 /** MyMemory translation engine */
 export const MyMemoryConfigSchema = z.object({
   apiKey: z.string().optional(),
@@ -123,6 +142,7 @@ export const TranslatorEnginesSchema = z.object({
   deepl: DeepLConfigSchema.optional(),
   gemini: GeminiConfigSchema.optional(),
   openrouter: OpenRouterConfigSchema.optional(),
+  nllb: NllbConfigSchema.optional(),
   mymemory: MyMemoryConfigSchema.optional(),
   copy: CopyConfigSchema
 })
@@ -137,6 +157,7 @@ const ENGINES = [
   'deepl',
   'gemini',
   'openrouter',
+  'nllb',
   'mymemory',
   'copy',
   'auto'
@@ -259,6 +280,7 @@ export type IGoogleConfig = z.infer<typeof GoogleConfigSchema>
 export type IDeepLConfig = z.infer<typeof DeepLConfigSchema>
 export type IGeminiConfig = z.infer<typeof GeminiConfigSchema>
 export type IOpenRouterConfig = z.infer<typeof OpenRouterConfigSchema>
+export type INllbConfig = z.infer<typeof NllbConfigSchema>
 export type IMyMemoryConfig = z.infer<typeof MyMemoryConfigSchema>
 export type ICopyConfig = z.infer<typeof CopyConfigSchema>
 export type ITranslatorEngines = z.infer<typeof TranslatorEnginesSchema>

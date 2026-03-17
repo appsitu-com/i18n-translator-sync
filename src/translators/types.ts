@@ -4,6 +4,7 @@ import type {
   IDeepLConfig,
   IGeminiConfig,
   IOpenRouterConfig,
+  INllbConfig,
   IMyMemoryConfig,
   ICopyConfig,
   TranslatorEngine
@@ -16,6 +17,7 @@ export type EngineConfig =
   | IDeepLConfig
   | IGeminiConfig
   | IOpenRouterConfig
+  | INllbConfig
   | IMyMemoryConfig
   | ICopyConfig
 

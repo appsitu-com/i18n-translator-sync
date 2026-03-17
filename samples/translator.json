@@ -148,6 +148,24 @@
         "zh-HK": "Chinese (Traditional)",
         "zh-TW": "Chinese (Traditional)"
       }
+    },
+
+    // NLLB via OpenRouter (meta-llama/nllb-200-1.3B)
+    "nllb": {
+      "apiKey": "${OPENROUTER_API_KEY}",
+      "endpoint": "${OPENROUTER_API_URL}",
+      "nllbModel": "meta-llama/nllb-200-1.3B",
+      "separator": "<<<SEP>>>",
+
+      // Recommended: map your app locales to FLORES/NLLB locale codes
+      "langMap": {
+        "en": "eng_Latn",
+        "fr": "fra_Latn",
+        "de": "deu_Latn",
+        "es": "spa_Latn",
+        "ja": "jpn_Jpan",
+        "zh-CN": "zho_Hans"
+      }
     }
   }
 }

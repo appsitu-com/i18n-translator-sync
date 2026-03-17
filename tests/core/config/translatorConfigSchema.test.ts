@@ -6,6 +6,7 @@ import {
   DeepLConfigSchema,
   GeminiConfigSchema,
   OpenRouterConfigSchema,
+  NllbConfigSchema,
   MyMemoryConfigSchema,
   TranslatorEngineSchema,
   TranslatorEnginesSchema
@@ -19,7 +20,7 @@ import path from 'path'
 // ---------------------------------------------------------------------------
 describe('TranslatorEngineSchema', () => {
   it('accepts all valid engine names', () => {
-    for (const name of ['azure', 'google', 'deepl', 'gemini', 'openrouter', 'mymemory', 'copy', 'auto']) {
+    for (const name of ['azure', 'google', 'deepl', 'gemini', 'openrouter', 'nllb', 'mymemory', 'copy', 'auto']) {
       expect(TranslatorEngineSchema.safeParse(name).success).toBe(true)
     }
   })
@@ -88,6 +89,19 @@ describe('OpenRouterConfigSchema', () => {
     expect(result.openrouterModel).toBe('anthropic/claude-3-haiku')
     expect(result.temperature).toBe(0.1)
     expect(result.maxOutputTokens).toBe(2048)
+    expect(result.timeoutMs).toBe(60_000)
+    expect(result.langMap).toEqual({})
+  })
+})
+
+describe('NllbConfigSchema', () => {
+  it('applies defaults for an empty object', () => {
+    const result = NllbConfigSchema.parse({})
+    expect(result.endpoint).toBe('https://openrouter.ai/api/v1/chat/completions')
+    expect(result.nllbModel).toBe('meta-llama/nllb-200-1.3B')
+    expect(result.temperature).toBe(0)
+    expect(result.maxOutputTokens).toBe(4096)
+    expect(result.separator).toBe('<<<SEP>>>')
     expect(result.timeoutMs).toBe(60_000)
     expect(result.langMap).toEqual({})
   })
