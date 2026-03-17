@@ -1,4 +1,5 @@
 import type { ResolvedTranslatorEngine, Translator, TranslatorEngine } from './types'
+import { selectEngine } from './auto'
 
 const DEFAULT_TRANSLATION_LIMIT = Number.MAX_SAFE_INTEGER
 const DEFAULT_TRANSLATION_MAX_CHARS = Number.MAX_SAFE_INTEGER
@@ -15,41 +16,6 @@ export interface RegisteredTranslator {
 }
 
 const REGISTRY = new Map<string, RegisteredTranslator>()
-
-const EUROPEAN_TARGET_LANGUAGES = new Set(['de', 'fr', 'es', 'it', 'nl', 'pl', 'pt', 'ru'])
-const ASIAN_TARGET_LANGUAGES = new Set(['zh', 'ja', 'ko', 'th', 'vi'])
-const GOOGLE_PRIORITY_TARGET_LANGUAGES = new Set(['ar', 'hi'])
-
-function toLanguageCode(locale: string): string {
-  return locale.toLowerCase().split(/[-_]/)[0]
-}
-
-function selectEngine(
-  sourceLocale: string,
-  targetLocale: string,
-  fileType: 'md' | 'json'
-): ResolvedTranslatorEngine {
-  const normalizedSourceLocale = toLanguageCode(sourceLocale)
-  const normalizedTargetLocale = toLanguageCode(targetLocale)
-
-  // Keep source locale available for pair-based routing expansion.
-  void normalizedSourceLocale
-
-  if (EUROPEAN_TARGET_LANGUAGES.has(normalizedTargetLocale)) {
-    return 'deepl'
-  }
-
-  if (ASIAN_TARGET_LANGUAGES.has(normalizedTargetLocale)) {
-    return 'google'
-  }
-
-  if (GOOGLE_PRIORITY_TARGET_LANGUAGES.has(normalizedTargetLocale)) {
-    return 'google'
-  }
-
-  // For locales outside explicit language groups, use document type defaults.
-  return fileType === 'md' ? 'azure' : 'google'
-}
 
 function normalizePositiveInteger(value: number | undefined, fallback: number): number {
   if (typeof value !== 'number') {
