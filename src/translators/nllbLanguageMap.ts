@@ -205,7 +205,11 @@ export const NLLB_LOCALE_TO_LANGUAGE_NAME: Record<string, string> = {
   'als_Latn': 'Tosk Albanian'
 }
 
-export const NLLB_SUPPORTED_LOCALES = new Set(Object.keys(NLLB_LOCALE_TO_LANGUAGE_NAME))
+export const NLLB_SUPPORTED_SCRIPT_LOCALE_CODES = new Set(Object.keys(NLLB_LOCALE_TO_LANGUAGE_NAME))
+
+export const NLLB_SUPPORTED_LANGUAGE_LOCALE_CODES = new Set(
+  Array.from(NLLB_SUPPORTED_SCRIPT_LOCALE_CODES).map((locale) => locale.toLowerCase().split('_')[0])
+)
 
 export const ISO_TO_NLLB_LOCALE: Record<string, string> = {
   ar: 'arb_Arab',
@@ -226,5 +230,7 @@ export const ISO_TO_NLLB_LOCALE: Record<string, string> = {
   tr: 'tur_Latn',
   uk: 'ukr_Cyrl',
   vi: 'vie_Latn',
-  zh: 'zho_Hans'
+  zh: 'zho_Hans',
+  'zh-Hans': 'zho_Hans',
+  'zh-Hant': 'zho_Hant'
 }

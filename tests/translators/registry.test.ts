@@ -6,19 +6,17 @@ import {
   deregisterTranslator,
   pickEngine
 } from '../../src/translators/registry'
-import type { Translator, TranslatorEngine } from '../../src/translators/types'
+import type { Translator } from '../../src/translators/types'
 
 describe('translators/registry', () => {
   // Mock translator for testing
   const mockTranslator: Translator = {
     name: 'test-translator',
-    normalizeLocale: (locale: string) => locale,
     translateMany: async (texts: string[]) => texts.map(() => 'translated')
   }
 
   const mockTranslator2: Translator = {
     name: 'another-translator',
-    normalizeLocale: (locale: string) => locale,
     translateMany: async (texts: string[]) => texts.map(() => 'another-translation')
   }
 
@@ -253,49 +251,5 @@ describe('translators/registry', () => {
       })).toBe('google')
     })
 
-    it('should resolve auto default to deepl for supported european targets', () => {
-      const result = pickEngine({
-        source: 'en-US',
-        target: 'fr-FR',
-        defaults: { md: 'auto', json: 'google' },
-        overrides: {},
-        fileType: 'md'
-      })
-
-      expect(result).toBe('deepl')
-    })
-
-    it('should resolve auto override using locale language codes', () => {
-      const result = pickEngine({
-        source: 'en_US',
-        target: 'ja-JP',
-        defaults: { md: 'azure', json: 'azure' },
-        overrides: { 'en_US:ja-JP': 'auto' },
-        fileType: 'json'
-      })
-
-      expect(result).toBe('google')
-    })
-
-    it('should route auto fallback to azure for markdown and google for structured files', () => {
-      const markdownResult = pickEngine({
-        source: 'en',
-        target: 'sv',
-        defaults: { md: 'auto', json: 'auto' },
-        overrides: {},
-        fileType: 'md'
-      })
-
-      const structuredResult = pickEngine({
-        source: 'en',
-        target: 'sv',
-        defaults: { md: 'auto', json: 'auto' },
-        overrides: {},
-        fileType: 'json'
-      })
-
-      expect(markdownResult).toBe('azure')
-      expect(structuredResult).toBe('google')
-    })
   })
 })

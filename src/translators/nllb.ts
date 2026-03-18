@@ -1,24 +1,41 @@
 import type { Translator, BulkTranslateOpts } from './types'
 import type { INllbConfig } from '../core/config'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
-import { ISO_TO_NLLB_LOCALE, NLLB_LOCALE_TO_LANGUAGE_NAME, NLLB_SUPPORTED_LOCALES } from './nllbLanguageMap'
+import { ISO_TO_NLLB_LOCALE, NLLB_LOCALE_TO_LANGUAGE_NAME, NLLB_SUPPORTED_SCRIPT_LOCALE_CODES } from './nllbLanguageMap'
 
 const DEFAULT_OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
 const DEFAULT_NLLB_MODEL = 'meta-llama/nllb-200-1.3B'
 const DEFAULT_SEPARATOR = '<<<SEP>>>'
 
+function findNllbLocaleByLanguagePrefix(languagePrefix: string): string | undefined {
+  const prefix = languagePrefix.toLowerCase() + '_'
+  for (const locale of Object.keys(NLLB_LOCALE_TO_LANGUAGE_NAME)) {
+    if (locale.toLowerCase().startsWith(prefix)) {
+      return locale
+    }
+  }
+  return undefined
+}
+
 function toNllbLocale(locale: string, langMap: Record<string, string>): string {
   const mapped = normalizeLocaleWithMap(locale, langMap)
 
-  if (NLLB_SUPPORTED_LOCALES.has(mapped)) {
+  if (NLLB_SUPPORTED_SCRIPT_LOCALE_CODES.has(mapped)) {
     return mapped
   }
 
   const shortCode = mapped.toLowerCase().split(/[-_]/)[0]
-  const fallback = ISO_TO_NLLB_LOCALE[shortCode]
 
-  if (fallback && NLLB_SUPPORTED_LOCALES.has(fallback)) {
+  // Try ISO_TO_NLLB_LOCALE mapping first
+  const fallback = ISO_TO_NLLB_LOCALE[shortCode]
+  if (fallback && NLLB_SUPPORTED_SCRIPT_LOCALE_CODES.has(fallback)) {
     return fallback
+  }
+
+  // Search for first NLLB locale matching the language prefix
+  const prefixMatch = findNllbLocaleByLanguagePrefix(shortCode)
+  if (prefixMatch) {
+    return prefixMatch
   }
 
   throw new Error(`NLLB Translator: unsupported locale '${locale}'. Map it to a supported NLLB code via translator.nllb.langMap (for example 'en' -> 'eng_Latn').`)
