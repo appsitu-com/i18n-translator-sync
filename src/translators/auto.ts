@@ -83,11 +83,12 @@ export function selectEngine(
     return fallbackEngine
   }
 
-  if (isNllbSupportedTarget(targetLocale)) {
-    return 'nllb'
-  }
+  // NLLB model (meta-llama/nllb-200-1.3B) removed from OpenRouter — disabled until a replacement is available.
+  // if (isNllbSupportedTarget(targetLocale)) {
+  //   return 'nllb'
+  // }
 
   throw new Error(
-    `Auto engine routing could not find support for target locale '${targetLocale}' in azure, google, or nllb`
+    `Auto engine routing could not find support for target locale '${targetLocale}' in azure or google`
   )
 }

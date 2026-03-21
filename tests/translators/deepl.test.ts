@@ -38,9 +38,7 @@ describe('deepl stub', () => {
       rootDir: '.',
       apiConfig: {
         apiKey: 'DEEPL',
-        free: true,
-        endpoint: 'https://api-free.deepl.com',
-        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
+        endpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 30_000,
         langMap: {},
       }
@@ -60,9 +58,7 @@ describe('deepl stub', () => {
       rootDir: '.',
       apiConfig: {
         apiKey: 'DEEPL',
-        free: true,
-        endpoint: 'https://api-free.deepl.com',
-        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
+        endpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 30_000,
         langMap: {
           en: 'EN-US',
@@ -83,9 +79,7 @@ describe('deepl stub', () => {
       rootDir: '.',
       apiConfig: {
         apiKey: 'DEEPL',
-        free: true,
-        endpoint: 'https://api-free.deepl.com',
-        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
+        endpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 30_000,
         langMap: {
           en: 'EN-US',
@@ -129,9 +123,7 @@ describe('deepl api', () => {
 
     apiConfig = {
       apiKey: process.env.DEEPL_TRANSLATION_KEY,
-      endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
-      freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
-      free: true,
+      endpoint: process.env.DEEPL_TRANSLATION_URL,
       timeoutMs: 30_000,
       langMap: {},
     }

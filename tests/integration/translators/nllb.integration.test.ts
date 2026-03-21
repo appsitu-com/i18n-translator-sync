@@ -1,5 +1,6 @@
 // cspell:ignore nllb
-import { describe, expect, it } from 'vitest';
+// NLLB model (meta-llama/nllb-200-1.3B) removed from OpenRouter — skipped until a replacement is available.
+import { describe, it } from 'vitest';
 import { NllbTranslator, NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb';
 import type { INllbConfig } from '../../../src/translators/nllb';
 import { requireEnv } from './testEnv';
@@ -25,7 +26,7 @@ function createNllbConfig(maxOutputTokens: number): INllbConfig {
   };
 }
 
-describe('integration: nllb translator', () => {
+describe.skip('integration: nllb translator', () => {
   it('makes a real API call and returns translated text', async () => {
     const sourceText = 'Good morning, friend!';
 

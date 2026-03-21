@@ -14,9 +14,7 @@ describe('integration: deepl translator', () => {
       rootDir: process.cwd(),
       apiConfig: {
         apiKey: deeplKey,
-        endpoint: process.env.DEEPL_TRANSLATION_URL || DEEPL_DEFAULT_ENDPOINT_FREE,
-        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
-        free: true,
+        endpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 60000,
         langMap: {}
       }
