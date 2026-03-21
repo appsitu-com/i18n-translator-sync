@@ -116,15 +116,15 @@ function readServiceAccountCredentials(keyOrPath: string, rootDir: string): Goog
   const resolvedPath = resolveCredentialPath(keyOrPath, rootDir)
 
   if (resolvedPath === null) {
-    console.error('Google Translate v3: Credentials provided as inline JSON')
+    console.debug('Google Translate v3: Credentials provided as inline JSON')
     return parseServiceAccountCredentials(keyOrPath)
   }
 
-  console.error(`Google Translate v3: Loading credentials from file: ${resolvedPath}`)
+  console.debug(`Google Translate v3: Loading credentials from file: ${resolvedPath}`)
   let fileContent: string
   try {
     fileContent = readFileSync(resolvedPath, 'utf-8')
-    console.error('Google Translate v3: Successfully read credentials file')
+    console.debug('Google Translate v3: Successfully read credentials file')
   } catch (error) {
     throw new Error(`Google Translate v3: failed to read service credentials from '${keyOrPath}': ${String(error)}`)
   }
@@ -161,11 +161,11 @@ function buildJwtAssertion(credentials: GoogleServiceAccountCredentials): string
 async function requestGoogleAccessToken(pathToCredentials: string, rootDir: string, timeoutMs: number): Promise<string> {
   const cached = tokenCache.get(pathToCredentials)
   if (cached && cached.expiresAtMs > Date.now()) {
-    console.error(`Google Translate v3: Using cached token (${describeCredentialSource(pathToCredentials, rootDir)})`)
+    console.debug(`Google Translate v3: Using cached token (${describeCredentialSource(pathToCredentials, rootDir)})`)
     return cached.accessToken
   }
 
-  console.error(`Google Translate v3: Requesting new access token (${describeCredentialSource(pathToCredentials, rootDir)})`)
+  console.debug(`Google Translate v3: Requesting new access token (${describeCredentialSource(pathToCredentials, rootDir)})`)
   const credentials = readServiceAccountCredentials(pathToCredentials, rootDir)
   const assertion = buildJwtAssertion(credentials)
   const tokenUrl = credentials.token_uri || GOOGLE_TOKEN_URL
@@ -195,7 +195,7 @@ async function requestGoogleAccessToken(pathToCredentials: string, rootDir: stri
       throw new Error(`Google OAuth token response missing 'access_token': ${responseText}`)
     }
 
-    console.error(`Google Translate v3: Successfully obtained access token`)
+    console.debug(`Google Translate v3: Successfully obtained access token`)
     tokenCache.set(pathToCredentials, {
       accessToken,
       expiresAtMs: Date.now() + TOKEN_CACHE_TTL_MS
@@ -224,7 +224,7 @@ export const GoogleTranslator: Translator<IGoogleConfig> = {
     if (!projectId) throw new Error("Google Translate v3: missing 'googleProjectId'")
 
     const rootDir = opts.rootDir
-    console.error(`Google Translate v3: Credential source from config: ${describeCredentialSource(credentialsPath, rootDir)}`)
+    console.debug(`Google Translate v3: Credential source from config: ${describeCredentialSource(credentialsPath, rootDir)}`)
     const token = await withRetry(retry, () => requestGoogleAccessToken(credentialsPath, rootDir, timeout))
 
     const parent = `projects/${projectId}/locations/${location}`
