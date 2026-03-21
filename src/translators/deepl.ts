@@ -19,8 +19,6 @@ export const DEEPL_ALLOWED_DOMAINS = [
 export const DeepLConfigSchema = z.object({
   apiKey: z.string().optional(),
   endpoint: z.string().default(DEEPL_DEFAULT_ENDPOINT),
-  freeEndpoint: z.string().default(DEEPL_DEFAULT_ENDPOINT_FREE),
-  free: z.boolean().default(false),
   formality: z.string().optional(),
   model: z.string().optional(),
   timeoutMs: z.number().int().min(0).default(30_000),
@@ -37,8 +35,7 @@ export const DeepLTranslator: Translator<IDeepLConfig> = {
   async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IDeepLConfig>) {
     const cfg = opts.apiConfig
     const authKey = cfg.apiKey
-    const free = cfg.free
-    const endpoint = (free ? cfg.freeEndpoint : cfg.endpoint).replace(/\/+$/, '')
+    const endpoint = cfg.endpoint.replace(/\/+$/, '')
     const timeout = cfg.timeoutMs
     const formality = cfg.formality
     const model_type = cfg.model
