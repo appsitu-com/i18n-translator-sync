@@ -306,47 +306,6 @@ describe('loadTranslatorConfig', () => {
     displayLoadedConfig(config, logger)
   })
 
-  it('loads and displays masked config exactly as app/integration fixtures do', () => {
-    const fixtureDir = path.join(process.cwd(), 'test-project')
-    const fixtureJsonPath = path.join(fixtureDir, 'translator.json')
-
-    expect(fs.existsSync(fixtureJsonPath)).toBe(true)
-
-    // Copy real app-like translator.json fixture into isolated temp directory.
-    fs.copyFileSync(fixtureJsonPath, path.join(tmpDir, 'translator.json'))
-
-    // Do not synthesize env values here.
-    // This test intentionally relies on process.env only, matching app behavior in CI (GH secrets)
-    // and local runs (dotenv loaded before tests).
-    const fixtureJsonContent = fs.readFileSync(fixtureJsonPath, 'utf8')
-    const envVarPattern = /\$\{([A-Z0-9_]+)\}/g
-    const requiredVars = new Set<string>()
-    let match: RegExpExecArray | null
-    while ((match = envVarPattern.exec(fixtureJsonContent)) !== null) {
-      requiredVars.add(match[1])
-    }
-    for (const varName of requiredVars) {
-      if (!savedEnv[varName]) {
-        throw new Error(`Missing required env var for fixture-based load test: ${varName}`)
-      }
-      process.env[varName] = savedEnv[varName]
-    }
-
-    const logger = createTestLogger()
-    const config = loadTranslatorConfig(tmpDir, logger)
-
-    const rawFixture = JSON5.parse(fs.readFileSync(fixtureJsonPath, 'utf8')) as {
-      translator?: Record<string, unknown>
-    }
-    const expectedTranslatorKeys = Object.keys(rawFixture.translator ?? {}).sort()
-    const actualTranslatorKeys = Object.keys(config.translator ?? {}).sort()
-
-    expect(actualTranslatorKeys).toEqual(expectedTranslatorKeys)
-
-    // Display final config with masked apiKey values for debugging.
-    displayLoadedConfig(config, logger)
-  })
-
   it('throws validation errors for invalid config', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'translator.json'),
@@ -457,6 +416,36 @@ describe('loadTranslatorConfig', () => {
     const infoMessages = logger.messages.filter((m) => m.startsWith('[info] Engine plan'))
     expect(infoMessages.some((m) => m.includes('[forward] en -> fr'))).toBe(true)
     expect(infoMessages.some((m) => m.includes('[back] fr -> en'))).toBe(true)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Fixture-based display test — mirrors the real app/integration load procedure
+// ---------------------------------------------------------------------------
+describe('loadTranslatorConfig - fixture load display', () => {
+  it('loads and displays masked config exactly as app/integration fixtures do', () => {
+    const fixtureDir = path.join(process.cwd(), 'test-project')
+    const fixtureJsonPath = path.join(fixtureDir, 'translator.json')
+
+    expect(fs.existsSync(fixtureJsonPath)).toBe(true)
+
+    const logger = createTestLogger()
+
+    // Real app procedure, no manual env setup:
+    //   1. loadEnvVars reads translator.env (if present) into process.env
+    //   2. translator.json ${VAR} placeholders are resolved from process.env
+    //   3. Zod parsing applies defaults to any missing fields — the ONLY place defaults come from
+    const config = loadTranslatorConfig(fixtureDir, logger)
+
+    const rawFixture = JSON5.parse(fs.readFileSync(fixtureJsonPath, 'utf8')) as {
+      translator?: Record<string, unknown>
+    }
+    const expectedTranslatorKeys = Object.keys(rawFixture.translator ?? {}).sort()
+    const actualTranslatorKeys = Object.keys(config.translator ?? {}).sort()
+    expect(actualTranslatorKeys).toEqual(expectedTranslatorKeys)
+
+    // Transform ITranslatorConfig → masked ITranslatorConfig → output
+    displayLoadedConfig(config, logger)
   })
 })
 
