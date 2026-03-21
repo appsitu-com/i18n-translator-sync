@@ -29,6 +29,7 @@ jobs:
           GOOGLE_TRANSLATION_URL: ${{ secrets.GOOGLE_TRANSLATION_URL }}
           GOOGLE_TRANSLATION_KEY: ${{ secrets.GOOGLE_TRANSLATION_KEY }}
           GOOGLE_TRANSLATION_PROJECT_ID: ${{ secrets.GOOGLE_TRANSLATION_PROJECT_ID }}
+          GOOGLE_TRANSLATION_LOCATION: ${{ secrets.GOOGLE_TRANSLATION_LOCATION }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
