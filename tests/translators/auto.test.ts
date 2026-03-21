@@ -127,7 +127,7 @@ describe('translators/auto', () => {
   })
 
   it('should route all nllb base locale codes to nllb when unsupported by azure and google', () => {
-    const translatorsDir = path.join(process.cwd(), 'src', 'translators')
+    const translatorsDir = path.join(process.cwd(), 'src', 'data')
     const azureTargetCodes = loadCsvColumnSet(path.join(translatorsDir, 'azure.csv'), 'language_code')
     const googleTargetCodes = loadCsvColumnSet(path.join(translatorsDir, 'google.csv'), 'language_code')
     const nllbBaseCodes = loadNllbBaseLanguageCodes(path.join(translatorsDir, 'nllb.csv'))

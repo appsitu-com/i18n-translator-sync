@@ -1,0 +1,437 @@
+language_name,language_code,dir
+Acehnese,ace-ID,ltr
+Afar,aa-ET,ltr
+Afrikaans,af-ZA,ltr
+Akan,ak-GH,ltr
+Albanian,sq-AL,ltr
+Amharic,am-ET,ltr
+Anii,blo-BJ,ltr
+Antigua and Barbuda Creole English,aig-AG,ltr
+Arabic,ar-SA,rtl
+Arabic (Egypt),ar-EG,rtl
+Arabic (Jordan),ar-JO,rtl
+Arabic (Morocco),ar-MA,rtl
+Arabic (Tunisia),ar-TN,rtl
+Arabic (United Arab Emirates),ar-AE,rtl
+Aragonese,an-ES,ltr
+Armenian,hy-AM,ltr
+Assamese,as-IN,ltr
+Asturian,ast-ES,ltr
+Asu,asa-TZ,ltr
+Awadhi,awa-IN,ltr
+Ayacucho Quechua,quy-PE,ltr
+Azerbaijani,az-AZ,ltr
+Bahamas Creole English,bah-BS,ltr
+Bajan,bjs-BB,ltr
+Balinese,ban-ID,ltr
+Balkan Romani,rmn-BG,ltr
+Baluchi (Pakistan),bal-PK,ltr
+Bambara,bm-ML,ltr
+Banjar,bjn-ID,ltr
+Bashkir,ba-RU,ltr
+Basque,eu-ES,ltr
+Belarusian,be-BY,ltr
+Bemba,bem-ZM,ltr
+Bena,bez-TZ,ltr
+Bengali (Bangladesh),bn-BD,ltr
+Bengali (India),bn-IN,ltr
+Bhojpuri,bho-IN,ltr
+Bihari,bh-IN,ltr
+Bislama,bi-VU,ltr
+Bodo (India),brx-IN,ltr
+Borana,gax-KE,ltr
+Bosnian (Cyrillic script),bs-Cyrl-BA,ltr
+Bosnian (Latin script),bs-BA,ltr
+Breton,br-FR,ltr
+Buginese,bug-ID,ltr
+Bulgarian,bg-BG,ltr
+Burmese,my-MM,ltr
+Cantonese,yue-HK,ltr
+Catalan (Catalonia),ca-ES,ltr
+Catalan (Valencia),cav-ES,ltr
+Cebuano,ceb-PH,ltr
+Central Atlas Tamazight,tzm-MA,ltr
+Central Aymara,ayr-BO,ltr
+Central Kanuri (Latin script),knc-NG,ltr
+Chadian Arabic,shu-TD,rtl
+Chamorro,ch-GU,ltr
+Chechen (Russia),ce-RU,ltr
+Cherokee,chr-US,ltr
+Chhattisgarhi,hne-IN,ltr
+Chiga,cgg-UG,ltr
+Chinese (Simplified; Singapore),zh-SG,ltr
+Chinese (Simplified; mainland China),zh-CN,ltr
+Chinese (Traditional; Hong Kong),zh-HK,ltr
+Chinese (Traditional; Macao),zh-MO,ltr
+Chinese (Traditional; Taiwan),zh-TW,ltr
+Chittagonian,ctg-BD,ltr
+Chokwe,cjk-AO,ltr
+Chuj,cac-GT,ltr
+Chuukese (Micronesia),chk-FM,ltr
+Classical Greek,grc-GR,ltr
+Colognian,ksh-DE,ltr
+Comorian Ngazidja,zdj-KM,ltr
+Coptic,cop-EG,ltr
+Cornish,kw-GB,ltr
+Crimean Tatar,crh-RU,ltr
+Crioulo Upper Guinea,pov-GW,ltr
+Croatian,hr-HR,ltr
+Czech,cs-CZ,ltr
+Danish,da-DK,ltr
+Dari,prs-AF,rtl
+Dimli,diq-TR,ltr
+Dogri (India),doi-IN,ltr
+Dutch (Belgium),nl-BE,ltr
+Dutch (Netherlands),nl-NL,ltr
+Dyula,dyu-CI,ltr
+Dzongkha,dz-BT,ltr
+Eastern Yiddish,ydd-US,rtl
+Emakhuwa,vmw-MZ,ltr
+English (Australia),en-AU,ltr
+English (Austria),en-AT,ltr
+English (Bangladesh),en-BD,ltr
+English (Cambodia),en-KH,ltr
+English (Canada),en-CA,ltr
+English (Czech Republic),en-CZ,ltr
+English (Finland),en-FI,ltr
+English (Hong Kong),en-HK,ltr
+English (Hungary),en-HU,ltr
+English (India),en-IN,ltr
+English (Ireland),en-IE,ltr
+English (Jamaica),en-JM,ltr
+English (Laos),en-LA,ltr
+English (Malaysia),en-MY,ltr
+English (Myanmar),en-MM,ltr
+English (New Zealand),en-NZ,ltr
+English (Pakistan),en-PK,ltr
+English (Singapore),en-SG,ltr
+English (South Africa),en-ZA,ltr
+English (Sweden),en-SE,ltr
+English (Taiwan),en-TW,ltr
+English (Turkey),en-TR,ltr
+English (USA),en-US,ltr
+English (United Kingdom),en-GB,ltr
+Esperanto,eo-EU,ltr
+Estonian,et-EE,ltr
+Ewe,ee-GH,ltr
+Fanagalo,fn-FNG,ltr
+Faroese,fo-FO,ltr
+Fijian,fj-FJ,ltr
+Filipino,fil-PH,ltr
+Finnish,fi-FI,ltr
+Fon,fon-BJ,ltr
+French (Belgium),fr-BE,ltr
+French (Canada),fr-CA,ltr
+French (France),fr-FR,ltr
+French (Morocco),fr-MA,ltr
+French (Switzerland),fr-CH,ltr
+Friulian,fur-IT,ltr
+Fula,ff-FUL,ltr
+Fula (Guinea),ff-GN,ltr
+Galician,gl-ES,ltr
+Garo,grt-IN,ltr
+Georgian,ka-GE,ltr
+German (Austria),de-AT,ltr
+German (Germany),de-DE,ltr
+German (Switzerland),de-CH,ltr
+Gilbertese,gil-KI,ltr
+Glavda,glw-NG,ltr
+Greek,el-GR,ltr
+Grenadian Creole English,gcl-GD,ltr
+Guarani,gn-PY,ltr
+Gujarati,gu-IN,ltr
+Guyanese Creole English,gyn-GY,ltr
+Haitian Creole French,ht-HT,ltr
+Halh Mongolian,khk-MN,ltr
+Hausa,ha-NE,ltr
+Hawaiian,haw-US,ltr
+Hebrew,he-IL,rtl
+Higi,hig-NG,ltr
+Hiligaynon,hil-PH,ltr
+Hill Mari,mrj-RU,ltr
+Hindi,hi-IN,ltr
+Hindi (Fiji),hi-FJ,ltr
+Hmong,hmn-CN,ltr
+Hmong Njua,hnj-LA,ltr
+Ho,hoc-IN,ltr
+Hungarian,hu-HU,ltr
+Icelandic,is-IS,ltr
+Ido,io-001,ltr
+Igbo,ig-NG,ltr
+Ilocano,ilo-PH,ltr
+Inari Sami,smn-FI,ltr
+Indonesian,id-ID,ltr
+Interlingua,ia-001,ltr
+Inuktitut,iu-CA,ltr
+Irish Gaelic,ga-IE,ltr
+Italian (Italy),it-IT,ltr
+Italian (Switzerland),it-CH,ltr
+Jamaican Creole English,jam-JM,ltr
+Japanese,ja-JP,ltr
+Javanese,jv-ID,ltr
+Jingpho,kac-MM,ltr
+Jju,kaj-NG,ltr
+K'iche',quc-GT,ltr
+Kabiyè,kbp-TG,ltr
+Kabuverdianu,kea-CV,ltr
+Kabylian,kab-DZ,ltr
+Kako,kkj-CM,ltr
+Kalaallisut (Greenland),kl-GL,ltr
+Kalenjin,kln-KE,ltr
+Kamba,kam-KE,ltr
+Kanjobal,kjb-GT,ltr
+Kannada,kn-IN,ltr
+Kanuri,kr-KAU,ltr
+Karen,kar-MM,ltr
+Kashmiri (Arabic script),kas-IN,rtl
+Kashmiri (Devanagari script),ks-IN,ltr
+Kazakh,kk-KZ,ltr
+Khasi,kha-IN,ltr
+Khmer,km-KH,ltr
+Kikuyu,ki-KE,ltr
+Kimbundu,kmb-AO,ltr
+Kinyarwanda,rw-RW,ltr
+Kirundi,rn-BI,ltr
+Kisii,guz-KE,ltr
+Kongo,kg-CG,ltr
+Konkani,kok-IN,ltr
+Korean,ko-KR,ltr
+Koyraboro Senni,ses-ML,ltr
+Kurdish Sorani,ckb-IQ,rtl
+Kyrgyz,ky-KG,ltr
+Ladin,lld-IT,ltr
+Lakota,lkt-US,ltr
+Langi,lag-TZ,ltr
+Lao,lo-LA,ltr
+Latgalian,ltg-LV,ltr
+Latin,la-VA,ltr
+Latvian,lv-LV,ltr
+Ligurian,lij-IT,ltr
+Limburgish,li-NL,ltr
+Lingala,ln-CD,ltr
+Lithuanian,lt-LT,ltr
+Lojban,jbo-001,ltr
+Lombard,lmo-IT,ltr
+Lower Sorbian,dsb-DE,ltr
+Luba-Kasai,lua-CD,ltr
+Luganda,lg-UG,ltr
+Luhya,luy-KE,ltr
+Lule Sami,smj-SE,ltr
+Luo,luo-KE,ltr
+Luxembourgish,lb-LU,ltr
+Maa,mas-KE,ltr
+Maay Maay,ymm-SO,ltr
+Macedonian,mk-MK,ltr
+Machame,jmc-TZ,ltr
+Magahi,mag-IN,ltr
+Maithili,mai-IN,ltr
+Makonde,kde-TZ,ltr
+Malagasy,mg-MG,ltr
+Malay,ms-MY,ltr
+Malayalam,ml-IN,ltr
+Maldivian,dv-MV,rtl
+Malgwa,mfi-NG,ltr
+Maltese,mt-MT,ltr
+Mam,mam-GT,ltr
+Mandinka (Gambia),mnk-GM,ltr
+Mandjak (Senegal),mfv-SN,ltr
+Manipuri,mni-IN,ltr
+Manx Gaelic,gv-IM,ltr
+Maori,mi-NZ,ltr
+Marathi,mr-IN,ltr
+Margi,mrt-NG,ltr
+Mari,mhr-RU,ltr
+Marshallese,mh-MH,ltr
+Mende,men-SL,ltr
+Meru,mer-KE,ltr
+Metaʼ,mgo-CM,ltr
+Mijikenda,nyf-KE,ltr
+Minangkabau,min-ID,ltr
+Mizo,lus-IN,ltr
+Moldavian,mo-MD,ltr
+Mongolian,mn-MN,ltr
+Montenegrin,sr-ME,ltr
+Morisyen,mfe-MU,ltr
+Mossi,mos-BF,ltr
+N'Ko,nqo-GN,rtl
+Nama,naq-NA,ltr
+Ndau,ndc-MZ,ltr
+Nepali,ne-NP,ltr
+Ngiemboon,nnh-CM,ltr
+Ngomba,jgo-CM,ltr
+Nigerian Fulfulde,fuv-NG,ltr
+Nigerian Pidgin,pcm-NG,ltr
+Niuean,niu-NU,ltr
+North Azerbaijani,azj-AZ,ltr
+Northern Kurdish,kmr-TR,ltr
+Northern Ndebele,nd-ZW,ltr
+Northern Sami,se-NO,ltr
+Northern Uzbek,uzn-UZ,ltr
+Norwegian,no-NO,ltr
+Norwegian Bokmål,nb-NO,ltr
+Norwegian Nynorsk,nn-NO,ltr
+Nuer,nus-SS,ltr
+Nupe,nup-NG,ltr
+Nyanja,ny-MW,ltr
+Nyankole,nyn-UG,ltr
+Occitan (Aran),oc-ES,ltr
+Occitan (France),oc-FR,ltr
+Odia,or-IN,ltr
+Oriya,ory-IN,ltr
+Oromo (Ethiopia),om-ET,ltr
+Osage,osa-US,ltr
+Ossetic,os-GE,ltr
+Palauan,pau-PW,ltr
+Pali,pi-IN,ltr
+Pangasinan,pag-PH,ltr
+Papiamentu,pap-CW,ltr
+Pashto,ps-PK,rtl
+Persian,fa-IR,rtl
+Pijin,pis-SB,ltr
+Plateau Malagasy,plt-MG,ltr
+Pohnpeian (Micronesia),pon-FM,ltr
+Polish,pl-PL,ltr
+Portuguese (Brazil),pt-BR,ltr
+Portuguese (Portugal),pt-PT,ltr
+Potawatomi,pot-US,ltr
+Prussian,prg-001,ltr
+Pulaar (Senegal),fuc-SN,ltr
+Punjabi (India),pa-IN,ltr
+Punjabi (Pakistan),pa-PK,rtl
+Pökoot (Kenya),pko-KE,ltr
+Pökoot (Uganda),pko-UG,ltr
+Quechua,qu-PE,ltr
+Rohingya,rhg-MM,rtl
+Rohingyalish,rhl-MM,ltr
+Romanian,ro-RO,ltr
+Romansh,roh-CH,ltr
+Rombo,rof-TZ,ltr
+Rundi,run-BI,ltr
+Russian,ru-RU,ltr
+Rwa,rwk-TZ,ltr
+S'gaw Karen (Myanmar),ksw-MM,ltr
+Saho (Eritrea),ssy-ER,ltr
+Saint Lucian Creole French,acf-LC,ltr
+Samburu,saq-KE,ltr
+Samoan,sm-WS,ltr
+Sango,sg-CF,ltr
+Sanskrit,sa-IN,ltr
+Santali,sat-IN,ltr
+Sardinian,sc-IT,ltr
+Scots Gaelic,gd-GB,ltr
+Sena,seh-ZW,ltr
+Serbian (Cyrillic script),sr-Cyrl-RS,ltr
+Serbian (Latin script),sr-Latn-RS,ltr
+Serbo-Croatian (Croatia),sh-HR,ltr
+Seselwa Creole French,crs-SC,ltr
+Sesotho,nso-ZA,ltr
+Shambala,ksb-TZ,ltr
+Shan,shn-MM,ltr
+Shona,sn-ZW,ltr
+Sichuan Yi,ii-CN,ltr
+Sicilian,scn-IT,ltr
+Silesian,szl-PL,ltr
+Sindhi,sd-PK,rtl
+Sinhala,si-LK,ltr
+Sinte Romani (Netherlands),rmo-NL,ltr
+Skolt Sami,sms-FI,ltr
+Slovak,sk-SK,ltr
+Slovenian,sl-SI,ltr
+Soga,xog-UG,ltr
+Somali,so-SO,ltr
+Soninke (Mali),snk-ML,ltr
+Sotho Southern,st-LS,ltr
+South Azerbaijani,azb-AZ,rtl
+Southern Kurdish,sdh-IR,rtl
+Southern Ndebele,nr-ZA,ltr
+Southern Pashto,pbt-PK,rtl
+Southern Sami,sma-SE,ltr
+Southwestern Dinka,dik-SS,ltr
+Spanish (Argentina),es-AR,ltr
+Spanish (Colombia),es-CO,ltr
+Spanish (Dominican Republic),es-DO,ltr
+Spanish (Honduras),es-HN,ltr
+Spanish (Latin America),es-419,ltr
+Spanish (Mexico),es-MX,ltr
+Spanish (Panama),es-PA,ltr
+Spanish (Perù),es-PE,ltr
+Spanish (Puerto Rico),es-PR,ltr
+Spanish (Spain),es-ES,ltr
+Spanish (USA),es-US,ltr
+Spanish (Uruguay),es-UY,ltr
+Spanish (Venezuela),es-VE,ltr
+Sranan Tongo,srn-SR,ltr
+Standard Latvian,lvs-LV,ltr
+Standard Malay,zsm-MY,ltr
+Sundanese,su-ID,ltr
+Susu (Guinea),sus-GN,ltr
+Swahili,sw-KE,ltr
+Swampy Cree,csw-CA,ltr
+Swati,ss-SZ,ltr
+Swedish,sv-SE,ltr
+Swiss German,gsw-CH,ltr
+Syriac,syr-SY,rtl
+Syriac (Aramaic),syc-TR,rtl
+Tachelhit,shi-MA,ltr
+Tagalog,tl-PH,ltr
+Tahitian,ty-PF,ltr
+Tajik,tg-TJ,ltr
+Tamashek (Tuareg),tmh-DZ,rtl
+Tamasheq,taq-ML,ltr
+Tamil (India),ta-IN,ltr
+Tamil (Sri Lanka),ta-LK,ltr
+Taroko,trv-TW,ltr
+Tatar,tt-RU,ltr
+Telugu,te-IN,ltr
+Teso,teo-UG,ltr
+Tetum,tet-TL,ltr
+Thai,th-TH,ltr
+Tibetan,bo-CN,ltr
+Tigre,tig-ER,ltr
+Tigrinya,ti-ET,ltr
+Tiv,tiv-NG,ltr
+Tok Pisin,tpi-PG,ltr
+Tokelauan,tkl-TK,ltr
+Tongan,to-TO,ltr
+Tosk Albanian,als-AL,ltr
+Tsonga,ts-ZA,ltr
+Tswa,tsc-MZ,ltr
+Tswana (Botswana),tn-BW,ltr
+Tswana (South Africa),tn-ZA,ltr
+Tumbuka,tum-MW,ltr
+Turkish,tr-TR,ltr
+Turkmen,tk-TM,ltr
+Tuvaluan,tvl-TV,ltr
+Twi,tw-GH,ltr
+Tyap,kcg-NG,ltr
+Udmurt,udm-RU,ltr
+Ukrainian,uk-UA,ltr
+Uma,ppk-ID,ltr
+Umbundu,umb-AO,ltr
+Upper Sorbian,hsb-DE,ltr
+Urdu (Latin script),ur-Latn-PK,ltr
+Urdu (Perso-arabic script),ur-PK,rtl
+Uyghur,ug-CN,rtl
+Uzbek,uz-UZ,ltr
+Venda,ve-ZA,ltr
+Venetian,vec-IT,ltr
+Vietnamese,vi-VN,ltr
+Vincentian Creole English,svc-VC,ltr
+Virgin Islands Creole English,vic-US,ltr
+Volapük,vo-001,ltr
+Vunjo,vun-TZ,ltr
+Wallisian,wls-WF,ltr
+Walloon,wa-BE,ltr
+Walser,wae-CH,ltr
+Wandala,mfi-CM,ltr
+Waray,war-PH,ltr
+Welsh,cy-GB,ltr
+West Central Oromo,gaz-ET,ltr
+West Flemish,vls-BE,ltr
+Western Frisian,fy-NL,ltr
+Wolof,wo-SN,ltr
+Xhosa,xh-ZA,ltr
+Yakut,sah-RU,ltr
+Yiddish,yi-YD,rtl
+Yoruba,yo-NG,ltr
+Zulu,zu-ZA,ltr
