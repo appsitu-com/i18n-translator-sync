@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import JSON5 from 'json5';
 import { ConfigProvider } from '../core/coreConfig';
 import { TRANSLATOR_JSON } from '../core/constants';
 import { substituteEnvVarsInObject } from '../core/util/envSubstitution';
@@ -28,7 +29,7 @@ export class VsCodeConfigProvider implements ConfigProvider {
     try {
       if (fs.existsSync(configPath)) {
         const configContent = fs.readFileSync(configPath, 'utf8');
-        const rawConfig = JSON.parse(configContent);
+        const rawConfig = JSON5.parse(configContent);
 
         // Substitute environment variables in the translator section
         if (rawConfig.translator) {

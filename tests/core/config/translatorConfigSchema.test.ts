@@ -16,7 +16,7 @@ import { OPENROUTER_DEFAULT_MODEL, OPENROUTER_DEFAULT_ENDPOINT } from '../../../
 import { NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb'
 import { AZURE_DEFAULT_ENDPOINT } from '../../../src/translators/azure'
 import { GOOGLE_DEFAULT_ENDPOINT } from '../../../src/translators/google'
-import { DEEPL_DEFAULT_ENDPOINT_FREE } from '../../../src/translators/deepl'
+import { DEEPL_DEFAULT_ENDPOINT_FREE, DEEPL_DEFAULT_ENDPOINT } from '../../../src/translators/deepl'
 import { MYMEMORY_DEFAULT_ENDPOINT } from '../../../src/translators/mymemory'
 import JSON5 from 'json5'
 import fs from 'fs'
@@ -70,7 +70,8 @@ describe('GoogleConfigSchema', () => {
 describe('DeepLConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = DeepLConfigSchema.parse({})
-    expect(result.endpoint).toBe(DEEPL_DEFAULT_ENDPOINT_FREE)
+    expect(result.endpoint).toBe(DEEPL_DEFAULT_ENDPOINT)
+    expect(result.freeEndpoint).toBe(DEEPL_DEFAULT_ENDPOINT_FREE)
     expect(result.free).toBe(false)
     expect(result.timeoutMs).toBe(30_000)
     expect(result.langMap).toEqual({})

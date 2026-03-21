@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import { DeepLTranslator } from '../../src/translators/deepl'
+import { DeepLTranslator, DEEPL_DEFAULT_ENDPOINT_FREE } from '../../src/translators/deepl'
 
 describe('deepl stub', () => {
   const originalFetch = globalThis.fetch as any
@@ -40,6 +40,7 @@ describe('deepl stub', () => {
         apiKey: 'DEEPL',
         free: true,
         endpoint: 'https://api-free.deepl.com',
+        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 30_000,
         langMap: {},
       }
@@ -61,6 +62,7 @@ describe('deepl stub', () => {
         apiKey: 'DEEPL',
         free: true,
         endpoint: 'https://api-free.deepl.com',
+        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 30_000,
         langMap: {
           en: 'EN-US',
@@ -83,6 +85,7 @@ describe('deepl stub', () => {
         apiKey: 'DEEPL',
         free: true,
         endpoint: 'https://api-free.deepl.com',
+        freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
         timeoutMs: 30_000,
         langMap: {
           en: 'EN-US',
@@ -92,7 +95,8 @@ describe('deepl stub', () => {
     })
 
     expect(calls).toHaveLength(1)
-    expect(calls[0].body.source_lang).toBe('EN-US')
+    // DeepL source_lang strips regional variants via toLanguage(), so EN-US → EN
+    expect(calls[0].body.source_lang).toBe('EN')
     expect(calls[0].body.target_lang).toBe('FR')
   })
 })
@@ -126,6 +130,7 @@ describe('deepl api', () => {
     apiConfig = {
       apiKey: process.env.DEEPL_TRANSLATION_KEY,
       endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
+      freeEndpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
       free: true,
       timeoutMs: 30_000,
       langMap: {},
