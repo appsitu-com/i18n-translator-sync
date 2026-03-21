@@ -21,7 +21,7 @@ jobs:
       - run: pnpm build
       - run: pnpm test:cov
         env:
-          "AZURE_TRANSLATION_URL: ${{ secrets."AZURE_TRANSLATION_URL }}
+          AZURE_TRANSLATION_URL: ${{ secrets.AZURE_TRANSLATION_URL }}
           AZURE_TRANSLATION_KEY: ${{ secrets.AZURE_TRANSLATION_KEY }}
           AZURE_TRANSLATION_REGION: ${{ secrets.AZURE_TRANSLATION_REGION }}
           DEEPL_TRANSLATION_KEY: ${{ secrets.DEEPL_TRANSLATION_KEY }}
