@@ -30,10 +30,8 @@ export function findSourcePathForFile(uri: vscode.Uri, config: TranslateProjectC
   const normalizedUriPath = normalizePath(uriPath);
   console.log(`Finding source path for: ${normalizedUriPath}`)
 
-  // Add source directory to workspace path if specified
-  const basePath = config.sourceDir ?
-    normalizePath(path.join(wsPath, config.sourceDir)) :
-    normalizePath(wsPath);
+  // Source resolution is workspace-rooted and driven by sourcePaths.
+  const basePath = normalizePath(wsPath);
 
   for (const sourcePath of config.sourcePaths) {
     // Normalize the full source path
@@ -63,18 +61,14 @@ export function findSourcePathForFile(uri: vscode.Uri, config: TranslateProjectC
  * Calculate the base path for source files
  */
 export function getSourceBasePath(workspacePath: string, config: TranslateProjectConfig): string {
-  return config.sourceDir ?
-    path.join(workspacePath, config.sourceDir) :
-    workspacePath;
+  return workspacePath;
 }
 
 /**
  * Calculate the base path for target files
  */
 export function getTargetBasePath(workspacePath: string, config: TranslateProjectConfig): string {
-  return config.targetDir ?
-    path.join(workspacePath, config.targetDir) :
-    workspacePath;
+  return workspacePath;
 }
 
 /**
@@ -98,7 +92,7 @@ export function getRelativePath(uri: vscode.Uri, config: TranslateProjectConfig)
     throw new Error(`File ${uri.fsPath} is not in any of the configured source paths.`);
   }
 
-  // Get base path including sourceDir if specified
+  // Source roots are derived from sourcePaths directly from workspace root.
   const basePath = getSourceBasePath(wsPath, config);
 
   // Get source folder path
@@ -177,20 +171,7 @@ export function createBackTranslationUri(
   // Determine if source is file-based by checking if sourcePath has extension
   const isSourcePathFile = sourcePath ? path.extname(sourcePath) !== '' : false;
 
-  // If target directory is configured, use it for back-translation as well
-  if (config.targetDir) {
-    const targetBasePath = path.join(ws.uri.fsPath, config.targetDir);
-
-    if (isSourcePathFile) {
-      // For file sources: i18n/{locale}_en.json
-      return vscode.Uri.file(path.join(targetBasePath, 'i18n', `${locale}_en.json`));
-    } else {
-      // For directory sources: i18n/{locale}_en/{relativePath}
-      return vscode.Uri.file(path.join(targetBasePath, 'i18n', `${locale}_en`, rel));
-    }
-  }
-
-  // Default behavior
+  // Back-translation targets are computed from source paths at workspace root.
   if (isSourcePathFile) {
     // For file sources: i18n/{locale}_en.json
     return vscode.Uri.joinPath(ws.uri, 'i18n', `${locale}_en.json`);
@@ -229,12 +210,12 @@ export function verifyFilePath(uri: vscode.Uri, config: TranslateProjectConfig):
   console.log(`Verification for file: ${uriPath}`)
   console.log(`Normalized path: ${normalizedUriPath}`)
   console.log(`Workspace path: ${wsPath}`)
-  console.log(`Source directory: ${config.sourceDir || '(not set)'}`)
-  console.log(`Target directory: ${config.targetDir || '(not set)'}`)
+  console.log('Source directory: (ignored)')
+  console.log('Target directory: (ignored)')
   console.log(`Source paths:`, config.sourcePaths)
   console.log(`Source locale: ${config.sourceLocale}`)
 
-  // Calculate base path with sourceDir if specified
+  // Calculate base path rooted at workspace
   const basePath = getSourceBasePath(wsPath, config);
 
   console.log(`Base path for source: ${basePath}`)

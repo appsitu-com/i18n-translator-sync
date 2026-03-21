@@ -19,7 +19,12 @@ import { Logger } from './util/baseLogger'
 export const TranslateConfigSchema = TranslatorConfigSchema.omit({ translator: true })
 
 /** Project-level configuration (no engine credentials). */
-export type TranslateProjectConfig = Omit<ITranslatorConfig, 'translator' | 'rootDir'>
+export type TranslateProjectConfig = Omit<ITranslatorConfig, 'translator' | 'rootDir'> & {
+  /** @deprecated Source directory is ignored; paths are derived from sourcePaths. */
+  sourceDir?: string
+  /** @deprecated Target directory is ignored; targets are computed from sourcePaths. */
+  targetDir?: string
+}
 
 // Interface for platform-specific configuration
 export interface ConfigProvider {
@@ -55,8 +60,6 @@ export function toProjectConfig(
   configProvider: ConfigProvider
 ): TranslateProjectConfig {
   return {
-    sourceDir: config.sourceDir || defaultConfig.sourceDir,
-    targetDir: config.targetDir || defaultConfig.targetDir,
     sourcePaths: config.sourcePaths?.length
       ? config.sourcePaths
       : defaultConfig.sourcePaths,

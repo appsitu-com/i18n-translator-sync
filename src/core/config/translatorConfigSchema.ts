@@ -69,16 +69,6 @@ export const TranslatorEngineSchema = z.enum(ENGINES)
 
 export const TranslatorConfigSchema = z.object({
   // Source & target settings
-  sourceDir: z
-    .string()
-    .optional()
-    .default('')
-    .describe('Base directory prepended to sourcePaths'),
-  targetDir: z
-    .string()
-    .optional()
-    .default('')
-    .describe('Base directory prepended to generated target paths'),
   sourcePaths: z
     .array(z.string())
     .optional()

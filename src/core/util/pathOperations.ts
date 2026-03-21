@@ -17,10 +17,8 @@ export function findSourcePathForFile(
   // Normalize paths for consistent comparison (especially important on Windows)
   const normalizedFilePath = normalizePath(filePath);
 
-  // Add source directory to workspace path if specified
-  const basePath = config.sourceDir ?
-    normalizePath(path.join(workspacePath, config.sourceDir)) :
-    normalizePath(workspacePath);
+  // Source resolution is workspace-rooted and driven by sourcePaths.
+  const basePath = normalizePath(workspacePath);
 
   // First pass: Check for exact file matches
   for (const sourcePath of config.sourcePaths) {
@@ -53,9 +51,7 @@ export function findSourcePathForFile(
  * Calculate the base path for source files
  */
 export function getSourceBasePath(workspacePath: string, config: TranslateProjectConfig): string {
-  const result = config.sourceDir ?
-    path.join(workspacePath, config.sourceDir) :
-    workspacePath;
+  const result = workspacePath;
   return result.replace(/\\/g, '/');
 }
 
@@ -63,9 +59,7 @@ export function getSourceBasePath(workspacePath: string, config: TranslateProjec
  * Calculate the base path for target files
  */
 export function getTargetBasePath(workspacePath: string, config: TranslateProjectConfig): string {
-  const result = config.targetDir ?
-    path.join(workspacePath, config.targetDir) :
-    workspacePath;
+  const result = workspacePath;
   return result.replace(/\\/g, '/');
 }
 
@@ -83,7 +77,7 @@ export function getRelativePath(
     throw new Error(`File ${filePath} is not in any of the configured source paths.`);
   }
 
-  // Get base path including sourceDir if specified
+  // Source roots are derived from sourcePaths directly from workspace root.
   const basePath = getSourceBasePath(workspacePath, config);
 
   // Check if the source path is a specific file (has extension) or a directory
@@ -181,10 +175,8 @@ export function createBackTranslationPath(
     forwardTranslationTargetLocale
   );
 
-  // Determine base path for back translation
-  const basePath = config.targetDir ?
-    path.join(workspacePath, config.targetDir) :
-    workspacePath;
+  // Back-translation targets are computed from source paths at workspace root.
+  const basePath = workspacePath;
 
   // Check if the source path is a file (has extension)
   const isSourcePathFile = path.extname(sourcePath) !== '';

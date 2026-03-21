@@ -23,8 +23,6 @@ describe('Config', () => {
   /** Helper to build a partial ITranslatorConfig (merged with defaults) */
   function makeConfig(overrides: Partial<ITranslatorConfig> = {}): ITranslatorConfig {
     return {
-      sourceDir: '',
-      targetDir: '',
       sourcePaths: ['i18n/en'],
       sourceLocale: 'en',
       targetLocales: [],
@@ -66,8 +64,6 @@ describe('Config', () => {
   describe('TranslateConfigSchema', () => {
     it('should validate a complete valid configuration', () => {
       const validConfig = {
-        sourceDir: 'src/i18n',
-        targetDir: 'dist/i18n',
         sourcePaths: ['en/messages.json', 'en/ui.json'],
         sourceLocale: 'en',
         targetLocales: ['fr', 'es', 'de'],
@@ -97,8 +93,6 @@ describe('Config', () => {
 
     it('should validate a minimal valid configuration', () => {
       const minimalConfig = {
-        sourceDir: '',
-        targetDir: '',
         sourcePaths: ['i18n/en'],
         sourceLocale: 'en',
         targetLocales: ['fr'],
@@ -136,8 +130,6 @@ describe('Config', () => {
   describe('defaultConfig', () => {
     it('should have expected default values', () => {
       expect(defaultConfig).toEqual({
-        sourceDir: '',
-        targetDir: '',
         sourcePaths: ['i18n/en'],
         sourceLocale: 'en',
         targetLocales: [],
@@ -161,8 +153,6 @@ describe('Config', () => {
     it('should delegate to loadTranslatorConfig and return project config', () => {
       mockLoadTranslatorConfig.mockReturnValue(
         makeConfig({
-          sourceDir: 'src/locales',
-          targetDir: 'dist/locales',
           sourceLocale: 'en-US',
           targetLocales: ['fr-FR', 'es-ES'],
           defaultMarkdownEngine: 'deepl'
@@ -172,8 +162,6 @@ describe('Config', () => {
       const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
       expect(mockLoadTranslatorConfig).toHaveBeenCalledWith(rootPath, mockLogger, undefined)
-      expect(result.sourceDir).toBe('src/locales')
-      expect(result.targetDir).toBe('dist/locales')
       expect(result.sourceLocale).toBe('en-US')
       expect(result.targetLocales).toEqual(['fr-FR', 'es-ES'])
       expect(result.defaultMarkdownEngine).toBe('deepl')
@@ -190,20 +178,18 @@ describe('Config', () => {
 
     it('should use preloaded config and skip loadTranslatorConfig', () => {
       const preloaded = makeConfig({
-        sourceDir: 'preloaded/src',
         sourceLocale: 'de'
       })
 
       const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger, undefined, preloaded)
 
       expect(mockLoadTranslatorConfig).not.toHaveBeenCalled()
-      expect(result.sourceDir).toBe('preloaded/src')
       expect(result.sourceLocale).toBe('de')
     })
 
     it('should merge project config with provider defaults', () => {
       mockLoadTranslatorConfig.mockReturnValue(
-        makeConfig({ sourceDir: 'custom/src', sourceLocale: '', targetLocales: [] })
+        makeConfig({ sourceLocale: '', targetLocales: [] })
       )
 
       vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
@@ -214,7 +200,6 @@ describe('Config', () => {
 
       const result = loadProjectConfig(rootPath, mockConfigProvider, mockLogger)
 
-      expect(result.sourceDir).toBe('custom/src')
       expect(result.sourceLocale).toBe('custom-locale')
       expect(result.targetLocales).toEqual(['custom-target'])
     })

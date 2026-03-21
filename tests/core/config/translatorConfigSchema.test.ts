@@ -150,8 +150,6 @@ describe('TranslatorEnginesSchema', () => {
 describe('TranslatorConfigSchema', () => {
   it('applies all top-level defaults for a minimal config', () => {
     const result = TranslatorConfigSchema.parse({})
-    expect(result.sourceDir).toBe('')
-    expect(result.targetDir).toBe('')
     expect(result.sourcePaths).toEqual(['i18n/en'])
     expect(result.sourceLocale).toBe('en')
     expect(result.targetLocales).toEqual([])

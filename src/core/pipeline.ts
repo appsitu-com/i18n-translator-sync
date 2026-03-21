@@ -488,29 +488,15 @@ export class TranslatorPipeline {
         this.logger.debug(`Could not delete ${path.basename(bwd.fsPath)}: ${error}`)
       }
 
-      // Clean up empty directories
-      if (config.targetDir) {
-        // If using custom target directory
-        const targetBasePath = path.join(workspacePath, config.targetDir)
-        await this.pruneEmptyDirs(
-          this.fileSystem.createUri(path.join(targetBasePath, 'i18n', locale)),
-          rel
-        )
-        await this.pruneEmptyDirs(
-          this.fileSystem.createUri(path.join(targetBasePath, 'i18n', `${locale}_en`)),
-          rel
-        )
-      } else {
-        // Default cleanup paths
-        await this.pruneEmptyDirs(
-          this.fileSystem.joinPath(this.fileSystem.createUri(workspacePath), 'i18n', locale),
-          rel
-        )
-        await this.pruneEmptyDirs(
-          this.fileSystem.joinPath(this.fileSystem.createUri(workspacePath), 'i18n', `${locale}_en`),
-          rel
-        )
-      }
+      // Clean up empty directories under computed workspace-rooted targets.
+      await this.pruneEmptyDirs(
+        this.fileSystem.joinPath(this.fileSystem.createUri(workspacePath), 'i18n', locale),
+        rel
+      )
+      await this.pruneEmptyDirs(
+        this.fileSystem.joinPath(this.fileSystem.createUri(workspacePath), 'i18n', `${locale}_en`),
+        rel
+      )
     }
   }
 }

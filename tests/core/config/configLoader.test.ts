@@ -13,6 +13,7 @@ import {
 } from '../../../src/core/config/configLoader'
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { Logger } from '../../../src/core/util/baseLogger'
+import type { ITranslatorConfig } from '../../../src/core/config'
 import { GEMINI_DEFAULT_MODEL } from '../../../src/translators/gemini'
 
 // Minimal logger for tests
@@ -27,6 +28,46 @@ function createTestLogger(): Logger & { messages: string[] } {
     appendLine: () => {},
     show: () => {}
   }
+}
+
+/**
+ * Mask apiKey values in a translator config object, showing only the first 4 characters
+ * followed by asterisks (e.g., "abcd****" for a 12-char key).
+ * Useful for displaying config in test output without exposing full credentials.
+ */
+function maskConfigApiKeys(config: ITranslatorConfig): ITranslatorConfig {
+  const maskKey = (val: unknown): unknown => {
+    if (typeof val === 'string' && val.length > 0) {
+      return val.length <= 4 ? val : val.slice(0, 4) + '****'
+    }
+    return val
+  }
+
+  if (!config.translator) return config
+
+  const maskedTranslator: Record<string, unknown> = { ...config.translator }
+  for (const [engine, engineConfig] of Object.entries(config.translator)) {
+    if (engineConfig && typeof engineConfig === 'object') {
+      maskedTranslator[engine] = {
+        ...engineConfig,
+        ...(('apiKey' in engineConfig) && { apiKey: maskKey(engineConfig.apiKey) })
+      }
+    }
+  }
+
+  return { ...config, translator: maskedTranslator as ITranslatorConfig['translator'] }
+}
+
+/**
+ * Log the final ITranslatorConfig with masked apiKey values.
+ * Useful for debugging test output while keeping credentials hidden.
+ * Displays to both logger and console for visibility in test output.
+ */
+function displayLoadedConfig(config: ITranslatorConfig, logger: Logger): void {
+  const masked = maskConfigApiKeys(config)
+  const configStr = JSON.stringify(masked, null, 2)
+  logger.info(`Loaded ITranslatorConfig: ${configStr}`)
+  console.log(`[test] Final masked ITranslatorConfig:\n${configStr}`)
 }
 
 // ---------------------------------------------------------------------------
@@ -259,6 +300,9 @@ describe('loadTranslatorConfig', () => {
       'https://api.cognitive.microsofttranslator.com'
     )
     expect(config.translator?.azure?.timeoutMs).toBe(30_000)
+
+    // Display final config with masked apiKey values for debugging
+    displayLoadedConfig(config, logger)
   })
 
   it('merges env file on top of process.env', () => {
@@ -289,6 +333,9 @@ describe('loadTranslatorConfig', () => {
 
     expect(config.translator?.google?.apiKey).toBe('/existing/creds.json')
     expect(config.translator?.google?.googleProjectId).toBe('proj-from-env')
+
+    // Display final config with masked apiKey values for debugging
+    displayLoadedConfig(config, logger)
   })
 
   it('throws validation errors for invalid config', () => {
@@ -411,8 +458,6 @@ describe('logConfiguredEnginePlan', () => {
     logConfiguredEnginePlan(
       {
         rootDir: '.',
-        sourceDir: '',
-        targetDir: '',
         sourcePaths: ['i18n/en'],
         sourceLocale: 'en',
         targetLocales: [],

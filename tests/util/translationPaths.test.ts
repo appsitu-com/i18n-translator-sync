@@ -150,7 +150,7 @@ describe('findSourcePathForFile', () => {
     expect(result).toBe('i18n/en')
   })
 
-  it('finds source path when sourceDir is configured', () => {
+  it('does not use sourceDir for source path resolution', () => {
     const uri = mockUri('C:/workspace/src/i18n/en/test.json')
     const config = createTestConfig({ sourceDir: 'src' })
 
@@ -158,7 +158,7 @@ describe('findSourcePathForFile', () => {
     vi.spyOn(vscode.workspace, 'getWorkspaceFolder').mockReturnValueOnce(mockWorkspaceFolder('C:/workspace'))
 
     const result = findSourcePathForFile(uri, config)
-    expect(result).toBe('i18n/en')
+    expect(result).toBeNull()
   })
 
   it('returns null when file is not in any source path', () => {
@@ -204,10 +204,10 @@ describe('getSourceBasePath', () => {
     expect(result).toBe('C:/workspace')
   })
 
-  it('joins workspace path with sourceDir when specified', () => {
+  it('ignores sourceDir and returns workspace path when specified', () => {
     const config = createTestConfig({ sourceDir: 'src' })
     const result = getSourceBasePath('C:/workspace', config)
-    expect(result).toBe(path.join('C:/workspace', 'src'))
+    expect(result).toBe('C:/workspace')
   })
 })
 
@@ -218,10 +218,10 @@ describe('getTargetBasePath', () => {
     expect(result).toBe('C:/workspace')
   })
 
-  it('joins workspace path with targetDir when specified', () => {
+  it('ignores targetDir and returns workspace path when specified', () => {
     const config = createTestConfig({ targetDir: 'dist' })
     const result = getTargetBasePath('C:/workspace', config)
-    expect(result).toBe(path.join('C:/workspace', 'dist'))
+    expect(result).toBe('C:/workspace')
   })
 })
 
@@ -298,7 +298,7 @@ describe('createTargetUri', () => {
     expect(result.fsPath).toContain(path.join('C:/workspace', 'i18n/fr', 'test.json'))
   })
 
-  it('creates target URI with sourceDir and targetDir configured', () => {
+  it('ignores sourceDir and targetDir for target URI creation', () => {
     const ws = mockWorkspaceFolder('C:/workspace')
     const config = createTestConfig({
       sourceDir: 'src',
@@ -306,7 +306,7 @@ describe('createTargetUri', () => {
     })
 
     const result = createTargetUri(ws, 'en', 'fr', 'test.json', config, 'i18n/en')
-    expect(result.fsPath).toContain(path.join('C:/workspace', 'dist/i18n/fr', 'test.json'))
+    expect(result.fsPath).toContain(path.join('C:/workspace', 'i18n/fr', 'test.json'))
   })
 
   it('throws error when target locale is the same as source locale', () => {
@@ -371,12 +371,12 @@ describe('createBackTranslationUri', () => {
     vi.restoreAllMocks()
   })
 
-  it('creates back-translation URI with targetDir configured', () => {
+  it('ignores targetDir for back-translation URI creation', () => {
     const ws = mockWorkspaceFolder('C:/workspace')
     const config = createTestConfig({ targetDir: 'dist' })
 
     const result = createBackTranslationUri(ws, 'fr', 'test.json', config)
-    expect(result.fsPath).toContain(path.join('C:/workspace', 'dist/i18n/fr_en', 'test.json'))
+    expect(result.fsPath).toContain(path.join('C:/workspace', 'i18n/fr_en', 'test.json'))
   })
 
   it('creates back-translation URI without targetDir (default behavior)', () => {

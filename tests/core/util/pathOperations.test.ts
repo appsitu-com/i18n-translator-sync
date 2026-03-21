@@ -110,7 +110,7 @@ describe('Core Paths Module', () => {
       expect(result).toBeNull()
     })
 
-    it('handles sourceDir configuration', () => {
+    it('does not use sourceDir for source path resolution', () => {
       const filePath = '/workspace/src/i18n/en.json'
       const workspacePath = '/workspace'
       const config = createTestConfig({
@@ -119,7 +119,7 @@ describe('Core Paths Module', () => {
       })
 
       const result = findSourcePathForFile(filePath, workspacePath, config)
-      expect(result).toBe('i18n/en.json')
+      expect(result).toBeNull()
     })
   })
 
@@ -199,7 +199,7 @@ describe('Core Paths Module', () => {
       expect(result).not.toBe('C:/workspace/i18n/es.json/en.json')
     })
 
-    it('handles targetDir configuration for file sources', () => {
+    it('ignores targetDir configuration for file sources', () => {
       const workspacePath = '/workspace'
       const sourceLocale = 'en'
       const targetLocale = 'fr'
@@ -210,10 +210,10 @@ describe('Core Paths Module', () => {
       })
 
       const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en.json')
-      expect(result).toBe('/workspace/dist/i18n/fr.json')
+      expect(result).toBe('/workspace/i18n/fr.json')
     })
 
-    it('handles targetDir configuration for directory sources', () => {
+    it('ignores targetDir configuration for directory sources', () => {
       const workspacePath = '/workspace'
       const sourceLocale = 'en'
       const targetLocale = 'fr'
@@ -224,7 +224,7 @@ describe('Core Paths Module', () => {
       })
 
       const result = createTargetPath(workspacePath, sourceLocale, targetLocale, relativePath, config, 'i18n/en')
-      expect(result).toBe('/workspace/dist/i18n/fr/messages.json')
+      expect(result).toBe('/workspace/i18n/fr/messages.json')
     })
 
     it('normalizes Windows paths correctly', () => {
@@ -246,10 +246,10 @@ describe('Core Paths Module', () => {
       expect(result).toBe('/workspace')
     })
 
-    it('joins workspace path with sourceDir when specified', () => {
+    it('ignores sourceDir and returns workspace path when specified', () => {
       const config = createTestConfig({ sourceDir: 'src' })
       const result = getSourceBasePath('/workspace', config)
-      expect(result).toBe('/workspace/src')
+      expect(result).toBe('/workspace')
     })
   })
 
@@ -260,10 +260,10 @@ describe('Core Paths Module', () => {
       expect(result).toBe('/workspace')
     })
 
-    it('joins workspace path with targetDir when specified', () => {
+    it('ignores targetDir and returns workspace path when specified', () => {
       const config = createTestConfig({ targetDir: 'dist' })
       const result = getTargetBasePath('/workspace', config)
-      expect(result).toBe('/workspace/dist')
+      expect(result).toBe('/workspace')
     })
   })
 
@@ -284,7 +284,7 @@ describe('Core Paths Module', () => {
       expect(result).toBe('/workspace/i18n/fr_en.json')
     })
 
-    it('creates back-translation path for directory-based source with targetDir', () => {
+    it('ignores targetDir for directory-based source back-translation paths', () => {
       const workspacePath = '/workspace'
       const config = createTestConfig({
         sourcePaths: ['i18n/en'],
@@ -292,10 +292,10 @@ describe('Core Paths Module', () => {
       })
 
       const result = createBackTranslationPath(workspacePath, 'fr', 'messages.json', config, 'i18n/en')
-      expect(result).toBe('/workspace/dist/i18n/fr_en/messages.json')
+      expect(result).toBe('/workspace/i18n/fr_en/messages.json')
     })
 
-    it('creates back-translation path for file-based source with targetDir', () => {
+    it('ignores targetDir for file-based source back-translation paths', () => {
       const workspacePath = '/workspace'
       const config = createTestConfig({
         sourcePaths: ['i18n/en.json'],
@@ -303,7 +303,7 @@ describe('Core Paths Module', () => {
       })
 
       const result = createBackTranslationPath(workspacePath, 'es', 'en.json', config, 'i18n/en.json')
-      expect(result).toBe('/workspace/dist/i18n/es_en.json')
+      expect(result).toBe('/workspace/i18n/es_en.json')
     })
 
     it('creates back-translation path with custom sourcePath patterns', () => {
@@ -376,7 +376,7 @@ describe('Core Paths Module', () => {
       expect(result.fsPath).toBe('/workspace/i18n/de.json')
     })
 
-    it('creates target URI with targetDir configured', () => {
+    it('ignores targetDir when creating target URI', () => {
       const fs = createMockFileSystem()
       const workspacePath = '/workspace'
       const config = createTestConfig({
@@ -394,7 +394,7 @@ describe('Core Paths Module', () => {
         'i18n/en'
       )
 
-      expect(result.fsPath).toBe('/workspace/dist/i18n/es/text.json')
+      expect(result.fsPath).toBe('/workspace/i18n/es/text.json')
     })
   })
 
@@ -433,7 +433,7 @@ describe('Core Paths Module', () => {
       expect(result.fsPath).toBe('/workspace/i18n/de_en.json')
     })
 
-    it('creates back-translation URI with targetDir configured', () => {
+    it('ignores targetDir when creating back-translation URI', () => {
       const fs = createMockFileSystem()
       const workspacePath = '/workspace'
       const config = createTestConfig({
@@ -450,7 +450,7 @@ describe('Core Paths Module', () => {
         'i18n/en'
       )
 
-      expect(result.fsPath).toBe('/workspace/dist/i18n/es_en/strings.json')
+      expect(result.fsPath).toBe('/workspace/i18n/es_en/strings.json')
     })
 
     it('throws when sourcePath is not provided', () => {
