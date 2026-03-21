@@ -62,6 +62,10 @@ class TestTranslatorAdapter extends TranslatorAdapter {
     this.fileOpenHandlerCalled = true;
   }
 
+  protected async openDocument(path: string): Promise<void> {
+    // no-op for tests
+  }
+
   protected createWatcher(): WorkspaceWatcher {
     return {
       createFileSystemWatcher: vi.fn().mockReturnValue({
@@ -333,7 +337,7 @@ describe('TranslatorAdapter', () => {
       await adapter.initialize();
       await adapter.start();
 
-      const cache = vi.mocked(SQLiteCache).mock.results.at(-1)?.value as any;
+      const cache = vi.mocked(SQLiteCache).mock.results.slice(-1)[0]?.value as any;
       expect(cache).toBeDefined();
       cache.exportCSV = vi.fn().mockRejectedValueOnce(new Error('Export failed'));
 
@@ -371,7 +375,7 @@ describe('TranslatorAdapter', () => {
         autoImport: false
       });
 
-      const cache = vi.mocked(SQLiteCache).mock.results.at(-1)?.value as any;
+      const cache = vi.mocked(SQLiteCache).mock.results.slice(-1)[0]?.value as any;
       expect(cache).toBeDefined();
       cache.purge = vi.fn().mockResolvedValueOnce({ deletedCount: 0 });
       cache.completePurge = vi.fn().mockResolvedValueOnce({ deletedCount: 3 });
@@ -540,9 +544,9 @@ describe('TranslatorAdapter', () => {
 
       // Mock loadProjectConfig for the config change handler
       vi.spyOn(coreConfig, 'loadProjectConfig').mockReturnValue({
+        ...coreConfig.defaultConfig,
         sourceLocale: 'en',
         targetLocales: ['fr'],
-        translationEngine: 'copy',
         sourcePaths: [],
         enableBackTranslation: false
       });

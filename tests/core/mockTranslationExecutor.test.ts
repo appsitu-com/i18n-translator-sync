@@ -4,7 +4,7 @@ import { TranslatorPipeline } from '../../src/core/pipeline'
 import { TranslatorManager } from '../../src/core/translatorManager'
 import { Logger } from '../../src/core/util/baseLogger'
 import { TranslationCache } from '../../src/core/cache/sqlite'
-import { TranslateProjectConfig, ConfigProvider } from '../../src/core/coreConfig'
+import { TranslateProjectConfig, ConfigProvider, defaultConfig } from '../../src/core/coreConfig'
 
 // Mock dependencies
 vi.mock('../../src/core/cache/sqlite')
@@ -70,6 +70,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       vi.spyOn(mockFs, 'stat').mockResolvedValue({ mtime: Date.now() } as any)
 
       const config: TranslateProjectConfig = {
+        ...defaultConfig,
         sourceDir: '',
         targetDir: '',
         sourceLocale: 'en',
@@ -116,6 +117,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       vi.spyOn(mockFs, 'stat').mockResolvedValue({ mtime: Date.now() } as any)
 
       const config: TranslateProjectConfig = {
+        ...defaultConfig,
         sourceDir: '',
         targetDir: '',
         sourceLocale: 'en',
@@ -163,6 +165,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       vi.spyOn(mockFs, 'stat').mockResolvedValue({ mtime: Date.now() } as any)
 
       const config: TranslateProjectConfig = {
+        ...defaultConfig,
         sourceDir: '',
         targetDir: '',
         sourceLocale: 'en',
@@ -207,6 +210,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       vi.spyOn(mockFs, 'stat').mockResolvedValue({ mtime: Date.now() } as any)
 
       const config: TranslateProjectConfig = {
+        ...defaultConfig,
         sourceDir: '',
         targetDir: '',
         sourceLocale: 'en',
@@ -245,6 +249,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       vi.spyOn(mockFs, 'stat').mockResolvedValue({ mtime: Date.now() } as any)
 
       const config: TranslateProjectConfig = {
+        ...defaultConfig,
         sourceDir: '',
         targetDir: '',
         sourceLocale: 'en',
@@ -312,6 +317,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       )
 
       const config: TranslateProjectConfig = {
+        ...defaultConfig,
         sourceDir: '',
         targetDir: '',
         sourceLocale: 'en',

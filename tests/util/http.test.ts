@@ -19,7 +19,6 @@ describe('http', () => {
   })
 
   afterEach(() => {
-    // @ts-expect-error
     global.fetch = originalFetch
   })
 

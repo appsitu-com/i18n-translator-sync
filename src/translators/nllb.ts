@@ -1,11 +1,36 @@
+import { z } from 'zod'
 import type { Translator, BulkTranslateOpts } from './types'
-import type { INllbConfig } from '../core/config'
+import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { ISO_TO_NLLB_LOCALE, NLLB_LOCALE_TO_LANGUAGE_NAME, NLLB_SUPPORTED_SCRIPT_LOCALE_CODES } from './nllbLanguageMap'
 
-const DEFAULT_OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
-const DEFAULT_NLLB_MODEL = 'meta-llama/nllb-200-1.3B'
-const DEFAULT_SEPARATOR = '<<<SEP>>>'
+/** Default OpenRouter endpoint for NLLB model */
+export const NLLB_DEFAULT_OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
+
+/** Default separator for splitting NLLB-translated segments */
+export const NLLB_DEFAULT_SEPARATOR = '<<<SEP>>>'
+
+/** Default model for NLLB via OpenRouter */
+export const NLLB_DEFAULT_MODEL = 'meta-llama/nllb-200-1.3B'
+
+/** NLLB uses OpenRouter's domains for endpoint validation */
+export { OPENROUTER_ALLOWED_DOMAINS as NLLB_ALLOWED_DOMAINS } from './openrouter'
+
+/** NLLB via OpenRouter config schema */
+export const NllbConfigSchema = z.object({
+  apiKey: z.string().optional(),
+  endpoint: z.string().default(NLLB_DEFAULT_OPENROUTER_ENDPOINT),
+  model: z.string().default(NLLB_DEFAULT_MODEL),
+  temperature: z.number().min(0).max(2).default(0),
+  maxOutputTokens: z.number().int().min(1).default(256),
+  separator: z.string().default(NLLB_DEFAULT_SEPARATOR),
+  timeoutMs: z.number().int().min(0).default(60_000),
+  retry: RetrySchema,
+  langMap: LangMapSchema
+})
+
+/** Inferred NLLB config type */
+export type INllbConfig = z.infer<typeof NllbConfigSchema>
 
 function findNllbLocaleByLanguagePrefix(languagePrefix: string): string | undefined {
   const prefix = languagePrefix.toLowerCase() + '_'
@@ -60,18 +85,20 @@ function parseTranslationsFromResponse(responseText: string, separator: string, 
   throw new Error(`NLLB Translator: expected ${expectedCount} translated segments but received ${chunks.length}.`)
 }
 
-export const NllbTranslator: Translator = {
+export const NllbTranslator: Translator<INllbConfig> = {
   name: 'nllb',
 
-  async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts): Promise<string[]> {
-    const cfg = opts.apiConfig as INllbConfig
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<INllbConfig>) {
+    const cfg = opts.apiConfig
     const apiKey = cfg.apiKey
-    const endpoint = (cfg.endpoint || DEFAULT_OPENROUTER_ENDPOINT).replace(/\/+$/, '')
-    const model = cfg.nllbModel || DEFAULT_NLLB_MODEL
-    const temperature = cfg.temperature ?? 0
-    const maxTokens = cfg.maxOutputTokens ?? 4096
-    const separator = cfg.separator || DEFAULT_SEPARATOR
-    const langMap = cfg.langMap ?? {}
+    const endpoint = cfg.endpoint.replace(/\/+$/, '')
+    const model = cfg.model
+    const temperature = cfg.temperature
+    const maxTokens = cfg.maxOutputTokens
+    const separator = cfg.separator
+    const timeout = cfg.timeoutMs
+    const retry = cfg.retry
+    const langMap = cfg.langMap
 
     if (!apiKey) {
       throw new Error(`NLLB Translator: missing 'apiKey'`)
@@ -84,9 +111,9 @@ export const NllbTranslator: Translator = {
 
     const payload = texts.join(`\n${separator}\n`)
 
-    const contextHints = contexts.some((ctx) => Boolean(ctx))
+    const contextHints = _contexts.some((ctx) => Boolean(ctx))
       ? '\n\nContext hints (aligned by input order):\n' +
-        contexts
+        _contexts
           .map((ctx, idx) => {
             if (!ctx) {
               return `${idx + 1}. (none)`
@@ -112,8 +139,12 @@ export const NllbTranslator: Translator = {
       'X-Title': 'VSCode i18n Translator Extension'
     }
 
-    const body = {
-      model,
+    const body: {
+      model?: string
+      messages: Array<{ role: 'user'; content: string }>
+      temperature: number
+      max_tokens: number
+    } = {
       messages: [
         {
           role: 'user',
@@ -122,6 +153,10 @@ export const NllbTranslator: Translator = {
       ],
       temperature,
       max_tokens: maxTokens
+    }
+
+    if (model) {
+      body.model = model
     }
 
     try {

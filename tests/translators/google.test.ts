@@ -1,5 +1,5 @@
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { GoogleTranslator } from '../../src/translators/google'
+import { GoogleTranslator, GOOGLE_DEFAULT_ENDPOINT } from '../../src/translators/google'
 import { generateKeyPairSync } from 'node:crypto'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
@@ -66,11 +66,14 @@ describe('google v3 stub', () => {
     const out = await GoogleTranslator.translateMany(['a', 'b'], [null, null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig: {
         apiKey: credentialsPath,
-        endpoint: 'https://translation.googleapis.com',
+        endpoint: GOOGLE_DEFAULT_ENDPOINT,
         googleProjectId: 'demo-project',
-        googleLocation: 'global'
+        googleLocation: 'global',
+        timeoutMs: 30_000,
+        langMap: {}
       }
     })
 
@@ -108,9 +111,13 @@ describe('google v3 stub', () => {
         GoogleTranslator.translateMany(['a'], [null], {
           sourceLocale: 'en',
           targetLocale: 'fr',
+          rootDir: '.',
           apiConfig: {
             apiKey: credentialsPath,
-            endpoint: 'https://translation.googleapis.com'
+            endpoint: GOOGLE_DEFAULT_ENDPOINT,
+            googleLocation: 'global',
+            timeoutMs: 30_000,
+            langMap: {}
           }
         })
       ).rejects.toThrow("Google Translate v3: missing 'googleProjectId'")
@@ -128,8 +135,12 @@ describe('google v3 stub', () => {
       GoogleTranslator.translateMany(['env'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
+        rootDir: '.',
         apiConfig: {
-          endpoint: ''
+          endpoint: '',
+          googleLocation: 'global',
+          timeoutMs: 30_000,
+          langMap: {}
         }
       })
     ).rejects.toThrow("missing 'apiKey'")
@@ -142,11 +153,14 @@ describe('google v3 stub', () => {
     const opts = {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig: {
         apiKey: cacheCredentialsPath,
-        endpoint: 'https://translation.googleapis.com',
+        endpoint: GOOGLE_DEFAULT_ENDPOINT,
         googleProjectId: 'demo-project',
-        googleLocation: 'global'
+        googleLocation: 'global',
+        timeoutMs: 30_000,
+        langMap: {}
       }
     }
 
@@ -175,11 +189,14 @@ describe('google v3 stub', () => {
     const out = await GoogleTranslator.translateMany(['hello'], [null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig: {
         apiKey: jsonString,
         endpoint: 'https://translation.googleapis.com',
         googleProjectId: 'demo-project',
-        googleLocation: 'global'
+        googleLocation: 'global',
+        timeoutMs: 30_000,
+        langMap: {}
       }
     })
 
@@ -191,11 +208,14 @@ describe('google v3 stub', () => {
     const out = await GoogleTranslator.translateMany(['world'], [null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig: {
         apiKey: credentialsPath,
         endpoint: 'https://translation.googleapis.com',
         googleProjectId: 'demo-project',
-        googleLocation: 'global'
+        googleLocation: 'global',
+        timeoutMs: 30_000,
+        langMap: {}
       }
     })
 
@@ -207,10 +227,14 @@ describe('google v3 stub', () => {
       GoogleTranslator.translateMany(['test'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
+        rootDir: '.',
         apiConfig: {
           apiKey: '{invalid json',
           endpoint: 'https://translation.googleapis.com',
-          googleProjectId: 'demo-project'
+          googleProjectId: 'demo-project',
+          googleLocation: 'global',
+          timeoutMs: 30_000,
+          langMap: {}
         }
       })
     ).rejects.toThrow('failed to parse service credentials JSON')
@@ -226,10 +250,14 @@ describe('google v3 stub', () => {
       GoogleTranslator.translateMany(['test'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
+        rootDir: '.',
         apiConfig: {
           apiKey: incompleteJson,
           endpoint: 'https://translation.googleapis.com',
-          googleProjectId: 'demo-project'
+          googleProjectId: 'demo-project',
+          googleLocation: 'global',
+          timeoutMs: 30_000,
+          langMap: {}
         }
       })
     ).rejects.toThrow("missing 'client_email' or 'private_key'")
@@ -240,10 +268,14 @@ describe('google v3 stub', () => {
       GoogleTranslator.translateMany(['test'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
+        rootDir: '.',
         apiConfig: {
           apiKey: '/nonexistent/path/to/creds.json',
           endpoint: 'https://translation.googleapis.com',
-          googleProjectId: 'demo-project'
+          googleProjectId: 'demo-project',
+          googleLocation: 'global',
+          timeoutMs: 30_000,
+          langMap: {}
         }
       })
     ).rejects.toThrow('failed to read service credentials from')

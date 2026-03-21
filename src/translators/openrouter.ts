@@ -1,6 +1,36 @@
+import { z } from 'zod'
 import type { Translator, BulkTranslateOpts } from './types'
-import type { IOpenRouterConfig } from '../core/config'
+import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
+
+/** Default endpoint for OpenRouter API */
+export const OPENROUTER_DEFAULT_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
+
+/** Default model for OpenRouter API */
+export const OPENROUTER_DEFAULT_MODEL = 'anthropic/claude-3-haiku'
+
+/** Allowed domains for OpenRouter endpoint validation */
+export const OPENROUTER_ALLOWED_DOMAINS = [
+  'openrouter.ai',
+  'api.openrouter.ai',
+  '*.openrouter.ai'
+] as const
+
+/** OpenRouter (multi-model LLM gateway) config schema */
+export const OpenRouterConfigSchema = z.object({
+  apiKey: z.string().optional(),
+  endpoint: z.string().default(OPENROUTER_DEFAULT_ENDPOINT),
+  model: z.string().default(OPENROUTER_DEFAULT_MODEL),
+  temperature: z.number().min(0).max(2).default(0.1),
+  maxOutputTokens: z.number().int().min(1).default(2048),
+  systemPrompt: z.string().optional(),
+  timeoutMs: z.number().int().min(0).default(60_000),
+  retry: RetrySchema,
+  langMap: LangMapSchema
+})
+
+/** Inferred OpenRouter config type */
+export type IOpenRouterConfig = z.infer<typeof OpenRouterConfigSchema>
 
 // JSON Schema for enforcing structured output
 const TRANSLATION_SCHEMA = {
@@ -18,18 +48,18 @@ const TRANSLATION_SCHEMA = {
   additionalProperties: false
 }
 
-export const OpenRouterTranslator: Translator = {
+export const OpenRouterTranslator: Translator<IOpenRouterConfig> = {
   name: 'openrouter',
 
-  async translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const cfg = opts.apiConfig as IOpenRouterConfig
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IOpenRouterConfig>) {
+    const cfg = opts.apiConfig
     const apiKey = cfg.apiKey
-    const endpoint = (cfg.endpoint || 'https://openrouter.ai/api/v1/chat/completions').replace(/\/+$/, '')
-    const model = cfg.openrouterModel ?? 'anthropic/claude-3-haiku'
-    const temperature = cfg.temperature ?? 0.1
-    const maxTokens = cfg.maxOutputTokens ?? 2048
+    const endpoint = cfg.endpoint.replace(/\/+$/, '')
+    const model = cfg.model
+    const temperature = cfg.temperature
+    const maxTokens = cfg.maxOutputTokens
     const systemPrompt = cfg.systemPrompt ?? 'You are a professional translator that provides accurate, contextually appropriate translations while preserving the original meaning and tone.'
-    const langMap = cfg.langMap ?? {}
+    const langMap = cfg.langMap
 
     if (!apiKey) throw new Error(`OpenRouter Translator: missing 'apiKey'`)
 
@@ -45,10 +75,10 @@ export const OpenRouterTranslator: Translator = {
 
     // Process texts in a single API call to maintain context and efficiency
     // Build context information for the prompt
-    const contextInfo = contexts.some(c => c)
+    const contextInfo = _contexts.some(c => c)
       ? '\n\nContext information is provided for some texts to help with translation accuracy. Use the context to understand the meaning and choose appropriate translations:\n' +
         texts.map((text, idx) => {
-          const context = contexts[idx]
+          const context = _contexts[idx]
           return context ? `"${text}" (Context: ${context})` : `"${text}"`
         }).join('\n')
       : ''
@@ -68,8 +98,16 @@ ${JSON.stringify(texts, null, 2)}${contextInfo}
 
 Respond with a JSON object containing a "translations" array with the translated texts in the same order.`
 
-    const body = {
-      model,
+    const body: {
+      model?: string
+      messages: Array<{ role: 'system' | 'user'; content: string }>
+      temperature: number
+      max_tokens: number
+      response_format: {
+        type: 'json_object'
+        schema: typeof TRANSLATION_SCHEMA
+      }
+    } = {
       messages: [
         {
           role: 'system',
@@ -86,6 +124,10 @@ Respond with a JSON object containing a "translations" array with the translated
         type: 'json_object',
         schema: TRANSLATION_SCHEMA
       }
+    }
+
+    if (model) {
+      body.model = model
     }
 
     try {

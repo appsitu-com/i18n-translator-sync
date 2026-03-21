@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { TranslationCommand, ITranslationExecutor } from '../../src/core/translationExecutor'
 import { IUri } from '../../src/core/util/fs'
-import { TranslatorEngine } from '../../src/translators/types'
+import type { ResolvedTranslatorEngine, EngineConfig } from '../../src/translators/types'
 
 describe('TranslationExecutor Interface', () => {
   it('should define TranslationCommand structure correctly', () => {
@@ -53,14 +53,17 @@ describe('TranslationExecutor Interface', () => {
       translateSegments: async (
         segments: string[],
         contexts: (string | null)[],
-        engineName: TranslatorEngine,
+        engineName: ResolvedTranslatorEngine,
         sourceLocale: string,
         targetLocale: string,
-        configProvider: { get: <T>(section: string, defaultValue?: T) => T },
+        engineConfig: EngineConfig | undefined,
         sourceFile: string,
         isBackTranslation: boolean
-      ): Promise<string[]> => {
-        return segments.map(s => `[${engineName}:${sourceLocale}->${targetLocale}] ${s}`)
+      ) => {
+        return {
+          translations: segments.map(s => `[${engineName}:${sourceLocale}->${targetLocale}] ${s}`),
+          stats: { total: segments.length, cacheHits: 0, apiCalls: segments.length }
+        }
       },
 
       writeTranslation: async (

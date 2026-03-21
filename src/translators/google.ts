@@ -1,11 +1,37 @@
+import { z } from 'zod'
 import type { BulkTranslateOpts, Translator } from './types'
-import type { IGoogleConfig } from '../core/config'
+import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { readFileSync } from 'node:fs'
 import { toAbsPath } from '../core/util/pathShared'
 import { createSign } from 'node:crypto'
+
+/** Default endpoint for Google Cloud Translation API */
+export const GOOGLE_DEFAULT_ENDPOINT = 'https://translation.googleapis.com'
+
+/** Allowed domains for Google Translate endpoint validation */
+export const GOOGLE_ALLOWED_DOMAINS = [
+  'translation.googleapis.com',
+  'generativelanguage.googleapis.com',
+  '*.googleapis.com'
+] as const
+
+/** Google Cloud Translation config schema */
+export const GoogleConfigSchema = z.object({
+  apiKey: z.string().optional(),
+  endpoint: z.string().default(GOOGLE_DEFAULT_ENDPOINT),
+  googleProjectId: z.string().optional(),
+  googleLocation: z.string().default('global'),
+  model: z.string().optional(),
+  timeoutMs: z.number().int().min(0).default(30_000),
+  retry: RetrySchema,
+  langMap: LangMapSchema
+})
+
+/** Inferred Google config type */
+export type IGoogleConfig = z.infer<typeof GoogleConfigSchema>
 
 const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const GOOGLE_TRANSLATION_SCOPE = 'https://www.googleapis.com/auth/cloud-translation'
@@ -180,19 +206,19 @@ async function requestGoogleAccessToken(pathToCredentials: string, rootDir: stri
   }
 }
 
-export const GoogleTranslator: Translator = {
+export const GoogleTranslator: Translator<IGoogleConfig> = {
   name: 'google',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const cfg = opts.apiConfig as IGoogleConfig
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IGoogleConfig>) {
+    const cfg = opts.apiConfig
     const credentialsPath = cfg.apiKey
-    const endpoint = (cfg.endpoint ?? 'https://translation.googleapis.com').replace(/\/+$/, '')
-    const timeout = Number(cfg.timeoutMs ?? 30_000)
+    const endpoint = cfg.endpoint.replace(/\/+$/, '')
+    const timeout = cfg.timeoutMs
     const retry = cfg.retry
-    const model = cfg.googleModel
+    const model = cfg.model
     const projectId = cfg.googleProjectId
-    const location = cfg.googleLocation ?? 'global'
-    const langMap = cfg.langMap ?? {}
+    const location = cfg.googleLocation
+    const langMap = cfg.langMap
 
     if (!credentialsPath) throw new Error("Google Translate v3: missing 'apiKey' (path to service credential JSON)")
     if (!projectId) throw new Error("Google Translate v3: missing 'googleProjectId'")

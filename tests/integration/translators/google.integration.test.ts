@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { resolve } from 'node:path';
-import { GoogleTranslator, clearTokenCache } from '../../../src/translators/google';
+import { GoogleTranslator, clearTokenCache, GOOGLE_DEFAULT_ENDPOINT } from '../../../src/translators/google';
 import { requireEnv } from './testEnv';
 
 // Can be either inline JSON string or file path to credentials JSON
@@ -25,10 +25,11 @@ describe('integration: google translator', () => {
       targetLocale: 'es',
       apiConfig: {
         apiKey: googleCredentials,
-        endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
+        endpoint: process.env.GOOGLE_TRANSLATION_URL || GOOGLE_DEFAULT_ENDPOINT,
         googleProjectId,
         googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
-        timeoutMs: 60000
+        timeoutMs: 60000,
+        langMap: {}
       },
       rootDir: testProjectDir
     });
@@ -52,10 +53,11 @@ describe('integration: google translator', () => {
         targetLocale: 'es',
         apiConfig: {
           apiKey: googleCredentials,
-          endpoint: process.env.GOOGLE_TRANSLATION_URL || 'https://translation.googleapis.com',
+          endpoint: process.env.GOOGLE_TRANSLATION_URL || GOOGLE_DEFAULT_ENDPOINT,
           googleProjectId,
           googleLocation: process.env.GOOGLE_TRANSLATION_LOCATION || 'global',
-          timeoutMs: 60000
+          timeoutMs: 60000,
+          langMap: {}
         },
         rootDir: testProjectDir
       };

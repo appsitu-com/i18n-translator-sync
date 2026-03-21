@@ -20,9 +20,7 @@ describe('Watcher', () => {
     it('should define proper interfaces', () => {
       // Create a minimal implementation of FileWatcher to verify interface
       const mockFileWatcher: FileWatcher = {
-        onDidCreate: vi.fn(() => ({ dispose: vi.fn() })),
-        onDidChange: vi.fn(() => ({ dispose: vi.fn() })),
-        onDidDelete: vi.fn(() => ({ dispose: vi.fn() })),
+        watch: vi.fn(() => ({ dispose: vi.fn() })),
         dispose: vi.fn()
       };
 
@@ -34,9 +32,7 @@ describe('Watcher', () => {
       };
 
       // Verify the interfaces have the expected methods
-      expect(mockFileWatcher.onDidCreate).toBeDefined();
-      expect(mockFileWatcher.onDidChange).toBeDefined();
-      expect(mockFileWatcher.onDidDelete).toBeDefined();
+      expect(mockFileWatcher.watch).toBeDefined();
       expect(mockFileWatcher.dispose).toBeDefined();
 
       expect(mockWorkspaceWatcher.createFileSystemWatcher).toBeDefined();

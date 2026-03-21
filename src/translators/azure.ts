@@ -1,23 +1,49 @@
+import { z } from 'zod'
 import type { Translator, BulkTranslateOpts } from './types'
-import type { IAzureConfig } from '../core/config'
+import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { randomUUID } from 'crypto'
 import { withRetry } from '../util/retry'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
-export const AzureTranslator: Translator = {
+/** Default endpoint for Azure Translator */
+export const AZURE_DEFAULT_ENDPOINT = 'https://api.cognitive.microsofttranslator.com'
+
+/** Allowed domains for Azure Translator endpoint validation */
+export const AZURE_ALLOWED_DOMAINS = [
+  'api.cognitive.microsofttranslator.com',
+  '*.cognitive.microsofttranslator.com'
+] as const
+
+/** Microsoft Azure Translator config schema */
+export const AzureConfigSchema = z.object({
+  apiKey: z.string().optional(),
+  endpoint: z.string().default(AZURE_DEFAULT_ENDPOINT),
+  region: z.string().optional(),
+  model: z.string().optional(),
+  category: z.string().optional(),
+  batchSize: z.number().int().min(1).optional(),
+  timeoutMs: z.number().int().min(0).default(30_000),
+  retry: RetrySchema,
+  langMap: LangMapSchema
+})
+
+/** Inferred Azure config type */
+export type IAzureConfig = z.infer<typeof AzureConfigSchema>
+
+export const AzureTranslator: Translator<IAzureConfig> = {
   name: 'azure',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts) {
-    const cfg = opts.apiConfig as IAzureConfig
-    const endpoint = (cfg.endpoint ?? 'https://api.cognitive.microsofttranslator.com').replace(/\/+$/, '')
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IAzureConfig>) {
+    const cfg = opts.apiConfig
+    const endpoint = cfg.endpoint.replace(/\/+$/, '')
     const apiKey = cfg.apiKey
     const region = cfg.region
 
-    const category = cfg.azureModel ? `custom:${cfg.azureModel}` : undefined
-    const timeout = Number(cfg.timeoutMs ?? 30_000)
+    const category = cfg.model ? `custom:${cfg.model}` : undefined
+    const timeout = cfg.timeoutMs
     const retry = cfg.retry
-    const langMap = cfg.langMap ?? {}
+    const langMap = cfg.langMap
 
     if (!apiKey) {
       throw new Error(`Azure Translator: missing 'apiKey'`)

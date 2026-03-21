@@ -271,10 +271,12 @@ class MockCache implements TranslationCache {
     target: string
     texts: string[]
     contexts: (string | null | undefined)[]
-  }): Promise<Map<string, string>> {
+    sourcePath?: string
+    positions?: number[]
+  }): Promise<Map<string, { translation: string; textPos?: number }>> {
     this.getCalls.push(params)
 
-    const out = new Map<string, string>()
+    const out = new Map<string, { translation: string; textPos?: number }>()
     const separator = '::' // Must match bulkTranslate.ts
 
     const engineMap = this.data.get(params.engine)
@@ -292,7 +294,7 @@ class MockCache implements TranslationCache {
       const key = `${text}${separator}${context}`
       const stored = targetLangMap.get(key)
       if (stored) {
-        out.set(key, stored)
+        out.set(key, { translation: stored })
       }
     }
 

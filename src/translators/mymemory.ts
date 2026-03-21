@@ -1,6 +1,29 @@
+import { z } from 'zod'
 import type { Translator, BulkTranslateOpts } from './types'
-import type { IMyMemoryConfig } from '../core/config'
+import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { withRetry } from '../util/retry'
+
+/** Default endpoint for MyMemory API */
+export const MYMEMORY_DEFAULT_ENDPOINT = 'https://api.mymemory.translated.net/get'
+
+/** Allowed domains for MyMemory endpoint validation */
+export const MYMEMORY_ALLOWED_DOMAINS = [
+  'api.mymemory.translated.net',
+  '*.mymemory.translated.net'
+] as const
+
+/** MyMemory translation engine config schema */
+export const MyMemoryConfigSchema = z.object({
+  apiKey: z.string().optional(),
+  endpoint: z.string().default(MYMEMORY_DEFAULT_ENDPOINT),
+  email: z.string().optional(),
+  timeoutMs: z.number().int().min(0).default(15_000),
+  retry: RetrySchema,
+  langMap: LangMapSchema
+})
+
+/** Inferred MyMemory config type */
+export type IMyMemoryConfig = z.infer<typeof MyMemoryConfigSchema>
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const ctrl = new AbortController()
@@ -45,7 +68,7 @@ const LOCALE_MAP: Record<string, string> = {
   'iu-Latn': 'iu'
 }
 
-export class MyMemoryTranslator implements Translator {
+export class MyMemoryTranslator implements Translator<IMyMemoryConfig> {
   name = 'mymemory'
 
   // Default normalizer: lowercase language, keep region if any
@@ -58,20 +81,21 @@ export class MyMemoryTranslator implements Translator {
     return LOCALE_MAP[locale] ?? this.defaultNorm(locale)
   }
 
-  async translateMany(texts: string[], _contexts: string[], opts: BulkTranslateOpts) {
-    const cfg = opts.apiConfig as IMyMemoryConfig
-    const endpoint = (cfg.endpoint ?? 'https://api.mymemory.translated.net/get').replace(/\/+$/, '')
+  async translateMany(texts: string[], _contexts: string[], opts: BulkTranslateOpts<IMyMemoryConfig>) {
+    const cfg = opts.apiConfig
+    const endpoint = cfg.endpoint.replace(/\/+$/, '')
     const email = cfg.email
     const apiKey = cfg.apiKey
 
-    const timeoutMs = cfg.timeoutMs ?? 15_000
+    const timeoutMs = cfg.timeoutMs
     const maxRetries = cfg.retry?.maxRetries ?? 2
     const delayMs = cfg.retry?.delayMs ?? 100
     const backoffFactor = cfg.retry?.backoffFactor ?? 2
     const retry = { maxRetries, delayMs, backoffFactor }
+    const langMap = cfg.langMap
 
-    const from = this.normalizeLocale(opts.sourceLocale)
-    const to = this.normalizeLocale(opts.targetLocale)
+    const from = langMap[opts.sourceLocale] ?? this.normalizeLocale(opts.sourceLocale)
+    const to = langMap[opts.targetLocale] ?? this.normalizeLocale(opts.targetLocale)
 
     const out: string[] = new Array(texts.length)
 

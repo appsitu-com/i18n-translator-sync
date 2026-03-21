@@ -20,6 +20,8 @@ interface TranslationChunk {
   contexts: string[]
 }
 
+const NLLB_DEFAULT_SEPARATOR = '<<<SEP>>>'
+
 function isTranslatableText(text: string): boolean {
   return text.trim().length > 0
 }
@@ -37,7 +39,9 @@ function buildTranslationChunks(
   texts: string[],
   contexts: string[],
   maxItemsPerRequest: number,
-  maxCharsPerRequest: number
+  maxCharsPerRequest: number,
+  maxCharsPerSegment: number,
+  interItemSeparatorChars: number
 ): TranslationChunk[] {
   const chunks: TranslationChunk[] = []
   let currentTexts: string[] = []
@@ -49,14 +53,15 @@ function buildTranslationChunks(
     const context = contexts[i]
     const textCharCount = text.length
 
-    if (textCharCount > maxCharsPerRequest) {
+    if (textCharCount > maxCharsPerSegment) {
       throw new Error(
-        `Segment exceeds max translation characters per request (${textCharCount} > ${maxCharsPerRequest})`
+        `Segment exceeds max translation characters per segment (${textCharCount} > ${maxCharsPerSegment})`
       )
     }
 
     const chunkIsFull = currentTexts.length >= maxItemsPerRequest
-    const charsWouldOverflow = currentChars + textCharCount > maxCharsPerRequest
+    const joinerChars = currentTexts.length > 0 ? interItemSeparatorChars : 0
+    const charsWouldOverflow = currentChars + joinerChars + textCharCount > maxCharsPerRequest
 
     if (currentTexts.length > 0 && (chunkIsFull || charsWouldOverflow)) {
       chunks.push({ texts: currentTexts, contexts: currentContexts })
@@ -67,7 +72,7 @@ function buildTranslationChunks(
 
     currentTexts.push(text)
     currentContexts.push(context)
-    currentChars += textCharCount
+    currentChars += joinerChars + textCharCount
   }
 
   if (currentTexts.length > 0) {
@@ -99,8 +104,12 @@ export async function bulkTranslateWithEngine(
   const {
     translator: engine,
     limit: translationLimit,
-    maxchars: translationMaxChars
+    maxchars: translationMaxChars,
+    maxitemchars: translationMaxItemChars
   } = getRegisteredTranslator(engineName)
+  const nllbSeparator =
+    engineName === 'nllb' ? ((opts.apiConfig as { separator?: string }).separator ?? NLLB_DEFAULT_SEPARATOR) : ''
+  const interItemSeparatorChars = engineName === 'nllb' ? nllbSeparator.length + 2 : 0
   const langMap = opts.apiConfig.langMap || {}
   const srcNorm = normalizeLocaleWithMap(opts.source, langMap)
   const tgtNorm = normalizeLocaleWithMap(opts.target, langMap)
@@ -175,7 +184,14 @@ export async function bulkTranslateWithEngine(
 
     // Translate the missing segments in chunks to respect per-engine request limits.
     const translated: string[] = []
-    const chunks = buildTranslationChunks(missTexts, missCtx, translationLimit, translationMaxChars)
+    const chunks = buildTranslationChunks(
+      missTexts,
+      missCtx,
+      translationLimit,
+      translationMaxChars,
+      translationMaxItemChars,
+      interItemSeparatorChars
+    )
     for (const chunk of chunks) {
       const chunkTexts = chunk.texts
       const chunkContexts = chunk.contexts

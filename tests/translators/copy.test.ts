@@ -6,6 +6,7 @@ describe('copy', () => {
     const out = await CopyTranslator.translateMany(['a', 'b'], [null, null], {
       sourceLocale: 'en',
       targetLocale: 'en-US',
+      rootDir: '.',
       apiConfig: {}
     })
     expect(out).toEqual(['a', 'b'])

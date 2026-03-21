@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { NllbTranslator } from '../../src/translators/nllb'
+import { NllbTranslator, NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../src/translators/nllb'
 import type { BulkTranslateOpts } from '../../src/translators/types'
-import type { INllbConfig } from '../../src/core/config'
+import type { INllbConfig } from '../../src/translators/nllb'
 
 const mockFetch = vi.fn()
 
@@ -22,13 +22,19 @@ describe('NllbTranslator', () => {
     vi.stubGlobal('fetch', mockFetch)
   })
 
-  const defaultOpts: BulkTranslateOpts = {
+  const defaultOpts: BulkTranslateOpts<INllbConfig> = {
     sourceLocale: 'en',
     targetLocale: 'fr',
     rootDir: '.',
     apiConfig: {
       apiKey: 'test-api-key',
-      endpoint: 'https://openrouter.ai/api/v1/chat/completions'
+      endpoint: NLLB_DEFAULT_OPENROUTER_ENDPOINT,
+      model: NLLB_DEFAULT_MODEL,
+      separator: NLLB_DEFAULT_SEPARATOR,
+      temperature: 0,
+      maxOutputTokens: 256,
+      timeoutMs: 60_000,
+      langMap: {}
     } as INllbConfig
   }
 
@@ -49,15 +55,16 @@ describe('NllbTranslator', () => {
 
     const [, options] = mockFetch.mock.calls[0]
     const body = JSON.parse(options.body)
-    expect(body.model).toBe('meta-llama/nllb-200-1.3B')
+    expect(body.model).toBe(NLLB_DEFAULT_MODEL)
+    expect(body.max_tokens).toBe(256)
     expect(body.messages[0].content).toContain('Translate from English (eng_Latn) to French (fra_Latn).')
-    expect(body.messages[0].content).toContain('Keep the separator <<<SEP>>> exactly as is.')
+    expect(body.messages[0].content).toContain(`Keep the separator ${NLLB_DEFAULT_SEPARATOR} exactly as is.`)
   })
 
   it('uses mapped NLLB locale codes from langMap', async () => {
     mockFetch.mockReturnValueOnce(createMockResponse('Hola'))
 
-    const mappedOpts: BulkTranslateOpts = {
+    const mappedOpts: BulkTranslateOpts<INllbConfig> = {
       ...defaultOpts,
       sourceLocale: 'en-US',
       targetLocale: 'es-ES',
@@ -74,10 +81,37 @@ describe('NllbTranslator', () => {
     expect(result).toEqual(['Hola'])
   })
 
-  it('throws for missing api key', async () => {
-    const opts: BulkTranslateOpts = {
+  it('uses configured unified model field when provided', async () => {
+    mockFetch.mockReturnValueOnce(createMockResponse('Bonjour'))
+
+    const optsWithModel: BulkTranslateOpts<INllbConfig> = {
       ...defaultOpts,
-      apiConfig: { endpoint: 'https://openrouter.ai/api/v1/chat/completions' } as INllbConfig
+      apiConfig: {
+        ...(defaultOpts.apiConfig as INllbConfig),
+        model: 'meta-llama/nllb-200-distilled-600M'
+      } as INllbConfig
+    }
+
+    const result = await NllbTranslator.translateMany(['Hello'], [null], optsWithModel)
+    expect(result).toEqual(['Bonjour'])
+
+    const [, options] = mockFetch.mock.calls[0]
+    const body = JSON.parse(options.body)
+    expect(body.model).toBe('meta-llama/nllb-200-distilled-600M')
+  })
+
+  it('throws for missing api key', async () => {
+    const opts: BulkTranslateOpts<INllbConfig> = {
+      ...defaultOpts,
+      apiConfig: {
+        endpoint: NLLB_DEFAULT_OPENROUTER_ENDPOINT,
+        model: NLLB_DEFAULT_MODEL,
+        separator: NLLB_DEFAULT_SEPARATOR,
+        temperature: 0,
+        maxOutputTokens: 256,
+        timeoutMs: 60_000,
+        langMap: {}
+      } as INllbConfig
     }
 
     await expect(NllbTranslator.translateMany(['Hello'], [null], opts)).rejects.toThrow(

@@ -398,7 +398,7 @@ describe('createBackTranslationUri', () => {
 
 describe('verifyFilePath', () => {
   // Move the mock inside beforeEach to ensure it's reset between tests
-  let consoleLogMock;
+  let consoleLogMock: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks()

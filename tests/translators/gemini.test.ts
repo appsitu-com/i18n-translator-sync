@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { GeminiTranslator } from '../../src/translators/gemini'
+import { GeminiTranslator, GEMINI_DEFAULT_MODEL, GEMINI_DEFAULT_ENDPOINT } from '../../src/translators/gemini'
 
 // Mock HTTP utilities
 vi.mock('../../src/util/http', () => ({
@@ -45,10 +45,15 @@ describe('GeminiTranslator stub', () => {
     const result = await GeminiTranslator.translateMany(['Hello world'], [null], {
       sourceLocale: 'en',
       targetLocale: 'es',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
-        region: '' // Not used by Gemini
+        model: GEMINI_DEFAULT_MODEL,
+        temperature: 0.1,
+        maxOutputTokens: 1024,
+        timeoutMs: 60_000,
+        langMap: {},
       }
     })
 
@@ -56,7 +61,7 @@ describe('GeminiTranslator stub', () => {
     expect(postJson).toHaveBeenCalledTimes(1)
 
     const callArgs = vi.mocked(postJson).mock.calls[0]
-    expect(callArgs[0]).toContain('https://test-endpoint/models/gemini-pro:generateContent')
+    expect(callArgs[0]).toContain(`https://test-endpoint/models/${GEMINI_DEFAULT_MODEL}:generateContent`)
     expect(callArgs[0]).toContain('key=test-api-key')
 
     const body = callArgs[1]
@@ -85,10 +90,15 @@ describe('GeminiTranslator stub', () => {
     const result = await GeminiTranslator.translateMany(['Open file'], ['Button label for opening a file'], {
       sourceLocale: 'en',
       targetLocale: 'es',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
-        region: ''
+        model: GEMINI_DEFAULT_MODEL,
+        temperature: 0.1,
+        maxOutputTokens: 1024,
+        timeoutMs: 60_000,
+        langMap: {},
       }
     })
 
@@ -105,10 +115,15 @@ describe('GeminiTranslator stub', () => {
     const result = await GeminiTranslator.translateMany(['Test error handling'], [null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
-        region: ''
+        model: GEMINI_DEFAULT_MODEL,
+        temperature: 0.1,
+        maxOutputTokens: 1024,
+        timeoutMs: 60_000,
+        langMap: {},
       }
     })
 
@@ -147,14 +162,19 @@ describe('gemini api', () => {
   it('translates text with real API', async () => {
     const apiConfig = {
       apiKey: process.env.GEMINI_API_KEY as string,
-      endpoint: process.env.GEMINI_API_URL || 'https://generativelanguage.googleapis.com/v1beta',
-      region: ''
+      endpoint: process.env.GEMINI_API_URL || GEMINI_DEFAULT_ENDPOINT,
+      model: GEMINI_DEFAULT_MODEL,
+      temperature: 0.1,
+      maxOutputTokens: 1024,
+      timeoutMs: 60_000,
+      langMap: {},
     }
 
     const texts = ['hello', 'world']
     const out = await GeminiTranslator.translateMany(texts, [null, null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig
     })
 

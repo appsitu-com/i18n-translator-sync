@@ -1,11 +1,10 @@
 import { describe, vi, it, expect, beforeEach, afterEach } from 'vitest'
-import { AzureTranslator } from '../../src/translators/azure'
+import { AzureTranslator, AZURE_DEFAULT_ENDPOINT } from '../../src/translators/azure'
 
 describe('azure stub', () => {
   const originalFetch = globalThis.fetch as any
 
   beforeEach(() => {
-    // @ts-expect-error
     global.fetch = vi.fn(async (url: string, init: any) => {
       const body = JSON.parse(init.body)
       return {
@@ -20,11 +19,10 @@ describe('azure stub', () => {
           )
         }
       } as any
-    })
+    }) as unknown as typeof fetch
   })
 
   afterEach(() => {
-    // @ts-expect-error
     global.fetch = originalFetch
   })
 
@@ -32,11 +30,14 @@ describe('azure stub', () => {
     const out = await AzureTranslator.translateMany(['x', 'y', 'z'], [null, null, null], {
       sourceLocale: 'en-GB',
       targetLocale: 'fr-FR',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'AZ',
         region: 'westeurope',
         batchSize: 2,
-        endpoint: 'https://api.cognitive.microsofttranslator.com'
+        endpoint: AZURE_DEFAULT_ENDPOINT,
+        timeoutMs: 30_000,
+        langMap: {}
       }
     })
     expect(out).toEqual(['X', 'Y', 'Z'])
@@ -47,10 +48,13 @@ describe('azure stub', () => {
       AzureTranslator.translateMany(['x'], [null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
+        rootDir: '.',
         apiConfig: {
           apiKey: 'AZ',
           region: '',
-          endpoint: ''
+          endpoint: '',
+          timeoutMs: 30_000,
+          langMap: {}
         }
       })
     ).rejects.toThrow("missing 'region'")
@@ -86,7 +90,10 @@ describe('azure api', () => {
     apiConfig = {
       apiKey: process.env.AZURE_TRANSLATION_KEY,
       region: process.env.AZURE_TRANSLATION_REGION || 'westus',
-      endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com'
+      endpoint: process.env.AZURE_TRANSLATION_URL || AZURE_DEFAULT_ENDPOINT,
+      timeoutMs: 30_000,
+      langMap: {},
+      retry: {}
     }
   })
 

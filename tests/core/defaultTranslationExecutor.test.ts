@@ -21,7 +21,8 @@ describe('defaultTranslationExecutor', () => {
       createDirectory: vi.fn(),
       createUri: vi.fn(),
       joinPath: vi.fn(),
-      stat: vi.fn()
+      stat: vi.fn(),
+      isDirectory: vi.fn().mockResolvedValue(false)
     }
 
     // Create mock logger

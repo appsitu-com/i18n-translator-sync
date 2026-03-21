@@ -5,10 +5,19 @@ import {
   ALLOWED_DOMAINS
 } from '../../../src/core/util/endpointValidator'
 import { ITranslatorConfig } from '../../../src/core/config/translatorConfigSchema'
+import { AZURE_DEFAULT_ENDPOINT } from '../../../src/translators/azure'
+import { GOOGLE_DEFAULT_ENDPOINT } from '../../../src/translators/google'
+import { DEEPL_DEFAULT_ENDPOINT_FREE, DEEPL_DEFAULT_ENDPOINT } from '../../../src/translators/deepl'
+import { GEMINI_DEFAULT_ENDPOINT } from '../../../src/translators/gemini'
+import { OPENROUTER_DEFAULT_ENDPOINT } from '../../../src/translators/openrouter'
+import { NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb'
+import { MYMEMORY_DEFAULT_ENDPOINT } from '../../../src/translators/mymemory'
+
+type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T
 
 describe('validateEndpoints', () => {
   it('does not throw when no translator engines are configured', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr']
     }
@@ -17,7 +26,7 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw when engines have no explicit endpoints', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
@@ -36,13 +45,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for Azure with trusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
         azure: {
           apiKey: 'test-key',
-          endpoint: 'https://api.cognitive.microsofttranslator.com'
+          endpoint: AZURE_DEFAULT_ENDPOINT
         }
       }
     }
@@ -51,7 +60,7 @@ describe('validateEndpoints', () => {
   })
 
   it('throws UntrustedEndpointError for Azure with untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
@@ -80,13 +89,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for Google with trusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['de'],
       translator: {
         google: {
           apiKey: 'test-key',
-          endpoint: 'https://translation.googleapis.com'
+          endpoint: GOOGLE_DEFAULT_ENDPOINT
         }
       }
     }
@@ -95,7 +104,7 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for Google with wildcard subdomain', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['de'],
       translator: {
@@ -110,7 +119,7 @@ describe('validateEndpoints', () => {
   })
 
   it('throws for Google with untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['de'],
       translator: {
@@ -137,13 +146,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for DeepL with free endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['es'],
       translator: {
         deepl: {
           apiKey: 'test-key',
-          endpoint: 'https://api-free.deepl.com'
+          endpoint: DEEPL_DEFAULT_ENDPOINT_FREE
         }
       }
     }
@@ -152,13 +161,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for DeepL with pro endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['es'],
       translator: {
         deepl: {
           apiKey: 'test-key',
-          endpoint: 'https://api.deepl.com'
+          endpoint: DEEPL_DEFAULT_ENDPOINT
         }
       }
     }
@@ -167,7 +176,7 @@ describe('validateEndpoints', () => {
   })
 
   it('throws for DeepL with untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['es'],
       translator: {
@@ -184,13 +193,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for Gemini with trusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['ja'],
       translator: {
         gemini: {
           apiKey: 'test-key',
-          endpoint: 'https://generativelanguage.googleapis.com/v1beta'
+          endpoint: GEMINI_DEFAULT_ENDPOINT
         }
       }
     }
@@ -199,7 +208,7 @@ describe('validateEndpoints', () => {
   })
 
   it('throws for Gemini with untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['ja'],
       translator: {
@@ -216,13 +225,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for OpenRouter with trusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['pt'],
       translator: {
         openrouter: {
           apiKey: 'test-key',
-          endpoint: 'https://openrouter.ai/api/v1/chat/completions'
+          endpoint: OPENROUTER_DEFAULT_ENDPOINT
         }
       }
     }
@@ -231,7 +240,7 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for OpenRouter with subdomain endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['pt'],
       translator: {
@@ -246,7 +255,7 @@ describe('validateEndpoints', () => {
   })
 
   it('throws for OpenRouter with untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['pt'],
       translator: {
@@ -263,13 +272,13 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for NLLB with trusted OpenRouter endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
         nllb: {
           apiKey: 'test-key',
-          endpoint: 'https://openrouter.ai/api/v1/chat/completions'
+          endpoint: NLLB_DEFAULT_OPENROUTER_ENDPOINT
         }
       }
     }
@@ -278,12 +287,12 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for MyMemory with trusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['zh'],
       translator: {
         mymemory: {
-          endpoint: 'https://api.mymemory.translated.net/get'
+          endpoint: MYMEMORY_DEFAULT_ENDPOINT
         }
       }
     }
@@ -292,7 +301,7 @@ describe('validateEndpoints', () => {
   })
 
   it('throws for MyMemory with untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['zh'],
       translator: {
@@ -308,7 +317,7 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for env var references in endpoints', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
@@ -323,7 +332,7 @@ describe('validateEndpoints', () => {
   })
 
   it('does not throw for env:VAR_NAME references in endpoints', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
@@ -338,13 +347,13 @@ describe('validateEndpoints', () => {
   })
 
   it('throws correctly when multiple engines are configured but only one has untrusted endpoint', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr', 'de'],
       translator: {
         azure: {
           apiKey: 'test-key1',
-          endpoint: 'https://api.cognitive.microsofttranslator.com'
+          endpoint: AZURE_DEFAULT_ENDPOINT
         },
         google: {
           apiKey: 'test-key2',
@@ -352,7 +361,7 @@ describe('validateEndpoints', () => {
         },
         deepl: {
           apiKey: 'test-key3',
-          endpoint: 'https://api-free.deepl.com'
+          endpoint: DEEPL_DEFAULT_ENDPOINT_FREE
         }
       }
     }
@@ -373,32 +382,32 @@ describe('validateEndpoints', () => {
   })
 
   it('validates all engines successfully when all are trusted', () => {
-    const config: Partial<ITranslatorConfig> = {
+    const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr', 'de'],
       translator: {
         azure: {
           apiKey: 'key1',
-          endpoint: 'https://api.cognitive.microsofttranslator.com'
+          endpoint: AZURE_DEFAULT_ENDPOINT
         },
         google: {
           apiKey: 'key2',
-          endpoint: 'https://translation.googleapis.com'
+          endpoint: GOOGLE_DEFAULT_ENDPOINT
         },
         deepl: {
           apiKey: 'key3',
-          endpoint: 'https://api-free.deepl.com'
+          endpoint: DEEPL_DEFAULT_ENDPOINT_FREE
         },
         gemini: {
           apiKey: 'key4',
-          endpoint: 'https://generativelanguage.googleapis.com/v1beta'
+          endpoint: GEMINI_DEFAULT_ENDPOINT
         },
         openrouter: {
           apiKey: 'key5',
-          endpoint: 'https://openrouter.ai/api/v1/chat/completions'
+          endpoint: OPENROUTER_DEFAULT_ENDPOINT
         },
         mymemory: {
-          endpoint: 'https://api.mymemory.translated.net/get'
+          endpoint: MYMEMORY_DEFAULT_ENDPOINT
         }
       }
     }

@@ -11,3 +11,8 @@
 export function normalizeLocaleWithMap(locale: string, langMap: Record<string, string>): string {
   return langMap[locale] ?? locale
 }
+
+
+export function toLanguage(locale: string): string {
+  return locale.split(/[-_]/)[0]
+}

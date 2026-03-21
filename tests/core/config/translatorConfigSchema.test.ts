@@ -11,6 +11,13 @@ import {
   TranslatorEngineSchema,
   TranslatorEnginesSchema
 } from '../../../src/core/config/translatorConfigSchema'
+import { GEMINI_DEFAULT_MODEL, GEMINI_DEFAULT_ENDPOINT } from '../../../src/translators/gemini'
+import { OPENROUTER_DEFAULT_MODEL, OPENROUTER_DEFAULT_ENDPOINT } from '../../../src/translators/openrouter'
+import { NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb'
+import { AZURE_DEFAULT_ENDPOINT } from '../../../src/translators/azure'
+import { GOOGLE_DEFAULT_ENDPOINT } from '../../../src/translators/google'
+import { DEEPL_DEFAULT_ENDPOINT_FREE } from '../../../src/translators/deepl'
+import { MYMEMORY_DEFAULT_ENDPOINT } from '../../../src/translators/mymemory'
 import JSON5 from 'json5'
 import fs from 'fs'
 import path from 'path'
@@ -36,7 +43,7 @@ describe('TranslatorEngineSchema', () => {
 describe('AzureConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = AzureConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://api.cognitive.microsofttranslator.com')
+    expect(result.endpoint).toBe(AZURE_DEFAULT_ENDPOINT)
     expect(result.timeoutMs).toBe(30_000)
     expect(result.langMap).toEqual({})
   })
@@ -53,7 +60,7 @@ describe('AzureConfigSchema', () => {
 describe('GoogleConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = GoogleConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://translation.googleapis.com')
+    expect(result.endpoint).toBe(GOOGLE_DEFAULT_ENDPOINT)
     expect(result.googleLocation).toBe('global')
     expect(result.timeoutMs).toBe(30_000)
     expect(result.langMap).toEqual({})
@@ -63,7 +70,7 @@ describe('GoogleConfigSchema', () => {
 describe('DeepLConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = DeepLConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://api-free.deepl.com')
+    expect(result.endpoint).toBe(DEEPL_DEFAULT_ENDPOINT_FREE)
     expect(result.free).toBe(false)
     expect(result.timeoutMs).toBe(30_000)
     expect(result.langMap).toEqual({})
@@ -73,8 +80,8 @@ describe('DeepLConfigSchema', () => {
 describe('GeminiConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = GeminiConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://generativelanguage.googleapis.com/v1beta')
-    expect(result.geminiModel).toBe('gemini-pro')
+    expect(result.endpoint).toBe(GEMINI_DEFAULT_ENDPOINT)
+    expect(result.model).toBe(GEMINI_DEFAULT_MODEL)
     expect(result.temperature).toBe(0.1)
     expect(result.maxOutputTokens).toBe(1024)
     expect(result.timeoutMs).toBe(60_000)
@@ -85,8 +92,8 @@ describe('GeminiConfigSchema', () => {
 describe('OpenRouterConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = OpenRouterConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://openrouter.ai/api/v1/chat/completions')
-    expect(result.openrouterModel).toBe('anthropic/claude-3-haiku')
+    expect(result.endpoint).toBe(OPENROUTER_DEFAULT_ENDPOINT)
+    expect(result.model).toBe(OPENROUTER_DEFAULT_MODEL)
     expect(result.temperature).toBe(0.1)
     expect(result.maxOutputTokens).toBe(2048)
     expect(result.timeoutMs).toBe(60_000)
@@ -97,11 +104,11 @@ describe('OpenRouterConfigSchema', () => {
 describe('NllbConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = NllbConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://openrouter.ai/api/v1/chat/completions')
-    expect(result.nllbModel).toBe('meta-llama/nllb-200-1.3B')
+    expect(result.endpoint).toBe(NLLB_DEFAULT_OPENROUTER_ENDPOINT)
+    expect(result.model).toBe(NLLB_DEFAULT_MODEL)
     expect(result.temperature).toBe(0)
-    expect(result.maxOutputTokens).toBe(4096)
-    expect(result.separator).toBe('<<<SEP>>>')
+    expect(result.maxOutputTokens).toBe(256)
+    expect(result.separator).toBe(NLLB_DEFAULT_SEPARATOR)
     expect(result.timeoutMs).toBe(60_000)
     expect(result.langMap).toEqual({})
   })
@@ -110,7 +117,7 @@ describe('NllbConfigSchema', () => {
 describe('MyMemoryConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = MyMemoryConfigSchema.parse({})
-    expect(result.endpoint).toBe('https://api.mymemory.translated.net/get')
+    expect(result.endpoint).toBe(MYMEMORY_DEFAULT_ENDPOINT)
     expect(result.timeoutMs).toBe(15_000)
     expect(result.langMap).toEqual({})
   })
@@ -133,7 +140,7 @@ describe('TranslatorEnginesSchema', () => {
       azure: { apiKey: 'abc' }
     })
     expect(result.azure?.apiKey).toBe('abc')
-    expect(result.azure?.endpoint).toBe('https://api.cognitive.microsofttranslator.com')
+    expect(result.azure?.endpoint).toBe(AZURE_DEFAULT_ENDPOINT)
     expect(result.azure?.timeoutMs).toBe(30_000)
   })
 })
@@ -179,7 +186,7 @@ describe('TranslatorConfigSchema', () => {
     expect(result.translator?.gemini?.apiKey).toBe('gem-key')
     expect(result.translator?.gemini?.temperature).toBe(0.5)
     // defaults still applied to gemini fields not specified
-    expect(result.translator?.gemini?.geminiModel).toBe('gemini-pro')
+    expect(result.translator?.gemini?.model).toBe(GEMINI_DEFAULT_MODEL)
   })
 
   it('rejects an invalid defaultMarkdownEngine', () => {

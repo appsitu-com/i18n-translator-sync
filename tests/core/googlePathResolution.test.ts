@@ -3,6 +3,7 @@ import { DefaultTranslationExecutor } from '../../src/core/defaultTranslationExe
 import { FileSystem } from '../../src/core/util/fs'
 import { Logger } from '../../src/core/util/baseLogger'
 import { TranslationCache } from '../../src/core/cache/sqlite'
+import { GOOGLE_DEFAULT_ENDPOINT } from '../../src/translators/google'
 import * as path from 'path'
 
 describe('Google Translator Path Resolution', () => {
@@ -43,7 +44,7 @@ describe('Google Translator Path Resolution', () => {
           return {
             key: relativePath,
             googleProjectId: 'test-project',
-            endpoint: 'https://translation.googleapis.com'
+            endpoint: GOOGLE_DEFAULT_ENDPOINT
           }
         }
         return undefined
@@ -58,7 +59,7 @@ describe('Google Translator Path Resolution', () => {
 
     // We can't directly test the internal getEngineConfig, but we can verify
     // that the config provider is called and check what it returns
-    const config = configProvider.get('google')
+    const config = configProvider.get('google')!
     expect(config.key).toBe(relativePath)
 
     // The actual resolution happens in resolveEnvDeep/resolveEnvObjectWithDecryption
@@ -74,14 +75,14 @@ describe('Google Translator Path Resolution', () => {
           return {
             key: absolutePath,
             googleProjectId: 'test-project',
-            endpoint: 'https://translation.googleapis.com'
+            endpoint: GOOGLE_DEFAULT_ENDPOINT
           }
         }
         return undefined
       })
     }
 
-    const config = configProvider.get('google')
+    const config = configProvider.get('google')!
     expect(config.key).toBe(absolutePath)
     expect(path.isAbsolute(config.key)).toBe(true)
   })
@@ -102,7 +103,7 @@ describe('Google Translator Path Resolution', () => {
       })
     }
 
-    const config = configProvider.get('google')
+    const config = configProvider.get('google')!
     expect(config.key).toBe('env:GOOGLE_CREDS_PATH')
 
     // Clean up

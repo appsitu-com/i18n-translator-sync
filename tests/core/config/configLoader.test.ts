@@ -13,6 +13,7 @@ import {
 } from '../../../src/core/config/configLoader'
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { Logger } from '../../../src/core/util/baseLogger'
+import { GEMINI_DEFAULT_MODEL } from '../../../src/translators/gemini'
 
 // Minimal logger for tests
 function createTestLogger(): Logger & { messages: string[] } {
@@ -334,7 +335,7 @@ describe('loadTranslatorConfig', () => {
     const config = loadTranslatorConfig(tmpDir, logger)
 
     expect(config.translator?.gemini?.apiKey).toBe('gem-key')
-    expect(config.translator?.gemini?.geminiModel).toBe('gemini-pro')
+    expect(config.translator?.gemini?.model).toBe(GEMINI_DEFAULT_MODEL)
     expect(config.translator?.gemini?.temperature).toBe(0.1)
     expect(config.translator?.gemini?.maxOutputTokens).toBe(1024)
     expect(config.translator?.gemini?.timeoutMs).toBe(60_000)
@@ -409,6 +410,7 @@ describe('logConfiguredEnginePlan', () => {
 
     logConfiguredEnginePlan(
       {
+        rootDir: '.',
         sourceDir: '',
         targetDir: '',
         sourcePaths: ['i18n/en'],

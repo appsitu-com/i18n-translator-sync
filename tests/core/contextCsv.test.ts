@@ -18,6 +18,8 @@ describe('Core contextCsv', () => {
       readDirectory: vi.fn(),
       createUri: vi.fn((path) => ({ fsPath: path, scheme: 'file', path })),
       joinPath: vi.fn(),
+      stat: vi.fn(),
+      isDirectory: vi.fn().mockResolvedValue(false),
     };
 
     // Mock URIs

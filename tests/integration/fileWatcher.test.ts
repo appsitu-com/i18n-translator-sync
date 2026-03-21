@@ -10,7 +10,7 @@ import { SQLiteCache } from '../../src/core/cache/sqlite';
 import { WorkspaceWatcher } from '../../src/core/util/watcher';
 import { CliWorkspaceWatcher } from '../../src/cli/watcher';
 import { CliConfigProvider } from '../../src/cli/cliConfig';
-import { TranslateProjectConfig } from '../../src/core/coreConfig';
+import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig';
 import { CopyTranslator } from '../../src/translators/copy';
 import { registerTranslator } from '../../src/translators/registry';
 
@@ -101,6 +101,7 @@ describe('File Watcher Integration Tests', () => {
 
     // Create test configuration
     config = {
+      ...defaultConfig,
       sourceDir: '',
       targetDir: '',
       sourcePaths: ['i18n/en', 'i18n/en.json'], // Include both the directory and the root file

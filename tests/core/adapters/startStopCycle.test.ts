@@ -52,6 +52,10 @@ class TestTranslatorAdapter extends TranslatorAdapter {
     // Mock implementation
   }
 
+  protected async openDocument(path: string): Promise<void> {
+    // Mock implementation
+  }
+
   protected createWatcher(): WorkspaceWatcher {
     return {
       watch: vi.fn(),

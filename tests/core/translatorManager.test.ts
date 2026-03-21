@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { TranslatorManager } from '../../src/core/translatorManager';
-import { TranslateProjectConfig } from '../../src/core/coreConfig';
+import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig';
 import { FileSystem } from '../../src/core/util/fs';
 import { Logger } from '../../src/core/util/baseLogger';
 import { FileWatcher, WorkspaceWatcher } from '../../src/core/util/watcher';
@@ -68,6 +68,7 @@ const createMockConfigProvider = () => ({
 
 // Mock project config
 const defaultProjectConfig: TranslateProjectConfig = {
+  ...defaultConfig,
   sourceDir: '',
   targetDir: '',
   sourcePaths: ['i18n/en'],
@@ -419,7 +420,7 @@ describe('TranslatorManager', () => {
       // Get the watch call for translator.json (should be the 2nd watcher for config files)
       const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
       // Find the translator.json watch call
-      const jsonWatchCall = watchCalls.find(call => call[0] === TRANSLATOR_JSON);
+      const jsonWatchCall = watchCalls.find((call: unknown[]) => call[0] === TRANSLATOR_JSON);
 
       expect(jsonWatchCall).toBeDefined();
       if (jsonWatchCall) {
@@ -445,7 +446,7 @@ describe('TranslatorManager', () => {
 
       // Find the translator.env watch call
       const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
-      const envWatchCall = watchCalls.find(call => call[0] === TRANSLATOR_ENV);
+      const envWatchCall = watchCalls.find((call: unknown[]) => call[0] === TRANSLATOR_ENV);
 
       expect(envWatchCall).toBeDefined();
       if (envWatchCall) {
@@ -482,7 +483,7 @@ describe('TranslatorManager', () => {
       await translatorManager.startWatching(defaultProjectConfig);
 
       const watchCalls = vi.mocked(mockFileWatcher.watch).mock.calls;
-      const jsonWatchCall = watchCalls.find(call => call[0] === TRANSLATOR_JSON);
+      const jsonWatchCall = watchCalls.find((call: unknown[]) => call[0] === TRANSLATOR_JSON);
 
       if (jsonWatchCall) {
         const listeners = jsonWatchCall[1];

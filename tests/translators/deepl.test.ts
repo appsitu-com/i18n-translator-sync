@@ -26,7 +26,6 @@ describe('deepl stub', () => {
   })
 
   afterEach(() => {
-    // @ts-expect-error
     global.fetch = originalFetch
   })
 
@@ -36,7 +35,14 @@ describe('deepl stub', () => {
     const out = await DeepLTranslator.translateMany(texts, ctxs, {
       sourceLocale: 'en',
       targetLocale: 'fr',
-      apiConfig: { apiKey: 'DEEPL', free: true, endpoint: 'https://api-free.deepl.com' }
+      rootDir: '.',
+      apiConfig: {
+        apiKey: 'DEEPL',
+        free: true,
+        endpoint: 'https://api-free.deepl.com',
+        timeoutMs: 30_000,
+        langMap: {},
+      }
     })
     // Upper-cased echo
     expect(out).toEqual(['SAVE', 'OPEN', 'CANCEL', 'TITLE'])
@@ -50,14 +56,16 @@ describe('deepl stub', () => {
     await DeepLTranslator.translateMany(['hello'], [null], {
       sourceLocale: 'fr',
       targetLocale: 'en',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'DEEPL',
         free: true,
         endpoint: 'https://api-free.deepl.com',
+        timeoutMs: 30_000,
         langMap: {
           en: 'EN-US',
           fr: 'FR'
-        }
+        },
       }
     })
 
@@ -70,14 +78,16 @@ describe('deepl stub', () => {
     await DeepLTranslator.translateMany(['hello'], [null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'DEEPL',
         free: true,
         endpoint: 'https://api-free.deepl.com',
+        timeoutMs: 30_000,
         langMap: {
           en: 'EN-US',
           fr: 'FR'
-        }
+        },
       }
     })
 
@@ -116,7 +126,9 @@ describe('deepl api', () => {
     apiConfig = {
       apiKey: process.env.DEEPL_TRANSLATION_KEY,
       endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
-      free: true
+      free: true,
+      timeoutMs: 30_000,
+      langMap: {},
     }
   })
 
@@ -125,6 +137,7 @@ describe('deepl api', () => {
     const out = await DeepLTranslator.translateMany(texts, [null, null], {
       sourceLocale: 'en',
       targetLocale: 'fr',
+      rootDir: '.',
       apiConfig
     })
 

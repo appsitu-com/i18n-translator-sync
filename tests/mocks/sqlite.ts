@@ -29,8 +29,10 @@ export class MockSQLiteCache implements TranslationCache {
     target: string
     texts: string[]
     contexts: (string | null | undefined)[]
-  }): Promise<Map<string, string>> {
-    const out = new Map<string, string>();
+    sourcePath?: string
+    positions?: number[]
+  }): Promise<Map<string, { translation: string; textPos?: number }>> {
+    const out = new Map<string, { translation: string; textPos?: number }>();
 
     for (let i = 0; i < texts.length; i++) {
       const t = texts[i];
@@ -39,7 +41,7 @@ export class MockSQLiteCache implements TranslationCache {
       const entry = this.translations.get(key);
 
       if (entry) {
-        out.set(`${t}\u0001${c}`, entry.translated_text);
+        out.set(`${t}\u0001${c}`, { translation: entry.translated_text });
       }
     }
 

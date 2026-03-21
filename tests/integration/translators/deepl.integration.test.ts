@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DeepLTranslator } from '../../../src/translators/deepl';
+import { DeepLTranslator, DEEPL_DEFAULT_ENDPOINT_FREE } from '../../../src/translators/deepl';
 import { requireEnv } from './testEnv';
 
 const deeplKey = requireEnv('DEEPL_TRANSLATION_KEY');
@@ -11,11 +11,13 @@ describe('integration: deepl translator', () => {
     const result = await DeepLTranslator.translateMany([sourceText], [null], {
       sourceLocale: 'en',
       targetLocale: 'es',
+      rootDir: process.cwd(),
       apiConfig: {
         apiKey: deeplKey,
-        endpoint: process.env.DEEPL_TRANSLATION_URL || 'https://api-free.deepl.com',
+        endpoint: process.env.DEEPL_TRANSLATION_URL || DEEPL_DEFAULT_ENDPOINT_FREE,
         free: true,
-        timeoutMs: 60000
+        timeoutMs: 60000,
+        langMap: {}
       }
     });
 

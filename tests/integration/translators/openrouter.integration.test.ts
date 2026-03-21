@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { OpenRouterTranslator } from '../../../src/translators/openrouter';
+import { OpenRouterTranslator, OPENROUTER_DEFAULT_MODEL, OPENROUTER_DEFAULT_ENDPOINT } from '../../../src/translators/openrouter';
 import { requireEnv } from './testEnv';
 
 const openRouterKey = requireEnv('OPENROUTER_API_KEY');
@@ -16,16 +16,18 @@ describe('integration: openrouter translator', () => {
     const result = await OpenRouterTranslator.translateMany([sourceText], [null], {
       sourceLocale: 'en',
       targetLocale: 'es',
+      rootDir: process.cwd(),
       apiConfig: {
         apiKey: openRouterKey,
-        endpoint: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
-        openrouterModel: 'anthropic/claude-3-haiku',
+        endpoint: process.env.OPENROUTER_API_URL || OPENROUTER_DEFAULT_ENDPOINT,
+        model: OPENROUTER_DEFAULT_MODEL,
         langMap: {
           en: 'English',
           es: 'Spanish'
         },
         temperature: 0,
-        maxOutputTokens: 256
+        maxOutputTokens: 256,
+        timeoutMs: 60000
       }
     });
 

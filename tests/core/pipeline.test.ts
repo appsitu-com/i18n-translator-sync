@@ -2,7 +2,7 @@ import * as path from 'path'
 import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest'
 import { TranslatorPipeline } from '../../src/core/pipeline'
 import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
-import { TranslateProjectConfig } from '../../src/core/coreConfig'
+import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig'
 import { registerAllTranslators } from '../../src/translators/translatorRegistry'
 
 describe('TranslatorPipeline', () => {
@@ -62,6 +62,7 @@ describe('TranslatorPipeline', () => {
 
     // Test configuration
     config = {
+      ...defaultConfig,
       sourceDir: '',
       targetDir: '',
       sourcePaths: ['i18n/en'],
@@ -265,6 +266,7 @@ describe('TranslatorPipeline translation trigger conditions', () => {
   const srcPath = '/ws/i18n/en/demo.json'
 
   const config: TranslateProjectConfig = {
+    ...defaultConfig,
     sourceDir: '',
     targetDir: '',
     sourcePaths: ['i18n/en'],

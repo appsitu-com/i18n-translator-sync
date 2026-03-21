@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { AzureTranslator } from '../../../src/translators/azure';
+import { AzureTranslator, AZURE_DEFAULT_ENDPOINT } from '../../../src/translators/azure';
 import { requireEnv } from './testEnv';
 
 const azureKey = requireEnv('AZURE_TRANSLATION_KEY');
@@ -12,11 +12,13 @@ describe('integration: azure translator', () => {
     const result = await AzureTranslator.translateMany([sourceText], [null], {
       sourceLocale: 'en',
       targetLocale: 'es',
+      rootDir: '.',
       apiConfig: {
         apiKey: azureKey,
         region: azureRegion,
-        endpoint: process.env.AZURE_TRANSLATION_URL || 'https://api.cognitive.microsofttranslator.com',
-        timeoutMs: 60000
+        endpoint: process.env.AZURE_TRANSLATION_URL || AZURE_DEFAULT_ENDPOINT,
+        timeoutMs: 60000,
+        langMap: {}
       }
     });
 

@@ -7,6 +7,7 @@ import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { NodeFileSystem } from '../../src/core/util/fs';
 import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { CopyTranslator } from '../../src/translators/copy';
+import type { ICopyConfig } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
 import { TranslatorPipeline } from '../../src/core/pipeline';
 import { SQLiteCache } from '../../src/core/cache/sqlite';
@@ -152,9 +153,10 @@ describe('CLI Copy Translator Tests', () => {
 
     // Verify copy translator returns input unchanged
     const result = await copyTranslator.translateMany(['hello'], [null], {
-      source: 'en',
-      target: 'fr',
-      apiConfig: {} as any
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      apiConfig: {} as ICopyConfig,
+      rootDir: process.cwd()
     });
     expect(result).toEqual(['hello']);
   });

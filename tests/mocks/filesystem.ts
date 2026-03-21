@@ -74,6 +74,8 @@ export function createMockFileSystem(files: Record<string, string> = {}): FileSy
         fsPath: joined,
         scheme: 'file'
       };
-    })
+    }),
+
+    isDirectory: vi.fn().mockResolvedValue(false)
   };
 }

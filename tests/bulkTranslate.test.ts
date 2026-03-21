@@ -1,9 +1,12 @@
 import { it, vi, expect, describe, beforeAll, afterAll } from 'vitest'
 import { bulkTranslateWithEngine } from '../src/bulkTranslate'
 import { deregisterTranslator, registerTranslator } from '../src/translators/registry'
+import { NLLB_DEFAULT_SEPARATOR } from '../src/translators/nllb'
+import { GOOGLE_DEFAULT_ENDPOINT } from '../src/translators/google'
 import type { Translator } from '../src/translators/types'
 import type { TranslationCache } from '../src/core/cache/sqlite'
 import type { IGoogleConfig } from '../src/core/config'
+import type { INllbConfig } from '../src/translators/nllb'
 
 class FakeTranslator implements Translator {
   name = 'fake'
@@ -32,6 +35,16 @@ class MaxCharsFakeTranslator implements Translator {
   }
 }
 
+class NllbChunkingFakeTranslator implements Translator {
+  name = 'nllb'
+  readonly calls: number[] = []
+
+  async translateMany(texts: string[]) {
+    this.calls.push(texts.length)
+    return texts.map((t) => `[${t}]`)
+  }
+}
+
 class LocaleCaptureTranslator implements Translator {
   name = 'fake-langmap'
   readonly calls: Array<{ sourceLocale: string; targetLocale: string }> = []
@@ -45,12 +58,14 @@ class LocaleCaptureTranslator implements Translator {
 describe('bulkTranslateWithEngine()', () => {
   const chunkedTranslator = new ChunkedFakeTranslator()
   const maxCharsTranslator = new MaxCharsFakeTranslator()
+  const nllbChunkingTranslator = new NllbChunkingFakeTranslator()
   const localeCaptureTranslator = new LocaleCaptureTranslator()
 
   beforeAll(() => {
     registerTranslator(new FakeTranslator())
     registerTranslator(chunkedTranslator, { limit: 2 })
-    registerTranslator(maxCharsTranslator, { limit: 10, maxchars: 5 })
+    registerTranslator(maxCharsTranslator, { limit: 10, maxchars: 5, maxitemchars: 2 })
+    registerTranslator(nllbChunkingTranslator, { limit: 10, maxchars: 10, maxitemchars: 10 })
     registerTranslator(localeCaptureTranslator)
   })
 
@@ -58,6 +73,7 @@ describe('bulkTranslateWithEngine()', () => {
     deregisterTranslator('fake')
     deregisterTranslator('fake-chunked')
     deregisterTranslator('fake-maxchars')
+    deregisterTranslator('nllb')
     deregisterTranslator('fake-langmap')
   })
 
@@ -126,6 +142,49 @@ describe('bulkTranslateWithEngine()', () => {
     expect(cache.putMany).toHaveBeenCalledTimes(1)
   })
 
+  it('throws when a segment exceeds translator registration maxitemchars', async () => {
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    await expect(
+      bulkTranslateWithEngine(
+        ['AAA'],
+        [null],
+        'fake-maxchars',
+        { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
+        cache as unknown as TranslationCache
+      )
+    ).rejects.toThrow('Segment exceeds max translation characters per segment (3 > 2)')
+  })
+
+  it('counts nllb separator characters toward maxchars chunking', async () => {
+    nllbChunkingTranslator.calls.length = 0
+
+    const cache = {
+      getMany: vi.fn(async () => new Map()),
+      putMany: vi.fn(async () => {})
+    }
+
+    const out = await bulkTranslateWithEngine(
+      ['AAAAA', 'BBBBB'],
+      [null, null],
+      'nllb',
+      {
+        source: 'en',
+        target: 'fr',
+        apiConfig: { separator: NLLB_DEFAULT_SEPARATOR } as INllbConfig,
+        rootDir: process.cwd()
+      },
+      cache as unknown as TranslationCache
+    )
+
+    expect(out.translations).toEqual(['[AAAAA]', '[BBBBB]'])
+    // 5 + (2 + 9) + 5 = 21 > 10, so chunking must split into one item per request.
+    expect(nllbChunkingTranslator.calls).toEqual([1, 1])
+  })
+
   it('applies langMap to both source and target locales for forward and back translation calls', async () => {
     localeCaptureTranslator.calls.length = 0
 
@@ -135,7 +194,7 @@ describe('bulkTranslateWithEngine()', () => {
     }
 
     const apiConfig: IGoogleConfig = {
-      endpoint: 'https://translation.googleapis.com',
+      endpoint: GOOGLE_DEFAULT_ENDPOINT,
       googleLocation: 'global',
       timeoutMs: 30000,
       langMap: {

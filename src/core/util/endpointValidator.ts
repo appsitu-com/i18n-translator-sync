@@ -1,4 +1,11 @@
 import { ITranslatorConfig } from '../config/translatorConfigSchema'
+import { AZURE_ALLOWED_DOMAINS } from '../../translators/azure'
+import { GOOGLE_ALLOWED_DOMAINS } from '../../translators/google'
+import { DEEPL_ALLOWED_DOMAINS } from '../../translators/deepl'
+import { GEMINI_ALLOWED_DOMAINS } from '../../translators/gemini'
+import { OPENROUTER_ALLOWED_DOMAINS } from '../../translators/openrouter'
+import { NLLB_ALLOWED_DOMAINS } from '../../translators/nllb'
+import { MYMEMORY_ALLOWED_DOMAINS } from '../../translators/mymemory'
 
 /**
  * Exception thrown when an endpoint is from an untrusted domain.
@@ -18,37 +25,16 @@ export class UntrustedEndpointError extends Error {
 }
 
 /**
- * Get the list of allowed domains for each translation engine.
- * These are the official/approved domains for each service.
+ * Allowed domains for each translation engine, sourced from each translator module.
  */
 export const ALLOWED_DOMAINS = {
-  azure: [
-    'api.cognitive.microsofttranslator.com',
-    '*.cognitive.microsofttranslator.com'
-  ],
-  google: [
-    'translation.googleapis.com',
-    'generativelanguage.googleapis.com',
-    '*.googleapis.com'
-  ],
-  deepl: [
-    'api-free.deepl.com',
-    'api.deepl.com',
-    '*.deepl.com'
-  ],
-  gemini: [
-    'generativelanguage.googleapis.com',
-    '*.googleapis.com'
-  ],
-  openrouter: [
-    'openrouter.ai',
-    'api.openrouter.ai',
-    '*.openrouter.ai'
-  ],
-  mymemory: [
-    'api.mymemory.translated.net',
-    '*.mymemory.translated.net'
-  ]
+  azure: AZURE_ALLOWED_DOMAINS,
+  google: GOOGLE_ALLOWED_DOMAINS,
+  deepl: DEEPL_ALLOWED_DOMAINS,
+  gemini: GEMINI_ALLOWED_DOMAINS,
+  openrouter: OPENROUTER_ALLOWED_DOMAINS,
+  nllb: NLLB_ALLOWED_DOMAINS,
+  mymemory: MYMEMORY_ALLOWED_DOMAINS
 } as const
 
 /**
@@ -185,11 +171,11 @@ export function validateEndpoints(config: ITranslatorConfig): void {
 
   // Check NLLB endpoint (OpenRouter-based)
   if (translator.nllb?.endpoint) {
-    if (!isEndpointAllowed(translator.nllb.endpoint, ALLOWED_DOMAINS.openrouter)) {
+    if (!isEndpointAllowed(translator.nllb.endpoint, ALLOWED_DOMAINS.nllb)) {
       throw new UntrustedEndpointError(
         'nllb',
         translator.nllb.endpoint,
-        ALLOWED_DOMAINS.openrouter
+        ALLOWED_DOMAINS.nllb
       )
     }
   }

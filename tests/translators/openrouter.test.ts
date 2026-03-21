@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { TRANSLATOR_ENV } from '../../src/core/constants'
-import { OpenRouterTranslator } from '../../src/translators/openrouter'
+import { OpenRouterTranslator, OPENROUTER_DEFAULT_MODEL, OPENROUTER_DEFAULT_ENDPOINT } from '../../src/translators/openrouter'
+import type { IOpenRouterConfig } from '../../src/translators/openrouter'
 import type { BulkTranslateOpts } from '../../src/translators/types'
 
 // Create a mock fetch function
@@ -29,12 +30,18 @@ describe('OpenRouterTranslator', () => {
       vi.stubGlobal('fetch', mockFetch)
     })
 
-    const defaultOpts: BulkTranslateOpts = {
+    const defaultOpts: BulkTranslateOpts<IOpenRouterConfig> = {
       sourceLocale: 'en',
       targetLocale: 'es',
+      rootDir: '.',
       apiConfig: {
         apiKey: 'test-api-key',
-        endpoint: 'https://openrouter.ai/api/v1/chat/completions'
+        endpoint: OPENROUTER_DEFAULT_ENDPOINT,
+        model: OPENROUTER_DEFAULT_MODEL,
+        temperature: 0.1,
+        maxOutputTokens: 2048,
+        timeoutMs: 60_000,
+        langMap: {}
       }
     }
 
@@ -75,7 +82,6 @@ describe('OpenRouterTranslator', () => {
 
         const body = JSON.parse(options.body)
         expect(body).toMatchObject({
-          model: 'anthropic/claude-3-haiku',
           temperature: 0.1,
           max_tokens: 2048,
           response_format: {
@@ -83,6 +89,7 @@ describe('OpenRouterTranslator', () => {
             schema: expect.any(Object)
           }
         })
+        expect(body.model).toBe(OPENROUTER_DEFAULT_MODEL)
       })
 
       it('should handle texts with context', async () => {
@@ -129,11 +136,11 @@ describe('OpenRouterTranslator', () => {
 
         mockFetch.mockReturnValueOnce(Promise.resolve(mockResponse))
 
-        const customOpts: BulkTranslateOpts = {
+        const customOpts: BulkTranslateOpts<IOpenRouterConfig> = {
           ...defaultOpts,
           apiConfig: {
             ...defaultOpts.apiConfig,
-            openrouterModel: 'openai/gpt-4',
+            model: 'openai/gpt-4',
             temperature: 0.5,
             maxOutputTokens: 1024,
             systemPrompt: 'You are a specialized translator.'
@@ -249,7 +256,7 @@ describe('OpenRouterTranslator', () => {
       })
 
       it('should throw error when API key is missing', async () => {
-        const optsWithoutKey: BulkTranslateOpts = {
+        const optsWithoutKey: BulkTranslateOpts<IOpenRouterConfig> = {
           ...defaultOpts,
           apiConfig: {
             ...defaultOpts.apiConfig,
@@ -265,7 +272,7 @@ describe('OpenRouterTranslator', () => {
         )
       })
 
-      it('should use default endpoint when not provided', async () => {
+      it('should use default endpoint from config', async () => {
         const mockResponse = createMockResponse({
           choices: [
             {
@@ -280,17 +287,22 @@ describe('OpenRouterTranslator', () => {
 
         mockFetch.mockReturnValueOnce(Promise.resolve(mockResponse))
 
-        const optsWithoutEndpoint: BulkTranslateOpts = {
+        const optsWithDefaultEndpoint: BulkTranslateOpts<IOpenRouterConfig> = {
           ...defaultOpts,
           apiConfig: {
             apiKey: 'test-key',
-            endpoint: '' // Empty endpoint to test default
+            endpoint: OPENROUTER_DEFAULT_ENDPOINT,
+            model: OPENROUTER_DEFAULT_MODEL,
+            temperature: 0.1,
+            maxOutputTokens: 2048,
+            timeoutMs: 60_000,
+            langMap: {}
           }
         }
 
         const texts = ['Hello']
         const contexts = [null]
-        await OpenRouterTranslator.translateMany(texts, contexts, optsWithoutEndpoint)
+        await OpenRouterTranslator.translateMany(texts, contexts, optsWithDefaultEndpoint)
 
         const [url] = mockFetch.mock.calls[0]
         expect(url).toBe('https://openrouter.ai/api/v1/chat/completions')
@@ -336,10 +348,12 @@ describe('OpenRouterTranslator', () => {
 
       apiConfig = {
         apiKey: 'test-api-key',
-        endpoint: 'https://openrouter.ai/api/v1/chat/completions',
-        openrouterModel: 'anthropic/claude-3-haiku',
+        endpoint: OPENROUTER_DEFAULT_ENDPOINT,
+        model: OPENROUTER_DEFAULT_MODEL,
         temperature: 0.1,
-        maxOutputTokens: 1024
+        maxOutputTokens: 1024,
+        timeoutMs: 60_000,
+        langMap: {}
       }
     })
 
@@ -362,6 +376,7 @@ describe('OpenRouterTranslator', () => {
       const out = await OpenRouterTranslator.translateMany(texts, [null, null], {
         sourceLocale: 'en',
         targetLocale: 'fr',
+        rootDir: '.',
         apiConfig
       })
 
@@ -393,6 +408,7 @@ describe('OpenRouterTranslator', () => {
       const out = await OpenRouterTranslator.translateMany(texts, contexts, {
         sourceLocale: 'en',
         targetLocale: 'es',
+        rootDir: '.',
         apiConfig
       })
 

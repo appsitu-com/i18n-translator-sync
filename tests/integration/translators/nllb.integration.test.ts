@@ -1,18 +1,18 @@
 // cspell:ignore nllb
 import { describe, expect, it } from 'vitest';
-import { NllbTranslator } from '../../../src/translators/nllb';
-import type { INllbConfig } from '../../../src/core/config';
+import { NllbTranslator, NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb';
+import type { INllbConfig } from '../../../src/translators/nllb';
 import { requireEnv } from './testEnv';
 
 const openRouterKey = requireEnv('OPENROUTER_API_KEY');
-const integrationModel = process.env.OPENROUTER_NLLB_MODEL || 'anthropic/claude-3-haiku';
+const integrationModel = process.env.OPENROUTER_NLLB_MODEL || NLLB_DEFAULT_MODEL;
 
 function createNllbConfig(maxOutputTokens: number): INllbConfig {
   return {
     apiKey: openRouterKey,
-    endpoint: process.env.OPENROUTER_API_URL || 'https://openrouter.ai/api/v1/chat/completions',
-    nllbModel: integrationModel,
-    separator: '<<<SEP>>>',
+    endpoint: process.env.OPENROUTER_API_URL || NLLB_DEFAULT_OPENROUTER_ENDPOINT,
+    model: integrationModel,
+    separator: NLLB_DEFAULT_SEPARATOR,
     temperature: 0,
     maxOutputTokens,
     timeoutMs: 60000,
