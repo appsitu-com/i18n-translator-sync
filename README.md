@@ -17,7 +17,7 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 **Quick Feature Overview:**
 - ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
 - ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
-- ✅ **NLLB AI engine** - _Experimental preview_ (supports 204 lanaguages) so we now translate to over [310 languages](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/SupportedLanguages.md).
+- ✅ **NLLB AI engine** - _Experimental preview_ (supports 204 languages) so we now translate to over [300 languages](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/SupportedLanguages.md).
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
 - ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
