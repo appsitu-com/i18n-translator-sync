@@ -146,15 +146,6 @@ export function validateEndpoints(config: ITranslatorConfig): void {
       )
     }
   }
-  if (translator.deepl?.freeEndpoint) {
-    if (!isEndpointAllowed(translator.deepl.freeEndpoint, ALLOWED_DOMAINS.deepl)) {
-      throw new UntrustedEndpointError(
-        'deepl',
-        translator.deepl.freeEndpoint,
-        ALLOWED_DOMAINS.deepl
-      )
-    }
-  }
 
   // Check Gemini endpoint
   if (translator.gemini?.endpoint) {
