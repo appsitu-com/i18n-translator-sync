@@ -37,6 +37,7 @@
       "endpoint": "${GOOGLE_TRANSLATION_URL}",         // API endpoint
       "googleProjectId": "${GOOGLE_TRANSLATION_PROJECT_ID}",
       "googleLocation": "${GOOGLE_TRANSLATION_LOCATION}",
+      // "model": "projects/${GOOGLE_TRANSLATION_PROJECT_ID}/locations/global/models/general/nmt", // Optional model field
 
       // Locale mappings for Google Cloud Translation
       "langMap": {
@@ -52,6 +53,7 @@
       "apiKey": "${AZURE_TRANSLATION_KEY}",
       "region": "${AZURE_TRANSLATION_REGION}",
       "endpoint": "${AZURE_TRANSLATION_URL}",
+      // "model": "your-custom-azure-model", // maps to Azure API category custom:model
 
       // Locale mappings for Azure Translator
       "langMap": {
@@ -76,6 +78,7 @@
     "deepl": {
       "apiKey": "${DEEPL_TRANSLATION_KEY}",
       "endpoint": "${DEEPL_TRANSLATION_URL}",
+      // "model": "quality_optimized", // DeepL specify a model_type => Speed or Quality goal
 
       // Locale mappings for DeepL
       "langMap": {
@@ -90,6 +93,7 @@
     "gemini": {
       "apiKey": "${GEMINI_API_KEY}",
       "endpoint": "${GEMINI_API_URL}",
+      "model": "gemini-pro", // Optional (default: gemini-pro)
 
       // Locale mappings for Gemini (uses language names)
       "langMap": {
@@ -114,6 +118,7 @@
     "openrouter": {
       "apiKey": "${OPENROUTER_API_KEY}",
       "endpoint": "${OPENROUTER_API_URL}",
+      "model": "anthropic/claude-3-haiku", // Optional unified model field
 
       // Locale mappings for OpenRouter
       "langMap": {
@@ -154,7 +159,7 @@
     "nllb": {
       "apiKey": "${OPENROUTER_API_KEY}",
       "endpoint": "${OPENROUTER_API_URL}",
-      "nllbModel": "meta-llama/nllb-200-1.3B",
+      "model": "meta-llama/nllb-200-1.3B", // Optional unified model field
       "separator": "<<<SEP>>>",
 
       // Recommended: map your app locales to FLORES/NLLB locale codes
