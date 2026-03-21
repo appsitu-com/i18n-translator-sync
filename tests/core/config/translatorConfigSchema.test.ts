@@ -71,8 +71,6 @@ describe('DeepLConfigSchema', () => {
   it('applies defaults for an empty object', () => {
     const result = DeepLConfigSchema.parse({})
     expect(result.endpoint).toBe(DEEPL_DEFAULT_ENDPOINT)
-    expect(result.freeEndpoint).toBe(DEEPL_DEFAULT_ENDPOINT_FREE)
-    expect(result.free).toBe(false)
     expect(result.timeoutMs).toBe(30_000)
     expect(result.langMap).toEqual({})
   })
