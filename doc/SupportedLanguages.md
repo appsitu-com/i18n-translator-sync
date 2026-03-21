@@ -4,9 +4,8 @@
 | Language name                      | google     | azure    | deepl   | nllb     |
 | ---------------------------------- | ---------- | -------- | ------- | -------- |
 | Abkhaz                             | ab         |          |         |          |
-| Acehnese                           | ace        |          |         |          |
 | Acehnese (Arabic script)           |            |          |         | ace_Arab |
-| Acehnese (Latin script)            |            |          |         | ace_Latn |
+| Acehnese (Latin script)            | ace        |          |         | ace_Latn |
 | Acholi                             | ach        |          |         |          |
 | Afrikaans                          | af         | af       | AF      | afr_Latn |
 | Akan                               |            |          |         | aka_Latn |
@@ -24,7 +23,6 @@
 | Azerbaijani                        | az         | az       | AZ      |          |
 | Balinese                           | ban        |          |         | ban_Latn |
 | Bambara                            | bm         |          |         | bam_Latn |
-| Bangla                             |            | bn       |         |          |
 | Banjar (Arabic script)             |            |          |         | bjn_Arab |
 | Banjar (Latin script)              |            |          |         | bjn_Latn |
 | Bashkir                            | ba         | ba       | BA      | bak_Cyrl |
@@ -34,7 +32,7 @@
 | Batak Toba                         | bbc        |          |         |          |
 | Belarusian                         | be         | be       | BE      | bel_Cyrl |
 | Bemba                              | bem        |          |         | bem_Latn |
-| Bengali                            | bn         |          | BN      | ben_Beng |
+| Bengali / Bangala                  | bn         | bn       | BN      | ben_Beng |
 | Betawi                             | bew        |          |         |          |
 | Bhojpuri                           | bho        | bho      |         | bho_Deva |
 | Bikol                              | bik        |          |         |          |
@@ -45,8 +43,6 @@
 | Bulgarian                          | bg         | bg       | BG      | bul_Cyrl |
 | Burmese                            |            |          | MY      | mya_Mymr |
 | Buryat                             | bua        |          |         |          |
-| Cantonese                          | yue        |          |         |          |
-| Cantonese (Traditional)            |            | yue      |         |          |
 | Catalan                            | ca         | ca       | CA      | cat_Latn |
 | Cebuano                            | ceb        |          |         | ceb_Latn |
 | Central Atlas Tamazight            |            |          |         | tzm_Tfng |
@@ -56,12 +52,10 @@
 | Central Kurdish                    |            |          |         | ckb_Arab |
 | Chhattisgarhi                      |            | hne      |         | hne_Deva |
 | Chichewa                           | ny         |          |         |          |
-| Chinese                            |            |          | ZH      |          |
-| Chinese (Literary)                 |            | lzh      |         |          |
-| Chinese (Simplified)               | zh / zh-CN |          | ZH-HANS | zho_Hans |
-| Chinese (Traditional)              | zh-TW      |          | ZH-HANT | zho_Hant |
-| Chinese Simplified                 |            | zh-Hans  |         |          |
-| Chinese Traditional                |            | zh-Hant  |         |          |
+| Chinese (Yue)                      | yue        | yue      |         |          |
+| Chinese (Literary)                 |            | lzh      | ZH      |          |
+| Chinese (Simplified)               | zh / zh-CN | zh-Hans  | ZH-HANS | zho_Hans |
+| Chinese (Traditional)              | zh-TW      | zh-Hant  | ZH-HANT | zho_Hant |
 | Chokwe                             |            |          |         | cjk_Latn |
 | Chuvash                            | cv         |          |         |          |
 | Corsican                           | co         |          |         |          |
@@ -70,9 +64,8 @@
 | Czech                              | cs         | cs       | CS      | ces_Latn |
 | Danish                             | da         | da       | DA      | dan_Latn |
 | Dari                               |            | prs      |         | prs_Arab |
-| Dhivehi                            | dv         |          |         |          |
 | Dinka                              | din        |          |         |          |
-| Divehi                             |            | dv       |         |          |
+| Dhivehi / Divehi                   | dv         | dv       |         |          |
 | Dogri                              | doi        | doi      |         |          |
 | Dombe                              | dov        |          |         |          |
 | Dutch                              | nl         | nl       | NL      | nld_Latn |
@@ -92,7 +85,7 @@
 | Filipino                           | fil / tl   | fil      |         |          |
 | Finnish                            | fi         | fi       | FI      | fin_Latn |
 | Fon                                |            |          |         | fon_Latn |
-| French                             | fr         | fr       | FR      | fra_Latn |
+| French (France)                    | fr         | fr       | FR      | fra_Latn |
 | French (Canada)                    | fr-CA      | fr-CA    |         |          |
 | Frisian                            | fy         |          |         |          |
 | Friulian                           |            |          |         | fur_Latn |
@@ -135,8 +128,7 @@
 | Kamba                              |            |          |         | kam_Latn |
 | Kannada                            | kn         | kn       |         | kan_Knda |
 | Kapampangan                        | pam        |          |         |          |
-| Kashmiri                           |            | ks       |         |          |
-| Kashmiri (Arabic script)           |            |          |         | kas_Arab |
+| Kashmiri (Arabic script)           |            | ks       |         | kas_Arab |
 | Kashmiri (Devanagari script)       |            |          |         | kas_Deva |
 | Kazakh                             | kk         | kk       | KK      |          |
 | Khmer                              | km         | km       |         | khm_Khmr |
@@ -180,8 +172,7 @@
 | Malayalam                          | ml         | ml       | ML      | mal_Mlym |
 | Maltese                            | mt         | mt       | MT      | mlt_Latn |
 | Manipuri                           |            | mni      |         |          |
-| Maori                              | mi         |          | MI      | mri_Latn |
-| Māori                              |            | mi       |         |          |
+| Māori                              | mi         | mi       | MI      | mri_Latn |
 | Marathi                            | mr         | mr       | MR      | mar_Deva |
 | Meadow Mari                        | chm        |          |         |          |
 | Meitei (Bengali script)            |            |          |         | mni_Beng |
@@ -193,8 +184,7 @@
 | Mizo                               | lus        |          |         | lus_Latn |
 | Modern Standard Arabic             |            |          |         | arb_Arab |
 | Modern Standard Arabic (Romanized) |            |          |         | arb_Latn |
-| Mongolian                          | mn         |          | MN      |          |
-| Mongolian (Cyrillic)               |            | mn-Cyrl  |         |          |
+| Mongolian (Cyrillic)               | mn         | mn-Cyrl  | MN      |          |
 | Mongolian (Traditional)            |            | mn-Mong  |         |          |
 | Moroccan Arabic                    |            |          |         | ary_Arab |
 | Mossi                              |            |          |         | mos_Latn |
@@ -209,10 +199,8 @@
 | Northern Kurdish                   |            |          |         | kmr_Latn |
 | Northern Sotho                     |            |          |         | nso_Latn |
 | Northern Uzbek                     |            |          |         | uzn_Latn |
-| Norwegian                          | no         | nb       |         |          |
-| Norwegian (bokmål)                 |            |          | NB      |          |
-| Norwegian Bokmål                   |            |          |         | nob_Latn |
-| Norwegian Nynorsk                  |            |          |         | nno_Latn |
+| Norwegian (Bokmål)                 | no         | nb       | NB      | nob_Latn |
+| Norwegian (Nynorsk)                |            |          |         | nno_Latn |
 | Nuer                               | nus        |          |         | nus_Latn |
 | Nyanja                             |            | nya      |         | nya_Latn |
 | Occitan                            | oc         |          | OC      | oci_Latn |
