@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as os from 'os'
+import JSON5 from 'json5'
 import {
   loadEnvVars,
   snapshotEnvVars,
@@ -14,7 +15,7 @@ import {
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { Logger } from '../../../src/core/util/baseLogger'
 import type { ITranslatorConfig } from '../../../src/core/config'
-import { GEMINI_DEFAULT_MODEL } from '../../../src/translators/gemini'
+import { GEMINI_DEFAULT_ENDPOINT, GEMINI_DEFAULT_MODEL } from '../../../src/translators/gemini'
 
 // Minimal logger for tests
 function createTestLogger(): Logger & { messages: string[] } {
@@ -305,36 +306,44 @@ describe('loadTranslatorConfig', () => {
     displayLoadedConfig(config, logger)
   })
 
-  it('merges env file on top of process.env', () => {
-    // Set one var in process.env
-    process.env.GOOGLE_TRANSLATION_KEY = '/existing/creds.json'
+  it('loads and displays masked config exactly as app/integration fixtures do', () => {
+    const fixtureDir = path.join(process.cwd(), 'test-project')
+    const fixtureJsonPath = path.join(fixtureDir, 'translator.json')
 
-    // translator.env overrides another var
-    fs.writeFileSync(
-      path.join(tmpDir, 'translator.env'),
-      "GOOGLE_TRANSLATION_PROJECT_ID='proj-from-env'\n"
-    )
+    expect(fs.existsSync(fixtureJsonPath)).toBe(true)
 
-    fs.writeFileSync(
-      path.join(tmpDir, 'translator.json'),
-      JSON.stringify({
-        translator: {
-          copy: {},
-          google: {
-            apiKey: '${GOOGLE_TRANSLATION_KEY}',
-            googleProjectId: '${GOOGLE_TRANSLATION_PROJECT_ID}'
-          }
-        }
-      })
-    )
+    // Copy real app-like translator.json fixture into isolated temp directory.
+    fs.copyFileSync(fixtureJsonPath, path.join(tmpDir, 'translator.json'))
+
+    // Do not synthesize env values here.
+    // This test intentionally relies on process.env only, matching app behavior in CI (GH secrets)
+    // and local runs (dotenv loaded before tests).
+    const fixtureJsonContent = fs.readFileSync(fixtureJsonPath, 'utf8')
+    const envVarPattern = /\$\{([A-Z0-9_]+)\}/g
+    const requiredVars = new Set<string>()
+    let match: RegExpExecArray | null
+    while ((match = envVarPattern.exec(fixtureJsonContent)) !== null) {
+      requiredVars.add(match[1])
+    }
+    for (const varName of requiredVars) {
+      if (!savedEnv[varName]) {
+        throw new Error(`Missing required env var for fixture-based load test: ${varName}`)
+      }
+      process.env[varName] = savedEnv[varName]
+    }
 
     const logger = createTestLogger()
     const config = loadTranslatorConfig(tmpDir, logger)
 
-    expect(config.translator?.google?.apiKey).toBe('/existing/creds.json')
-    expect(config.translator?.google?.googleProjectId).toBe('proj-from-env')
+    const rawFixture = JSON5.parse(fs.readFileSync(fixtureJsonPath, 'utf8')) as {
+      translator?: Record<string, unknown>
+    }
+    const expectedTranslatorKeys = Object.keys(rawFixture.translator ?? {}).sort()
+    const actualTranslatorKeys = Object.keys(config.translator ?? {}).sort()
 
-    // Display final config with masked apiKey values for debugging
+    expect(actualTranslatorKeys).toEqual(expectedTranslatorKeys)
+
+    // Display final config with masked apiKey values for debugging.
     displayLoadedConfig(config, logger)
   })
 

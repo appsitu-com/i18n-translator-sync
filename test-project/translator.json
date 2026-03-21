@@ -33,13 +33,11 @@
     "deepl": {
       "apiKey": "${DEEPL_TRANSLATION_KEY}",
       "endpoint": "${DEEPL_TRANSLATION_URL}",
-
-      // Locale mappings for DeepL (uses uppercase language codes)
       "langMap": {
-        "en": "EN-US",
-        "zh-CN": "ZH-HANS",
-        "zh-TW": "ZH-HANT",
-        "zh-HK": "ZH-HANT"
+        "en": "en-US",
+        "zh-CN": "zh-Hans",
+        "zh-TW": "zh-Hant",
+        "zh-HK": "zh-Hant"
       }
     }
   }
