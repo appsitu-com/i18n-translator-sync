@@ -411,7 +411,7 @@ async function exportCache(): Promise<void> {
     const uri = await vscode.window.showSaveDialog({
       defaultUri: vscode.Uri.file(csvPath),
       filters: { 'CSV Files': ['csv'] },
-      title: 'Export Cache to CSV'
+      title: 'Export translation memory to CSV'
     })
 
     if (!uri) {
@@ -464,7 +464,7 @@ async function importCache(): Promise<void> {
     const uris = await vscode.window.showOpenDialog({
       defaultUri: vscode.Uri.file(csvPath),
       filters: { 'CSV Files': ['csv'] },
-      title: 'Import Cache from CSV',
+      title: 'Import translation memory from CSV',
       canSelectMany: false
     })
 
@@ -619,13 +619,13 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
     //   command: 'translator.pull'
     // },
     {
-      label: '$(arrow-circle-right) Export Cache to CSV',
-      description: 'Export translation cache to CSV file',
+      label: '$(arrow-circle-right) Export Translation Memory to CSV',
+      description: 'Export TM database to CSV file',
       command: 'translator.exportCache'
     },
     {
-      label: '$(arrow-circle-left) Import Cache from CSV',
-      description: 'Import translation cache from CSV file',
+      label: '$(arrow-circle-left) Import Translation Memory from CSV',
+      description: 'Import TM database from CSV file',
       command: 'translator.importCache'
     },
     {

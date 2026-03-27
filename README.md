@@ -45,15 +45,15 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 
 ## Visual Studio Code Commands
 
-| Command                             | Description                                                           |
-| ----------------------------------- | --------------------------------------------------------------------- |
-| `Translator: Start`                 | Starts the translation service. Starts watching source & config files |
-| `Translator: Stop`                  | Stops the translation service                                         |
-| `Translator: Restart`               | Restarts the translation service                                      |
-| `Translator: Export Cache to CSV`   | Exports the translation memory cache to a CSV file                    |
-| `Translator: Import Cache from CSV` | Imports translations from a CSV file into the cache                   |
-| `Translator: Purge`                 | Removes all unused translations from translation cache                |
-| `Translator: Show output`           | Opens the translator service output logs for debugging                |
+| Command                                          | Description                                                           |
+| ------------------------------------------------ | --------------------------------------------------------------------- |
+| `Translator: Start`                              | Starts the translation service. Starts watching source & config files |
+| `Translator: Stop`                               | Stops the translation service                                         |
+| `Translator: Restart`                            | Restarts the translation service                                      |
+| `Translator: Export translation memory to CSV`   | Exports the translation memory database to a CSV file                 |
+| `Translator: Import translation memory from CSV` | Imports translations from a CSV file into the TM database             |
+| `Translator: Purge`                              | Removes all unused translations from translation cache                |
+| `Translator: Show output`                        | Opens the translator service output logs for debugging                |
 
 ## CLI Quick Reference
 
@@ -348,20 +348,20 @@ See [Supported Languages Matrix](https://github.com/appsitu-com/i18n-translator-
   - Locale variants such as `fr-FR` or `pt-BR` are supported.
 - `auto` can be used in defaults and in overrides. For overrides, use `"auto"` as the `engineOverrides` key.
 
-| Option                  | Type                       | Description                                                                                                                | Example                                      |
-| ----------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `sourcePaths`           | `string[]`                 | Source language directories to scan for files to translate OR single source files                                          | `["i18n/en", "i18n/en.json"]`                |
-| `sourceLocale`          | `string`                   | Source locale                                                                                                              | `"en"`                                       |
-| `targetLocales`         | `string[]`                 | Target locales to generate translations for                                                                                | `['fr-FR', 'fr-CA']`                         |
-| `enableBackTranslation` | `boolean`                  | Enable back translation                                                                                                    | `false`                                      |
-| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)                                         | `"azure"`                                    |
-| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)                                    | `"google"`                                   |
-| `engineOverrides`       | `Record<string, string[]>` | Overrides default engine key for a locale or locale-pair. | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
-| `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth.                                    | `["code", "native"]`                         |
-| `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                                                        | `["meta.version"]`                           |
-| `copyOnlyFiles`         | `string[]`                 | File names (not paths) to copy verbatim instead of translating.                                                            | `["index.ts"]`                               |
-| `csvExportPath`         | `string`                   | Path to cache CSV export/import file. Absolute or relative to workspace.                                                   | `"translator.csv"`                           |
-| `autoExport`            | `boolean`                  | Automatically export cache to CSV after translation updates.                                                               | `true`                                       |
+| Option                  | Type                       | Description                                                                                               | Example                                      |
+| ----------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `sourcePaths`           | `string[]`                 | Source language directories to scan for files to translate OR single source files                         | `["i18n/en", "i18n/en.json"]`                |
+| `sourceLocale`          | `string`                   | Source locale                                                                                             | `"en"`                                       |
+| `targetLocales`         | `string[]`                 | Target locales to generate translations for                                                               | `['fr-FR', 'fr-CA']`                         |
+| `enableBackTranslation` | `boolean`                  | Enable back translation                                                                                   | `false`                                      |
+| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)      | `"azure"`                                    |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, openrouter, nllb, copy, auto) | `"google"`                                   |
+| `engineOverrides`       | `Record<string, string[]>` | Overrides default engine key for a locale or locale-pair.                                                 | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
+| `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth.                   | `["code", "native"]`                         |
+| `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                                       | `["meta.version"]`                           |
+| `copyOnlyFiles`         | `string[]`                 | File names (not paths) to copy verbatim instead of translating.                                           | `["index.ts"]`                               |
+| `csvExportPath`         | `string`                   | Path to cache CSV export/import file. Absolute or relative to workspace.                                  | `"translator.csv"`                           |
+| `autoExport`            | `boolean`                  | Automatically export cache to CSV after translation updates.                                              | `true`                                       |
 
 
 Example `translator.json`:

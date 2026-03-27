@@ -147,11 +147,11 @@
       },
       {
         "command": "translator.exportCache",
-        "title": "Translator: Export Cache to CSV"
+        "title": "Translator: Export translation memory to CSV"
       },
       {
         "command": "translator.importCache",
-        "title": "Translator: Import Cache from CSV"
+        "title": "Translator: Import translation memory from CSV"
       },
       {
         "command": "translator.purgeCache",
