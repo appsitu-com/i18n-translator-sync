@@ -234,17 +234,16 @@ describe('File Watcher Integration Tests', () => {
 
     await fs.writeFile(existingFilePath, modifiedContent);
 
-    // Wait for file system events to propagate
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     // Verify that the file change was detected
-    expect(onAddOrChangeSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fsPath: expect.stringMatching(/messages\.json$/)
-      }),
-      config
-    );
-  });
+    await vi.waitFor(() => {
+      expect(onAddOrChangeSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fsPath: expect.stringMatching(/messages\.json$/)
+        }),
+        config
+      );
+    }, { timeout: 5000 });
+  }, 10000);
 
   it('should trigger onDidDelete when files are deleted', async () => {
     // First create a test file to delete
@@ -266,17 +265,16 @@ describe('File Watcher Integration Tests', () => {
     // Delete the file
     await fs.unlink(testFilePath);
 
-    // Wait for file system events to propagate
-    await new Promise(resolve => setTimeout(resolve, 800));
-
     // Verify that the file deletion was detected
-    expect(onDeleteSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        fsPath: expect.stringMatching(/tobedeleted\.json$/)
-      }),
-      config
-    );
-  });
+    await vi.waitFor(() => {
+      expect(onDeleteSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fsPath: expect.stringMatching(/tobedeleted\.json$/)
+        }),
+        config
+      );
+    }, { timeout: 5000 });
+  }, 10000);
 
   it('should detect file operations through file watcher events', async () => {
     // This test focuses on verifying that the file watcher system is properly connected
@@ -296,37 +294,28 @@ describe('File Watcher Integration Tests', () => {
     onAddOrChangeSpy.mockClear();
     onDeleteSpy.mockClear();
 
-    // Create a test file
+    // Create a test file and wait for the add event.
+    // Note: rapid create→modify→delete defeats awaitWriteFinish (300ms stability threshold),
+    // so we must wait for the create event before deleting.
     const testFilePath = path.join(tempDir, 'i18n', 'en', 'watchertest.json');
     await fs.writeFile(testFilePath, JSON.stringify({ initial: 'content' }, null, 2));
 
-    // Wait for creation event
-    await new Promise(resolve => setTimeout(resolve, 400));
+    // Wait for the create event before deleting (awaitWriteFinish needs stability before emitting)
+    await vi.waitFor(() => {
+      expect(onAddOrChangeSpy).toHaveBeenCalled();
+    }, { timeout: 5000 });
 
-    // Modify the file
-    await fs.writeFile(testFilePath, JSON.stringify({ modified: 'content' }, null, 2));
-
-    // Wait for modification event
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    // Delete the file
+    // Now delete and verify the delete event fires
     await fs.unlink(testFilePath);
-
-    // Wait for deletion event
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    // Verify that at least some file operations were detected
-    // Note: File system events can be tricky in test environments, so we check for at least some activity
-    const totalCalls = onAddOrChangeSpy.mock.calls.length + onDeleteSpy.mock.calls.length;
-    expect(totalCalls).toBeGreaterThan(0);
-
-    // Log the calls for debugging if needed
-    if (totalCalls === 0) {
-      console.log('No file watcher calls detected. This might indicate a timing or setup issue.');
-      console.log('onAddOrChange calls:', onAddOrChangeSpy.mock.calls.length);
-      console.log('onDelete calls:', onDeleteSpy.mock.calls.length);
-    }
-  });
+    await vi.waitFor(() => {
+      expect(onDeleteSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          fsPath: expect.stringMatching(/watchertest\.json$/)
+        }),
+        config
+      );
+    }, { timeout: 5000 });
+  }, 15000);
 
   it('should verify watcher setup with manual event simulation', async () => {
     // This test manually simulates watcher events to verify the system works correctly
