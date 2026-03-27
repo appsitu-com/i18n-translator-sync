@@ -76,6 +76,16 @@ function toNllbLocale(locale: string, langMap: Record<string, string>): string {
   throw new Error(`NLLB Translator: unsupported locale '${locale}'. Map it to a supported NLLB code via translator.nllb.langMap (for example 'en' -> 'eng_Latn').`)
 }
 
+function isModelNotFoundError(errorText: string): boolean {
+  try {
+    const body = JSON.parse(errorText)
+    const message: unknown = body?.error?.message
+    return typeof message === 'string' && message.toLowerCase().includes('not a valid model')
+  } catch {
+    return false
+  }
+}
+
 function parseTranslationsFromResponse(responseText: string, separator: string, expectedCount: number): string[] {
   const lines = responseText
     .split(/\r?\n/)
@@ -178,7 +188,10 @@ export const NllbTranslator: Translator<INllbConfig> = {
 
       if (!response.ok) {
         const errorText = await response.text()
-        throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorText}`)
+        const hint = isModelNotFoundError(errorText)
+          ? ' (This may indicate an invalid or missing API key, or that the model is not accessible on the configured endpoint.)'
+          : ''
+        throw new Error(`HTTP ${response.status} ${response.statusText}: ${errorText}${hint}`)
       }
 
       const text = await response.text()

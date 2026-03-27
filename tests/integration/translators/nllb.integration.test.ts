@@ -1,17 +1,18 @@
 // cspell:ignore nllb
 // Run this suite explicitly with: pnpm test:nllb
+// Requires HUGGINGFACE_API_KEY and optionally HUGGINGFACE_API_URL in translator.env
 import { describe, it, expect } from 'vitest';
-import { NllbTranslator, NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb';
+import { NllbTranslator, NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_ENDPOINT } from '../../../src/translators/nllb';
 import type { INllbConfig } from '../../../src/translators/nllb';
 import { requireEnv } from './testEnv';
 
-const openRouterKey = requireEnv('OPENROUTER_API_KEY');
-const integrationModel = process.env.OPENROUTER_NLLB_MODEL || NLLB_DEFAULT_MODEL;
+const huggingFaceKey = requireEnv('HUGGINGFACE_API_KEY');
+const integrationModel = process.env.NLLB_MODEL || NLLB_DEFAULT_MODEL;
 
 function createNllbConfig(maxOutputTokens: number): INllbConfig {
   return {
-    apiKey: openRouterKey,
-    endpoint: process.env.OPENROUTER_API_URL || NLLB_DEFAULT_OPENROUTER_ENDPOINT,
+    apiKey: huggingFaceKey,
+    endpoint: process.env.HUGGINGFACE_API_URL || NLLB_DEFAULT_ENDPOINT,
     model: integrationModel,
     separator: NLLB_DEFAULT_SEPARATOR,
     temperature: 0,
