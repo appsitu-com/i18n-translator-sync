@@ -3,6 +3,7 @@ import type { Translator, BulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { ISO_TO_NLLB_LOCALE, NLLB_LOCALE_TO_LANGUAGE_NAME, NLLB_SUPPORTED_SCRIPT_LOCALE_CODES } from './nllbLanguageMap'
+import { OPENROUTER_ALLOWED_DOMAINS } from './openrouter'
 
 /** Default OpenRouter endpoint for NLLB model */
 export const NLLB_DEFAULT_OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
@@ -13,8 +14,8 @@ export const NLLB_DEFAULT_SEPARATOR = '<<<SEP>>>'
 /** Default model for NLLB via OpenRouter */
 export const NLLB_DEFAULT_MODEL = 'meta-llama/nllb-200-1.3B'
 
-/** NLLB uses OpenRouter's domains for endpoint validation */
-export { OPENROUTER_ALLOWED_DOMAINS as NLLB_ALLOWED_DOMAINS } from './openrouter'
+/** NLLB uses OpenRouter domains plus localhost for local endpoints (any port). */
+export const NLLB_ALLOWED_DOMAINS = [...OPENROUTER_ALLOWED_DOMAINS, 'localhost'] as const
 
 /** NLLB via OpenRouter config schema */
 export const NllbConfigSchema = z.object({

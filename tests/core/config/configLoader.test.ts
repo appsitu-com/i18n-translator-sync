@@ -8,6 +8,7 @@ import {
   snapshotEnvVars,
   resolveConfigEnvVars,
   loadTranslatorConfig,
+  resolveAndValidateEngineConfig,
   logConfiguredEnginePlan,
   MissingEnvironmentValueError,
   InvalidTranslatorConfigError
@@ -16,6 +17,8 @@ import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { Logger } from '../../../src/core/util/baseLogger'
 import type { ITranslatorConfig } from '../../../src/core/config'
 import { GEMINI_DEFAULT_ENDPOINT, GEMINI_DEFAULT_MODEL } from '../../../src/translators/gemini'
+import { UntrustedEndpointError } from '../../../src/core/util/endpointValidator'
+import type { EngineConfig } from '../../../src/translators/types'
 
 // Minimal logger for tests
 function createTestLogger(): Logger & { messages: string[] } {
@@ -268,7 +271,7 @@ describe('loadTranslatorConfig', () => {
     expect(config.translator).toBeUndefined()
   })
 
-  it('loads translator.json and resolves env vars from translator.env', () => {
+  it('loads translator.json but defers translator engine env var resolution', () => {
     // Write env file
     fs.writeFileSync(
       path.join(tmpDir, 'translator.env'),
@@ -294,8 +297,9 @@ describe('loadTranslatorConfig', () => {
 
     expect(config.sourceLocale).toBe('fr')
     expect(config.targetLocales).toEqual(['en', 'de'])
-    expect(config.translator?.azure?.apiKey).toBe('my-secret-key')
-    expect(config.translator?.azure?.region).toBe('westus2')
+    // Engine env placeholders are intentionally unresolved at config-load time
+    expect(config.translator?.azure?.apiKey).toBe('${AZURE_TRANSLATION_KEY}')
+    expect(config.translator?.azure?.region).toBe('${AZURE_TRANSLATION_REGION}')
     // Defaults applied by Zod
     expect(config.translator?.azure?.endpoint).toBe(
       'https://api.cognitive.microsofttranslator.com'
@@ -318,7 +322,7 @@ describe('loadTranslatorConfig', () => {
     expect(() => loadTranslatorConfig(tmpDir, logger)).toThrow(InvalidTranslatorConfigError)
   })
 
-  it('throws when translator.json references a missing env var', () => {
+  it('does not throw when translator.json references missing engine env vars', () => {
     fs.writeFileSync(
       path.join(tmpDir, 'translator.json'),
       JSON.stringify({
@@ -332,7 +336,8 @@ describe('loadTranslatorConfig', () => {
     )
 
     const logger = createTestLogger()
-    expect(() => loadTranslatorConfig(tmpDir, logger)).toThrow(MissingEnvironmentValueError)
+    const config = loadTranslatorConfig(tmpDir, logger)
+    expect(config.translator?.azure?.apiKey).toBe('${AZURE_TRANSLATION_KEY}')
   })
 
   it('applies engine defaults for partially-configured engines', () => {
@@ -416,6 +421,70 @@ describe('loadTranslatorConfig', () => {
     const infoMessages = logger.messages.filter((m) => m.startsWith('[info] Engine plan'))
     expect(infoMessages.some((m) => m.includes('[forward] en -> fr'))).toBe(true)
     expect(infoMessages.some((m) => m.includes('[back] fr -> en'))).toBe(true)
+  })
+})
+
+describe('resolveAndValidateEngineConfig', () => {
+  const logger = createTestLogger()
+
+  it('resolves env placeholders lazily for an engine at runtime', () => {
+    const envVars: IEnvVars = {
+      AZURE_TRANSLATION_KEY: 'runtime-az-key',
+      AZURE_TRANSLATION_REGION: 'eastus'
+    }
+
+    const resolved = resolveAndValidateEngineConfig(
+      'azure',
+      {
+        apiKey: '${AZURE_TRANSLATION_KEY}',
+        region: '${AZURE_TRANSLATION_REGION}'
+      } as EngineConfig,
+      envVars,
+      logger
+    )
+
+    expect((resolved as Record<string, unknown>)['apiKey']).toBe('runtime-az-key')
+    expect((resolved as Record<string, unknown>)['region']).toBe('eastus')
+    expect((resolved as Record<string, unknown>)['endpoint']).toBe(
+      'https://api.cognitive.microsofttranslator.com'
+    )
+  })
+
+  it('throws MissingEnvironmentValueError when a used engine env var is missing', () => {
+    const missingVarName = 'I18N_TRANSLATOR_TEST_MISSING_VAR'
+    delete process.env[missingVarName]
+    const envVars: IEnvVars = {}
+
+    expect(() =>
+      resolveAndValidateEngineConfig(
+        'azure',
+        {
+          apiKey: `\${${missingVarName}}`,
+          region: 'westus'
+        } as EngineConfig,
+        envVars,
+        logger
+      )
+    ).toThrow(MissingEnvironmentValueError)
+  })
+
+  it('throws UntrustedEndpointError for untrusted runtime engine endpoint', () => {
+    const envVars: IEnvVars = {
+      AZURE_TRANSLATION_KEY: 'runtime-az-key'
+    }
+
+    expect(() =>
+      resolveAndValidateEngineConfig(
+        'azure',
+        {
+          apiKey: '${AZURE_TRANSLATION_KEY}',
+          region: 'westus',
+          endpoint: 'https://evil.example.com'
+        } as EngineConfig,
+        envVars,
+        logger
+      )
+    ).toThrow(UntrustedEndpointError)
   })
 })
 

@@ -266,7 +266,8 @@ export abstract class TranslatorAdapter {
           this.configProvider,
           undefined,
           onConfigChanged,
-          this.translatorEngines
+          this.translatorEngines,
+          getPassphrase
         );
       }
     } catch (error: any) {

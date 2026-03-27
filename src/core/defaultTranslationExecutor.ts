@@ -4,16 +4,32 @@ import { Logger } from './util/baseLogger'
 import { TranslationCache } from './cache/sqlite'
 import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
 import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
+import {
+  snapshotEnvVars,
+  resolveAndValidateEngineConfig,
+  type GetPassphrase
+} from './config'
+
+interface CachedEngineConfigEntry {
+  signature: string
+  config: EngineConfig
+}
 
 /**
  * Default implementation that actually performs translations and writes files
  */
 export class DefaultTranslationExecutor implements ITranslationExecutor {
+  private readonly runtimeEngineConfigCache = new Map<
+    ResolvedTranslatorEngine,
+    CachedEngineConfigEntry
+  >()
+
   constructor(
     private fileSystem: FileSystem,
     private logger: Logger,
     private cache: TranslationCache,
-    private workspacePath: string
+    private workspacePath: string,
+    private getPassphrase?: GetPassphrase
   ) {}
 
     /**
@@ -45,6 +61,11 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       throw new Error(`No configuration found for engine '${engineName}'`)
     }
 
+    const resolvedEngineConfig = this.resolveRuntimeEngineConfig(
+      engineName,
+      engineConfig
+    )
+
     // Perform actual translation
     return await bulkTranslateWithEngine(
       segments,
@@ -53,7 +74,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       {
         source: sourceLocale,
         target: targetLocale,
-        apiConfig: engineConfig,
+        apiConfig: resolvedEngineConfig,
         rootDir: this.workspacePath
       },
       this.cache,
@@ -91,5 +112,41 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       this.logger.error(`Failed to create directory for ${file.fsPath}: ${error}`)
       throw error
     }
+  }
+
+  resetRuntimeState(): void {
+    this.runtimeEngineConfigCache.clear()
+  }
+
+  private resolveRuntimeEngineConfig(
+    engineName: ResolvedTranslatorEngine,
+    engineConfig: EngineConfig
+  ): EngineConfig {
+    const signature = JSON.stringify(engineConfig)
+    const cached = this.runtimeEngineConfigCache.get(engineName)
+
+    if (cached && cached.signature === signature) {
+      return cached.config
+    }
+
+    const envVars = snapshotEnvVars()
+    const resolved = resolveAndValidateEngineConfig(
+      engineName,
+      engineConfig,
+      envVars,
+      this.logger,
+      this.getPassphrase
+    )
+
+    if (!resolved) {
+      throw new Error(`No configuration found for engine '${engineName}'`)
+    }
+
+    this.runtimeEngineConfigCache.set(engineName, {
+      signature,
+      config: resolved
+    })
+
+    return resolved
   }
 }

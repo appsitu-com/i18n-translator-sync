@@ -16,6 +16,7 @@ import {
 } from './util/pathOperations'
 import { ITranslationExecutor } from './translationExecutor'
 import { DefaultTranslationExecutor } from './defaultTranslationExecutor'
+import type { GetPassphrase } from './config'
 
 /**
  * Core translator pipeline service
@@ -31,12 +32,28 @@ export class TranslatorPipeline {
     logger: Logger,
     cache: TranslationCache,
     workspacePath: string,
-    executor?: ITranslationExecutor
+    executor?: ITranslationExecutor,
+    getPassphrase?: GetPassphrase
   ) {
     this.fileSystem = fileSystem
     this.logger = logger
     this.cache = cache
-    this.executor = executor || new DefaultTranslationExecutor(fileSystem, logger, cache, workspacePath)
+    this.executor =
+      executor ||
+      new DefaultTranslationExecutor(
+        fileSystem,
+        logger,
+        cache,
+        workspacePath,
+        getPassphrase
+      )
+  }
+
+  /**
+   * Clear runtime caches in the active translation executor after config reloads.
+   */
+  public resetRuntimeState(): void {
+    this.executor.resetRuntimeState?.()
   }
 
   /**

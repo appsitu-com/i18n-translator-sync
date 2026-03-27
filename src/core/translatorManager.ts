@@ -10,6 +10,7 @@ import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
 import * as path from 'path';
 import { toAbsPath } from './util/pathShared';
+import type { GetPassphrase } from './config';
 
 /**
  * TranslatorManager manages the translation process for both CLI and VSCode extension
@@ -32,10 +33,11 @@ export class TranslatorManager {
     private configProvider: ConfigProvider,
     executor?: ITranslationExecutor,
     onConfigChanged?: () => Promise<void>,
-    translatorEngines?: ITranslatorEngines
+    translatorEngines?: ITranslatorEngines,
+    getPassphrase?: GetPassphrase
   ) {
     this.cache = cache;
-    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor);
+    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
     this.onConfigChanged = onConfigChanged;
     this.translatorEngines = translatorEngines;
 
@@ -62,6 +64,7 @@ export class TranslatorManager {
    */
   setTranslatorEngines(engines: ITranslatorEngines | undefined): void {
     this.translatorEngines = engines;
+    this.pipeline.resetRuntimeState();
   }
 
   /**

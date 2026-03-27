@@ -286,6 +286,21 @@ describe('validateEndpoints', () => {
     expect(() => validateEndpoints(config as ITranslatorConfig)).not.toThrow()
   })
 
+  it('does not throw for NLLB with localhost endpoint on any port', () => {
+    const config: DeepPartial<ITranslatorConfig> = {
+      sourceLocale: 'en',
+      targetLocales: ['fr'],
+      translator: {
+        nllb: {
+          apiKey: 'test-key',
+          endpoint: 'http://localhost:11434/v1/chat/completions'
+        }
+      }
+    }
+
+    expect(() => validateEndpoints(config as ITranslatorConfig)).not.toThrow()
+  })
+
   it('does not throw for MyMemory with trusted endpoint', () => {
     const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',

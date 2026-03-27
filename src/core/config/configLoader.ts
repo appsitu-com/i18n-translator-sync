@@ -2,15 +2,27 @@ import * as fs from 'fs'
 import * as path from 'path'
 import dotenv from 'dotenv'
 import JSON5 from 'json5'
-import { TranslatorConfigSchema, ITranslatorConfig } from './translatorConfigSchema'
+import {
+  TranslatorConfigSchema,
+  ITranslatorConfig,
+  AzureConfigSchema,
+  GoogleConfigSchema,
+  DeepLConfigSchema,
+  GeminiConfigSchema,
+  OpenRouterConfigSchema,
+  NllbConfigSchema,
+  MyMemoryConfigSchema,
+  CopyConfigSchema
+} from './translatorConfigSchema'
 import { EnvVarsSchema, IEnvVars } from './envVarsSchema'
 import { TRANSLATOR_ENV, TRANSLATOR_JSON } from '../constants'
 import { Logger } from '../util/baseLogger'
 import { formatZodError } from '../util/formatZodError'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
-import { validateEndpoints } from '../util/endpointValidator'
+import { ALLOWED_DOMAINS, validateEngineEndpoint } from '../util/endpointValidator'
 import { createEngineOverrides } from '../util/engines'
 import { pickEngine } from '../../translators/registry'
+import type { EngineConfig, ResolvedTranslatorEngine } from '../../translators/types'
 
 /** Function that returns a passphrase for decrypting encrypted env values. */
 export type GetPassphrase = () => string | undefined
@@ -158,16 +170,15 @@ export function loadTranslatorConfig(
     logger.warn(`${TRANSLATOR_JSON} not found at ${configPath} — using defaults`)
   }
 
-  // 3. Resolve env var references
-  const resolved = resolveConfigEnvVars(rawJson, envVars, logger, getPassphrase)
+  // 3. Resolve env var references for non-engine settings.
+  // Engine config env vars are intentionally deferred until the first time each engine is used.
+  const resolved = resolveConfigEnvVarsExceptTranslator(rawJson, envVars, logger, getPassphrase)
 
   // 4. Validate with Zod
   const result = TranslatorConfigSchema.safeParse(resolved)
 
   if (result.success) {
     const config: ITranslatorConfig = { ...result.data, rootDir }
-    // 5. Validate endpoint domains after env substitution and schema parsing
-    validateEndpoints(config)
     logConfiguredEnginePlan(config, logger)
     return config
   }
@@ -175,6 +186,55 @@ export function loadTranslatorConfig(
   const errors = formatZodError(result.error)
   logger.error(`Invalid ${TRANSLATOR_JSON}:\n${errors.join('\n')}`)
   throw new InvalidTranslatorConfigError(errors)
+}
+
+const ENGINE_CONFIG_SCHEMAS = {
+  azure: AzureConfigSchema,
+  google: GoogleConfigSchema,
+  deepl: DeepLConfigSchema,
+  gemini: GeminiConfigSchema,
+  openrouter: OpenRouterConfigSchema,
+  nllb: NllbConfigSchema,
+  mymemory: MyMemoryConfigSchema,
+  copy: CopyConfigSchema
+} as const
+
+/**
+ * Lazily resolve and validate one engine config in a single centralized location.
+ *
+ * This is called at engine first-use time instead of during translator.json load,
+ * so users only need environment variables for engines they actually invoke.
+ */
+export function resolveAndValidateEngineConfig(
+  engineName: ResolvedTranslatorEngine,
+  engineConfig: EngineConfig | undefined,
+  envVars: IEnvVars,
+  logger: Logger,
+  getPassphrase?: GetPassphrase
+): EngineConfig | undefined {
+  const schema = ENGINE_CONFIG_SCHEMAS[engineName]
+
+  if (!engineConfig && engineName !== 'copy') {
+    return undefined
+  }
+
+  const unresolvedConfig = engineConfig ?? {}
+  const resolvedConfig = resolveConfigEnvVars(
+    unresolvedConfig,
+    envVars,
+    logger,
+    getPassphrase
+  )
+  const parsedConfig = schema.parse(resolvedConfig) as EngineConfig
+
+  if (engineName in ALLOWED_DOMAINS) {
+    const endpoint = (parsedConfig as { endpoint?: unknown }).endpoint
+    if (typeof endpoint === 'string') {
+      validateEngineEndpoint(engineName as keyof typeof ALLOWED_DOMAINS, endpoint)
+    }
+  }
+
+  return parsedConfig
 }
 
 /**
@@ -311,6 +371,35 @@ function createEnvValueAccessor(envVars: IEnvVars): EnvValueAccessor {
       return resolved
     }
   }
+}
+
+/**
+ * Resolve env vars for translator.json while intentionally skipping the nested
+ * `translator` engines object. Engine config resolution is performed lazily at runtime.
+ */
+function resolveConfigEnvVarsExceptTranslator(
+  value: unknown,
+  envVars: IEnvVars,
+  logger: Logger,
+  getPassphrase?: GetPassphrase
+): unknown {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return resolveConfigEnvVars(value, envVars, logger, getPassphrase)
+  }
+
+  const input = value as Record<string, unknown>
+  const output: Record<string, unknown> = {}
+
+  for (const [key, nestedValue] of Object.entries(input)) {
+    if (key === 'translator') {
+      output[key] = nestedValue
+      continue
+    }
+
+    output[key] = resolveConfigEnvVars(nestedValue, envVars, logger, getPassphrase)
+  }
+
+  return output
 }
 
 /**

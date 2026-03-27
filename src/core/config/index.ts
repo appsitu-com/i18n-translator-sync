@@ -28,6 +28,7 @@ export {
   snapshotEnvVars,
   resolveConfigEnvVars,
   loadTranslatorConfig,
+  resolveAndValidateEngineConfig,
   logConfiguredEnginePlan,
   MissingEnvironmentValueError,
   InvalidTranslatorConfigError,

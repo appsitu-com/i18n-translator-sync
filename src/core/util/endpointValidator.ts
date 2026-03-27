@@ -37,6 +37,8 @@ export const ALLOWED_DOMAINS = {
   mymemory: MYMEMORY_ALLOWED_DOMAINS
 } as const
 
+export type EndpointEngineName = keyof typeof ALLOWED_DOMAINS
+
 /**
  * Extract the hostname from a URL string.
  * @param url The URL to parse
@@ -189,5 +191,19 @@ export function validateEndpoints(config: ITranslatorConfig): void {
         ALLOWED_DOMAINS.mymemory
       )
     }
+  }
+}
+
+/**
+ * Validate one endpoint for one engine.
+ * Intended for lazy runtime validation when engine config is resolved at first use.
+ */
+export function validateEngineEndpoint(
+  engineName: EndpointEngineName,
+  endpoint: string
+): void {
+  const allowedDomains = ALLOWED_DOMAINS[engineName]
+  if (!isEndpointAllowed(endpoint, allowedDomains)) {
+    throw new UntrustedEndpointError(engineName, endpoint, allowedDomains)
   }
 }

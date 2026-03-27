@@ -35,6 +35,11 @@ export interface TranslationCommand {
  */
 export interface ITranslationExecutor {
   /**
+   * Optional hook for clearing runtime caches when configuration is reloaded.
+   */
+  resetRuntimeState?(): void
+
+  /**
    * Translate text segments from source to target language
    * @param segments Text segments to translate
    * @param contexts Context information for each segment
