@@ -1,3 +1,29 @@
+## Release 0.8.0
+
+### Features
+
+- Added Gemini batch translation support so multiple strings are translated in one API request.
+- Added automatic Gemini Flash model discovery and fallback when configured models are unavailable.
+- Added one-time discovery caching (including in-flight deduplication) for Gemini model lookup.
+- Added NLLB registration lifecycle updates and related translator wiring improvements while engine rollout is being finalized.
+- Added deferred environment variable resolution so only engines in use require env configured credentials.
+
+### Fixes
+
+- Fixed file watcher reliability by introducing watcher readiness (`waitUntilReady`) and removing fragile timing assumptions.
+- Fixed integration and unit test stability by replacing fixed sleeps with polling where safe and updating watcher mocks.
+- Fixed NLLB integration configuration to use dedicated Hugging Face environment variables (`HUGGINGFACE_API_KEY` / `HUGGINGFACE_API_URL`).
+- Fixed NLLB error messaging to better explain ambiguous model-ID failures that are often endpoint/auth configuration issues.
+- Fixed environment variable coverage and related CI/config test expectations.
+- Fixed config parsing behavior to ensure `translator.json` in VS Code uses JSON5 parsing consistently.
+- Fixed DeepL config behavior to rely on a single endpoint value and removed obsolete free-endpoint assumptions.
+
+### Documentation and Maintenance
+
+- Updated README and supported-language docs, including NLLB documentation and language data organization improvements.
+- Updated sample and test project environment/config defaults to match current provider expectations.
+- Performed translator registry and menu cleanup, including temporarily de-registering NLLB while rollout hardening continues.
+
 ## Release 0.7.0
 
 ### Features
