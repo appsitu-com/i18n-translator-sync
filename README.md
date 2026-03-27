@@ -14,9 +14,9 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 
 <!-- TODO: Add demo GIF here showing translation in action -->
 
-**Quick Feature Overview:**
+**Quick Features Overview:**
 - ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
-- ✅ **Multiple AI engines** - Support for Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
+- ✅ **Multiple AI engines** - Supports Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
 - ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
@@ -102,9 +102,9 @@ We found that Google Translate is often better at short text strings typically f
 
 ## Source Language Neutral
 
-You can choose to make any language your source language - it does not need to be English. However, be aware that many Translation APIs have been trained to translate best from English and may in fact translate from your source language to English and then to your target language. Some of the newer engines don't suffer from this issue.
+You can choose any language as your source language - it does not need to be English. However, be aware that many Translation APIs have been trained to translate best from English and may translate from your source language to English, then to your target language. Some of the newer engines do not suffer from this issue.
 
-See related info on [English and Translation Engines](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/NonEnglishSourceLanguage.md) .
+See related info on [English and Translation Engines](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/NonEnglishSourceLanguage.md).
 
 ## Source file & folder names
 
@@ -118,31 +118,31 @@ Source files and folder names must contain the source locale code (e.g., "en" fo
 
 You can configure multiple files and folders containing the source text to be translated. The translation service will attempt to translate all supported file types in these source folders.
 
-Being able to translate multiple source folder is very handy for projects like mono-repos that need to manage translated content in many places.
+Being able to translate multiple source folders is very handy for projects like mono-repos that need to manage translated content in many places.
 
 Source folders would normally only contain files you intend to translate but there is one useful exception - See [TypeScript i18n file translation](#typescript-i18n-file-translation) below.
 
-### Example `translate.json` configuration
+### Example `translator.json` configuration
 
-- where `packages` are subprojects and `sourcePaths` is your source language folders and files.
+- where `packages` are subprojects and `sourcePaths` are your source language folders and files.
 
 `sourcePaths: ["packages/app/i18n/en", "packages/api/app/i18n/en.json", "packages/content/markdown/en/" ]`
-- `"packages/app/i18n/en"` => Translates English source folder in your front end application.
-- `"packages/api/i18n/en.json"` => Translates JSON files in this folder from your backend end API.
-- `"packages/content/markdown/en/"` => Translate markdown content files
+- `"packages/app/i18n/en"` => Translates English source folder in your front-end application.
+- `"packages/api/i18n/en.json"` => Translates JSON files in this folder from your backend API.
+- `"packages/content/markdown/en/"` => Translates markdown content files
 
 This will generate translated files replacing `en` with each of your target locales.
 
 - `targetLocales: ["fr", "zh-Hans", "ar"]` will translate to French, Chinese (Simplified) and Arabic.
 
 **Example:**
-- `"packages/app/i18n/fr"` => **French** for front end application.
-- `"packages/api/i18n/fr.json"` => **French** JSON files for backend end API.
+- `"packages/app/i18n/fr"` => **French** for front-end application.
+- `"packages/api/i18n/fr.json"` => **French** JSON files for backend API.
 - `"packages/content/markdown/fr/"` => **French** markdown content files
 
 ## Smart Folder Syncing
 
-Translated folders are kept "in sync" so if you rename or delete files in a source folder, the corresponding files will be auto renamed and deleted in all target folders. This is a **major time saver** when maintaining translated content and a key reason we developed the "i18n Translation **Sync**" tool.
+Translated folders are kept "in sync" so if you rename or delete files in a source folder, the corresponding files will be automatically renamed and deleted in all target folders. This is a **major time saver** when maintaining translated content and a key reason we developed the "i18n Translation **Sync**" tool.
 
 ## Back Translations!
 
@@ -154,7 +154,7 @@ When you enable "back translation", each target language is translated back to t
 **Example:**
 - `"packages/app/i18n/en` => Original English source text.
 - `"packages/app/i18n/fr"` => Forward translation English => French.
-- `"packages/app/i18n/fr_en"` => _Back translation_ of **English => French => English** to compare with Original English text.
+- `"packages/app/i18n/fr_en"` => _Back translation_ of **English => French => English** to compare with original English text.
 
 So enabling this feature is like adding a new locale code `fr_en` to your system.
 
@@ -162,7 +162,7 @@ Back translation will by default use the same engine used for forward translatio
 
 ### Using back translation to improve the AI translation quality
 
-Tweaking your input source text can often significantly improve AI translation quality as you find terms that are less ambiguous to the AI engine. Using this feature, you can iteratively adjust input source text and instantly check the back translations to assess  translation quality across all your target languages.
+Tweaking your input source text can often significantly improve AI translation quality as you find terms that are less ambiguous to the AI engine. Using this feature, you can iteratively adjust input source text and instantly check the back translations to assess translation quality across all your target languages.
 
 > 💡 Idea: Add a `back translation` switch for software developers to display back translations inside your app.
 
@@ -170,7 +170,7 @@ Tweaking your input source text can often significantly improve AI translation q
 
 ## Translation Memory
 
-The i18n Translator stores translations in a locale **translation memory database**.  This is not only boosts performance - it's a foundational feature we'll eventually develop to integrate with professional translation services.
+The i18n Translator stores translations in a locale **translation memory database**.  This not only boosts performance - it's a foundational feature we'll eventually develop to integrate with professional translation services.
 
 **Current capabilities:**
 - **Reduces AI costs** - Only translates new or changed content
@@ -180,11 +180,11 @@ The i18n Translator stores translations in a locale **translation memory databas
 - **Purge unused entries** - Finds and removes unused translations
 - **CSV export/import** - Export your translation cache => `translator.csv` and commit it to Git.
 - **CSV export/import** - Import `translator.csv` pulled from Git into your translation cache.
-- **Auto export** - If enabled, it can automatically reexport translation memory to CSV keeping it in sync with source text and new translations and Git commits.
-- **Auto import** - If enabled, when a co-worker first pulls a CSV file from Git and runs "Translator: Start", this setting will auto import the CSV file into their new cache database
+- **Auto export** - If enabled, it can automatically re-export translation memory to CSV, keeping it in sync with source text, new translations, and Git commits.
+- **Auto import** - If enabled, when a co-worker first pulls a `translator.csv` file from Git and runs "Translator: Start", this setting will it's auto imported into their "translation memory" database. This is important to ensure your software team maintains consistent translations.
 
 **Coming soon** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
-- Integration with Computer-Assisted Translation (CAT) tools to convert your draft AI translations into production grade professional human assisted translations.
+- Integration with a professional human translation service to review and revise your AI translations. These update will be retained in your local "translation mem"
 
 <!-- TODO: Add diagram showing translation memory workflow -->
 
@@ -199,9 +199,9 @@ Examples:
 
 ## Locale Code Mapping
 
-AI translation engines may use different locale codes to that used by your app, so we support mapping your preferred locale codes to the API's required codes using a `langMap` setting in `translator.json` for each AI engine.
+AI translation engines may use different locale codes than those used by your app, so we support mapping your preferred locale codes to the API's required codes using a `langMap` setting in `translator.json` for each AI engine.
 
-See the "translators" > "langMap" in [translator.json](https://github.com/appsitu-com/i18n-translator-sync/blob/main/samples/translator.json) for examples of engine specific language code mapping.
+See the "translators" > "langMap" in [translator.json](https://github.com/appsitu-com/i18n-translator-sync/blob/main/samples/translator.json) for examples of engine-specific language code mapping.
 
 _Did we get all the engine code mappings correct?_ If not, submit a PR with the correct mappings.
 
@@ -248,7 +248,7 @@ Examples:
 
 ## TypeScript i18n File Translation
 
-We support translation of TypeScript files that follow this specific format that is almost a JSON file. The `as const` is optional. We use the [JSON5](https://github.com/json5/json5) parser which accepts comments and strings with single or double quotes.
+We support translation of TypeScript files that follow a specific format that is almost JSON. The `as const` is optional. We use the [JSON5](https://github.com/json5/json5) parser, which accepts comments and strings delimited either single or double quotes.
 
 ```ts
 export default {
@@ -256,9 +256,9 @@ export default {
 } as const
 ```
 
-In this example, we translate a folder of TypeScript files that are merged together using an `index.ts` in the same folder.
-We want to copy the `index.ts` file into each target folder - avoiding it being translated.
-For a fully working example see our [test project](https://github.com/appsitu-com/i18n-translator-sync/blob/main/test-project).
+In this example, we translate a folder of TypeScript files that are merged using an `index.ts` file in the same folder.
+We want to copy the `index.ts` file into each target folder, avoiding translation.
+For a fully working example, see our [test project](https://github.com/appsitu-com/i18n-translator-sync/blob/main/test-project).
 
 `i18n/en/index.ts`
 ```ts
@@ -306,8 +306,8 @@ Our [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROAD
 
 # Getting Started
 
-1. Install the VSCode extension (see [Installation](#installation) above)
-2. Run the Command `Translator: Start`
+1. Install the VS Code extension (see [Installation](#installation) above)
+2. Run the command `Translator: Start`
 
 The first time you do this on a project, it will make these changes in the root folder of your project:
 - Creates an example `translator.json` file that configures files & folders to be translated, languages & AI translation engine preferences
@@ -315,7 +315,7 @@ The first time you do this on a project, it will make these changes in the root 
 - Adds `translator.env` to `.gitignore` to exclude it from git. Creates `.gitignore` if it does not exist.
 
 It will also open `translator.json` and `translator.env` so you can edit them:
-- `translator.env` => Contains instructions and links to videos to help you setup your translation keys
+- `translator.env` => Contains instructions and links to videos to help you set up your translation keys
 - `translator.json` => See the [Configuration](#configuration) section below to learn how to configure this file
 
 ⚠️ **Important: If the server fails to start after editing config files**
@@ -407,13 +407,13 @@ Purge workflow:
 ## Setting API Keys
 
 API keys for translation services are configured via environment variables that you can specify in `translator.env` or in your operating system. We avoided using `.env.*` files so we don't interfere with your local project environment.
-Ensure that the `translator.env` file is excluded from GIT via your `.gitignore` file.
+Ensure that the `translator.env` file is excluded from Git via your `.gitignore` file.
 
-The first time you run the `Translator: Start` in a project, `translator.env` will be created with placeholder text for your API keys. It's name is also added to your project `.gitignore` file.
+The first time you run the `Translator: Start` in a project, `translator.env` will be created with placeholder text for your API keys. Its name is also added to your project `.gitignore` file.
 
 You only need to configure keys for the AI translation engines you plan to use.
 You'll be warned if any required keys are missing or invalid.
-See the configurations settings that select which AI services to use for each file type.
+See the configuration settings that select which AI services to use for each file type.
 
 Example `translator.env` file:
 
