@@ -3,24 +3,33 @@ import type { Translator, BulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { ISO_TO_NLLB_LOCALE, NLLB_LOCALE_TO_LANGUAGE_NAME, NLLB_SUPPORTED_SCRIPT_LOCALE_CODES } from './nllbLanguageMap'
-import { OPENROUTER_ALLOWED_DOMAINS } from './openrouter'
 
-/** Default OpenRouter endpoint for NLLB model */
-export const NLLB_DEFAULT_OPENROUTER_ENDPOINT = 'https://openrouter.ai/api/v1/chat/completions'
+/** Default Hugging Face Inference endpoint for NLLB model */
+export const NLLB_DEFAULT_ENDPOINT = 'https://api-inference.huggingface.co/models/facebook/nllb-200-1.3B'
+
+/**
+ * Backward-compatible alias kept for existing imports/tests.
+ * Prefer `NLLB_DEFAULT_ENDPOINT` for all new code.
+ */
+export const NLLB_DEFAULT_OPENROUTER_ENDPOINT = NLLB_DEFAULT_ENDPOINT
 
 /** Default separator for splitting NLLB-translated segments */
 export const NLLB_DEFAULT_SEPARATOR = '<<<SEP>>>'
 
-/** Default model for NLLB via OpenRouter */
-export const NLLB_DEFAULT_MODEL = 'meta-llama/nllb-200-1.3B'
+/** Default model for NLLB via Hugging Face */
+export const NLLB_DEFAULT_MODEL = 'facebook/nllb-200-1.3B'
 
-/** NLLB uses OpenRouter domains plus localhost for local endpoints (any port). */
-export const NLLB_ALLOWED_DOMAINS = [...OPENROUTER_ALLOWED_DOMAINS, 'localhost'] as const
+/** NLLB trusted domains (Hugging Face + localhost for local endpoints). */
+export const NLLB_ALLOWED_DOMAINS = [
+  'api-inference.huggingface.co',
+  '*.huggingface.co',
+  'localhost'
+] as const
 
-/** NLLB via OpenRouter config schema */
+/** NLLB config schema */
 export const NllbConfigSchema = z.object({
   apiKey: z.string().optional(),
-  endpoint: z.string().default(NLLB_DEFAULT_OPENROUTER_ENDPOINT),
+  endpoint: z.string().default(NLLB_DEFAULT_ENDPOINT),
   model: z.string().default(NLLB_DEFAULT_MODEL),
   temperature: z.number().min(0).max(2).default(0),
   maxOutputTokens: z.number().int().min(1).default(256),

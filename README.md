@@ -17,6 +17,7 @@ Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save.
 **Quick Features Overview:**
 - ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
 - ✅ **Multiple AI engines** - Supports Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
+- ✅ **NLLB AI engine** - Supports NLLB translation engine. License permits non-commercial use only.
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
 - ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
@@ -170,7 +171,7 @@ Tweaking your input source text can often significantly improve AI translation q
 
 ## Translation Memory
 
-The i18n Translator stores translations in a locale **translation memory database**.  This not only boosts performance - it's a foundational feature we'll eventually develop to integrate with professional translation services.
+The i18n Translator stores translations in a local **translation memory database**. This not only boosts performance - it's a foundational feature we'll eventually develop to integrate with professional human translation services.
 
 **Current capabilities:**
 - **Reduces AI costs** - Only translates new or changed content
@@ -322,9 +323,11 @@ It will also open `translator.json` and `translator.env` so you can edit them:
 
 The Translator may fail to auto-start if it finds invalid or missing values in `translator.json` or `translator.env`. If this happens:
 
-1. Check the server logs: **VS Code Terminal** → **Output** → Select **"i18n Translator"** from the dropdown
-2. Look for error messages about invalid JSON, missing required fields, or invalid API keys
-3. See the [Troubleshooting](#troubleshooting) section below for common issues and solutions
+1. Check the server logs:
+  - Simplest: click "Translator" on the very bottom bar in VSCode and choose "Show Output" from the menu.
+  - Otherwise: **VS Code Terminal** → **Output** tab → Select **"i18n Translator"**
+3. Look for error messages about invalid JSON, missing required fields, or invalid API keys
+4. See the [Troubleshooting](#troubleshooting) section below for common issues and solutions
 
 **When the Translator service is running:**
 - Whenever you update either `translator.json` or `translator.env`, the Translator will auto-restart and load your new settings
@@ -440,6 +443,13 @@ DEEPL_TRANSLATION_URL='https://api-free.deepl.com'
 # Gemini AI API configuration
 # Get API key from: https://ai.google.dev/tutorials/setup
 GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
+
+# Hugging Face API configuration
+# Get API key from: https://huggingface.co/settings/tokens
+# NLLB can use Hugging Face Inference API with facebook/nllb-200-1.3B
+# NLLB's license prohibits commercial use.
+HUGGINGFACE_API_KEY='hf_XXXXXXXXXXXXXXXXXXXXX'
+HUGGINGFACE_API_URL='https://api-inference.huggingface.co/models/facebook/nllb-200-1.3B'
 
 ```
 

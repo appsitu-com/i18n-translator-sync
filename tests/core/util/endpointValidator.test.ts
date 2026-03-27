@@ -10,7 +10,7 @@ import { GOOGLE_DEFAULT_ENDPOINT } from '../../../src/translators/google'
 import { DEEPL_DEFAULT_ENDPOINT_FREE, DEEPL_DEFAULT_ENDPOINT } from '../../../src/translators/deepl'
 import { GEMINI_DEFAULT_ENDPOINT } from '../../../src/translators/gemini'
 import { OPENROUTER_DEFAULT_ENDPOINT } from '../../../src/translators/openrouter'
-import { NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../../src/translators/nllb'
+import { NLLB_DEFAULT_ENDPOINT } from '../../../src/translators/nllb'
 import { MYMEMORY_DEFAULT_ENDPOINT } from '../../../src/translators/mymemory'
 
 type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T
@@ -271,14 +271,14 @@ describe('validateEndpoints', () => {
     )
   })
 
-  it('does not throw for NLLB with trusted OpenRouter endpoint', () => {
+  it('does not throw for NLLB with trusted Hugging Face endpoint', () => {
     const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',
       targetLocales: ['fr'],
       translator: {
         nllb: {
           apiKey: 'test-key',
-          endpoint: NLLB_DEFAULT_OPENROUTER_ENDPOINT
+          endpoint: NLLB_DEFAULT_ENDPOINT
         }
       }
     }

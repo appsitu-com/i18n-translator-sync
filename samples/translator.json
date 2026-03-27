@@ -155,11 +155,11 @@
       }
     },
 
-    // NLLB via OpenRouter (meta-llama/nllb-200-1.3B)
+    // NLLB via Hugging Face (facebook/nllb-200-1.3B)
     "nllb": {
-      "apiKey": "${OPENROUTER_API_KEY}",
-      "endpoint": "${OPENROUTER_API_URL}",
-      "model": "meta-llama/nllb-200-1.3B", // Optional unified model field
+      "apiKey": "${HUGGINGFACE_API_KEY}",
+      "endpoint": "${HUGGINGFACE_API_URL}",
+      "model": "facebook/nllb-200-1.3B", // Optional model field
       "separator": "<<<SEP>>>",
 
       // Recommended: map your app locales to FLORES/NLLB locale codes

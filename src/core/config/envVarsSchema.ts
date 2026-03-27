@@ -30,6 +30,10 @@ export const EnvVarsSchema = z.object({
   OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_API_URL: z.string().optional(),
 
+  // Hugging Face (NLLB)
+  HUGGINGFACE_API_KEY: z.string().optional(),
+  HUGGINGFACE_API_URL: z.string().optional(),
+
   // MyMemory (optional — no standard env vars, but allow future use)
   MYMEMORY_API_KEY: z.string().optional(),
   MYMEMORY_EMAIL: z.string().optional(),
