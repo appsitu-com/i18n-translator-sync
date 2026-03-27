@@ -214,6 +214,13 @@ describe('Bulk Translation Integration Tests', () => {
     await cleanupTempDir(tempDir);
   });
 
+  it('should copy real files to all target locales using the real copy engine', async () => {
+    const count = await translatorManager.bulkTranslate(config, undefined, true);
+
+    expect(count).toBeGreaterThan(0);
+    await verifyTranslatedFiles(tempDir, config.sourceLocale, config.targetLocales);
+  });
+
   it('should bulk translate all files in source paths', async () => {
     // Setup mock for bulkTranslate
     const mockCount = 3; // Number of files to translate

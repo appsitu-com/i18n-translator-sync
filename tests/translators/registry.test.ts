@@ -123,6 +123,19 @@ describe('translators/registry', () => {
   })
 
   describe('pickEngine', () => {
+    it('should use google for en=>es when google is default and no override exists', () => {
+      const params = {
+        source: 'en',
+        target: 'es',
+        defaults: { md: 'azure', json: 'google' },
+        overrides: {},
+        fileType: 'json'
+      }
+
+      const result = pickEngine(params)
+      expect(result).toBe('google')
+    })
+
     it('should return override engine when match found', () => {
       const params = {
         source: 'en',
