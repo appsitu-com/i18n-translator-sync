@@ -41,6 +41,7 @@ const createMockLogger = () => ({
 
 const createMockFileWatcher = () => ({
   watch: vi.fn(),
+  waitUntilReady: vi.fn().mockResolvedValue(undefined),
   dispose: vi.fn()
 });
 
