@@ -58,6 +58,13 @@ export interface FileWatcher {
   watch(globPattern: string, listeners: FileWatcherListeners): Disposable
 
   /**
+   * Resolves when all active watches have completed their initial scan and
+   * are ready to emit file-change events. Implementations backed by
+   * always-ready watchers (e.g. VS Code API) should return a resolved promise.
+   */
+  waitUntilReady(): Promise<void>
+
+  /**
    * Dispose the watcher and all active watches
    */
   dispose(): void

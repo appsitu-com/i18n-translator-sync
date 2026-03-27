@@ -179,9 +179,6 @@ describe('File Watcher Integration Tests', () => {
     // Start watching
     await translatorManager.startWatching(config);
 
-    // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 400));
-
     // Clear any initial calls from existing files being processed
     onAddOrChangeSpy.mockClear();
 
@@ -195,10 +192,6 @@ describe('File Watcher Integration Tests', () => {
 
     await fs.mkdir(newFileDir, { recursive: true });
     await fs.writeFile(newFilePath, newFileContent);
-
-    // Wait for file system events to propagate
-    // chokidar has awaitWriteFinish with 300ms stability threshold + 100ms poll interval
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Verify that the file creation was detected
     await vi.waitFor(() => {
@@ -217,9 +210,6 @@ describe('File Watcher Integration Tests', () => {
 
     // Start watching
     await translatorManager.startWatching(config);
-
-    // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 400));
 
     // Clear any initial calls from existing files being processed
     onAddOrChangeSpy.mockClear();
@@ -256,9 +246,6 @@ describe('File Watcher Integration Tests', () => {
     // Start watching
     await translatorManager.startWatching(config);
 
-    // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 400));
-
     // Clear any initial calls
     onDeleteSpy.mockClear();
 
@@ -286,9 +273,6 @@ describe('File Watcher Integration Tests', () => {
 
     // Start watching
     await translatorManager.startWatching(config);
-
-    // Wait for watchers to be set up
-    await new Promise(resolve => setTimeout(resolve, 200));
 
     // Clear any initial setup calls
     onAddOrChangeSpy.mockClear();

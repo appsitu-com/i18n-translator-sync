@@ -10,6 +10,7 @@ import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable, FileRenameEven
 class CliFileWatcher implements FileWatcher {
   private disposables: Disposable[] = [];
   private watchers: Map<string, chokidar.FSWatcher> = new Map();
+  private readyPromises: Promise<void>[] = [];
 
   constructor(
     private fs: FileSystem,
@@ -67,11 +68,18 @@ class CliFileWatcher implements FileWatcher {
     const watcherId = `${globPattern}-${Date.now()}`;
     this.watchers.set(watcherId, watcher);
 
+    // Track the ready promise so waitUntilReady() can await all scans
+    this.readyPromises.push(new Promise<void>(resolve => watcher.on('ready', resolve)));
+
     // Return disposable for this specific watch
     return toDisposable(() => {
       watcher.close();
       this.watchers.delete(watcherId);
     });
+  }
+
+  waitUntilReady(): Promise<void> {
+    return Promise.all(this.readyPromises).then(() => undefined);
   }
 
   dispose(): void {

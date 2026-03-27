@@ -1,7 +1,7 @@
 import { FileSystem, IUri } from './util/fs';
 import { Logger } from './util/baseLogger';
 import { TranslationCache } from './cache/sqlite';
-import { Disposable, FileRenameEvent, WorkspaceWatcher } from './util/watcher';
+import { Disposable, FileRenameEvent, FileWatcher, WorkspaceWatcher } from './util/watcher';
 import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
 import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './pipeline';
@@ -16,7 +16,7 @@ import type { GetPassphrase } from './config';
  * TranslatorManager manages the translation process for both CLI and VSCode extension
  */
 export class TranslatorManager {
-  private watchers: Disposable[] = [];
+  private watchers: FileWatcher[] = [];
   private pipeline: TranslatorPipeline;
   private cache: TranslationCache;
   private isWatching: boolean = false;
@@ -131,6 +131,10 @@ export class TranslatorManager {
 
     // Watch for configuration file changes
     this.setupConfigFileWatcher();
+
+    // Wait for all chokidar watchers to complete their initial scan before returning.
+    // This ensures callers can immediately write files and expect change events.
+    await Promise.all(this.watchers.map(w => w.waitUntilReady()));
 
     this.isWatching = true;
     this.logger.info('Started watching for file changes');

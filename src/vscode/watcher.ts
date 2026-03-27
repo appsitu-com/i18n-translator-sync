@@ -57,6 +57,11 @@ class VSCodeFileWatcher implements FileWatcher {
     };
   }
 
+  waitUntilReady(): Promise<void> {
+    // VS Code file system watchers are immediately ready — no scan phase required.
+    return Promise.resolve();
+  }
+
   dispose(): void {
     for (const watcher of this.watchers.values()) {
       watcher.dispose();
