@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { GeminiTranslator, GEMINI_DEFAULT_MODEL, GEMINI_DEFAULT_ENDPOINT } from '../../src/translators/gemini'
+import { GeminiTranslator, GEMINI_DEFAULT_ENDPOINT } from '../../src/translators/gemini'
+
+const TEST_MODEL = 'gemini-test-model'
 
 // Mock HTTP utilities
 vi.mock('../../src/util/http', () => ({
@@ -32,7 +34,7 @@ describe('GeminiTranslator stub', () => {
           content: {
             parts: [
               {
-                text: 'Hola mundo'
+                text: '["Hola mundo"]'
               }
             ]
           }
@@ -49,7 +51,7 @@ describe('GeminiTranslator stub', () => {
       apiConfig: {
         apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
-        model: GEMINI_DEFAULT_MODEL,
+        model: TEST_MODEL,
         temperature: 0.1,
         maxOutputTokens: 1024,
         timeoutMs: 60_000,
@@ -61,11 +63,11 @@ describe('GeminiTranslator stub', () => {
     expect(postJson).toHaveBeenCalledTimes(1)
 
     const callArgs = vi.mocked(postJson).mock.calls[0]
-    expect(callArgs[0]).toContain(`https://test-endpoint/models/${GEMINI_DEFAULT_MODEL}:generateContent`)
+    expect(callArgs[0]).toContain(`https://test-endpoint/models/${TEST_MODEL}:generateContent`)
     expect(callArgs[0]).toContain('key=test-api-key')
 
     const body = callArgs[1]
-    expect(body.contents[0].parts[0].text).toContain('Translate the following text from en to es')
+    expect(body.contents[0].parts[0].text).toContain('Translate each text from en to es')
     expect(body.contents[0].parts[0].text).toContain('Hello world')
   })
 
@@ -77,7 +79,7 @@ describe('GeminiTranslator stub', () => {
           content: {
             parts: [
               {
-                text: 'Abrir archivo'
+                text: '["Abrir archivo"]'
               }
             ]
           }
@@ -94,7 +96,7 @@ describe('GeminiTranslator stub', () => {
       apiConfig: {
         apiKey: 'test-api-key',
         endpoint: 'https://test-endpoint',
-        model: GEMINI_DEFAULT_MODEL,
+        model: TEST_MODEL,
         temperature: 0.1,
         maxOutputTokens: 1024,
         timeoutMs: 60_000,
@@ -106,83 +108,28 @@ describe('GeminiTranslator stub', () => {
     expect(postJson).toHaveBeenCalledTimes(1)
 
     const body = vi.mocked(postJson).mock.calls[0][1]
-    expect(body.contents[0].parts[0].text).toContain('Context: Button label for opening a file')
+    expect(body.contents[0].parts[0].text).toContain('Button label for opening a file')
   })
 
   it('handles error by returning original text', async () => {
-    vi.mocked(postJson).mockRejectedValueOnce(new Error('API Error'))
+    vi.mocked(postJson).mockRejectedValue(new Error('API Error'))
 
-    const result = await GeminiTranslator.translateMany(['Test error handling'], [null], {
-      sourceLocale: 'en',
-      targetLocale: 'fr',
-      rootDir: '.',
-      apiConfig: {
-        apiKey: 'test-api-key',
-        endpoint: 'https://test-endpoint',
-        model: GEMINI_DEFAULT_MODEL,
-        temperature: 0.1,
-        maxOutputTokens: 1024,
-        timeoutMs: 60_000,
-        langMap: {},
-      }
-    })
-
-    expect(result).toEqual(['Test error handling'])
+    await expect(
+      GeminiTranslator.translateMany(['Test error handling'], [null], {
+        sourceLocale: 'en',
+        targetLocale: 'fr',
+        rootDir: '.',
+        apiConfig: {
+          apiKey: 'test-api-key',
+          endpoint: 'https://test-endpoint',
+          model: TEST_MODEL,
+          temperature: 0.1,
+          maxOutputTokens: 1024,
+          timeoutMs: 60_000,
+          langMap: {},
+        }
+      })
+    ).rejects.toThrow('API Error')
   })
 })
 
-// Tests using real Gemini API keys from translator.env
-describe('gemini api', () => {
-  // This will ensure we're using the real implementation, not the mock
-  beforeEach(() => {
-    vi.restoreAllMocks()
-
-    // Explicitly load translator.env file before each test
-    const dotenv = require('dotenv')
-    const path = require('path')
-    const fs = require('fs')
-
-    const envPath = path.resolve(process.cwd(), 'test-project/translator.env')
-    if (fs.existsSync(envPath)) {
-      console.log('Loading environment from:', envPath)
-      const result = dotenv.config({ path: envPath, override: true })
-      if (result.error) {
-        console.error('Error loading translator.env:', result.error)
-      }
-    }
-
-    // This will throw an error if the key isn't set or is a test/placeholder key
-    const key = process.env.GEMINI_API_KEY
-    console.log('Gemini API key:', key ? `${key.substring(0, 5)}...` : 'undefined')
-    if (!key || key === 'test-gemini-key' || key.includes('YOUR_GEMINI_API_KEY_HERE')) {
-      throw new Error('Real Gemini API key required in translator.env for this test suite')
-    }
-  })
-
-  it('translates text with real API', async () => {
-    const apiConfig = {
-      apiKey: process.env.GEMINI_API_KEY as string,
-      endpoint: process.env.GEMINI_API_URL || GEMINI_DEFAULT_ENDPOINT,
-      model: GEMINI_DEFAULT_MODEL,
-      temperature: 0.1,
-      maxOutputTokens: 1024,
-      timeoutMs: 60_000,
-      langMap: {},
-    }
-
-    const texts = ['hello', 'world']
-    const out = await GeminiTranslator.translateMany(texts, [null, null], {
-      sourceLocale: 'en',
-      targetLocale: 'fr',
-      rootDir: '.',
-      apiConfig
-    })
-
-    // Verify we got some response (not necessarily the exact translations)
-    // The Gemini API might give different translations or formats based on API key and rate limits
-    expect(out.length).toBe(2)
-    // Just check that we got something other than an error (which would return original text)
-    expect(out[0].length).toBeGreaterThan(0)
-    expect(out[1].length).toBeGreaterThan(0)
-  })
-})

@@ -93,7 +93,7 @@
     "gemini": {
       "apiKey": "${GEMINI_API_KEY}",
       "endpoint": "${GEMINI_API_URL}",
-      "model": "gemini-pro", // Optional (default: gemini-pro)
+      // "model": "gemini-1.5-flash", // Optional - will auto discover latest Gemini flash model
 
       // Locale mappings for Gemini (uses language names)
       "langMap": {
@@ -160,7 +160,6 @@
       "apiKey": "${HUGGINGFACE_API_KEY}",
       "endpoint": "${HUGGINGFACE_API_URL}",
       "model": "facebook/nllb-200-1.3B", // Optional model field
-      "separator": "<<<SEP>>>",
 
       // Recommended: map your app locales to FLORES/NLLB locale codes
       "langMap": {
