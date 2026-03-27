@@ -13,7 +13,7 @@ export function registerAllTranslators() {
   registerTranslator(DeepLTranslator, { limit: 50, maxchars: 30000 })
   registerTranslator(GeminiTranslator, { limit: 5, maxchars: 30000 })
   registerTranslator(OpenRouterTranslator, { limit: 50, maxchars: 30000 })
-  registerTranslator(NllbTranslator, { limit: 8, maxchars: 1400, maxitemchars: 240 })
+  // registerTranslator(NllbTranslator, { limit: 8, maxchars: 1400, maxitemchars: 240 })
 
   registerTranslator(CopyTranslator, { limit: Number.MAX_SAFE_INTEGER, maxchars: Number.MAX_SAFE_INTEGER })
 }
