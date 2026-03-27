@@ -556,6 +556,13 @@ async function purgeCache(): Promise<void> {
 }
 
 /**
+ * Extended QuickPickItem with command field
+ */
+interface CommandQuickPickItem extends vscode.QuickPickItem {
+  command?: string
+}
+
+/**
  * Show context menu with all available translator commands
  * Icons: https://microsoft.github.io/vscode-codicons/dist/codicon.html
  */
@@ -563,19 +570,19 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
   const state = getTranslatorState()
 
   // Create menu items based on current state
-  const items: vscode.QuickPickItem[] = []
+  const items: CommandQuickPickItem[] = []
 
   if (state.isRunning) {
     items.push(
       {
         label: '$(debug-pause) Stop Translator',
         description: 'Stop file watching and auto-translation',
-        detail: 'translator.stop'
+        command: 'translator.stop'
       },
       {
         label: '$(refresh) Restart Translator',
         description: 'Restart file watching with fresh configuration',
-        detail: 'translator.restart'
+        command: 'translator.restart'
       }
     )
   } else if (state.isInitialized) {
@@ -583,19 +590,19 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
       {
         label: '$(play-circle) Start Translator',
         description: 'Start file watching and auto-translation',
-        detail: 'translator.start'
+        command: 'translator.start'
       },
       {
         label: '$(refresh) Restart Translator',
         description: 'Restart file watching with fresh configuration',
-        detail: 'translator.restart'
+        command: 'translator.restart'
       }
     )
   } else {
     items.push({
       label: '$(play-circle) Start Translator',
       description: 'Initialize and start file watching',
-      detail: 'translator.start'
+      command: 'translator.start'
     })
   }
 
@@ -604,43 +611,50 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
     // {
     //   label: '$(cloud-upload) Push to MateCat',
     //   description: 'Upload source files to MateCat for professional translation',
-    //   detail: 'translator.push'
+    //   command: 'translator.push'
     // },
     // {
     //   label: '$(cloud-download) Pull from MateCat',
     //   description: 'Download completed translations from MateCat',
-    //   detail: 'translator.pull'
+    //   command: 'translator.pull'
     // },
     {
       label: '$(arrow-circle-right) Export Cache to CSV',
       description: 'Export translation cache to CSV file',
-      detail: 'translator.exportCache'
+      command: 'translator.exportCache'
     },
     {
       label: '$(arrow-circle-left) Import Cache from CSV',
       description: 'Import translation cache from CSV file',
-      detail: 'translator.importCache'
+      command: 'translator.importCache'
     },
     {
       label: '$(trash) Purge Unused Translations',
       description: 'Remove translations not used by current source files',
-      detail: 'translator.purgeCache'
+      command: 'translator.purgeCache'
     },
     {
       label: '$(output) Show Output',
       description: 'Open the translator output channel',
-      detail: 'translator.showOutput'
+      command: 'translator.showOutput'
     }
   )
+
+  // Extract command map from command fields and remove commands for display
+  const commandMap = new Map(items.map(item => [item.label, item.command || '']))
+  items.forEach(item => delete item.command)
 
   const selected = await vscode.window.showQuickPick(items, {
     placeHolder: 'Select a translator command',
     title: 'i18n Translator Commands'
   })
 
-  if (selected && selected.detail) {
-    // Execute the selected command
-    await vscode.commands.executeCommand(selected.detail, context)
+  if (selected) {
+    const command = commandMap.get(selected.label)
+    if (command) {
+      // Execute the selected command
+      await vscode.commands.executeCommand(command, context)
+    }
   }
 }
 
