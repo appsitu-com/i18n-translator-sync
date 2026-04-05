@@ -4,7 +4,7 @@
   "displayName": "i18n Translator Sync",
   "publisher": "AppSitu",
   "preview": true,
-  "version": "0.8.0",
+  "version": "0.8.1",
   "engines": {
     "vscode": "^1.103.0"
   },
