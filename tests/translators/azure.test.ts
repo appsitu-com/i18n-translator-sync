@@ -107,5 +107,5 @@ describe('azure api', () => {
     })
 
     expect(out.map((text) => text.toLowerCase())).toEqual(['bonjour', 'monde'])
-  })
+  }, 60_000)
 })
