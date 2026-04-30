@@ -185,7 +185,8 @@ The i18n Translator stores translations in a local **translation memory database
 - **Auto import** - If enabled, when a co-worker first pulls a `translator.csv` file from Git and runs "Translator: Start", this setting will it's auto imported into their "translation memory" database. This is important to ensure your software team maintains consistent translations.
 
 **Coming soon** (see [Roadmap](https://github.com/appsitu-com/i18n-translator-sync/blob/main/ROADMAP.md)):
-- Integration with a professional human translation service to review and revise your AI translations. These update will be retained in your local "translation mem"
+- Integration with a professional human translation service to review and revise your AI translations.
+- These updates will then be synced back into your local "translation memory" database.
 
 <!-- TODO: Add diagram showing translation memory workflow -->
 
@@ -198,13 +199,12 @@ Examples:
 - `"excludeKeys": ["native", "code"]` => In JSON and YAML files, don't translate `'code'` or `'native'` fields.
 - `"copyOnlyFiles": ["index.ts"]` =>  When `index.ts` files exist in a source folder, just copy them to all target folders - don't translate them.
 
+NOTE: For the Preview, `excludeKeys` applies globally to all files but we're considering an improved solution to configure this for specific files.
+
 ## Locale Code Mapping
 
 AI translation engines may use different locale codes than those used by your app, so we support mapping your preferred locale codes to the API's required codes using a `langMap` setting in `translator.json` for each AI engine.
-
 See the "translators" > "langMap" in [translator.json](https://github.com/appsitu-com/i18n-translator-sync/blob/main/samples/translator.json) for examples of engine-specific language code mapping.
-
-_Did we get all the engine code mappings correct?_ If not, submit a PR with the correct mappings.
 
 Examples:
 
