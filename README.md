@@ -249,13 +249,16 @@ Examples:
 
 ## TypeScript i18n File Translation
 
-We support translation of TypeScript files that follow a specific format that is almost JSON. The `as const` is optional. We use the [JSON5](https://github.com/json5/json5) parser, which accepts comments and strings delimited either single or double quotes.
+We support translation of TypeScript files that follow a specific format that is almost JSON. The `as const` is optional.
+Apart from type checking, this can improve VS Code intellisense assistance as you code your app.
 
 ```ts
 export default {
   /// JSON values
 } as const
 ```
+
+  We use the [JSON5](https://github.com/json5/json5) parser, which accepts comments and strings delimited either single or double quotes.
 
 In this example, we translate a folder of TypeScript files that are merged using an `index.ts` file in the same folder.
 We want to copy the `index.ts` file into each target folder, avoiding translation.
