@@ -76,8 +76,31 @@ function buildBatchPrompt(
 }
 
 function parseJsonArrayResponse(responseText: string, expectedCount: number): string[] {
-  const cleaned = responseText.trim().replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '')
-  const parsed: unknown = JSON.parse(cleaned)
+  const trimmed = responseText.trim()
+  const withoutFences = trimmed.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '').trim()
+
+  const parseAttempts = [withoutFences]
+  const firstBracket = withoutFences.indexOf('[')
+  const lastBracket = withoutFences.lastIndexOf(']')
+  if (firstBracket !== -1 && lastBracket !== -1 && lastBracket > firstBracket) {
+    parseAttempts.push(withoutFences.slice(firstBracket, lastBracket + 1))
+  }
+
+  let parsed: unknown
+  let lastError: unknown
+  for (const candidate of parseAttempts) {
+    try {
+      parsed = JSON.parse(candidate)
+      break
+    } catch (error) {
+      lastError = error
+    }
+  }
+
+  if (parsed === undefined) {
+    const reason = lastError instanceof Error ? lastError.message : String(lastError)
+    throw new Error(`Gemini Translator: failed to parse JSON array response (${reason})`)
+  }
 
   if (!Array.isArray(parsed) || parsed.length !== expectedCount) {
     throw new Error(
@@ -192,7 +215,7 @@ async function requestTranslation(
   apiKey: string,
   body: {
     contents: Array<{ parts: Array<{ text: string }> }>
-    generation_config: { temperature: number; max_output_tokens: number }
+    generation_config: { temperature: number; max_output_tokens: number; response_mime_type: 'application/json' }
   },
   timeoutMs: number,
   retry: z.infer<typeof RetrySchema>
@@ -231,7 +254,11 @@ export const GeminiTranslator: Translator<IGeminiConfig> = {
     const prompt = buildBatchPrompt(texts, _contexts, sourceLocale, targetLocale)
     const body = {
       contents: [{ parts: [{ text: prompt }] }],
-      generation_config: { temperature: cfg.temperature, max_output_tokens: cfg.maxOutputTokens }
+      generation_config: {
+        temperature: cfg.temperature,
+        max_output_tokens: cfg.maxOutputTokens,
+        response_mime_type: 'application/json' as const
+      }
     }
 
     const endpoint = cfg.endpoint.replace(/\/+$/, '')

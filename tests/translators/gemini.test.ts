@@ -131,5 +131,71 @@ describe('GeminiTranslator stub', () => {
       })
     ).rejects.toThrow('API Error')
   })
+
+  it('parses JSON array wrapped in markdown fences', async () => {
+    vi.mocked(postJson).mockResolvedValueOnce({
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: '```json\n["Hola", "Adios"]\n```'
+              }
+            ]
+          }
+        }
+      ]
+    })
+
+    const result = await GeminiTranslator.translateMany(['Hello', 'Bye'], [null, null], {
+      sourceLocale: 'en',
+      targetLocale: 'es',
+      rootDir: '.',
+      apiConfig: {
+        apiKey: 'test-api-key',
+        endpoint: 'https://test-endpoint',
+        model: TEST_MODEL,
+        temperature: 0.1,
+        maxOutputTokens: 1024,
+        timeoutMs: 60_000,
+        langMap: {},
+      }
+    })
+
+    expect(result).toEqual(['Hola', 'Adios'])
+  })
+
+  it('parses JSON array when response includes extra text', async () => {
+    vi.mocked(postJson).mockResolvedValueOnce({
+      candidates: [
+        {
+          content: {
+            parts: [
+              {
+                text: 'Here are your translations:\n["Guardar", "Cancelar"]\nDone.'
+              }
+            ]
+          }
+        }
+      ]
+    })
+
+    const result = await GeminiTranslator.translateMany(['Save', 'Cancel'], [null, null], {
+      sourceLocale: 'en',
+      targetLocale: 'es',
+      rootDir: '.',
+      apiConfig: {
+        apiKey: 'test-api-key',
+        endpoint: 'https://test-endpoint',
+        model: TEST_MODEL,
+        temperature: 0.1,
+        maxOutputTokens: 1024,
+        timeoutMs: 60_000,
+        langMap: {},
+      }
+    })
+
+    expect(result).toEqual(['Guardar', 'Cancelar'])
+  })
 })
 
