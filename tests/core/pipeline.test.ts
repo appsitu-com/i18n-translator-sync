@@ -82,6 +82,12 @@ describe('TranslatorPipeline', () => {
     vi.restoreAllMocks()
   })
 
+  it('classifies .js, .mjs and .cjs files as json type', () => {
+    expect(pipeline.getFileType('/ws/i18n/en/messages.js')).toBe('json')
+    expect(pipeline.getFileType('/ws/i18n/en/messages.mjs')).toBe('json')
+    expect(pipeline.getFileType('/ws/i18n/en/messages.cjs')).toBe('json')
+  })
+
   it('processes forward and back translations for JSON', async () => {
     // Mock file content
     const jsonContent = JSON.stringify({ a: 'x' })

@@ -363,6 +363,14 @@ describe('TranslatorManager', () => {
     });
   });
 
+  describe('supported file detection', () => {
+    it('accepts .js, .mjs and .cjs files as supported', () => {
+      expect((translatorManager as any).isSupportedFile('/workspace/i18n/en/messages.js')).toBe(true)
+      expect((translatorManager as any).isSupportedFile('/workspace/i18n/en/messages.mjs')).toBe(true)
+      expect((translatorManager as any).isSupportedFile('/workspace/i18n/en/messages.cjs')).toBe(true)
+    })
+  })
+
   describe('Configuration file watching', () => {
     let configChangeCallback: (() => Promise<void>) | undefined;
 

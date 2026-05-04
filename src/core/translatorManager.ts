@@ -387,7 +387,10 @@ export class TranslatorManager {
            lowerPath.endsWith('.mdx') ||
            lowerPath.endsWith('.yaml') ||
            lowerPath.endsWith('.yml') ||
-           lowerPath.endsWith('.ts');
+           lowerPath.endsWith('.ts') ||
+           lowerPath.endsWith('.js') ||
+           lowerPath.endsWith('.mjs') ||
+           lowerPath.endsWith('.cjs');
   }
 
   /**
@@ -702,7 +705,7 @@ export class TranslatorManager {
 
     // Check if file type is supported
     if (!this.isSupportedFile(fileUri.fsPath)) {
-      throw new Error(`Unsupported file type: ${fileUri.fsPath}. Supported types: .json, .ts, .md, .mdx, .yaml, .yml`);
+      throw new Error(`Unsupported file type: ${fileUri.fsPath}. Supported types: .json, .ts, .js, .mjs, .cjs, .md, .mdx, .yaml, .yml`);
     }
 
     // Process the file using the pipeline

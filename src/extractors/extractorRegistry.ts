@@ -21,7 +21,12 @@ export function extractForFile(
     return extractJSON(content, options)
   } else if (lowerFilename.endsWith('.yaml') || lowerFilename.endsWith('.yml')) {
     return extractYAML(content, options)
-  } else if (lowerFilename.endsWith('.ts')) {
+  } else if (
+    lowerFilename.endsWith('.ts') ||
+    lowerFilename.endsWith('.js') ||
+    lowerFilename.endsWith('.mjs') ||
+    lowerFilename.endsWith('.cjs')
+  ) {
     return extractTypeScript(content, options)
   } else {
     return extractMarkdownOrMDX(content, undefined, options)

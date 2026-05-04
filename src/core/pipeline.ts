@@ -227,8 +227,13 @@ export class TranslatorPipeline {
     if (lowerPath.endsWith('.yml') || lowerPath.endsWith('.yaml')) {
       return 'yaml';
     }
-    if (lowerPath.endsWith('.ts')) {
-      return 'json'; // TS default-export files use JSON engine selection
+    if (
+      lowerPath.endsWith('.ts') ||
+      lowerPath.endsWith('.js') ||
+      lowerPath.endsWith('.mjs') ||
+      lowerPath.endsWith('.cjs')
+    ) {
+      return 'json'; // TS/JS default-export files use JSON engine selection
     }
 
     throw new Error(`Unsupported file type for path: ${filePath}`);

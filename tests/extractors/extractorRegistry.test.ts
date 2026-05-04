@@ -37,6 +37,27 @@ describe('extractForFile', () => {
     expect(ex.segments).toEqual(['Hello', 'Goodbye']);
   });
 
+  it('delegates to TypeScript extraction for .js files', () => {
+    const js = 'export default {\n  greeting: "Hello",\n  farewell: "Goodbye"\n};';
+    const ex = extractForFile('file.js', js);
+    expect(ex.kind).toBe('json');
+    expect(ex.segments).toEqual(['Hello', 'Goodbye']);
+  });
+
+  it('delegates to TypeScript extraction for .mjs files', () => {
+    const js = 'export default {\n  greeting: "Hello",\n  farewell: "Goodbye"\n};';
+    const ex = extractForFile('file.mjs', js);
+    expect(ex.kind).toBe('json');
+    expect(ex.segments).toEqual(['Hello', 'Goodbye']);
+  });
+
+  it('delegates to TypeScript extraction for .cjs files', () => {
+    const js = 'export default {\n  greeting: "Hello",\n  farewell: "Goodbye"\n};';
+    const ex = extractForFile('file.cjs', js);
+    expect(ex.kind).toBe('json');
+    expect(ex.segments).toEqual(['Hello', 'Goodbye']);
+  });
+
   it('passes exclude options through to TS extraction', () => {
     const ts = 'export default {\n  "id": "skip",\n  "greeting": "Hello"\n};';
     const ex = extractForFile('file.ts', ts, { excludeKeys: ['id'] });

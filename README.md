@@ -10,12 +10,12 @@
 [![Release](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/release.yml)
 [![Publish](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml/badge.svg)](https://github.com/appsitu-com/i18n-translator-sync/actions/workflows/publish.yml) -->
 
-Translate Markdown, MDX, JSON, YAML, and TypeScript files instantly as you save. Your translations stay in sync automatically with smart folder mirroring, translation memory, and support for Azure, Google, DeepL, and Gemini engines, including an `auto` router mode.
+Translate Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files instantly as you save. Your translations stay in sync automatically with smart folder mirroring, translation memory, and support for Azure, Google, DeepL, and Gemini engines, including an `auto` router mode.
 
 <!-- TODO: Add demo GIF here showing translation in action -->
 
 **Quick Features Overview:**
-- ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, and TypeScript files on save
+- ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files on save
 - ✅ **Multiple AI engines** - Supports Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
 - ✅ **NLLB AI engine** - Supports NLLB translation engine. License permits non-commercial use only.
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
@@ -93,13 +93,13 @@ For complete CLI details, see [doc/CLI.md](doc/CLI.md).
 
 <!-- TODO: Add screenshot of multi-language translation in action -->
 
-You can instantly translate **Markdown, MDX, JSON, YAML, YML, and TypeScript** files. Translation is triggered whenever you save a source language file so all your translated files remain "in sync" as you code.
+You can instantly translate **Markdown, MDX, JSON, YAML, YML, TypeScript, and JavaScript** files. Translation is triggered whenever you save a source language file so all your translated files remain "in sync" as you code.
 
 - Use any of the languages supported by Google Translate, Azure Translate, DeepL or Gemini LLM
-- Set a default translation engine for JSON/YAML/TS files or Markdown/MDX files
+- Set a default translation engine for JSON/YAML/TS/JS files or Markdown/MDX files
 - Override your default engine by setting different engines for each locale
 
-We found that Google Translate is often better at short text strings typically found in JSON/YAML/TS whereas Azure is often better at paragraphs and sentences found in Markdown/MDX files. DeepL is also best for European languages and supports `en-US` ⇒ `en-GB` translation.
+We found that Google Translate is often better at short text strings typically found in JSON/YAML/TS/JS whereas Azure is often better at paragraphs and sentences found in Markdown/MDX files. DeepL is also best for European languages and supports `en-US` ⇒ `en-GB` translation.
 
 ## Source Language Neutral
 
@@ -121,7 +121,7 @@ You can configure multiple files and folders containing the source text to be tr
 
 Being able to translate multiple source folders is very handy for projects like mono-repos that need to manage translated content in many places.
 
-Source folders would normally only contain files you intend to translate but there is one useful exception - See [TypeScript i18n file translation](#typescript-i18n-file-translation) below.
+Source folders would normally only contain files you intend to translate but there is one useful exception - See [TypeScript and JavaScript i18n file translation](#typescript-and-javascript-i18n-file-translation) below.
 
 ### Example `translator.json` configuration
 
@@ -193,7 +193,7 @@ The i18n Translator stores translations in a local **translation memory database
 ## Exclude Translation
 
 You can exclude specific file names, keys or key paths from translation.
-The next section on TypeScript translation demonstrates these features.
+The next section on TypeScript and JavaScript translation demonstrates these features.
 
 Examples:
 - `"excludeKeys": ["native", "code"]` => In JSON and YAML files, don't translate `'code'` or `'native'` fields.
@@ -247,9 +247,10 @@ Examples:
 ```
 
 
-## TypeScript i18n File Translation
+## TypeScript and JavaScript i18n File Translation
 
-We support translation of TypeScript files that follow a specific format that is almost JSON. The `as const` is optional.
+We support translation of TypeScript and JavaScript files that follow a specific format that is almost JSON.
+For TypeScript, the `as const` suffix is optional.
 Apart from type checking, this can improve VS Code intellisense assistance as you code your app.
 
 ```ts
@@ -347,7 +348,7 @@ See [Supported Languages Matrix](https://github.com/appsitu-com/i18n-translator-
 - `auto` chooses an engine from the locale pair and document type using normalized locale codes:
   - `deepl` for targets `de|fr|es|it|nl|pl|pt|ru`;
   - `google` for targets `zh|ja|ko|th|vi|ar|hi`;
-  - for other targets: `azure` for markdown/MDX and `google` for structured files (JSON/YAML/TS).
+  - for other targets: `azure` for markdown/MDX and `google` for structured files (JSON/YAML/TS/JS).
   - Locale variants such as `fr-FR` or `pt-BR` are supported.
 - `auto` can be used in defaults and in overrides. For overrides, use `"auto"` as the `engineOverrides` key.
 
@@ -358,7 +359,7 @@ See [Supported Languages Matrix](https://github.com/appsitu-com/i18n-translator-
 | `targetLocales`         | `string[]`                 | Target locales to generate translations for                                                               | `['fr-FR', 'fr-CA']`                         |
 | `enableBackTranslation` | `boolean`                  | Enable back translation                                                                                   | `false`                                      |
 | `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)      | `"azure"`                                    |
-| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, and YML files (azure, google, deepl, gemini, openrouter, nllb, copy, auto) | `"google"`                                   |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, YML, TS, and JS default-export files (azure, google, deepl, gemini, openrouter, nllb, copy, auto) | `"google"`                                   |
 | `engineOverrides`       | `Record<string, string[]>` | Overrides default engine key for a locale or locale-pair.                                                 | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
 | `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth.                   | `["code", "native"]`                         |
 | `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                                       | `["meta.version"]`                           |
@@ -375,7 +376,7 @@ Example `translator.json`:
   "targetLocales": ["es", "fr", "de", "ja", "zh-CN"],
   "enableBackTranslation": true,
   "defaultMarkdownEngine": "azure",  // Applied to MDX and Markdown files
-  "defaultJsonEngine": "google", // Applied to JSON/YAML and TypeScript (export default {... })
+  "defaultJsonEngine": "google", // Applied to JSON/YAML and TS/JS (export default {... })
   "engineOverrides": {
     "auto": ["en:ja", "en:ko"],
     "deepl": ["fr", "de"],
@@ -493,8 +494,8 @@ HUGGINGFACE_API_URL='https://api-inference.huggingface.co/models/facebook/nllb-2
 **Files not translating when saved:**
 - Verify the Translator service is running (check Output logs)
 - Ensure the file is in a configured `sourcePaths` directory
-- Check file extension is supported (`.md`, `.mdx`, `.json`, `.yaml`, `.yml`, `.ts`)
-- For TypeScript files, verify the file matches the `export default { ... }` pattern
+- Check file extension is supported (`.md`, `.mdx`, `.json`, `.yaml`, `.yml`, `.ts`, `.js`, `.mjs`, `.cjs`)
+- For TypeScript and JavaScript files, verify the file matches the `export default { ... }` pattern
 
 ### Translation Quality Issues
 
