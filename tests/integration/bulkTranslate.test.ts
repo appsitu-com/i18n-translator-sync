@@ -6,8 +6,7 @@ import * as os from 'os';
 import { TranslatorManager } from '../../src/core/translatorManager';
 import { NodeFileSystem } from '../../src/core/util/fs';
 import { ConsoleLogger } from '../../src/core/util/baseLogger';
-import { SQLiteCache } from '../../src/core/cache/sqlite';
-import { WorkspaceWatcher } from '../../src/core/util/watcher';
+import { JsonlTranslationCache } from '../../src/core/cache/TranslationCache';
 import { CliWorkspaceWatcher } from '../../src/cli/watcher';
 import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig';
@@ -101,7 +100,7 @@ describe('Bulk Translation Integration Tests', () => {
   let tempDir: string;
   let fileSystem: NodeFileSystem;
   let logger: ConsoleLogger;
-  let cache: SQLiteCache;
+  let cache: JsonlTranslationCache;
   let configProvider: CliConfigProvider;
   let watcher: CliWorkspaceWatcher;
   let translatorManager: TranslatorManager;
@@ -139,7 +138,7 @@ describe('Bulk Translation Integration Tests', () => {
     // Initialize real components (not mocks)
     fileSystem = new NodeFileSystem();
     logger = new ConsoleLogger('test');
-    cache = new SQLiteCache(':memory:', process.cwd()); // Use in-memory DB for tests
+    cache = new JsonlTranslationCache(':memory:', process.cwd()); // Use in-memory cache for tests
     watcher = new CliWorkspaceWatcher(fileSystem, logger, tempDir);
     configProvider = new CliConfigProvider(fileSystem, logger, path.join(tempDir, TRANSLATOR_JSON));
 

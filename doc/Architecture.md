@@ -251,7 +251,7 @@ The translation pipeline processes files through these steps:
 5. Rebuild the file with translated strings
 6. Write the output to the target language directories
 
-#### Translation Cache (`src/core/cache/sqlite.ts`)
+#### Translation Cache (`src/core/cache/jsonlTranslationCache.ts`)
 Manages the translation cache:
 - Stores previously translated segments
 - Optimizes translation speed and reduces API calls

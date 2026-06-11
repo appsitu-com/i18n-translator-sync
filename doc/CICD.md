@@ -87,7 +87,7 @@ pnpm package:quick
 
 The build process is optimized to avoid redundant builds:
 - `pnpm package` calls `vsce package`, which automatically triggers `vscode:prepublish`
-- The `vscode:prepublish` hook rebuilds SQLite for Electron and compiles TypeScript
+- The `vscode:prepublish` hook compiles TypeScript and prepares package artifacts
 - No manual `pnpm build` needed before packaging
 
 ## 6) Debug Locally

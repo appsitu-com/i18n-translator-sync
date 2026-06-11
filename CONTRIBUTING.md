@@ -22,7 +22,7 @@ For information about the internal architecture of the extension, see [Architect
 │   │   └── types.ts      # Common interfaces for translation engines
 │   ├── core/             # Core business logic
 │   │   ├── cache/        # Translation cache implementations
-│   │   │   └── sqlite.ts # SQLite translation cache
+│   │   │   └── jsonlTranslationCache.ts # JSONL translation cache
 │   │   └── util/         # Core utilities
 │   ├── util/             # Utility functions
 │   ├── extension.ts      # Main extension entry point

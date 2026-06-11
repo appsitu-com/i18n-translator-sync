@@ -1,6 +1,6 @@
 ## Options for CAT integration - GPT answers
 
-Great brief — you’re already set up for a low-cost, high-control workflow. Here’s a concise shortlist that matches your needs (software UI + docs in JSON/Markdown, VS Code plugin, SQLite/CSV cache, volunteer/pro teams).
+Great brief — you’re already set up for a low-cost, high-control workflow. Here’s a concise shortlist that matches your needs (software UI + docs in JSON/Markdown, VS Code plugin, JSONL/CSV cache, volunteer/pro teams).
 
 # Least-cost CAT/TMS options (my short list)
 
@@ -44,7 +44,7 @@ These are the big, **non-MT** resources software teams use to keep UI terms stab
 
 # Recommended stack by scenario
 
-* **Private, \$0 infra, software-centric** → **Self-host Weblate** (or Tolgee) + your SQLite/CSV as the canonical TM. You keep data, reviewers work in the browser, Git sync for JSON/MD. ([Weblate][2], [Weblate][1])
+* **Private, \$0 infra, software-centric** → **Self-host Weblate** (or Tolgee) + your JSONL/CSV cache as the canonical TM. You keep data, reviewers work in the browser, Git sync for JSON/MD. ([Weblate][2], [Weblate][1])
 * **Public/OSS with volunteers** → **Hosted Weblate Libre** (gratis) or **Crowdin/Transifex OSS** (gratis). Let the community translate in a familiar UI; keep your VS Code plugin for batch machine-drafts and cache. ([Weblate][2], [Crowdin Docs][10], [transifex.com][11])
 * **Quick, low-friction post-editing sprints** → **MateCat** projects linked to your CSV/TMX; volunteers edit in browser; integrate via its API for push/pull. ([Matecat][7], [Weblate][8])
 * **Small private projects, minimal ops** → **POEditor** (free tier to start, API for automation). ([POEditor][9])
@@ -53,7 +53,7 @@ These are the big, **non-MT** resources software teams use to keep UI terms stab
 
 # How I’d wire this into your current flow (minimal effort)
 
-1. **Keep your SQLite→CSV cache as source of truth for TM.**
+1. **Keep your JSONL→CSV cache as source of truth for TM.**
    Export your cache to **TMX** (and glossary to **TBX**) so any CAT can import it. (All options above accept TMX/TBX via UI or API.)
 2. **Use XLIFF as the exchange format** for JSON/Markdown segments.
 
@@ -71,7 +71,7 @@ These are the big, **non-MT** resources software teams use to keep UI terms stab
 
 ## My bottom line (for you)
 
-* If you want **\$0 recurring and full control**: **Self-host Weblate** (or Tolgee) and keep your current SQLite/CSV cache + XLIFF round-trip. That gives you professional review workflow, Git sync, and API automation without vendor lock-in. ([Weblate][2], [Weblate][3])
+* If you want **\$0 recurring and full control**: **Self-host Weblate** (or Tolgee) and keep your current JSONL/CSV cache + XLIFF round-trip. That gives you professional review workflow, Git sync, and API automation without vendor lock-in. ([Weblate][2], [Weblate][3])
 * If you want **zero ops** and you’re okay being **public**: **Hosted Weblate Libre** or **Crowdin/Transifex OSS** is the smoothest path. ([Weblate][2], [Crowdin Docs][10], [transifex.com][11])
 * For **ad-hoc volunteer bursts**: spin up **MateCat** jobs using your TMX; it’s free and fast. ([Matecat][7])
 

@@ -1,5 +1,7 @@
 ## Release 0.8.1
 
+- Replaced SQLite dependency with JSONL + in memory index.
+  - Faster and avoids better-sqlite upgrades whenever VSCode Electron version changes.
 - feat(deepl): support Eden AI endpoint and preserve placeholders
 - chore(pnpm): migrate build approvals and pin pnpm 11.5.3
 

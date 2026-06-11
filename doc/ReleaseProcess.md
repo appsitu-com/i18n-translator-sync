@@ -25,7 +25,7 @@ This will:
 5. Package it as a versioned VSIX file in the `releases/` directory
 6. Display git commands to use to correctly tag the release in GIT
 
-**Note**: The build process has been optimized to avoid redundant builds. The packaging script triggers `vsce package`, which automatically runs the `vscode:prepublish` hook (rebuilding SQLite for Electron and building the extension).
+**Note**: The build process has been optimized to avoid redundant builds. The packaging script triggers `vsce package`, which automatically runs the `vscode:prepublish` hook to build the extension.
 
 You can also update the version independently:
 ```bash

@@ -1,12 +1,11 @@
-import { JsonlTranslationCache as OriginalSQLiteCache, type Pair, type TranslationCache } from '../../src/core/cache/TranslationCache';
+import { type Pair, type TranslationCache } from '../../src/core/cache/TranslationCache';
 import * as fs from 'fs';
 import * as nodePath from 'path';
 
 /**
- * Mock implementation of SQLiteCache for testing
- * This can be used when native SQLite modules cause issues in test environments
+ * Mock implementation of the translation cache for testing.
  */
-export class MockSQLiteCache implements TranslationCache {
+export class MockTranslationCache implements TranslationCache {
   private path: string;
   private translations: Map<string, { translated_text: string, updated_at: number }> = new Map();
 
@@ -14,7 +13,23 @@ export class MockSQLiteCache implements TranslationCache {
     this.path = path;
     const dir = nodePath.dirname(path);
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    console.log(`[MOCK] Created SQLite cache at ${path}`);
+    console.log(`[MOCK] Created translation cache at ${path}`);
+  }
+
+  hasSourcePath(sourcePath: string): Promise<boolean> {
+    throw new Error('Method not implemented.')
+  }
+  hasPendingPurge(): Promise<boolean> {
+    throw new Error('Method not implemented.')
+  }
+  purge(): Promise<{ deletedCount: number }> {
+    throw new Error('Method not implemented.')
+  }
+  completePurge(): Promise<{ deletedCount: number }> {
+    throw new Error('Method not implemented.')
+  }
+  isNew(): boolean {
+    throw new Error('Method not implemented.')
   }
 
   async getMany({
@@ -143,9 +158,9 @@ export class MockSQLiteCache implements TranslationCache {
   }
 
   close(): void {
-    console.log(`[MOCK] Closed SQLite cache at ${this.path}`);
+    console.log(`[MOCK] Closed translation cache at ${this.path}`);
   }
 }
 
-// Export the MockSQLiteCache for use in tests
+// Export the mock cache for use in tests
 export { type Pair, type TranslationCache };
