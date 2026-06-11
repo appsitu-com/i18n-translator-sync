@@ -1,3 +1,8 @@
+## Release 0.8.1
+
+- feat(deepl): support Eden AI endpoint and preserve placeholders
+- chore(pnpm): migrate build approvals and pin pnpm 11.5.3
+
 ## Release 0.8.0
 
 ### Features
@@ -22,7 +27,7 @@
 
 - Updated README and supported-language docs, including NLLB documentation and language data organization improvements.
 - Updated sample and test project environment/config defaults to match current provider expectations.
-- Performed translator registry and menu cleanup, including temporarily de-registering NLLB while rollout hardening continues.
+- Performed translator registry and menu clean up, including temporarily de-registering NLLB while rollout hardening continues.
 
 ## Release 0.7.0
 
