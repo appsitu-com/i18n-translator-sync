@@ -175,6 +175,21 @@ describe('validateEndpoints', () => {
     expect(() => validateEndpoints(config as ITranslatorConfig)).not.toThrow()
   })
 
+  it('does not throw for DeepL with Eden AI endpoint', () => {
+    const config: DeepPartial<ITranslatorConfig> = {
+      sourceLocale: 'en',
+      targetLocales: ['es'],
+      translator: {
+        deepl: {
+          apiKey: 'test-key',
+          endpoint: 'https://api.edenai.run/v2/translation/automatic_translation'
+        }
+      }
+    }
+
+    expect(() => validateEndpoints(config as ITranslatorConfig)).not.toThrow()
+  })
+
   it('throws for DeepL with untrusted endpoint', () => {
     const config: DeepPartial<ITranslatorConfig> = {
       sourceLocale: 'en',

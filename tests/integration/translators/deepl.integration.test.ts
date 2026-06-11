@@ -3,6 +3,7 @@ import { DeepLTranslator, DEEPL_DEFAULT_ENDPOINT_FREE } from '../../../src/trans
 import { requireEnv } from './testEnv';
 
 const deeplKey = requireEnv('DEEPL_TRANSLATION_KEY');
+const deeplEndpoint = process.env.DEEPL_TRANSLATION_URL || DEEPL_DEFAULT_ENDPOINT_FREE;
 
 describe('integration: deepl translator', () => {
   it('makes a real API call and returns translated text', async () => {
@@ -14,7 +15,7 @@ describe('integration: deepl translator', () => {
       rootDir: process.cwd(),
       apiConfig: {
         apiKey: deeplKey,
-        endpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
+        endpoint: deeplEndpoint,
         timeoutMs: 60000,
         langMap: {}
       }

@@ -93,6 +93,83 @@ describe('deepl stub', () => {
     expect(calls[0].body.source_lang).toBe('EN')
     expect(calls[0].body.target_lang).toBe('FR')
   })
+
+  it('protects braced variables using xml tag handling and restores them', async () => {
+    // @ts-expect-error
+    global.fetch = vi.fn(async (url: string, init: any) => {
+      const body = JSON.parse(init.body)
+      calls.push({ url, body })
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        async text() {
+          return JSON.stringify({
+            translations: [{ text: 'Bonjour <x id="1">{title}</x> et <x id="2">{count}</x>' }]
+          })
+        }
+      } as any
+    })
+
+    const out = await DeepLTranslator.translateMany(['Hello {title} and {count}'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      rootDir: '.',
+      apiConfig: {
+        apiKey: 'DEEPL',
+        endpoint: DEEPL_DEFAULT_ENDPOINT_FREE,
+        timeoutMs: 30_000,
+        langMap: {},
+      }
+    })
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0].body.text).toEqual(['Hello <x id="1">{title}</x> and <x id="2">{count}</x>'])
+    expect(calls[0].body.tag_handling).toBe('xml')
+    expect(calls[0].body.ignore_tags).toEqual(['x'])
+    expect(out).toEqual(['Bonjour {title} et {count}'])
+  })
+
+  it('adapts request and parsing when endpoint is Eden AI', async () => {
+    // @ts-expect-error
+    global.fetch = vi.fn(async (url: string, init: any) => {
+      const body = JSON.parse(init.body)
+      calls.push({ url, body, headers: init.headers })
+      return {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        async text() {
+          return JSON.stringify({
+            deepl: {
+              text: 'Bonjour <x id="1">{title}</x>'
+            }
+          })
+        }
+      } as any
+    })
+
+    const out = await DeepLTranslator.translateMany(['Hello {title}'], [null], {
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      rootDir: '.',
+      apiConfig: {
+        apiKey: 'EDEN_KEY',
+        endpoint: 'https://api.edenai.run',
+        timeoutMs: 30_000,
+        langMap: {},
+      }
+    })
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0].url).toBe('https://api.edenai.run/v2/translation/automatic_translation')
+    expect(calls[0].headers.Authorization).toBe('Bearer EDEN_KEY')
+    expect(calls[0].body.providers).toBe('deepl')
+    expect(calls[0].body.source_language).toBe('en')
+    expect(calls[0].body.target_language).toBe('fr')
+    expect(calls[0].body.text).toBe('Hello <x id="1">{title}</x>')
+    expect(out).toEqual(['Bonjour {title}'])
+  })
 })
 
 // Tests using real DeepL API keys from translator.env
@@ -138,6 +215,6 @@ describe('deepl api', () => {
       apiConfig
     })
 
-    expect(out).toEqual(['Bonjour', 'monde'])
+    expect(out).toEqual(['bonjour', 'monde'])
   })
 })

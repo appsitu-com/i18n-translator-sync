@@ -4,6 +4,138 @@ import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { normalizeLocaleWithMap, toLanguage } from '../util/localeNorm'
 
+const VARIABLE_REGEX = /\{[^}]+\}/g
+const EDEN_AI_DEFAULT_PATH = '/v2/translation/automatic_translation'
+const EDEN_AI_PROVIDER = 'deepl'
+
+interface ProtectedTextResult {
+  protectedText: string
+  placeholders: string[]
+}
+
+interface DeepLTranslationResponse {
+  translations?: Array<{ text?: string }>
+}
+
+interface EdenAiTranslationResponse {
+  items?: unknown[]
+  [EDEN_AI_PROVIDER]?: {
+    text?: string
+    translated_text?: string
+    translations?: Array<{ text?: string; translated_text?: string }>
+  }
+}
+
+function protectVariablesWithXmlTags(text: string): ProtectedTextResult {
+  const placeholders = text.match(VARIABLE_REGEX) ?? []
+  if (placeholders.length === 0) {
+    return { protectedText: text, placeholders }
+  }
+
+  let index = 0
+  const protectedText = text.replace(VARIABLE_REGEX, () => {
+    index += 1
+    return `<x id="${index}">${placeholders[index - 1]}</x>`
+  })
+
+  return { protectedText, placeholders }
+}
+
+function restoreVariablesFromXmlTags(translatedText: string, placeholders: string[]): string {
+  if (placeholders.length === 0) {
+    return translatedText
+  }
+
+  const withWrappedTagsRestored = translatedText.replace(/<x\b[^>]*\bid="(\d+)"[^>]*>[\s\S]*?<\/x>/gi, (_full, id: string) => {
+    const placeholder = placeholders[Number(id) - 1]
+    return placeholder ?? _full
+  })
+
+  return withWrappedTagsRestored.replace(/<x\b[^>]*\bid="(\d+)"[^>]*\/>/gi, (_full, id: string) => {
+    const placeholder = placeholders[Number(id) - 1]
+    return placeholder ?? _full
+  })
+}
+
+function isEdenAiEndpoint(endpoint: string): boolean {
+  try {
+    return new URL(endpoint).hostname.endsWith('edenai.run')
+  } catch {
+    return false
+  }
+}
+
+function getEdenAiUrl(endpoint: string): string {
+  const parsed = new URL(endpoint)
+  if (!parsed.pathname || parsed.pathname === '/') {
+    parsed.pathname = EDEN_AI_DEFAULT_PATH
+  }
+  return parsed.toString().replace(/\/+$/, '')
+}
+
+function extractEdenAiTranslation(json: EdenAiTranslationResponse): string | null {
+  const providerPayload = json?.[EDEN_AI_PROVIDER]
+  const providerText = providerPayload?.translated_text ?? providerPayload?.text
+  if (providerText) {
+    return providerText
+  }
+
+  const providerFirst = providerPayload?.translations?.[0]
+  const providerFirstText = providerFirst?.translated_text ?? providerFirst?.text
+  if (providerFirstText) {
+    return providerFirstText
+  }
+
+  const firstItem = json?.items?.[0] as
+    | { translated_text?: string; text?: string; translations?: Array<{ translated_text?: string; text?: string }> }
+    | undefined
+  const itemText = firstItem?.translated_text ?? firstItem?.text
+  if (itemText) {
+    return itemText
+  }
+
+  const firstItemTranslation = firstItem?.translations?.[0]
+  return firstItemTranslation?.translated_text ?? firstItemTranslation?.text ?? null
+}
+
+function toEdenLanguageCode(locale: string): string {
+  return locale.toLowerCase()
+}
+
+async function translateChunkWithEdenAi(
+  chunk: string[],
+  protectedChunk: ProtectedTextResult[],
+  endpoint: string,
+  authKey: string,
+  timeout: number,
+  sourceLocale: string,
+  targetLocale: string,
+  context: string
+): Promise<string[]> {
+  const url = getEdenAiUrl(endpoint)
+  const headers = { Authorization: `Bearer ${authKey}` }
+
+  const out: string[] = []
+  for (let i = 0; i < protectedChunk.length; i++) {
+    const requestBody: Record<string, unknown> = {
+      providers: EDEN_AI_PROVIDER,
+      text: protectedChunk[i].protectedText,
+      source_language: toEdenLanguageCode(sourceLocale),
+      target_language: toEdenLanguageCode(targetLocale)
+    }
+
+    if (context) {
+      requestBody.context = context
+    }
+
+    const json = await postJson<EdenAiTranslationResponse>(url, requestBody, headers, timeout)
+    const translated = extractEdenAiTranslation(json) ?? chunk[i]
+    out.push(restoreVariablesFromXmlTags(translated, protectedChunk[i].placeholders))
+  }
+
+  return out
+}
+
 /** Default endpoints for DeepL */
 export const DEEPL_DEFAULT_ENDPOINT_FREE = 'https://api-free.deepl.com'
 export const DEEPL_DEFAULT_ENDPOINT = 'https://api.deepl.com'
@@ -12,7 +144,9 @@ export const DEEPL_DEFAULT_ENDPOINT = 'https://api.deepl.com'
 export const DEEPL_ALLOWED_DOMAINS = [
   'api-free.deepl.com',
   'api.deepl.com',
-  '*.deepl.com'
+  '*.deepl.com',
+  'api.edenai.run',
+  '*.edenai.run'
 ] as const
 
 /** DeepL Translation config schema */
@@ -40,6 +174,7 @@ export const DeepLTranslator: Translator<IDeepLConfig> = {
     const formality = cfg.formality
     const model_type = cfg.model
     const langMap = cfg.langMap
+    const useEdenAi = isEdenAiEndpoint(cfg.endpoint)
 
     if (!authKey) throw new Error(`DeepL: missing 'apiKey'`)
     const headers = { Authorization: `DeepL-Auth-Key ${authKey}` }
@@ -50,6 +185,8 @@ export const DeepLTranslator: Translator<IDeepLConfig> = {
     // https://developers.deepl.com/docs/getting-started/supported-languages
     const source_lang = toLanguage(normalizeLocaleWithMap(opts.sourceLocale, langMap)).toUpperCase()
     const target_lang = normalizeLocaleWithMap(opts.targetLocale, langMap).toUpperCase()
+    const sourceLocale = normalizeLocaleWithMap(opts.sourceLocale, langMap)
+    const targetLocale = normalizeLocaleWithMap(opts.targetLocale, langMap)
 
     // Group texts by context, because DeepL's 'context' parameter applies to the whole request.
     const groups = new Map<string, number[]>()
@@ -64,18 +201,43 @@ export const DeepLTranslator: Translator<IDeepLConfig> = {
     const out: string[] = new Array(texts.length)
     for (const [ctx, idxs] of groups.entries()) {
       const chunk = idxs.map((i) => texts[i])
-      const url = `${endpoint}/v2/translate`
-      const body: any = { text: chunk, source_lang, target_lang }
+      const protectedChunk = chunk.map((text) => protectVariablesWithXmlTags(text))
+      if (useEdenAi) {
+        const edenTranslations = await translateChunkWithEdenAi(
+          chunk,
+          protectedChunk,
+          endpoint,
+          authKey,
+          timeout,
+          sourceLocale,
+          targetLocale,
+          ctx
+        )
 
-      if (ctx) body.context = ctx
-      if (formality) body.formality = formality
-      if (model_type) body.model_type = model_type
+        for (let k = 0; k < idxs.length; k++) {
+          out[idxs[k]] = edenTranslations[k] ?? chunk[k]
+        }
+      } else {
+        const requestTexts = protectedChunk.map((entry) => entry.protectedText)
+        const hasProtectedVariables = protectedChunk.some((entry) => entry.placeholders.length > 0)
+        const url = `${endpoint}/v2/translate`
+        const body: Record<string, unknown> = { text: requestTexts, source_lang, target_lang }
 
-      const json = await postJson<any>(url, body, headers, timeout)
+        if (ctx) body.context = ctx
+        if (formality) body.formality = formality
+        if (model_type) body.model_type = model_type
+        if (hasProtectedVariables) {
+          body.tag_handling = 'xml'
+          body.ignore_tags = ['x']
+        }
 
-      const trans = json?.translations ?? []
-      for (let k = 0; k < idxs.length; k++) {
-        out[idxs[k]] = trans[k]?.text ?? chunk[k]
+        const json = await postJson<DeepLTranslationResponse>(url, body, headers, timeout)
+
+        const trans = json?.translations ?? []
+        for (let k = 0; k < idxs.length; k++) {
+          const translated = trans[k]?.text ?? chunk[k]
+          out[idxs[k]] = restoreVariablesFromXmlTags(translated, protectedChunk[k].placeholders)
+        }
       }
     }
     return out

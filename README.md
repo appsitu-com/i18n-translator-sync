@@ -127,7 +127,7 @@ Source folders would normally only contain files you intend to translate but the
 
 - where `packages` are subprojects and `sourcePaths` are your source language folders and files.
 
-`sourcePaths: ["packages/app/i18n/en", "packages/api/app/i18n/en.json", "packages/content/markdown/en/" ]`
+`sourcePaths: ["packages/app/i18n/en", "packages/api/i18n/en.json", "packages/content/markdown/en/" ]`
 - `"packages/app/i18n/en"` => Translates English source folder in your front-end application.
 - `"packages/api/i18n/en.json"` => Translates JSON files in this folder from your backend API.
 - `"packages/content/markdown/en/"` => Translates markdown content files
