@@ -26,14 +26,6 @@ const ICON_PNG_PATH = path.join(ROOT_DIR, 'images', 'icon.png');
 const PACKAGE_LOCK_PATH = path.join(ROOT_DIR, 'package-lock.json');
 const README_PATH = path.join(ROOT_DIR, 'README.md');
 const RELEASES_DIR = path.join(ROOT_DIR, 'releases');
-const BETTER_SQLITE_BINARY_PATH = path.join(
-  ROOT_DIR,
-  'node_modules',
-  'better-sqlite3',
-  'build',
-  'Release',
-  'better_sqlite3.node'
-);
 
 // Utilities
 function execPromise(command) {
@@ -70,15 +62,6 @@ function parseArgumentValue(name) {
 function sanitizeTargetForFileName(target) {
   if (!target) return null;
   return target.replace(/[^a-zA-Z0-9.-]/g, '-');
-}
-
-function ensureNativeBinaryExists() {
-  if (!fs.existsSync(BETTER_SQLITE_BINARY_PATH)) {
-    console.error('Missing native better-sqlite3 binary at:');
-    console.error(`  ${BETTER_SQLITE_BINARY_PATH}`);
-    console.error('Run the Electron rebuild step before packaging.');
-    process.exit(1);
-  }
 }
 
 async function downloadFile(url, dest) {
@@ -343,8 +326,6 @@ async function packageExtension(newVersion, target) {
 
     // Note: vsce package will automatically trigger vscode:prepublish hook
     // No need to run it explicitly here
-
-    ensureNativeBinaryExists();
 
     // Package with vsce into the releases directory
     console.log('Packaging with @vscode/vsce...');

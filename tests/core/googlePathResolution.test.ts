@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { DefaultTranslationExecutor } from '../../src/core/defaultTranslationExecutor'
 import { FileSystem } from '../../src/core/util/fs'
 import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationCache } from '../../src/core/cache/sqlite'
+import { TranslationCache } from '../../src/core/cache/TranslationCache'
 import { GOOGLE_DEFAULT_ENDPOINT } from '../../src/translators/google'
 import * as path from 'path'
 

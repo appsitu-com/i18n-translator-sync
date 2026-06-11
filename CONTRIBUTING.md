@@ -87,66 +87,12 @@ The test project contains a `.vscode/settings.json` file with `"translator.autoS
 
 The debug configuration automatically:
 1. Builds the TypeScript code
-2. Rebuilds the better-sqlite3 module for Electron if needed
-3. Launches the extension in debug mode
+2. Launches the extension in debug mode
 
 Copy your API keys from `translator.env` into `test-project/translator.env` for use during manual testing.
 Make sure that `test-project/.gitignore` includes `translator.env` - *so you don't accidentally commit your keys into GIT!*
 
-## Native Modules: better-sqlite3 and Electron
 
-SQLite support in this extension requires native modules which need to be compiled for the specific Node.js or Electron version being used. We provide helper scripts to make this easier.
-
-If you see an error like:
-
-```
-The module '.../better_sqlite3.node' was compiled against a different Node.js version...
-```
-
-You need to rebuild the native modules using our scripts:
-
-```bash
-# For running tests (rebuilds for your current Node.js version)
-pnpm rebuild:sqlite
-
-# For running in VS Code (rebuilds for Electron)
-pnpm rebuild:sqlite:electron
-
-# Quick rebuild without cleaning (faster but less reliable)
-pnpm rebuild:quick
-```
-
-These scripts will automatically handle rebuilding the native SQLite module for the appropriate environment.
-
-**How to find your VS Code Electron version:**
-
-The Electron version is automatically detected by our scripts. If you need to know it:
-
-1. Open VS Code and go to the menu: **Help > About** (or run the `Help: About` command from the Command Palette). The Electron version will be listed in the dialog.
-2. Alternatively, open the **Debug Console** (while debugging the extension) and enter:
-  ```js
-  process.versions.electron
-  ```
-
-  This will output the Electron version used by the current VS Code instance.
-
-3. You can also check the [VS Code release notes](https://code.visualstudio.com/updates/) for your version.
-
-**Note:** Our configuration handles this automatically:
-- `pnpm test` will automatically rebuild SQLite for Node.js
-- When debugging (F5), SQLite will automatically rebuild for Electron if needed
-- `pnpm vscode:prepublish` will rebuild for Electron before packaging
-
-In the `package.json` file we have the following rule to ensure that the published version will be auto updated to use the `better-sqlite3` version that matches a user's VSCode version when they install the extension.
-
-```json
-"vsce": {
-  "dependencies": [
-    "better-sqlite3",
-    "json5"
-  ]
-}
-```
 
 ## Running the Extension
 
@@ -214,11 +160,11 @@ Refer to [Configuration.md](./doc/Configuration.md) for details of how to config
 
 ## Troubleshooting
 
-### SQLite Issues
-If you encounter SQLite-related errors:
-1. Check that you've rebuilt the module for your environment using `pnpm rebuild:sqlite`
-2. If test failures persist, try cleaning the node_modules directory and reinstalling: `rm -rf node_modules && pnpm install && pnpm rebuild:sqlite`
-3. For VS Code runtime issues, ensure you've rebuilt for Electron using `pnpm rebuild:sqlite:electron`
+### Cache Issues
+If cache behavior looks incorrect:
+1. Verify `translator.csv` import/export settings in your `translator.json`.
+2. Check whether `translation.jsonl` is being created in your workspace.
+3. Run `pnpm test` to validate cache behavior and integration.
 
 ### Debugging the Extension
 1. Use the "Run Extension with Test Project" configuration in VS Code
@@ -239,7 +185,7 @@ These warnings are harmless and expected behavior caused by VS Code's hot-reload
 - **API Keys not working**: Check that `translator.env` exists and contains the correct keys
 - **Files not being translated**: Verify that the file paths match your configured source paths
 - **Watcher not detecting changes**: Try restarting the translator and check logs for glob pattern issues
-- **SQLite version mismatch**: Use the rebuild scripts mentioned above
+- **Cache file issues**: Check file permissions for reading and writing `translation.jsonl`
 - **Node.js version conflicts**: Ensure you're using Node.js 22+ as recommended
 
 ## Questions?

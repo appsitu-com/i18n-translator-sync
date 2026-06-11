@@ -3,11 +3,11 @@ import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
 import { TranslatorPipeline } from '../../src/core/pipeline'
 import { TranslatorManager } from '../../src/core/translatorManager'
 import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationCache } from '../../src/core/cache/sqlite'
+import { TranslationCache } from '../../src/core/cache/TranslationCache'
 import { TranslateProjectConfig, ConfigProvider, defaultConfig } from '../../src/core/coreConfig'
 
 // Mock dependencies
-vi.mock('../../src/core/cache/sqlite')
+vi.mock('../../src/core/cache/TranslationCache')
 vi.mock('../../src/core/util/watcher')
 
 describe('MockTranslationExecutor - Dry Run Functionality', () => {

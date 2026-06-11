@@ -8,7 +8,7 @@ import { VsCodeConfigProvider } from './vscodeConfig'
 import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
 import { Logger } from '../core/util/baseLogger'
 import { loadProjectConfig } from '../core/coreConfig'
-import { SQLiteCache } from '../core/cache/sqlite'
+import { TranslationCache } from '../core/cache/TranslationCache'
 
 /**
  * VSCode adapter for the TranslatorManager
@@ -289,7 +289,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   /**
    * Get the cache instance (public accessor for extension commands)
    */
-  getCacheInstance(): SQLiteCache | undefined {
+  getCacheInstance(): TranslationCache | undefined {
     return this.cache
   }
 

@@ -6,7 +6,7 @@ import { loadProjectConfig, toProjectConfig } from '../coreConfig';
 import { Logger } from '../util/baseLogger';
 import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
-import { SQLiteCache } from '../cache/sqlite';
+import { JsonlTranslationCache, TranslationCache } from '../cache/TranslationCache';
 import { ConfigProvider } from '../coreConfig';
 import { TRANSLATOR_DIR } from '../constants';
 import { initTranslatorEnv } from '../util/environmentSetup';
@@ -19,7 +19,7 @@ import { loadTranslatorConfig, type ITranslatorEngines, type ITranslatorConfig }
  */
 export abstract class TranslatorAdapter {
   protected translatorManager?: TranslatorManager;
-  protected cache?: SQLiteCache;
+  protected cache?: TranslationCache;
   protected running = false;
   protected translatorEngines?: ITranslatorEngines;
   protected translatorConfig?: ITranslatorConfig;
@@ -55,8 +55,8 @@ export abstract class TranslatorAdapter {
   /**
    * Get or create the cache
    */
-  protected async getCache(dbMustExist = false): Promise<SQLiteCache | undefined> {
-    const dbPath = path.join(this.workspacePath, TRANSLATOR_DIR, 'translation.db');
+  protected async getCache(dbMustExist = false): Promise<TranslationCache | undefined> {
+    const dbPath = path.join(this.workspacePath, TRANSLATOR_DIR, 'translation.jsonl');
 
     // Check if the database file exists (for dbMustExist mode)
     if (dbMustExist) {
@@ -73,7 +73,8 @@ export abstract class TranslatorAdapter {
     const dirUri = this.fileSystem.createUri(cacheDir);
     await this.fileSystem.createDirectory(dirUri);
 
-    this.cache = new SQLiteCache(dbPath, this.workspacePath, this.logger);
+    this.cache = new JsonlTranslationCache(dbPath, this.workspacePath, this.logger);
+
     return this.cache;
   }
 

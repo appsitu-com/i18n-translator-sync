@@ -13,7 +13,7 @@
       ],
       "sourceMaps": true,
       "resolveSourceMapLocations": ["${workspaceFolder}/**", "!**/node_modules/**"],
-      "preLaunchTask": "pnpm: prepare-debug",
+      "preLaunchTask": "pnpm: build",
       "trace": true,
       "smartStep": false,
       "skipFiles": [

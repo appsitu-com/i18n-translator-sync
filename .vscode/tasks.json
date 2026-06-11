@@ -19,17 +19,6 @@
       "args": ["test"],
       "group": "test",
       "problemMatcher": []
-    },
-    {
-      "label": "pnpm: prepare-debug",
-      "type": "shell",
-      "command": "pnpm",
-      "args": ["rebuild:sqlite:electron"],
-      "dependsOn": ["pnpm: build"],
-      "presentation": {
-        "reveal": "silent",
-        "close": true
-      }
     }
   ]
 }

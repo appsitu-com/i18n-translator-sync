@@ -19,7 +19,7 @@ Translate Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files instantly 
 - ✅ **Multiple AI engines** - Supports Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
 - ✅ **NLLB AI engine** - Supports NLLB translation engine. License permits non-commercial use only.
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
-- ✅ **Translation memory** - SQLite-based translation database reduces costs and prevents translation drift
+- ✅ **Translation memory** - JSONL-based translation memory reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
 - ✅ **Language-specific engines** - Override default engine per language for optimal results
 
@@ -505,7 +505,7 @@ HUGGINGFACE_API_URL='https://api-inference.huggingface.co/models/facebook/nllb-2
 
 **Translations keep changing:**
 - This indicates translation memory isn't working
-- Check the cache database is being created (look for `.sqlite` files)
+- Check the cache file is being created (look for `translation.jsonl` in your workspace)
 - Verify file permissions allow writing to the cache directory
 
 ### Need More Help?

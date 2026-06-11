@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { DefaultTranslationExecutor } from '../../src/core/defaultTranslationExecutor'
 import { FileSystem, IUri } from '../../src/core/util/fs'
 import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationCache } from '../../src/core/cache/sqlite'
+import { TranslationCache } from '../../src/core/cache/TranslationCache'
 
 describe('defaultTranslationExecutor', () => {
   let executor: DefaultTranslationExecutor

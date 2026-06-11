@@ -1,4 +1,4 @@
-import { SQLiteCache as OriginalSQLiteCache, type Pair, type TranslationCache } from '../../src/core/cache/sqlite';
+import { JsonlTranslationCache as OriginalSQLiteCache, type Pair, type TranslationCache } from '../../src/core/cache/TranslationCache';
 import * as fs from 'fs';
 import * as nodePath from 'path';
 

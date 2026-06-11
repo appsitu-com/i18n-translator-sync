@@ -1,6 +1,5 @@
 allowBuilds:
   '@vscode/vsce-sign': false
-  better-sqlite3: true
   esbuild: true
   keytar: false
   sharp: true

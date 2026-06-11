@@ -68,12 +68,7 @@
     "test:cov": "vitest run --reporter=dot --coverage --exclude tests/integration/translators/nllb.integration.test.ts",
     "test:int": "vitest --reporter=dot --run tests/integration --exclude tests/integration/translators/nllb.integration.test.ts",
     "test:nllb": "vitest --reporter=dot --run tests/integration/translators/nllb.integration.test.ts",
-    "rebuild:sqlite": "node ./scripts/rebuild-sqlite.js",
-    "rebuild:sqlite:electron": "node ./scripts/rebuild-sqlite.js --electron",
-    "rebuild:sqlite:electron:quick": "node ./scripts/rebuild-sqlite.js --electron --skip-if-unchanged",
-    "rebuild:quick": "node ./scripts/rebuild-sqlite.js --skip-clean",
-    "pretest": "pnpm rebuild:sqlite",
-    "vscode:prepublish": "pnpm rebuild:sqlite:electron && pnpm build",
+    "vscode:prepublish": "pnpm build",
     "package": "node scripts/package-extension.js",
     "package:ci": "node scripts/package-extension.js --ci",
     "package:regenerate-icon": "node scripts/package-extension.js --force-icon-generation",
@@ -82,14 +77,8 @@
     "icon:png": "node scripts/convert-icon.js",
     "versions": "vsce show AppSitu.i18n-translator-sync"
   },
-  "vsce": {
-    "dependencies": [
-      "better-sqlite3"
-    ]
-  },
+  "vsce": {},
   "devDependencies": {
-    "@electron/rebuild": "^4.0.3",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.3.1",
     "@types/vscode": "^1.103.0",
@@ -105,7 +94,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "better-sqlite3": "^12.6.2",
     "chokidar": "^4.0.3",
     "commander": "^14.0.1",
     "csv-parse": "^5.6.0",

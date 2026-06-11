@@ -13,7 +13,7 @@ Key reminders:
 - It supports multiple translation engines.
   - Translation engines include Azure, Google, DeepL, OpenRouter, Gemini, and a 'Copy' which is a non-translating engine.
 - Some engines support context aware translations.
-- The extension is written in TypeScript and uses native modules (better-sqlite3) for caching.
+- The extension is written in TypeScript and uses a JSONL cache with in-memory indexes for persistence.
 - It supports translating both directory structures and individual files, with flexible source path configuration.
 
 ## MCP
@@ -95,12 +95,6 @@ Key reminders:
 - Use GitHub Issues and Pull Requests for tracking changes and collaboration.
 - Use GitHub Actions for CI/CD (see .github/workflows/).
 
-## Native Modules
-- Consider Electron ABI compatibility for native modules
-  - SQLite uses better-sqlite3 which is a native module
-  - We've added code to rebuild native modules for the Electron version used by VS Code and for unit tests
-- Native modules must be rebuilt for the Electron version used by VS Code (see CONTRIBUTING.md for instructions).
-
 ## Project specific conventions
 - The translation pipeline is managed in `src/pipeline.ts`.
 - Path handling utilities are in `src/util/paths.ts`.
@@ -109,7 +103,7 @@ Key reminders:
 - Context CSV handling is in `src/contextCsv.ts`.
 - Shared logic for structured data (JSON/YAML) is in `src/extractors/structured.ts`.
 - Configuration is loaded from `translator.json` or VS Code settings (see `src/config.ts`).
-- The translation cache uses SQLite via better-sqlite3 (see `src/cache.ts
+- The translation cache uses JSONL persistence with in-memory indexes (see `src/core/cache/jsonlTranslationCache.ts`).
 - Maintain language neutrality in code - don't assume English (or any specific language) is always the source language
 
 ## Coding Guidelines
@@ -127,11 +121,11 @@ Key reminders:
 - The configuration allows flexible source path setup via `translator.json`:
   - Directory paths (e.g., "i18n/en") for translating entire directory structures
   - Individual file paths (e.g., "i18n/en.json") for single file translation to sibling files
-- Native module and development environment setup is described in CONTRIBUTING.md.
+- Cache behavior and development environment setup are described in CONTRIBUTING.md.
 
 ## Special Notes for LLMs
 - When generating code, ensure compatibility with VS Code extension APIs and Electron.
-- When updating dependencies or native modules, always consider Electron ABI compatibility.
+- When updating dependencies, keep runtime compatibility with VS Code's Node/Electron environment in mind.
 - When adding new extractors or translation engines, follow the patterns in `src/extractors/` and `src/translators/`.
 - For context-aware translation, ensure context CSVs are loaded and mapped correctly (see `src/contextCsv.ts`).
 - When working with source and target paths, always use language-neutral functions and terminology.

@@ -41,8 +41,5 @@ coverage/**
 releases/**
 test-project/**
 
-# Exclude all node_modules by default and include only native runtime deps.
+# Exclude all node_modules by default.
 node_modules/**
-!node_modules/better-sqlite3/**
-!node_modules/bindings/**
-!node_modules/file-uri-to-path/**

@@ -5,7 +5,7 @@ import { FileSystem, IUri } from '../../../src/core/util/fs';
 import { ConfigProvider } from '../../../src/core/coreConfig';
 import { WorkspaceWatcher } from '../../../src/core/util/watcher';
 import { TranslatorManager } from '../../../src/core/translatorManager';
-import { SQLiteCache } from '../../../src/core/cache/sqlite';
+import { JsonlTranslationCache, TranslationCache } from '../../../src/core/cache/TranslationCache';
 import * as path from 'path';
 import * as coreConfig from '../../../src/core/coreConfig';
 
@@ -27,11 +27,13 @@ vi.mock('../../../src/core/translatorManager', () => {
   };
 });
 
-vi.mock('../../../src/core/cache/sqlite', () => ({
-  SQLiteCache: vi.fn().mockImplementation(() => ({
+vi.mock('../../../src/core/cache/TranslationCache', () => ({
+  JsonlTranslationCache: vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     exportCSV: vi.fn().mockResolvedValue(undefined),
     importCSV: vi.fn().mockResolvedValue(0),
+    hasSourcePath: vi.fn().mockResolvedValue(true),
+    hasPendingPurge: vi.fn().mockResolvedValue(false),
     isNew: vi.fn().mockReturnValue(false),
     purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
     completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 })
@@ -99,7 +101,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
   }
 
   // Expose protected methods for testing
-  public async testGetCache(): Promise<SQLiteCache | undefined> {
+  public async testGetCache(): Promise<TranslationCache | undefined> {
     return await this.getCache();
   }
 
@@ -182,7 +184,7 @@ describe('TranslatorAdapter', () => {
       await adapter.initialize();
 
       expect(mockConfigProvider.load).toHaveBeenCalled();
-      expect(SQLiteCache).toHaveBeenCalled();
+      expect(JsonlTranslationCache).toHaveBeenCalled();
       expect(TranslatorManager).toHaveBeenCalled();
       expect(adapter.getTranslatorManager()).toBeDefined();
     });
@@ -337,7 +339,7 @@ describe('TranslatorAdapter', () => {
       await adapter.initialize();
       await adapter.start();
 
-      const cache = vi.mocked(SQLiteCache).mock.results.slice(-1)[0]?.value as any;
+      const cache = vi.mocked(JsonlTranslationCache).mock.results.slice(-1)[0]?.value as any;
       expect(cache).toBeDefined();
       cache.exportCSV = vi.fn().mockRejectedValueOnce(new Error('Export failed'));
 
@@ -375,7 +377,7 @@ describe('TranslatorAdapter', () => {
         autoImport: false
       });
 
-      const cache = vi.mocked(SQLiteCache).mock.results.slice(-1)[0]?.value as any;
+      const cache = vi.mocked(JsonlTranslationCache).mock.results.slice(-1)[0]?.value as any;
       expect(cache).toBeDefined();
       cache.purge = vi.fn().mockResolvedValueOnce({ deletedCount: 0 });
       cache.completePurge = vi.fn().mockResolvedValueOnce({ deletedCount: 3 });
@@ -417,7 +419,7 @@ describe('TranslatorAdapter', () => {
   describe('startup auto-import', () => {
     it('imports translations.csv on new database when autoImport is enabled', async () => {
       const importCSV = vi.fn().mockResolvedValue(3);
-      vi.mocked(SQLiteCache).mockImplementationOnce(() => ({
+      vi.mocked(JsonlTranslationCache).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
         importCSV,
@@ -453,7 +455,7 @@ describe('TranslatorAdapter', () => {
 
     it('falls back to configured csvExportPath when translations.csv is missing', async () => {
       const importCSV = vi.fn().mockResolvedValue(2);
-      vi.mocked(SQLiteCache).mockImplementationOnce(() => ({
+      vi.mocked(JsonlTranslationCache).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
         importCSV,
@@ -491,7 +493,7 @@ describe('TranslatorAdapter', () => {
 
     it('skips startup import when autoImport is disabled', async () => {
       const importCSV = vi.fn().mockResolvedValue(1);
-      vi.mocked(SQLiteCache).mockImplementationOnce(() => ({
+      vi.mocked(JsonlTranslationCache).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
         importCSV,

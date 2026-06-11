@@ -110,15 +110,9 @@ When using `--ci` with `--version`, the script validates that the provided versi
 
 If validation fails, the workflow will exit with an error and provide clear instructions on how to fix the issue.
 
-## Cross-Platform Native Dependencies
+## Cross-Platform Packaging
 
-This extension uses `better-sqlite3`, which is a native module that requires platform-specific binaries. The packaging configuration is set up to handle cross-platform compatibility:
-
-- The extension uses target-specific packaging so native modules are built on matching OS runners
-- In `package.json`, the `vsce.dependencies` array specifies which runtime native modules to include
-- Matrix workflows package one VSIX per platform target to prevent ABI mismatch issues
-
-This approach avoids shipping Linux-built binaries to Windows or macOS users and keeps installation reliable.
+This extension uses standard JavaScript runtime dependencies for cache persistence and translation workflows. Packaging still uses target-specific builds in CI to validate compatibility across VS Code platforms.
 
 ## Quick Packaging Options
 

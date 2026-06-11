@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { FileSystem, IUri } from './util/fs'
 import { Logger } from './util/baseLogger'
-import { TranslationCache } from './cache/sqlite'
+import { TranslationCache } from './cache/TranslationCache'
 import { extractForFile, jsonPathToString } from '../extractors/extractorRegistry'
 import { loadContextCsvForJson } from './contextCsv'
 import { pickEngine } from '../translators/registry'

@@ -3,7 +3,6 @@ import { resolve } from 'node:path'
 import type { UserConfig } from 'vite'
 
 const nodeBuiltins = [...builtinModules, ...builtinModules.map((name) => `node:${name}`)]
-const nativeRuntimeDeps = ['better-sqlite3', 'bindings', 'file-uri-to-path']
 
 interface NodeBundleConfigOptions {
   entry: string
@@ -14,8 +13,8 @@ interface NodeBundleConfigOptions {
 
 export function createNodeBundleConfig(options: NodeBundleConfigOptions): UserConfig {
   const external = options.includeVscodeExternal
-    ? ['vscode', ...nativeRuntimeDeps, ...nodeBuiltins]
-    : [...nativeRuntimeDeps, ...nodeBuiltins]
+    ? ['vscode', ...nodeBuiltins]
+    : [...nodeBuiltins]
 
   return {
     resolve: {

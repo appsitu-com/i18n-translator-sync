@@ -46,12 +46,3 @@ if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
 
   process.env[TEST_ENV_LOADED_FLAG] = '1';
 }
-
-// SQLite test environment setup - ensure it's available
-const betterSqlitePath = path.resolve(__dirname, '../node_modules/better-sqlite3');
-
-// Check if we need to rebuild SQLite
-if (!fs.existsSync(betterSqlitePath) || !fs.existsSync(path.join(betterSqlitePath, 'build/Release'))) {
-  console.warn('SQLite module may not be properly built for the current Node.js version.');
-  console.warn('If tests fail with SQLite errors, run: pnpm rebuild:sqlite');
-}
