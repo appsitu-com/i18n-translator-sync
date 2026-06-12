@@ -5,7 +5,7 @@ import { DeepLTranslator } from './deepl'
 import { CopyTranslator } from './copy'
 import { GeminiTranslator } from './gemini'
 import { OpenRouterTranslator } from './openrouter'
-import { NllbTranslator } from './nllb'
+// import { NllbTranslator } from './nllb'
 
 export function registerAllTranslators() {
   registerTranslator(AzureTranslator, { limit: 1000, maxchars: 50000 })

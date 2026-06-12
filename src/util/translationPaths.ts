@@ -60,14 +60,14 @@ export function findSourcePathForFile(uri: vscode.Uri, config: TranslateProjectC
 /**
  * Calculate the base path for source files
  */
-export function getSourceBasePath(workspacePath: string, config: TranslateProjectConfig): string {
+export function getSourceBasePath(workspacePath: string, _config: TranslateProjectConfig): string {
   return workspacePath;
 }
 
 /**
  * Calculate the base path for target files
  */
-export function getTargetBasePath(workspacePath: string, config: TranslateProjectConfig): string {
+export function getTargetBasePath(workspacePath: string, _config: TranslateProjectConfig): string {
   return workspacePath;
 }
 

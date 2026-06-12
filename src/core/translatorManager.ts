@@ -1,7 +1,8 @@
 import { FileSystem, IUri } from './util/fs';
 import { Logger } from './util/baseLogger';
 import { TranslationCache } from './cache/TranslationCache';
-import { Disposable, FileRenameEvent, FileWatcher, WorkspaceWatcher } from './util/watcher';
+import { FileWatcher, WorkspaceWatcher } from './util/watcher';
+import type { FileRenameEvent } from './util/watcher';
 import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
 import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './pipeline';
