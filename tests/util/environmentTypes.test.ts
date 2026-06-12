@@ -1,4 +1,4 @@
-import { it, expect, describe, beforeEach, vi } from 'vitest';
+import { it, expect, describe, beforeEach, afterEach, vi } from 'vitest';
 import { resolveEnvString, resolveEnvDeep, MissingEnvVarError, getEnv, initTranslatorEnv, resetEnvInitialization } from '../../src/core/util/environmentSetup';
 import { createMockFileSystem } from '../mocks/filesystem';
 import { TRANSLATOR_ENV } from '../../src/core/constants';
@@ -81,9 +81,28 @@ describe('resolveEnvDeep', () => {
 });
 
 describe('initTranslatorEnv', () => {
+  const originalCi = process.env.CI;
+  const originalGithubActions = process.env.GITHUB_ACTIONS;
+
   beforeEach(() => {
     vi.clearAllMocks();
     resetEnvInitialization();
+    delete process.env.CI;
+    delete process.env.GITHUB_ACTIONS;
+  });
+
+  afterEach(() => {
+    if (originalCi === undefined) {
+      delete process.env.CI;
+    } else {
+      process.env.CI = originalCi;
+    }
+
+    if (originalGithubActions === undefined) {
+      delete process.env.GITHUB_ACTIONS;
+    } else {
+      process.env.GITHUB_ACTIONS = originalGithubActions;
+    }
   });
 
   it('warns when translator.env file does not exist (does not create it)', async () => {
@@ -97,6 +116,20 @@ describe('initTranslatorEnv', () => {
     expect(mockFs.writeFile).not.toHaveBeenCalled();
     // Should log a warning that the file is missing
     expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Environment file not found')
+    );
+  });
+
+  it('does not warn when translator.env file does not exist in CI', async () => {
+    resetEnvInitialization();
+    process.env.CI = 'true';
+    const files: Record<string, string> = {};
+    const mockFs = createMockFileSystem(files);
+
+    await initTranslatorEnv('/test/workspace', mockLogger, mockFs);
+
+    expect(mockFs.writeFile).not.toHaveBeenCalled();
+    expect(mockLogger.warn).not.toHaveBeenCalledWith(
       expect.stringContaining('Environment file not found')
     );
   });
