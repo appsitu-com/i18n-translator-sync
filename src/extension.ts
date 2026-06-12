@@ -219,7 +219,7 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
 }
 
 /**
- * Start the translator with auto-start prompt
+ * Start the translator
  */
 export async function onStartTranslator(context: vscode.ExtensionContext): Promise<void> {
   try {
@@ -244,11 +244,14 @@ export async function onStartTranslator(context: vscode.ExtensionContext): Promi
         'No'
       )
 
-      const autoStart = response === 'Yes' ? 'true' : 'false'
-      await vscode.workspace
-        .getConfiguration('translator')
-        .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
+      if (response === 'Yes' || response === 'No') {
+        const autoStart = response === 'Yes' ? 'true' : 'false'
+        await vscode.workspace
+          .getConfiguration('translator')
+          .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
+      }
     }
+
   } catch (error: any) {
     if (error instanceof MissingEnvironmentValueError) {
       const action = 'Set in translator.env'
@@ -727,6 +730,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
 
     // Auto-start runs in the same background task to avoid blocking activation.
+    // Activation itself is passive: no prompt and no workspace updates are performed here.
     const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
     if (autoStartSetting === 'true') {
       try {

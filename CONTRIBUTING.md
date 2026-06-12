@@ -83,7 +83,8 @@ pnpm test:cov
 
 Use the "Run Extension with Test Project" in VS Code Debug panel.
 This will launch a new instance of VS Code and open the `test-project` subfolder.
-The test project contains a `.vscode/settings.json` file with `"translator.autoStart": true` that should auto start the extension server.
+The test project sets `"translator.autoStart": "false"` in `.vscode/settings.json`, so the server starts in a stopped state unless you run **Translator: Start**.
+If you open `test-project/i18n-test.code-workspace` instead, that workspace setting can override folder settings.
 
 The debug configuration automatically:
 1. Builds the TypeScript code
