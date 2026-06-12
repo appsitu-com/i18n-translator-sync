@@ -1,14 +1,14 @@
-export * from './json.js'
-export * from './markdown.js'
-export * from './yaml.js'
-export * from './structured.js'
-export * from './typescript.js'
+export * from './json'
+export * from './markdown'
+export * from './yaml'
+export * from './structured'
+export * from './typescript'
 
 import { extractJSON, JsonExtraction } from './json'
-import { extractMarkdownOrMDX, MarkdownExtraction } from './markdown.js'
+import { extractMarkdownOrMDX, MarkdownExtraction } from './markdown'
 import { extractYAML } from './yaml'
-import { extractTypeScript } from './typescript.js'
-import { ExcludeOptions } from './structured.js'
+import { extractTypeScript } from './typescript'
+import { ExcludeOptions } from './structured'
 
 export function extractForFile(
   filename: string,

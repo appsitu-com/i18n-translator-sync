@@ -66,4 +66,4 @@ export interface TranslationCache {
   close(): void
 }
 
-export { JsonlTranslationCache } from './jsonlTranslationCache.js'
+export { JsonlTranslationCache } from './jsonlTranslationCache'

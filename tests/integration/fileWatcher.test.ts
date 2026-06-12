@@ -7,7 +7,6 @@ import { TranslatorManager } from '../../src/core/translatorManager';
 import { NodeFileSystem } from '../../src/core/util/fs';
 import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { JsonlTranslationCache } from '../../src/core/cache/TranslationCache';
-import { WorkspaceWatcher } from '../../src/core/util/watcher';
 import { CliWorkspaceWatcher } from '../../src/cli/watcher';
 import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig';
