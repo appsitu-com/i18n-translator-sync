@@ -341,18 +341,18 @@ describe('package-extension script', () => {
 
   it('should pass --no-dependencies to vsce at runtime', () => {
     const scriptContent = readFileSync(ACTUAL_SCRIPT_PATH, 'utf-8');
-    const functionMatch = scriptContent.match(/async function packageExtension\(newVersion, target\) {[\s\S]*?^}/m);
+    const functionMatch = scriptContent.match(/async function packageExtension\([^)]*\)\s*{[\s\S]*?^}/m);
 
     if (!functionMatch) {
       throw new Error('Could not find packageExtension function in the script file');
     }
 
     const extractedScriptPath = path.join(TEST_DIR, 'package-command-runtime-test.js');
-    const releasesDir = path.join(TEST_DIR, 'releases').replace(/\\/g, '\\\\');
+    const releasesDir = JSON.stringify(path.join(TEST_DIR, 'releases'));
     fs.writeFileSync(extractedScriptPath, `
       const fs = require('fs');
       const path = require('path');
-      const RELEASES_DIR = '${releasesDir}';
+      const RELEASES_DIR = ${releasesDir};
       let capturedCommand = '';
 
       function sanitizeTargetForFileName(target) {
