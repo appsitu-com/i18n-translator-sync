@@ -339,8 +339,44 @@ describe('package-extension script', () => {
     expect(copiedEnv).toBe(originalEnv);
   });
 
-  it('should package with --no-dependencies to avoid npm dependency tree validation', () => {
+  it('should pass --no-dependencies to vsce at runtime', () => {
     const scriptContent = readFileSync(ACTUAL_SCRIPT_PATH, 'utf-8');
-    expect(scriptContent).toContain('pnpm exec vsce package --no-dependencies');
+    const functionMatch = scriptContent.match(/async function packageExtension\(newVersion, target\) {[\s\S]*?^}/m);
+
+    if (!functionMatch) {
+      throw new Error('Could not find packageExtension function in the script file');
+    }
+
+    const extractedScriptPath = path.join(TEST_DIR, 'package-command-runtime-test.js');
+    const releasesDir = path.join(TEST_DIR, 'releases').replace(/\\/g, '\\\\');
+    fs.writeFileSync(extractedScriptPath, `
+      const fs = require('fs');
+      const path = require('path');
+      const RELEASES_DIR = '${releasesDir}';
+      let capturedCommand = '';
+
+      function sanitizeTargetForFileName(target) {
+        return target ? target.replace(/[^a-zA-Z0-9._-]/g, '-') : '';
+      }
+
+      function execPromise(command) {
+        capturedCommand = command;
+        return Promise.resolve('');
+      }
+
+      ${functionMatch[0]}
+
+      packageExtension('1.2.3', 'linux-x64')
+        .then(() => console.log(capturedCommand))
+        .catch(error => {
+          console.error(error);
+          process.exit(1);
+        });
+    `);
+
+    const output = execSync(`node "${extractedScriptPath}"`, { encoding: 'utf-8' });
+    expect(output).toContain('pnpm exec vsce package --no-dependencies');
+    expect(output).toContain('--target linux-x64');
+    expect(output).toContain('i18n-translator-vscode-1.2.3-linux-x64.vsix');
   });
 });
