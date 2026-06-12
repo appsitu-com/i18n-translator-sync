@@ -338,4 +338,9 @@ describe('package-extension script', () => {
     const copiedEnv = fs.readFileSync(path.join(DIST_SAMPLES_DIR, TRANSLATOR_ENV), 'utf8');
     expect(copiedEnv).toBe(originalEnv);
   });
+
+  it('should package with --no-dependencies to avoid npm dependency tree validation', () => {
+    const scriptContent = readFileSync(ACTUAL_SCRIPT_PATH, 'utf-8');
+    expect(scriptContent).toContain('pnpm exec vsce package --no-dependencies');
+  });
 });
