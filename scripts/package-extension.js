@@ -335,7 +335,7 @@ async function packageExtension(newVersion, target) {
       : `i18n-translator-vscode-${version}.vsix`;
     const outputPath = path.join(RELEASES_DIR, outputFileName);
 
-    const commandParts = ['pnpm exec vsce package'];
+    const commandParts = ['pnpm exec vsce package --no-dependencies'];
     if (target) {
       commandParts.push(`--target ${target}`);
     }
