@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import * as fs from 'fs';
 import * as path from 'path';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
-import { execSync } from 'child_process';
+import { execFileSync, execSync } from 'child_process';
 import { readFileSync } from 'fs';
 
 // Path constants
@@ -341,13 +341,17 @@ describe('package-extension script', () => {
 
   it('should pass --no-dependencies to vsce at runtime', () => {
     const scriptContent = readFileSync(ACTUAL_SCRIPT_PATH, 'utf-8');
+    // This matches the top-level packageExtension function in scripts/package-extension.js.
     const functionMatch = scriptContent.match(/async function packageExtension\([^)]*\)\s*{[\s\S]*?^}/m);
 
     if (!functionMatch) {
       throw new Error('Could not find packageExtension function in the script file');
     }
 
-    const extractedScriptPath = path.join(TEST_DIR, 'package-command-runtime-test.js');
+    const extractedScriptPath = path.join(
+      TEST_DIR,
+      `package-command-runtime-test-${Date.now()}-${Math.random().toString(16).slice(2)}.js`,
+    );
     const releasesDir = JSON.stringify(path.join(TEST_DIR, 'releases'));
     fs.writeFileSync(extractedScriptPath, `
       const fs = require('fs');
@@ -374,7 +378,7 @@ describe('package-extension script', () => {
         });
     `);
 
-    const output = execSync(`node "${extractedScriptPath}"`, { encoding: 'utf-8' });
+    const output = execFileSync('node', [extractedScriptPath], { encoding: 'utf-8' });
     expect(output).toContain('pnpm exec vsce package --no-dependencies');
     expect(output).toContain('--target linux-x64');
     expect(output).toContain('i18n-translator-vscode-1.2.3-linux-x64.vsix');
