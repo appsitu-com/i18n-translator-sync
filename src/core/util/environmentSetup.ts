@@ -16,6 +16,10 @@ function getFileSystem(fs?: FileSystem): FileSystem {
 // This flag tracks if the environment has been initialized
 let isEnvInitialized = false
 
+function isCiEnvironment(): boolean {
+  return process.env.CI === 'true' || process.env.CI === '1' || process.env.GITHUB_ACTIONS === 'true'
+}
+
 /**
  * Reset the initialization flag - used for testing
  */
@@ -53,7 +57,9 @@ export const initTranslatorEnv = async (
     const envFileExists = await fileSystem.fileExists(fileSystem.createUri(translatorEnvFile))
 
     if (!envFileExists) {
-      logger.warn(`Environment file not found: ${translatorEnvFile}. Run "Translator: Start" to create it.`)
+      if (!isCiEnvironment()) {
+        logger.warn(`Environment file not found: ${translatorEnvFile}. Run "Translator: Start" to create it.`)
+      }
     } else {
       logger.info(`Loading environment from: ${translatorEnvFile}`)
       process.env.I18N_TRANSLATOR_ENV_DIR = path.dirname(translatorEnvFile)
