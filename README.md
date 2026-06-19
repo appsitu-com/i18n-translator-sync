@@ -17,7 +17,6 @@ Translate Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files instantly 
 **Quick Features Overview:**
 - ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files on save
 - ✅ **Multiple AI engines** - Supports Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
-- ✅ **NLLB AI engine** - Supports NLLB translation engine. License permits non-commercial use only.
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
 - ✅ **Translation memory** - JSONL-based translation memory reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
@@ -343,7 +342,7 @@ The Translator may fail to auto-start if it finds invalid or missing values in `
 See [Configuration Documentation](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/Configuration.md) for full details.
 See [Supported Languages Matrix](https://github.com/appsitu-com/i18n-translator-sync/blob/main/doc/SupportedLanguages.md) for engine-by-engine language codes.
 
-- Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `openrouter`, `nllb`, `copy`, `auto`
+- Translation Engine codes:  `azure`, `google`, `deepl`, `gemini`, `openrouter`, `copy`, `auto`
 - `copy` engine is just that. It won't translate anything. It just copies a file from source to target.
 - `auto` chooses an engine from the locale pair and document type using normalized locale codes:
   - `deepl` for targets `de|fr|es|it|nl|pl|pt|ru`;
@@ -358,8 +357,8 @@ See [Supported Languages Matrix](https://github.com/appsitu-com/i18n-translator-
 | `sourceLocale`          | `string`                   | Source locale                                                                                             | `"en"`                                       |
 | `targetLocales`         | `string[]`                 | Target locales to generate translations for                                                               | `['fr-FR', 'fr-CA']`                         |
 | `enableBackTranslation` | `boolean`                  | Enable back translation                                                                                   | `false`                                      |
-| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, nllb, copy, auto)      | `"azure"`                                    |
-| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, YML, TS, and JS default-export files (azure, google, deepl, gemini, openrouter, nllb, copy, auto) | `"google"`                                   |
+| `defaultMarkdownEngine` | `string`                   | Default engine for markdown & MDX files (azure, google, deepl, gemini, openrouter, copy, auto)      | `"azure"`                                    |
+| `defaultJsonEngine`     | `string`                   | Default engine for JSON, YAML, YML, TS, and JS default-export files (azure, google, deepl, gemini, openrouter, copy, auto) | `"google"`                                   |
 | `engineOverrides`       | `Record<string, string[]>` | Overrides default engine key for a locale or locale-pair.                                                 | `{"auto": ["en:ja"], "deepl": ["fr", "de"]}` |
 | `excludeKeys`           | `string[]`                 | Key names to exclude from translation (copied unchanged). Matches at any nesting depth.                   | `["code", "native"]`                         |
 | `excludeKeyPaths`       | `string[]`                 | Exact dotted key paths to exclude from translation.                                                       | `["meta.version"]`                           |
@@ -448,12 +447,6 @@ DEEPL_TRANSLATION_URL='https://api-free.deepl.com'
 # Get API key from: https://ai.google.dev/tutorials/setup
 GEMINI_API_KEY='XXXXXXXXXXXXXXXXXXXXX'
 
-# Hugging Face API configuration
-# Get API key from: https://huggingface.co/settings/tokens
-# NLLB can use Hugging Face Inference API with facebook/nllb-200-1.3B
-# NLLB's license prohibits commercial use.
-HUGGINGFACE_API_KEY='hf_XXXXXXXXXXXXXXXXXXXXX'
-HUGGINGFACE_API_URL='https://api-inference.huggingface.co/models/facebook/nllb-200-1.3B'
 
 ```
 
