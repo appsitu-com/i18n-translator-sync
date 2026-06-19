@@ -1,6 +1,92 @@
+## Release 0.11.0
+
+### Features
+
+- Added a `verified` field to CSV and JSONL translation-memory records to support manual translation verification workflows (default: `false`).
+
+## Release 0.10.7
+
+### Maintenance
+
+- Updated GitHub Actions workflow script versions.
+
+## Release 0.10.6
+
+### Features
+
+- Added first-run-only prompting for the extension `autoStart` setting.
+
+## Release 0.10.5
+
+### Fixes
+
+- Fixed `environmentTypes` test behavior.
+
+## Release 0.10.4
+
+### Fixes
+
+- Fixed CI behavior to avoid emitting unnecessary "Environment file not found" warnings.
+
+### Maintenance
+
+- Updated extension packaging to use `--no-dependencies` in the packaging script.
+
+## Release 0.10.3
+
+### Maintenance
+
+- Release-only version update.
+
+## Release 0.10.2
+
+### Maintenance
+
+- Removed multi-OS dependency setup from CI.
+
+## Release 0.10.1
+
+### Maintenance
+
+- Removed pinned pnpm version rules from GitHub workflows.
+
+## Release 0.10.0
+
+### Features
+
+- Replaced the SQLite-backed translation memory with JSONL persistence and in-memory indexes.
+- Added DeepL support for Eden AI endpoint usage and improved placeholder preservation behavior.
+
+### Fixes
+
+- Fixed lint and import-path issues related to `.js` import usage.
+- Fixed leftover SQLite references after translation-memory migration.
+
+### Maintenance
+
+- Updated pnpm build approvals and pinned pnpm `11.5.3`.
+- Added MDX extension planning documentation updates.
+
+## Release 0.9.0
+
+### Features
+
+- Added translation support for JavaScript files (`.js`, `.cjs`, `.mjs`) via the TypeScript extractor pipeline.
+
+## Release 0.8.2
+
+### Fixes
+
+- Improved Gemini JSON response handling.
+- Increased Azure test timeouts for better test stability.
+
+### Maintenance
+
+- Updated versioning scripts and README documentation.
+
 ## Release 0.8.1
 
-- Replaced SQLite dependency with JSONL + in memory index.
+- feat(tm): Replaced SQLite translation memory DB with JSONL file + in memory index.
   - Faster and avoids better-sqlite upgrades whenever VSCode Electron version changes.
 - feat(deepl): support Eden AI endpoint and preserve placeholders
 - chore(pnpm): migrate build approvals and pin pnpm 11.5.3
