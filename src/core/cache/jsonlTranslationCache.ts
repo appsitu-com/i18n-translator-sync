@@ -21,7 +21,7 @@ type CacheEntry = {
   sourceText: string
   context: string
   targetText: string
-  verified: boolean
+  status: string
   used: boolean
   updatedAt: number
 }
@@ -164,7 +164,7 @@ export class JsonlTranslationCache implements TranslationCache {
         sourceText: pair.src,
         context,
         targetText: pair.dst,
-        verified: false,
+        status: 'ai_draft',
         used: true,
         updatedAt: now
       }
@@ -196,7 +196,7 @@ export class JsonlTranslationCache implements TranslationCache {
         source_text: entry.sourceText,
         context: entry.context,
         target_text: entry.targetText,
-        verified: entry.verified ? 'true' : 'false',
+        status: entry.status,
         updated_at: entry.updatedAt
       }))
 
@@ -211,7 +211,7 @@ export class JsonlTranslationCache implements TranslationCache {
         'source_text',
         'context',
         'target_text',
-        'verified',
+        'status',
         'updated_at'
       ]
     })
@@ -235,9 +235,6 @@ export class JsonlTranslationCache implements TranslationCache {
         if (context.column === 'text_pos' || context.column === 'updated_at') {
           return Number(value)
         }
-        if (context.column === 'verified') {
-          return this.parseBoolean(value)
-        }
         return value
       }
     }) as Array<{
@@ -249,7 +246,7 @@ export class JsonlTranslationCache implements TranslationCache {
       source_text: string
       context?: string
       target_text: string
-      verified?: boolean
+      status?: string
       updated_at?: number
     }>
 
@@ -276,7 +273,7 @@ export class JsonlTranslationCache implements TranslationCache {
         sourceText: record.source_text,
         context,
         targetText: record.target_text,
-        verified: record.verified ?? false,
+        status: record.status || 'ai_draft',
         used: true,
         updatedAt
       }
@@ -429,7 +426,7 @@ export class JsonlTranslationCache implements TranslationCache {
           sourceText: parsed.sourceText,
           context: parsed.context,
           targetText: parsed.targetText,
-          verified: typeof parsed.verified === 'boolean' ? parsed.verified : false,
+          status: typeof parsed.status === 'string' && parsed.status.trim().length > 0 ? parsed.status : 'ai_draft',
           used: Boolean(parsed.used),
           updatedAt: parsed.updatedAt
         }
@@ -568,17 +565,5 @@ export class JsonlTranslationCache implements TranslationCache {
 
   private nowSeconds(): number {
     return Math.floor(Date.now() / 1000)
-  }
-
-  private parseBoolean(value: unknown): boolean {
-    if (typeof value === 'boolean') {
-      return value
-    }
-
-    const normalized = String(value ?? '')
-      .trim()
-      .toLowerCase()
-
-    return normalized === 'true' || normalized === '1' || normalized === 'yes'
   }
 }

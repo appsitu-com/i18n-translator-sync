@@ -148,7 +148,7 @@ describe('JsonlTranslationCache', () => {
     await cache.exportCSV(csvPath)
 
     expect(existsSync(csvPath)).toBe(true)
-    expect(readFileSync(csvPath, 'utf8')).toContain('source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,verified,updated_at')
+    expect(readFileSync(csvPath, 'utf8')).toContain('source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,updated_at')
 
     const restored = new JsonlTranslationCache(join(dir, 'restored.jsonl'), dir)
     const imported = await restored.importCSV(csvPath)
@@ -307,37 +307,37 @@ describe('JsonlTranslationCache', () => {
     const rows = parse(readFileSync(exportedPath, 'utf8'), {
       columns: true,
       skip_empty_lines: true
-    }) as Array<{ source_text: string; verified: string }>
+    }) as Array<{ source_text: string; status: string }>
 
     expect(rows).toHaveLength(1)
     expect(rows[0].source_text).toBe('Hello')
-    expect(rows[0].verified).toBe('false')
+    expect(rows[0].status).toBe('ai_draft')
   })
 
-  it('imports and exports verified flag from CSV', async () => {
+  it('imports and exports status field from CSV', async () => {
     const cache = new JsonlTranslationCache(cachePath, dir)
-    const csvPath = join(dir, 'verified.csv')
+    const csvPath = join(dir, 'status.csv')
 
     writeFileSync(
       csvPath,
-      'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,verified,updated_at\nfile.json,0,test,en,fr,Hello,,Bonjour,true,12345\n',
+      'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,updated_at\nfile.json,0,test,en,fr,Hello,,Bonjour,reviewed,12345\n',
       'utf8'
     )
 
     const imported = await cache.importCSV(csvPath)
     expect(imported).toBe(1)
 
-    const exportedPath = join(dir, 'verified-export.csv')
+    const exportedPath = join(dir, 'status-export.csv')
     await cache.exportCSV(exportedPath)
 
     const rows = parse(readFileSync(exportedPath, 'utf8'), {
       columns: true,
       skip_empty_lines: true
-    }) as Array<{ source_text: string; verified: string; updated_at: string }>
+    }) as Array<{ source_text: string; status: string; updated_at: string }>
 
     expect(rows).toHaveLength(1)
     expect(rows[0].source_text).toBe('Hello')
-    expect(rows[0].verified).toBe('true')
+    expect(rows[0].status).toBe('reviewed')
     expect(rows[0].updated_at).toBe('12345')
   })
 
@@ -363,7 +363,7 @@ describe('JsonlTranslationCache', () => {
 
     writeFileSync(
       csvPath,
-      'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,verified,updated_at\nfile.json,0,test,en,fr,Hello,,Bonjour,false,12345\n',
+      'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,updated_at\nfile.json,0,test,en,fr,Hello,,Bonjour,ai_draft,12345\n',
       'utf8'
     )
 

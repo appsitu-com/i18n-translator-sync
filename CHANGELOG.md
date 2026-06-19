@@ -1,8 +1,12 @@
-## Release 0.11.0
+## Release 0.11.1
 
 ### Features
 
-- Added a `verified` field to CSV and JSONL translation-memory records to support manual translation verification workflows (default: `false`).
+- Added a `status` field to CSV and JSONL translation-memory records to support review lifecycle workflows (default: `ai_draft`).
+
+## Release 0.11.0
+
+- Added `verified` fields to CSV and JSONL records. (Now replaced with `status` field).
 
 ## Release 0.10.7
 
