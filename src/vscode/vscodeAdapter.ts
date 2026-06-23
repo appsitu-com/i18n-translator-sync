@@ -42,6 +42,31 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
     }
 
     await this.initialize()
+
+    // If migration from v1 to v2 occurred, prompt user to complete purge
+    if (this.cache?.didMigrateFromV1?.()) {
+      const selection = await vscode.window.showInformationMessage(
+        'Translation cache was updated to support structured path positions. Clean up old numeric position entries?',
+        { modal: true },
+        'Complete Purge',
+        'Later'
+      )
+
+      if (selection === 'Complete Purge') {
+        try {
+          const result = await this.cache.completePurge()
+          vscode.window.showInformationMessage(
+            `Cleaned up ${result.deletedCount} old translation cache entries.`
+          )
+          this.logger.info(`Migration purge completed: removed ${result.deletedCount} entries`)
+        } catch (error) {
+          this.logger.error(`Migration purge failed: ${String(error)}`)
+          vscode.window.showErrorMessage('Failed to clean up old cache entries.')
+        }
+      }
+
+      this.cache.clearMigrationFlag()
+    }
   }
 
   /**
