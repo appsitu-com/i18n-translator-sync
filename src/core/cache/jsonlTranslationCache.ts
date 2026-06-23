@@ -13,22 +13,20 @@ const KEY_SEPARATOR = '\u0000'
 const FILE_SCHEMA_VERSION = 1
 
 type CacheEntry = {
-  engine: string
-  source: string
-  target: string
-  sourcePath: string
-  textPos: number
-  sourceText: string
-  context: string
-  targetText: string
-  status: string
-  used: boolean
-  updatedAt: number
+  engine: string // Translation engine name, for example "google", "deepl", or "copy"
+  source: string // Source locale code used for this translation, for example "en"
+  target: string // Target locale code used for this translation, for example "fr"
+  sourcePath: string // Workspace-relative source root path; a file path for file-based sources or a directory path for folder-based sources
+  textPos: number // Zero-based segment position within the source file content
+  sourceText: string // Original source segment text before translation
+  context: string // Optional segment context string; usually empty, but may carry disambiguation metadata
+  targetText: string // Translated text stored in the cache
+  status: string // Translation status; defaults to "ai_draft"
+  used: boolean // Whether this cache row has been used since the last purge cycle
+  updatedAt: number // Unix timestamp in seconds when the row was last written
 }
 
-type JsonlLine =
-  | { type: 'meta'; schemaVersion: number }
-  | ({ type: 'entry' } & CacheEntry)
+type JsonlLine = { type: 'meta'; schemaVersion: number } | ({ type: 'entry' } & CacheEntry)
 
 export class JsonlTranslationCache implements TranslationCache {
   private readonly logger: Logger
@@ -187,7 +185,7 @@ export class JsonlTranslationCache implements TranslationCache {
         }
         return a.target.localeCompare(b.target)
       })
-      .map(entry => ({
+      .map((entry) => ({
         source_path: entry.sourcePath,
         text_pos: entry.textPos,
         engine_name: entry.engine,
@@ -311,9 +309,7 @@ export class JsonlTranslationCache implements TranslationCache {
       return true
     }
 
-    const directoryPrefix = normalizedSourcePath.endsWith('/')
-      ? normalizedSourcePath
-      : `${normalizedSourcePath}/`
+    const directoryPrefix = normalizedSourcePath.endsWith('/') ? normalizedSourcePath : `${normalizedSourcePath}/`
 
     for (const knownSourcePath of this.sourcePaths) {
       if (knownSourcePath.startsWith(directoryPrefix)) {
@@ -553,13 +549,7 @@ export class JsonlTranslationCache implements TranslationCache {
     return [engine, source, target, sourcePath, String(textPos), sourceText, context].join(KEY_SEPARATOR)
   }
 
-  private makeFallbackKey(
-    engine: string,
-    source: string,
-    target: string,
-    sourceText: string,
-    context: string
-  ): string {
+  private makeFallbackKey(engine: string, source: string, target: string, sourceText: string, context: string): string {
     return [engine, source, target, sourceText, context].join(KEY_SEPARATOR)
   }
 
