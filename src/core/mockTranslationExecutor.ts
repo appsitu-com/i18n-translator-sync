@@ -86,6 +86,7 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     _engineConfig: EngineConfig | undefined,
     sourceFile: string,
     isBackTranslation: boolean,
+    _segmentPositions?: (number | string)[],
   ): Promise<{ translations: string[]; stats: TranslationStats }> {
     // Capture the translation command
     this._commands.push({

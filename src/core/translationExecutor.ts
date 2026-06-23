@@ -60,6 +60,7 @@ export interface ITranslationExecutor {
     engineConfig: EngineConfig | undefined,
     sourceFile: string,
     isBackTranslation: boolean,
+    segmentPositions?: (number | string)[],
   ): Promise<{ translations: string[]; stats: TranslationStats }>
 
   /**

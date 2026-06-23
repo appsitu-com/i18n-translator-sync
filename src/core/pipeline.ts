@@ -292,6 +292,9 @@ export class TranslatorPipeline {
 
     // Load translation contexts for JSON files
     const contexts = await this.loadJsonContexts(extraction, srcUri)
+    const segmentPositions = extraction.kind === 'json' || extraction.kind === 'yaml'
+      ? extraction.paths.map(jsonPathToString)
+      : undefined
 
     const sourcePath = findSourcePathForFile(srcUri.fsPath, workspacePath, config)
     if (!sourcePath) {
@@ -344,6 +347,7 @@ export class TranslatorPipeline {
           translatorEngines?.[engineName],
           srcUri.fsPath,
           false,
+          segmentPositions,
         )
 
         const fwd = fwdResult.translations
@@ -406,6 +410,7 @@ export class TranslatorPipeline {
                   translatorEngines?.[backEngine],
                   srcUri.fsPath,
                   true,
+                  segmentPositions,
                 )
                 back = backResult.translations
 

@@ -88,7 +88,8 @@ export async function bulkTranslateWithEngine(
   engineName: string,
   opts: { source: string; target: string; apiConfig: EngineConfig; rootDir: string },
   cache: TranslationCache,
-  sourcePath?: string
+  sourcePath?: string,
+  positions?: (number | string)[]
 ): Promise<{ translations: string[]; stats: TranslationStats }> {
   if (!texts.length) {
     return {
@@ -114,7 +115,7 @@ export async function bulkTranslateWithEngine(
   const srcNorm = normalizeLocaleWithMap(opts.source, langMap)
   const tgtNorm = normalizeLocaleWithMap(opts.target, langMap)
 
-  const uniq: Array<{ t: string; c: string; pos: number }> = []
+  const uniq: Array<{ t: string; c: string; pos: number | string }> = []
   const seen = new Set<string>()
 
   // Use a readable separator that can be easily seen in database queries
@@ -125,7 +126,7 @@ export async function bulkTranslateWithEngine(
     const c = (contexts[i] ?? '').toString()
     if (!isTranslatableText(t)) {
       return {
-        pos: i,
+        pos: positions?.[i] ?? i,
         context: c,
         translatable: false as const,
         original: t
@@ -134,7 +135,7 @@ export async function bulkTranslateWithEngine(
 
     const { prefix, core, suffix } = extractWhitespaceAffixes(t)
     return {
-      pos: i,
+      pos: positions?.[i] ?? i,
       context: c,
       translatable: true as const,
       original: t,
@@ -168,8 +169,8 @@ export async function bulkTranslateWithEngine(
 
   const cached = await cache.getMany({
     engine: engine.name,
-    source: srcNorm,
-    target: tgtNorm,
+    sourceLocale: srcNorm,
+    targetLocale: tgtNorm,
     texts: uniq.map((u) => u.t),
     contexts: uniq.map((u) => u.c),
     sourcePath: sourcePath,
@@ -213,8 +214,8 @@ export async function bulkTranslateWithEngine(
     // Always cache translations, even for "copy" engine
     await cache.putMany({
       engine: engine.name,
-      source: srcNorm,
-      target: tgtNorm,
+      sourceLocale: srcNorm,
+      targetLocale: tgtNorm,
       pairs: misses.map((m, i) => ({ src: m.t, dst: translated[i], ctx: m.c, pos: m.pos })),
       sourcePath: sourcePath
     })

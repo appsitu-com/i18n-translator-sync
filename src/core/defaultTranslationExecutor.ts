@@ -44,6 +44,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     engineConfig: EngineConfig | undefined,
     sourceFile: string,
     _isBackTranslation: boolean,
+    segmentPositions?: (number | string)[],
   ): Promise<{ translations: string[]; stats: TranslationStats }> {
     // If using copy engine, just return original segments
     if (engineName === 'copy') {
@@ -78,7 +79,8 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
         rootDir: this.workspacePath
       },
       this.cache,
-      sourceFile
+      sourceFile,
+      segmentPositions
     )
   }
 
