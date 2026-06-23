@@ -105,6 +105,23 @@ describe('TranslatorPipeline', () => {
     expect(mockFs.writeFile).toHaveBeenCalledTimes(2)
   })
 
+  it('passes path positions to executor for structured files', async () => {
+    const jsonContent = JSON.stringify({ a: 'x' })
+    mockFs.readFile.mockResolvedValueOnce(jsonContent)
+
+    const src = mockFs.createUri('/ws/i18n/en/demo.json')
+    const translateSpy = vi.spyOn(mockExecutor, 'translateSegments')
+
+    await pipeline.processFile(src, '/ws', config, undefined)
+
+    expect(translateSpy).toHaveBeenCalled()
+
+    const firstCall = translateSpy.mock.calls[0]
+    const pathPositions = firstCall[8] as (number | string)[] | undefined
+
+    expect(pathPositions).toEqual(['a'])
+  })
+
   it('processes forward and back translations for YAML', async () => {
     // Mock file content
     const yamlContent = 'a: x\nb: y'

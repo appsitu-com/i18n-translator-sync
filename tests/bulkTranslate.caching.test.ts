@@ -253,26 +253,26 @@ class MockCache implements TranslationCache {
   private data = new Map<string, Map<string, Map<string, Map<string, string>>>>()
   getCalls: Array<{
     engine: string
-    source: string
-    target: string
+    sourceLocale: string
+    targetLocale: string
     texts: string[]
     contexts: (string | null | undefined)[]
   }> = []
   putCalls: Array<{
     engine: string
-    source: string
-    target: string
+    sourceLocale: string
+    targetLocale: string
     pairs: Array<{ src: string; dst: string; ctx?: string | null }>
   }> = []
 
   async getMany(params: {
     engine: string
-    source: string
-    target: string
+    sourceLocale: string
+    targetLocale: string
     texts: string[]
     contexts: (string | null | undefined)[]
     sourcePath?: string
-    positions?: number[]
+    positions?: (number | string)[]
   }): Promise<Map<string, { translation: string; textPos?: number }>> {
     this.getCalls.push(params)
 
@@ -282,10 +282,10 @@ class MockCache implements TranslationCache {
     const engineMap = this.data.get(params.engine)
     if (!engineMap) return out
 
-    const sourceLangMap = engineMap.get(params.source)
+    const sourceLangMap = engineMap.get(params.sourceLocale)
     if (!sourceLangMap) return out
 
-    const targetLangMap = sourceLangMap.get(params.target)
+    const targetLangMap = sourceLangMap.get(params.targetLocale)
     if (!targetLangMap) return out
 
     for (let i = 0; i < params.texts.length; i++) {
@@ -303,8 +303,8 @@ class MockCache implements TranslationCache {
 
   async putMany(params: {
     engine: string
-    source: string
-    target: string
+    sourceLocale: string
+    targetLocale: string
     pairs: Array<{ src: string; dst: string; ctx?: string | null }>
   }): Promise<void> {
     this.putCalls.push(params)
@@ -317,16 +317,16 @@ class MockCache implements TranslationCache {
       this.data.set(params.engine, engineMap)
     }
 
-    let sourceLangMap = engineMap.get(params.source)
+    let sourceLangMap = engineMap.get(params.sourceLocale)
     if (!sourceLangMap) {
       sourceLangMap = new Map()
-      engineMap.set(params.source, sourceLangMap)
+      engineMap.set(params.sourceLocale, sourceLangMap)
     }
 
-    let targetLangMap = sourceLangMap.get(params.target)
+    let targetLangMap = sourceLangMap.get(params.targetLocale)
     if (!targetLangMap) {
       targetLangMap = new Map()
-      sourceLangMap.set(params.target, targetLangMap)
+      sourceLangMap.set(params.targetLocale, targetLangMap)
     }
 
     for (const { src, dst, ctx } of params.pairs) {
@@ -342,6 +342,34 @@ class MockCache implements TranslationCache {
 
   async importCSV(): Promise<number> {
     return 0
+  }
+
+  async hasSourcePath(): Promise<boolean> {
+    return false
+  }
+
+  async hasPendingPurge(): Promise<boolean> {
+    return false
+  }
+
+  async purge(): Promise<{ deletedCount: number }> {
+    return { deletedCount: 0 }
+  }
+
+  async completePurge(): Promise<{ deletedCount: number }> {
+    return { deletedCount: 0 }
+  }
+
+  isNew(): boolean {
+    return false
+  }
+
+  didMigrateFromV1(): boolean {
+    return false
+  }
+
+  clearMigrationFlag(): void {
+    // Not needed for tests
   }
 
   close(): void {

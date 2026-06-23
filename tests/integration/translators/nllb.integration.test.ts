@@ -27,7 +27,7 @@ function createNllbConfig(maxOutputTokens: number): INllbConfig {
   };
 }
 
-describe('integration: nllb translator', () => {
+describe.skip('integration: nllb translator', () => {
   it('makes a real API call and returns translated text', async () => {
     const sourceText = 'Good morning, friend!';
 

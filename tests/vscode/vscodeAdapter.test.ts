@@ -73,6 +73,7 @@ import { VSCodeTranslatorAdapter } from '../../src/vscode/vscodeAdapter';
 import { TranslatorAdapter } from '../../src/core/adapters/baseAdapter';
 import { VsCodeConfigProvider } from '../../src/vscode/vscodeConfig';
 import { VSCodeFileSystem } from '../../src/vscode/filesystem';
+import * as vscode from 'vscode';
 
 describe('VSCodeTranslatorAdapter', () => {
   let adapter: VSCodeTranslatorAdapter;
@@ -331,4 +332,51 @@ describe('VSCodeTranslatorAdapter', () => {
     // Verify method was called with correct arguments
     expect(mockBaseBulkTranslate).toHaveBeenCalledWith(false);
   });
+
+  describe('Migration Prompt', () => {
+    it('shows modal migration purge prompt and clears flag when user selects Later', async () => {
+      const cacheMock = {
+        didMigrateFromV1: vi.fn().mockReturnValue(true),
+        clearMigrationFlag: vi.fn()
+      }
+
+      ;(adapter as any).cache = cacheMock
+      ;(adapter as any).translatorManager = undefined
+      adapter.initialize = vi.fn().mockResolvedValue(undefined)
+      adapter.purge = vi.fn().mockResolvedValue({ deletedCount: 0 })
+      vi.mocked(vscode.window.showInformationMessage).mockResolvedValue('Later' as any)
+
+      await (adapter as any).ensureRuntimeInitialized()
+
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        'Translation cache was updated to support structured path positions. Clean up old numeric position entries?',
+        { modal: true },
+        'Complete Purge',
+        'Later'
+      )
+      expect(adapter.purge).not.toHaveBeenCalled()
+      expect(cacheMock.clearMigrationFlag).toHaveBeenCalled()
+    })
+
+    it('runs complete purge when user approves migration cleanup', async () => {
+      const cacheMock = {
+        didMigrateFromV1: vi.fn().mockReturnValue(true),
+        clearMigrationFlag: vi.fn()
+      }
+
+      ;(adapter as any).cache = cacheMock
+      ;(adapter as any).translatorManager = undefined
+      adapter.initialize = vi.fn().mockResolvedValue(undefined)
+      adapter.purge = vi.fn().mockResolvedValue({ deletedCount: 3 })
+      vi.mocked(vscode.window.showInformationMessage).mockResolvedValue('Complete Purge' as any)
+
+      await (adapter as any).ensureRuntimeInitialized()
+
+      expect(adapter.purge).toHaveBeenCalled()
+      expect(cacheMock.clearMigrationFlag).toHaveBeenCalled()
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        'Migration purge completed: removed 3 entries.'
+      )
+    })
+  })
 });
