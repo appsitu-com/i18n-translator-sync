@@ -7,36 +7,30 @@ import { FileSystem } from '../util/fs'
 import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
 import { toWorkspaceRelativePosix } from '../util/pathShared'
 import type { Pair, TranslationCache } from './TranslationCache'
+import type { CacheEntry, JsonlLine } from './jsonlCacheTypes'
+import { JsonlCacheMigrator } from './migrations/jsonlCacheMigrator'
+import { V1ToV2JsonlCacheMigration } from './migrations/v1ToV2JsonlCacheMigration'
 
 const LOOKUP_SEPARATOR = '::'
 const KEY_SEPARATOR = '\u0000'
-const FILE_SCHEMA_VERSION = 1
-
-type CacheEntry = {
-  engine: string     // Translation engine name, for example "google", "deepl", or "copy"
-  source: string     // Source locale code used for this translation, for example "en"
-  target: string     // Target locale code used for this translation, for example "fr"
-  sourcePath: string // Workspace-relative source root path; a file path for file-based sources or a directory path for folder-based sources
-  textPos: number    // Zero-based segment position within the source file content
-  sourceText: string // Original source segment text before translation
-  context: string    // Optional segment context string; usually empty, but may carry disambiguation metadata
-  targetText: string // Translated text stored in the cache
-  status: string     // Translation status; defaults to "ai_draft"
-  used: boolean      // Whether this cache row has been used since the last purge cycle
-  updatedAt: number  // Unix timestamp in seconds when the row was last written
-}
-
-type JsonlLine = { type: 'meta'; schemaVersion: number } | ({ type: 'entry' } & CacheEntry)
+const FILE_SCHEMA_VERSION = 2
 
 export class JsonlTranslationCache implements TranslationCache {
   private readonly logger: Logger
   private readonly workspacePath: string
   private readonly cacheFilePath: string
   private readonly memoryOnly: boolean
+  // Maps strict keys (engine+source+target+sourcePath+textPos+sourceText+context) to cache entries
   private readonly strictData = new Map<string, CacheEntry>()
+  // Maps fallback keys (engine+source+target+sourceText+context) to sets of strict keys
   private readonly fallbackIndex = new Map<string, Set<string>>()
+
   private readonly sourcePaths = new Set<string>()
+  private readonly usedStrictKeysDuringPurge = new Set<string>()
+  private purgeInProgress = false
   private readonly isNewDatabaseFlag: boolean
+  private readonly cacheMigrator = new JsonlCacheMigrator([new V1ToV2JsonlCacheMigration()])
+  private migrationOccurred = false
 
   constructor(cacheFilePath: string, workspacePath: string, logger: Logger = NO_OP_LOGGER) {
     this.logger = logger
@@ -76,51 +70,92 @@ export class JsonlTranslationCache implements TranslationCache {
 
   async getMany({
     engine,
-    source,
-    target,
+    sourceLocale,
+    targetLocale,
     texts,
     contexts,
     sourcePath = '',
     positions = []
   }: {
     engine: string
-    source: string
-    target: string
+    sourceLocale: string
+    targetLocale: string
     texts: string[]
     contexts: (string | null | undefined)[]
     sourcePath?: string
-    positions?: number[]
-  }): Promise<Map<string, { translation: string; textPos?: number }>> {
-    const out = new Map<string, { translation: string; textPos?: number }>()
+    positions?: (number | string)[]
+  }): Promise<Map<string, { translation: string; textPos?: number | string }>> {
+    const out = new Map<string, { translation: string; textPos?: number | string }>()
     const normalizedSourcePath = this.normalizeSourcePath(sourcePath)
-    let didMutate = false
+    const debugCacheLookup = this.shouldDebugCacheLookup()
+    let strictHits = 0
+    let fallbackPromotions = 0
+    let misses = 0
+    const missSamples: string[] = []
 
     for (let i = 0; i < texts.length; i++) {
       const text = texts[i] ?? ''
       const context = (contexts[i] ?? '').toString()
       const textPos = positions[i] ?? 0
 
-      const strictKey = this.makeStrictKey(engine, source, target, normalizedSourcePath, textPos, text, context)
+      const strictKey = this.makeStrictKey(engine, sourceLocale, targetLocale, normalizedSourcePath, textPos, text, context)
       const strictEntry = this.strictData.get(strictKey)
-      const entry = strictEntry ?? this.getFallbackEntry(engine, source, target, text, context)
+      if (strictEntry) {
+        strictHits++
+        this.markStrictKeyUsed(strictKey)
 
-      if (!entry) {
+        out.set(`${text}${LOOKUP_SEPARATOR}${context}`, {
+          translation: strictEntry.targetText,
+          textPos: strictEntry.textPos
+        })
         continue
       }
 
-      if (!entry.used) {
-        entry.used = true
-        didMutate = true
+      const fallbackEntry = this.getFallbackEntry(
+        engine,
+        sourceLocale,
+        targetLocale,
+        text,
+        context
+      )
+      if (!fallbackEntry) {
+        misses++
+        if (debugCacheLookup && missSamples.length < 5) {
+          missSamples.push(`text=${JSON.stringify(text)} ctx=${JSON.stringify(context)} pos=${JSON.stringify(textPos)}`)
+        }
+        continue
       }
 
+      const promotedEntry = this.promoteFallbackEntry({
+        strictKey,
+        engine,
+        sourceLocale,
+        targetLocale,
+        sourcePath: normalizedSourcePath,
+        textPos,
+        sourceText: text,
+        context,
+        fallbackEntry
+      })
+      fallbackPromotions++
+
       out.set(`${text}${LOOKUP_SEPARATOR}${context}`, {
-        translation: entry.targetText,
-        textPos: entry.textPos
+        translation: promotedEntry.targetText,
+        textPos: promotedEntry.textPos
       })
     }
 
-    if (didMutate) {
-      this.persistToDisk()
+    // Intentionally skip immediate persistence for lookup-time mutations
+    // and fallback promotions. This keeps purge re-translation fast and still persists via
+    // existing write points (putMany, purge, completePurge, close).
+
+    if (debugCacheLookup) {
+      this.logger.debug(
+        `[cache.lookup] engine=${engine} ${sourceLocale}->${targetLocale} sourcePath=${normalizedSourcePath || '<none>'} total=${texts.length} strictHits=${strictHits} fallbackPromotions=${fallbackPromotions} misses=${misses}`
+      )
+      if (missSamples.length > 0) {
+        this.logger.debug(`[cache.lookup.miss-samples] ${missSamples.join(' | ')}`)
+      }
     }
 
     return out
@@ -128,14 +163,14 @@ export class JsonlTranslationCache implements TranslationCache {
 
   async putMany({
     engine,
-    source,
-    target,
+    sourceLocale,
+    targetLocale,
     pairs,
     sourcePath = ''
   }: {
     engine: string
-    source: string
-    target: string
+    sourceLocale: string
+    targetLocale: string
     pairs: Pair[]
     sourcePath?: string
   }): Promise<void> {
@@ -150,25 +185,25 @@ export class JsonlTranslationCache implements TranslationCache {
     for (const pair of pairs) {
       const textPos = pair.pos ?? 0
       const context = (pair.ctx ?? '').toString()
-      const strictKey = this.makeStrictKey(engine, source, target, normalizedSourcePath, textPos, pair.src, context)
-      const fallbackKey = this.makeFallbackKey(engine, source, target, pair.src, context)
+      const strictKey = this.makeStrictKey(engine, sourceLocale, targetLocale, normalizedSourcePath, textPos, pair.src, context)
+      const fallbackKey = this.makeFallbackKey(engine, sourceLocale, targetLocale, pair.src, context)
 
       const next: CacheEntry = {
         engine,
-        source,
-        target,
+        source: sourceLocale,
+        target: targetLocale,
         sourcePath: normalizedSourcePath,
         textPos,
         sourceText: pair.src,
         context,
         targetText: pair.dst,
         status: 'ai_draft',
-        used: true,
         updatedAt: now
       }
 
       this.strictData.set(strictKey, next)
       this.addFallbackIndex(fallbackKey, strictKey)
+      this.markStrictKeyUsed(strictKey)
     }
 
     this.persistToDisk()
@@ -181,7 +216,7 @@ export class JsonlTranslationCache implements TranslationCache {
           return a.sourcePath.localeCompare(b.sourcePath)
         }
         if (a.textPos !== b.textPos) {
-          return a.textPos - b.textPos
+          return this.compareTextPos(a.textPos, b.textPos)
         }
         return a.target.localeCompare(b.target)
       })
@@ -230,14 +265,21 @@ export class JsonlTranslationCache implements TranslationCache {
       columns: true,
       skip_empty_lines: true,
       cast: (value, context) => {
-        if (context.column === 'text_pos' || context.column === 'updated_at') {
+        if (context.column === 'updated_at') {
           return Number(value)
+        }
+        if (context.column === 'text_pos') {
+          const trimmed = String(value)
+          const numericValue = Number(trimmed)
+          if (trimmed !== '' && Number.isFinite(numericValue) && String(numericValue) === trimmed) {
+            return numericValue
+          }
         }
         return value
       }
     }) as Array<{
       source_path: string
-      text_pos: number
+      text_pos: number | string
       engine_name: string
       source_lang: string
       target_lang: string
@@ -251,12 +293,18 @@ export class JsonlTranslationCache implements TranslationCache {
     this.strictData.clear()
     this.fallbackIndex.clear()
     this.sourcePaths.clear()
+    let skippedLegacyNumericStructuredRows = 0
 
     for (const record of records) {
       const normalizedSourcePath = this.normalizeSourcePath(record.source_path ?? '')
       const textPos = record.text_pos ?? 0
       const context = (record.context ?? '').toString()
       const updatedAt = record.updated_at || this.nowSeconds()
+
+      if (typeof textPos === 'number' && this.isStructuredSourceFile(normalizedSourcePath)) {
+        skippedLegacyNumericStructuredRows++
+        continue
+      }
 
       if (normalizedSourcePath) {
         this.sourcePaths.add(normalizedSourcePath)
@@ -272,7 +320,6 @@ export class JsonlTranslationCache implements TranslationCache {
         context,
         targetText: record.target_text,
         status: record.status || 'ai_draft',
-        used: true,
         updatedAt
       }
 
@@ -298,8 +345,14 @@ export class JsonlTranslationCache implements TranslationCache {
     }
 
     this.persistToDisk()
-    this.logger.info(`Imported ${records.length} translations from ${filePath}`)
-    return records.length
+    const importedCount = records.length - skippedLegacyNumericStructuredRows
+    this.logger.info(`Imported ${importedCount} translations from ${filePath}`)
+    if (skippedLegacyNumericStructuredRows > 0) {
+      this.logger.warn(
+        `Skipped ${skippedLegacyNumericStructuredRows} legacy numeric structured translation row(s) during CSV import`
+      )
+    }
+    return importedCount
   }
 
   async hasSourcePath(sourcePath: string): Promise<boolean> {
@@ -321,34 +374,32 @@ export class JsonlTranslationCache implements TranslationCache {
   }
 
   async hasPendingPurge(): Promise<boolean> {
-    for (const entry of this.strictData.values()) {
-      if (!entry.used) {
-        return true
-      }
-    }
-    return false
+    return this.purgeInProgress
   }
 
   async purge(): Promise<{ deletedCount: number }> {
-    for (const entry of this.strictData.values()) {
-      entry.used = false
-    }
-
-    this.persistToDisk()
+    this.purgeInProgress = true
+    this.usedStrictKeysDuringPurge.clear()
     this.logger.info('Marked all translations as unused. Retranslate files to mark used translations.')
     return { deletedCount: 0 }
   }
 
   async completePurge(): Promise<{ deletedCount: number }> {
+    if (!this.purgeInProgress) {
+      return { deletedCount: 0 }
+    }
+
     let deletedCount = 0
 
     for (const [key, entry] of this.strictData.entries()) {
-      if (!entry.used) {
+      if (!this.usedStrictKeysDuringPurge.has(key)) {
         this.strictData.delete(key)
         deletedCount++
       }
     }
 
+    this.purgeInProgress = false
+    this.usedStrictKeysDuringPurge.clear()
     this.rebuildIndexes()
     this.persistToDisk()
     this.logger.info(`Purged ${deletedCount} unused translations`)
@@ -357,6 +408,14 @@ export class JsonlTranslationCache implements TranslationCache {
 
   isNew(): boolean {
     return this.isNewDatabaseFlag
+  }
+
+  didMigrateFromV1(): boolean {
+    return this.migrationOccurred
+  }
+
+  clearMigrationFlag(): void {
+    this.migrationOccurred = false
   }
 
   close(): void {
@@ -372,6 +431,8 @@ export class JsonlTranslationCache implements TranslationCache {
       }
 
       const lines = raw.split(/\r?\n/)
+      const entries: CacheEntry[] = []
+      let schemaVersion = 1
 
       for (const line of lines) {
         const trimmed = line.trim()
@@ -388,6 +449,7 @@ export class JsonlTranslationCache implements TranslationCache {
         }
 
         if (parsed.type === 'meta') {
+          schemaVersion = parsed.schemaVersion
           continue
         }
 
@@ -395,25 +457,7 @@ export class JsonlTranslationCache implements TranslationCache {
           continue
         }
 
-        const strictKey = this.makeStrictKey(
-          parsed.engine,
-          parsed.source,
-          parsed.target,
-          parsed.sourcePath,
-          parsed.textPos,
-          parsed.sourceText,
-          parsed.context
-        )
-
-        const fallbackKey = this.makeFallbackKey(
-          parsed.engine,
-          parsed.source,
-          parsed.target,
-          parsed.sourceText,
-          parsed.context
-        )
-
-        const entry: CacheEntry = {
+        entries.push({
           engine: parsed.engine,
           source: parsed.source,
           target: parsed.target,
@@ -423,9 +467,40 @@ export class JsonlTranslationCache implements TranslationCache {
           context: parsed.context,
           targetText: parsed.targetText,
           status: typeof parsed.status === 'string' && parsed.status.trim().length > 0 ? parsed.status : 'ai_draft',
-          used: Boolean(parsed.used),
           updatedAt: parsed.updatedAt
+        })
+      }
+
+      const migrationResult = this.cacheMigrator.run({
+        entries,
+        schemaVersion,
+        targetVersion: FILE_SCHEMA_VERSION,
+        context: {
+          workspacePath: this.workspacePath,
+          logger: this.logger
         }
+      })
+
+      const migratedEntries = migrationResult.entries
+
+      for (const entry of migratedEntries) {
+        const strictKey = this.makeStrictKey(
+          entry.engine,
+          entry.source,
+          entry.target,
+          entry.sourcePath,
+          entry.textPos,
+          entry.sourceText,
+          entry.context
+        )
+
+        const fallbackKey = this.makeFallbackKey(
+          entry.engine,
+          entry.source,
+          entry.target,
+          entry.sourceText,
+          entry.context
+        )
 
         this.strictData.set(strictKey, entry)
 
@@ -434,6 +509,11 @@ export class JsonlTranslationCache implements TranslationCache {
         }
 
         this.addFallbackIndex(fallbackKey, strictKey)
+      }
+
+      if (migrationResult.didMigrate) {
+        this.migrationOccurred = true
+        this.persistToDisk()
       }
     } catch (error) {
       this.logger.warn(`Failed to load JSONL cache ${this.cacheFilePath}: ${String(error)}`)
@@ -459,9 +539,46 @@ export class JsonlTranslationCache implements TranslationCache {
       fs.mkdirSync(dir, { recursive: true })
     }
 
-    const tempFile = `${this.cacheFilePath}.tmp`
-    fs.writeFileSync(tempFile, `${lines.join('\n')}\n`, 'utf8')
-    fs.renameSync(tempFile, this.cacheFilePath)
+    const serialized = `${lines.join('\n')}\n`
+    const tempFile = `${this.cacheFilePath}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
+
+    fs.writeFileSync(tempFile, serialized, 'utf8')
+
+    try {
+      fs.renameSync(tempFile, this.cacheFilePath)
+    } catch (error) {
+      if (this.isTransientRenameError(error)) {
+        this.logger.warn(
+          `Atomic cache rename failed for ${this.cacheFilePath}; attempting non-atomic copy fallback (${String(error)})`
+        )
+
+        try {
+          fs.copyFileSync(tempFile, this.cacheFilePath)
+          this.logger.info(
+            `Cache persisted via non-atomic copy fallback for ${this.cacheFilePath} (no data loss expected)`
+          )
+        } catch (copyError) {
+          this.logger.error(
+            `Failed to persist JSONL cache ${this.cacheFilePath} after rename and copy fallback: ${String(copyError)}`
+          )
+        }
+      } else {
+        throw error
+      }
+    } finally {
+      if (fs.existsSync(tempFile)) {
+        try {
+          fs.unlinkSync(tempFile)
+        } catch {
+          // Best-effort cleanup; stale temp files are harmless.
+        }
+      }
+    }
+  }
+
+  private isTransientRenameError(error: unknown): boolean {
+    const code = (error as NodeJS.ErrnoException | undefined)?.code
+    return code === 'EPERM' || code === 'EBUSY' || code === 'ENOTEMPTY'
   }
 
   private rebuildIndexes(): void {
@@ -486,12 +603,12 @@ export class JsonlTranslationCache implements TranslationCache {
 
   private getFallbackEntry(
     engine: string,
-    source: string,
-    target: string,
+    sourceLocale: string,
+    targetLocale: string,
     sourceText: string,
     context: string
   ): CacheEntry | undefined {
-    const fallbackKey = this.makeFallbackKey(engine, source, target, sourceText, context)
+    const fallbackKey = this.makeFallbackKey(engine, sourceLocale, targetLocale, sourceText, context)
     const strictKeys = this.fallbackIndex.get(fallbackKey)
 
     if (!strictKeys || strictKeys.size === 0) {
@@ -519,6 +636,62 @@ export class JsonlTranslationCache implements TranslationCache {
     return latest
   }
 
+  private promoteFallbackEntry({
+    strictKey,
+    engine,
+    sourceLocale,
+    targetLocale,
+    sourcePath,
+    textPos,
+    sourceText,
+    context,
+    fallbackEntry
+  }: {
+    strictKey: string
+    engine: string
+    sourceLocale: string
+    targetLocale: string
+    sourcePath: string
+    textPos: number | string
+    sourceText: string
+    context: string
+    fallbackEntry: CacheEntry
+  }): CacheEntry {
+    const fallbackKey = this.makeFallbackKey(engine, sourceLocale, targetLocale, sourceText, context)
+    const now = this.nowSeconds()
+
+    const promotedEntry: CacheEntry = {
+      engine,
+      source: sourceLocale,
+      target: targetLocale,
+      sourcePath,
+      textPos,
+      sourceText,
+      context,
+      targetText: fallbackEntry.targetText,
+      status: fallbackEntry.status,
+      updatedAt: now
+    }
+
+    if (sourcePath) {
+      this.sourcePaths.add(sourcePath)
+    }
+
+    this.strictData.set(strictKey, promotedEntry)
+    this.addFallbackIndex(fallbackKey, strictKey)
+    this.markStrictKeyUsed(strictKey)
+
+    return promotedEntry
+  }
+
+  private markStrictKeyUsed(strictKey: string): void {
+    if (!this.purgeInProgress) {
+      return
+    }
+
+    this.usedStrictKeysDuringPurge.add(strictKey)
+  }
+
   private addFallbackIndex(fallbackKey: string, strictKey: string): void {
     const keys = this.fallbackIndex.get(fallbackKey)
     if (keys) {
@@ -542,18 +715,57 @@ export class JsonlTranslationCache implements TranslationCache {
     source: string,
     target: string,
     sourcePath: string,
-    textPos: number,
+    textPos: number | string,
     sourceText: string,
     context: string
   ): string {
-    return [engine, source, target, sourcePath, String(textPos), sourceText, context].join(KEY_SEPARATOR)
+    return [
+      engine,
+      source,
+      target,
+      sourcePath,
+      String(textPos),
+      this.normalizeKeyText(sourceText),
+      context
+    ].join(KEY_SEPARATOR)
   }
 
   private makeFallbackKey(engine: string, source: string, target: string, sourceText: string, context: string): string {
-    return [engine, source, target, sourceText, context].join(KEY_SEPARATOR)
+    return [engine, source, target, this.normalizeKeyText(sourceText), context].join(KEY_SEPARATOR)
+  }
+
+  private normalizeKeyText(text: string): string {
+    return text.trim()
   }
 
   private nowSeconds(): number {
     return Math.floor(Date.now() / 1000)
   }
+
+  private shouldDebugCacheLookup(): boolean {
+    const flag = process.env.TRANSLATOR_DEBUG_CACHE_LOOKUP?.toLowerCase()
+    return flag === '1' || flag === 'true' || flag === 'yes' || flag === 'on'
+  }
+
+  private compareTextPos(left: number | string, right: number | string): number {
+    if (typeof left === 'number' && typeof right === 'number') {
+      return left - right
+    }
+
+    return String(left).localeCompare(String(right))
+  }
+
+  private isStructuredSourceFile(sourcePath: string): boolean {
+    const lowerPath = sourcePath.toLowerCase()
+    return (
+      lowerPath.endsWith('.json') ||
+      lowerPath.endsWith('.yaml') ||
+      lowerPath.endsWith('.yml') ||
+      lowerPath.endsWith('.ts') ||
+      lowerPath.endsWith('.js') ||
+      lowerPath.endsWith('.mjs') ||
+      lowerPath.endsWith('.cjs')
+    )
+  }
+
 }
