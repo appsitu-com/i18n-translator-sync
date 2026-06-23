@@ -13,17 +13,17 @@ const KEY_SEPARATOR = '\u0000'
 const FILE_SCHEMA_VERSION = 1
 
 type CacheEntry = {
-  engine: string // Translation engine name, for example "google", "deepl", or "copy"
-  source: string // Source locale code used for this translation, for example "en"
-  target: string // Target locale code used for this translation, for example "fr"
+  engine: string     // Translation engine name, for example "google", "deepl", or "copy"
+  source: string     // Source locale code used for this translation, for example "en"
+  target: string     // Target locale code used for this translation, for example "fr"
   sourcePath: string // Workspace-relative source root path; a file path for file-based sources or a directory path for folder-based sources
-  textPos: number // Zero-based segment position within the source file content
+  textPos: number    // Zero-based segment position within the source file content
   sourceText: string // Original source segment text before translation
-  context: string // Optional segment context string; usually empty, but may carry disambiguation metadata
+  context: string    // Optional segment context string; usually empty, but may carry disambiguation metadata
   targetText: string // Translated text stored in the cache
-  status: string // Translation status; defaults to "ai_draft"
-  used: boolean // Whether this cache row has been used since the last purge cycle
-  updatedAt: number // Unix timestamp in seconds when the row was last written
+  status: string     // Translation status; defaults to "ai_draft"
+  used: boolean      // Whether this cache row has been used since the last purge cycle
+  updatedAt: number  // Unix timestamp in seconds when the row was last written
 }
 
 type JsonlLine = { type: 'meta'; schemaVersion: number } | ({ type: 'entry' } & CacheEntry)
