@@ -1,0 +1,48 @@
+{
+  "common": {
+    "buttons": {
+      "save": "use sparingly",
+      "cancel": "abolish",
+      "apply": "application (form etc)",
+      "reset": "Reset to default"
+    },
+    "labels": {
+      "name": "name (of a thing)",
+      "email": "e-mail address",
+      "phone": "telephone number",
+      "address": "mailing address"
+    },
+    "notifications": {
+      "success": "Operation completed successfully",
+      "error": "error occurs",
+      "warning": "Warning: proceed with caution",
+      "info": "for your reference"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "This field is required",
+      "minLength": "Must be at least {length} characters",
+      "maxLength": "Cannot exceed { length } characters",
+      "pattern": "Invalid format",
+      "match": "Field mismatch"
+    },
+    "placeholders": {
+      "search": "Search...",
+      "select": "Select an option",
+      "date": "Month/day/year"
+    }
+  },
+  "features": {
+    "darkMode": {
+      "enable": "Enable Dark Mode",
+      "disable": "Disable Dark Mode",
+      "auto": "Using System Settings"
+    },
+    "accessibility": {
+      "highContrast": "high contrast",
+      "largeText": "large text",
+      "screenReader": "Screen Reader Support"
+    }
+  }
+}

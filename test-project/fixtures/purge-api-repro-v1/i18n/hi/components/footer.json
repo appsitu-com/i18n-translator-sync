@@ -1,0 +1,23 @@
+{
+  "footer": {
+    "copyright": "© 2025 टेस्ट कंपनी। सर्वाधिकार सुरक्षित।",
+    "version": "संस्करण {version}",
+    "links": {
+      "privacy": "गोपनीयता नीति",
+      "terms": "सेवा की शर्तें",
+      "contact": "हमसे संपर्क करें",
+      "about": "हमारे बारे में"
+    }
+  },
+  "language": {
+    "selector": "भाषा चुने",
+    "current": "वर्तमान भाषा: {language}"
+  },
+  "social": {
+    "follow": "हमारे पर का पालन करें",
+    "twitter": "ट्विटर",
+    "facebook": "फेसबुक",
+    "linkedin": "Linkedin",
+    "github": "GitHub"
+  }
+}

@@ -1,3 +1,7 @@
+
+export const TM_STATUS_DEFAULT = 'initial'
+export const TM_ORIGIN_DEFAULT = 'ai'
+
 export type TmEntry = {
   engine: string     // Translation engine name, for example "google", "deepl", or "copy"
   source: string     // Source locale code used for this translation, for example "en"
@@ -7,8 +11,11 @@ export type TmEntry = {
   sourceText: string // Original source segment text before translation
   context: string    // Optional segment context string; usually empty, but may carry disambiguation metadata
   targetText: string // Translated text stored in the cache
-  status: string     // Translation status; defaults to "ai_draft"
+  status: string     // Translation status; defaults to TM_STATUS_DEFAULT
+  origin: string     // Translation origin; defaults to TM_ORIGIN_DEFAULT
   updatedAt: number  // Unix timestamp in seconds when the row was last written
 }
 
-export type JsonlTmLine = { type: 'meta'; schemaVersion: number } | ({ type: 'entry' } & TmEntry)
+export type JsonlTmEntryLine = { type: 'entry' } & Omit<TmEntry, 'origin'> & { origin?: string }
+
+export type JsonlTmLine = { type: 'meta'; schemaVersion: number } | JsonlTmEntryLine

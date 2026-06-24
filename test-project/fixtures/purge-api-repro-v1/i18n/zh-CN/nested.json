@@ -1,0 +1,48 @@
+{
+  "common": {
+    "buttons": {
+      "save": "节省",
+      "cancel": "取消",
+      "apply": "申请",
+      "reset": "重置为默认值"
+    },
+    "labels": {
+      "name": "名称",
+      "email": "电子邮件地址",
+      "phone": "电话号码",
+      "address": "邮寄地址"
+    },
+    "notifications": {
+      "success": "操作成功完成",
+      "error": "发生错误",
+      "warning": "警告：小心行事",
+      "info": "供您参考"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "该字段为必填字段",
+      "minLength": "必须至少为 {length} 字符",
+      "maxLength": "不能超过 { 长度} 字符",
+      "pattern": "格式无效",
+      "match": "字段不匹配"
+    },
+    "placeholders": {
+      "search": "搜索...",
+      "select": "选择一个选项",
+      "date": "月/日/年"
+    }
+  },
+  "features": {
+    "darkMode": {
+      "enable": "启用黑暗模式",
+      "disable": "禁用黑暗模式",
+      "auto": "使用系统设置"
+    },
+    "accessibility": {
+      "highContrast": "高对比度",
+      "largeText": "大文本",
+      "screenReader": "屏幕阅读器支持"
+    }
+  }
+}

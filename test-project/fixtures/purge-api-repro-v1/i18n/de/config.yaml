@@ -1,0 +1,14 @@
+title: Beispiel YAML-Datei
+description: Dies ist eine Demonstration der YAML-Übersetzung
+sections:
+  - title: Einführung
+    content: YAML-Dateien werden üblicherweise zur Konfiguration verwendet
+  - title: Vorteile
+    content: YAML ist menschenlesbar und unterstützt Kommentare
+settings:
+  enabled: true
+  message: Willkommen bei der YAML-Übersetzung
+  features:
+    - Automatische Übersetzung
+    - Kontextabhängige Übersetzung
+    - Unterstützung für verschachtelte Strukturen

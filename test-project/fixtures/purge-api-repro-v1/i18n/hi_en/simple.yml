@@ -1,0 +1,7 @@
+simple:
+  title: YML Testing
+  description: This is a simple YML file.
+list:
+  - first item
+  - second item
+  - Third item

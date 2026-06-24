@@ -1,0 +1,36 @@
+{
+  "greeting": "Hello everyone!",
+  "greeting2": "Bois-le Freddy",
+  "messages": {
+    "welcome": "Welcome to the test project",
+    "intro": "Here's a demonstration of JSON translation",
+    "getStarted": "Let's start with the translations"
+  },
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "save": "Save money",
+    "delete": "Delete",
+    "edit": "Edit"
+  },
+  "feedback": {
+    "title": "Your opinion is important to us",
+    "question": "How would you rate your experience?",
+    "positive": "Thank you for your positive comments!",
+    "negative": "We're sorry to hear that. How can we improve?",
+    "submit": "Submit feedback"
+  },
+  "help": {
+    "title": "Need help?",
+    "description": "Answers to frequently asked questions",
+    "contact": "Contact support",
+    "faq": "Frequently asked questions",
+    "documentation": "See the documentation"
+  },
+  "legal": {
+    "privacy": "Privacy policy",
+    "terms": "Terms of use",
+    "cookies": "Cookie policy",
+    "rights": "All rights reserved"
+  }
+}

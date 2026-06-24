@@ -1,0 +1,14 @@
+title: YAML 文件示例
+description: 这是一个 YAML 翻译演示
+sections:
+  - title: 导言
+    content: YAML 文件通常用于配置
+  - title: 益处
+    content: YAML 可由人类阅读并支持注释
+settings:
+  enabled: true
+  message: 欢迎来到 YAML 翻译
+  features:
+    - 自动翻译
+    - 语境感知翻译
+    - 支持嵌套结构

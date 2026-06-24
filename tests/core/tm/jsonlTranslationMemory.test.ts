@@ -136,8 +136,9 @@ describe('JsonlTranslationMemory', () => {
     expect(result.get('Hello::')?.textPos).toBe('greeting')
 
     const rewritten = readFileSync(cachePath, 'utf8')
-    expect(rewritten).toContain('"schemaVersion":2')
+    expect(rewritten).toContain('"schemaVersion":3')
     expect(rewritten).toContain('"textPos":"greeting"')
+    expect(rewritten).toContain('"origin":"ai"')
   })
 
   it('finds fallback matches from the archived v1 JSONL snapshot even when the source path changes', async () => {
@@ -464,7 +465,7 @@ describe('JsonlTranslationMemory', () => {
     await cache.exportCSV(csvPath)
 
     expect(existsSync(csvPath)).toBe(true)
-    expect(readFileSync(csvPath, 'utf8')).toContain('source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,updated_at')
+    expect(readFileSync(csvPath, 'utf8')).toContain('source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at')
 
     const restored = new JsonlTranslationMemory(join(dir, 'restored.jsonl'), dir)
     const imported = await restored.importCSV(csvPath)
@@ -623,11 +624,12 @@ describe('JsonlTranslationMemory', () => {
     const rows = parse(readFileSync(exportedPath, 'utf8'), {
       columns: true,
       skip_empty_lines: true
-    }) as Array<{ source_text: string; status: string }>
+    }) as Array<{ source_text: string; status: string; origin: string }>
 
     expect(rows).toHaveLength(1)
     expect(rows[0].source_text).toBe('Hello')
-    expect(rows[0].status).toBe('ai_draft')
+    expect(rows[0].status).toBe('initial')
+    expect(rows[0].origin).toBe('ai')
   })
 
   it('imports and exports status field from CSV', async () => {
@@ -636,7 +638,7 @@ describe('JsonlTranslationMemory', () => {
 
     writeFileSync(
       csvPath,
-      'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,updated_at\nfile.md,0,test,en,fr,Hello,,Bonjour,reviewed,12345\n',
+      'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at\nfile.md,0,test,en,fr,Hello,,Bonjour,reviewed,human,12345\n',
       'utf8'
     )
 
@@ -649,11 +651,12 @@ describe('JsonlTranslationMemory', () => {
     const rows = parse(readFileSync(exportedPath, 'utf8'), {
       columns: true,
       skip_empty_lines: true
-    }) as Array<{ source_text: string; status: string; updated_at: string }>
+    }) as Array<{ source_text: string; status: string; origin: string; updated_at: string }>
 
     expect(rows).toHaveLength(1)
     expect(rows[0].source_text).toBe('Hello')
     expect(rows[0].status).toBe('reviewed')
+    expect(rows[0].origin).toBe('human')
     expect(rows[0].updated_at).toBe('12345')
   })
 
@@ -755,11 +758,13 @@ describe('JsonlTranslationMemory', () => {
     const rows = parse(readFileSync(exportedPath, 'utf8'), {
       columns: true,
       skip_empty_lines: true
-    }) as Array<{ updated_at: string; source_text: string }>
+    }) as Array<{ updated_at: string; source_text: string; status: string; origin: string }>
 
     expect(rows).toHaveLength(1)
     expect(rows[0].source_text).toBe('Hello')
     expect(rows[0].updated_at).toBe('12345')
+    expect(rows[0].status).toBe('initial')
+    expect(rows[0].origin).toBe('ai')
   })
 
 })

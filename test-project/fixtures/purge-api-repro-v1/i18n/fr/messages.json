@@ -1,0 +1,36 @@
+{
+  "greeting": "Bonjour à tous !",
+  "greeting2": "Bois-le Freddy",
+  "messages": {
+    "welcome": "Bienvenue dans le projet test",
+    "intro": "Voici une démonstration de la traduction de JSON",
+    "getStarted": "Commençons par les traductions"
+  },
+  "buttons": {
+    "ok": "OK",
+    "cancel": "Annuler",
+    "save": "Économiser",
+    "delete": "Supprimer",
+    "edit": "Editer"
+  },
+  "feedback": {
+    "title": "Votre avis nous intéresse",
+    "question": "Comment évaluez-vous votre expérience ?",
+    "positive": "Merci pour vos commentaires positifs !",
+    "negative": "Nous sommes désolés de l'apprendre. Comment pouvons-nous nous améliorer ?",
+    "submit": "Soumettre un retour d'information"
+  },
+  "help": {
+    "title": "Besoin d'aide ?",
+    "description": "Réponses aux questions les plus fréquentes",
+    "contact": "Support de contact",
+    "faq": "Questions fréquemment posées",
+    "documentation": "Voir la documentation"
+  },
+  "legal": {
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation",
+    "cookies": "Politique en matière de cookies",
+    "rights": "Tous droits réservés"
+  }
+}

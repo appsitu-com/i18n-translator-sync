@@ -1,0 +1,7 @@
+simple:
+  title: Test YML
+  description: Voici un simple fichier YML
+list:
+  - Premier point
+  - Deuxième point
+  - Troisième point

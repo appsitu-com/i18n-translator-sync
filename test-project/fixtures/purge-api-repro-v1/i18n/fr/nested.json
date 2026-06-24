@@ -1,0 +1,48 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Économiser",
+      "cancel": "Annuler",
+      "apply": "Appliquer",
+      "reset": "Rétablissement des valeurs par défaut"
+    },
+    "labels": {
+      "name": "Nom",
+      "email": "Adresse électronique",
+      "phone": "Numéro de téléphone",
+      "address": "Adresse postale"
+    },
+    "notifications": {
+      "success": "L'opération s'est déroulée avec succès",
+      "error": "Une erreur s'est produite",
+      "warning": "Avertissement : procéder avec prudence",
+      "info": "Pour votre information"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "Ce champ est obligatoire",
+      "minLength": "Doit comporter au moins {longueur} caractères",
+      "maxLength": "Ne peut excéder {longueur} caractères",
+      "pattern": "Format non valide",
+      "match": "Les champs ne correspondent pas"
+    },
+    "placeholders": {
+      "search": "Recherche...",
+      "select": "Sélectionner une option",
+      "date": "MM/JJ/AAAA"
+    }
+  },
+  "features": {
+    "darkMode": {
+      "enable": "Activer le mode sombre",
+      "disable": "Désactiver le mode sombre",
+      "auto": "Utiliser le réglage du système"
+    },
+    "accessibility": {
+      "highContrast": "Contraste élevé",
+      "largeText": "Grand texte",
+      "screenReader": "Support pour les lecteurs d'écran"
+    }
+  }
+}

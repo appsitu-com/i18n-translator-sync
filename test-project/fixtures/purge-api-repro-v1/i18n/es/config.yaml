@@ -1,0 +1,14 @@
+title: Archivo YAML de ejemplo
+description: Esta es una demostración de la traducción YAML
+sections:
+  - title: Introducción
+    content: Los archivos YAML se usan comúnmente para la configuración
+  - title: Beneficios
+    content: YAML es legible para humanos y soporta comentarios
+settings:
+  enabled: true
+  message: Bienvenido a la traducción de YAML
+  features:
+    - Traducción automática
+    - Traducción consciente del contexto
+    - Soporte para estructuras anidadas

@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "应用程序仪表板",
+    "logo": "徽标 Alt 文本",
+    "menu": "菜单",
+    "search": "搜索...",
+    "notifications": "通知",
+    "profile": "我的简介"
+  },
+  "userMenu": {
+    "account": "账户设置",
+    "preferences": "首选项",
+    "help": "帮助与支持",
+    "logout": "签出"
+  },
+  "notifications": {
+    "title": "您的通知",
+    "empty": "无新通知",
+    "markAllRead": "标记全部已读",
+    "settings": "通知设置"
+  }
+}

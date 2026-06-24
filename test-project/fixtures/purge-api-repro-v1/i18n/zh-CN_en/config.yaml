@@ -1,0 +1,14 @@
+title: Example of a YAML file
+description: This is a YAML translation demo
+sections:
+  - title: introductory
+    content: YAML files are typically used to configure
+  - title: mileage
+    content: YAML is human-readable and supports annotations.
+settings:
+  enabled: true
+  message: Welcome to the YAML translation.
+  features:
+    - automatic translation
+    - Context-aware translation
+    - Support for nested structures

@@ -1,0 +1,23 @@
+{
+  "footer": {
+    "copyright": "© 2025 Test Company. All rights reserved.",
+    "version": "Version {version}",
+    "links": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "contact": "Contact Us",
+      "about": "About Us"
+    }
+  },
+  "language": {
+    "selector": "Select Language",
+    "current": "Current Language: {language}"
+  },
+  "social": {
+    "follow": "Follow us",
+    "twitter": "Twitter",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "github": "GitHub"
+  }
+}

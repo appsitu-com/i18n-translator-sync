@@ -1,0 +1,7 @@
+simple:
+  title: YML 测试
+  description: 这是一个简单的 YML 文件
+list:
+  - 第一个项目
+  - 第二项
+  - 第三项

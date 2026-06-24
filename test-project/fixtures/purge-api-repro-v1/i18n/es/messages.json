@@ -1,0 +1,36 @@
+{
+  "greeting": "¡Hola, Mundo!",
+  "greeting2": "Bébelo, Freddy",
+  "messages": {
+    "welcome": "Bienvenido al proyecto de prueba",
+    "intro": "Esto es una demostración de la traducción JSON",
+    "getStarted": "Empecemos con las traducciones"
+  },
+  "buttons": {
+    "ok": "Vale",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Borrar",
+    "edit": "Edición"
+  },
+  "feedback": {
+    "title": "Valoramos mucho tus comentarios",
+    "question": "¿Cómo valorarías tu experiencia?",
+    "positive": "¡Gracias por tus comentarios positivos!",
+    "negative": "Lamentamos oír eso. ¿Cómo podemos mejorar?",
+    "submit": "Enviar comentarios"
+  },
+  "help": {
+    "title": "¿Necesitas ayuda?",
+    "description": "Encuentra respuestas a preguntas comunes",
+    "contact": "Contacta con el soporte",
+    "faq": "Preguntas frecuentes",
+    "documentation": "Ver documentación"
+  },
+  "legal": {
+    "privacy": "Política de privacidad",
+    "terms": "Términos de servicio",
+    "cookies": "Política de Cookies",
+    "rights": "Todos los derechos reservados"
+  }
+}

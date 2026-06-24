@@ -1,0 +1,48 @@
+{
+  "common": {
+    "buttons": {
+      "save": "محفوظ کریں۔",
+      "cancel": "منسوخ کریں۔",
+      "apply": "لگائیں",
+      "reset": "ڈیفالٹ پر ری سیٹ کریں۔"
+    },
+    "labels": {
+      "name": "نام",
+      "email": "ای میل ایڈریس",
+      "phone": "فون نمبر",
+      "address": "ڈاک کا پتہ"
+    },
+    "notifications": {
+      "success": "آپریشن کامیابی سے مکمل ہوا۔",
+      "error": "ایک خرابی پیش آگئی",
+      "warning": "انتباہ: احتیاط کے ساتھ آگے بڑھیں۔",
+      "info": "آپ کی معلومات کے لیے"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "یہ فیلڈ درکار ہے۔",
+      "minLength": "کم از کم {length} حروف کا ہونا ضروری ہے۔",
+      "maxLength": "{length} حروف سے زیادہ نہیں ہو سکتا",
+      "pattern": "غلط فارمیٹ",
+      "match": "فیلڈز میل نہیں کھاتے"
+    },
+    "placeholders": {
+      "search": "تلاش کریں...",
+      "select": "ایک آپشن منتخب کریں۔",
+      "date": "MM/DD/YYYY"
+    }
+  },
+  "features": {
+    "darkMode": {
+      "enable": "ڈارک موڈ کو فعال کریں۔",
+      "disable": "ڈارک موڈ کو غیر فعال کریں۔",
+      "auto": "سسٹم سیٹنگ کا استعمال کریں۔"
+    },
+    "accessibility": {
+      "highContrast": "ہائی کنٹراسٹ",
+      "largeText": "بڑا متن",
+      "screenReader": "اسکرین ریڈر سپورٹ"
+    }
+  }
+}

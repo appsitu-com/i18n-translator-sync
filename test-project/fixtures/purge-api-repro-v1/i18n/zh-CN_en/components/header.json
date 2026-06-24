@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Application Dashboard",
+    "logo": "Logo Alt Text",
+    "menu": "menu",
+    "search": "Search...",
+    "notifications": "notifications",
+    "profile": "My Profile"
+  },
+  "userMenu": {
+    "account": "Account Settings",
+    "preferences": "preferences",
+    "help": "Help and support",
+    "logout": "log off"
+  },
+  "notifications": {
+    "title": "Your notification",
+    "empty": "No new notifications",
+    "markAllRead": "Mark all as read",
+    "settings": "Notification Settings"
+  }
+}

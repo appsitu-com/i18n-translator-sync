@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Tableau de bord de l'application",
+    "logo": "Texte Alt du logo",
+    "menu": "Menu",
+    "search": "Recherche...",
+    "notifications": "Notifications",
+    "profile": "Mon profil"
+  },
+  "userMenu": {
+    "account": "Paramètres du compte",
+    "preferences": "Préférences",
+    "help": "Aide et assistance",
+    "logout": "S'inscrire"
+  },
+  "notifications": {
+    "title": "Vos notifications",
+    "empty": "Pas de nouvelles notifications",
+    "markAllRead": "Marquer tous les textes comme lus",
+    "settings": "Paramètres de notification"
+  }
+}

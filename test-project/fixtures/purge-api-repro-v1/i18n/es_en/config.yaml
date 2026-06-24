@@ -1,0 +1,14 @@
+title: Sample YAML file
+description: This is a demonstration of the YAML translation
+sections:
+  - title: Introduction
+    content: YAML files are commonly used for configuration
+  - title: Benefits
+    content: YAML is human-readable and supports comments
+settings:
+  enabled: true
+  message: Welcome to the translation of YAML
+  features:
+    - Machine translation
+    - Context-aware translation
+    - Support for nested structures

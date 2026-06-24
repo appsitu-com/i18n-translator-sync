@@ -1,0 +1,36 @@
+{
+  "greeting": "你好，世界",
+  "greeting2": "喝吧 弗莱迪",
+  "messages": {
+    "welcome": "欢迎来到测试项目",
+    "intro": "这是一个 JSON 翻译演示",
+    "getStarted": "让我们从翻译开始"
+  },
+  "buttons": {
+    "ok": "好的",
+    "cancel": "取消",
+    "save": "节省",
+    "delete": "删除",
+    "edit": "编辑"
+  },
+  "feedback": {
+    "title": "我们重视您的反馈意见",
+    "question": "您如何评价自己的经历？",
+    "positive": "感谢您的积极反馈！",
+    "negative": "我们对此深表遗憾。我们该如何改进？",
+    "submit": "提交反馈"
+  },
+  "help": {
+    "title": "需要帮助吗？",
+    "description": "查找常见问题的答案",
+    "contact": "联系支持",
+    "faq": "常见问题",
+    "documentation": "查看文档"
+  },
+  "legal": {
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "cookies": "Cookie 政策",
+    "rights": "版权所有"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Panel de control de aplicaciones",
+    "logo": "Texto alternativo del logotipo",
+    "menu": "Menú",
+    "search": "Buscar...",
+    "notifications": "Notificaciones",
+    "profile": "Mi perfil"
+  },
+  "userMenu": {
+    "account": "Configuración de la cuenta",
+    "preferences": "Preferencias",
+    "help": "Ayuda y apoyo",
+    "logout": "Desconectarse"
+  },
+  "notifications": {
+    "title": "Tus notificaciones",
+    "empty": "Sin notificaciones nuevas",
+    "markAllRead": "Marca todo como leído",
+    "settings": "Configuración de notificaciones"
+  }
+}

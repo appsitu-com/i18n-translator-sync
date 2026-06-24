@@ -1,0 +1,48 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Speichern Sie",
+      "cancel": "Abbrechen",
+      "apply": "Bewerbung",
+      "reset": "Auf Standard zurücksetzen"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "E-Mail Adresse",
+      "phone": "Rufnummer",
+      "address": "Postanschrift"
+    },
+    "notifications": {
+      "success": "Operation erfolgreich abgeschlossen",
+      "error": "Es ist ein Fehler aufgetreten",
+      "warning": "Warnung: Mit Vorsicht vorgehen",
+      "info": "Zu Ihrer Information"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "Dieses Feld ist erforderlich",
+      "minLength": "Muss mindestens {Länge} Zeichen betragen",
+      "maxLength": "Kann {Länge} Zeichen nicht überschreiten",
+      "pattern": "Ungültiges Format",
+      "match": "Felder stimmen nicht überein"
+    },
+    "placeholders": {
+      "search": "Suche...",
+      "select": "Wählen Sie eine Option",
+      "date": "MM/TD/YYYY"
+    }
+  },
+  "features": {
+    "darkMode": {
+      "enable": "Dunkler Modus aktivieren",
+      "disable": "Dunkler Modus deaktivieren",
+      "auto": "Systemeinstellung verwenden"
+    },
+    "accessibility": {
+      "highContrast": "Hoher Kontrast",
+      "largeText": "Großer Text",
+      "screenReader": "Unterstützung für Bildschirmleser"
+    }
+  }
+}

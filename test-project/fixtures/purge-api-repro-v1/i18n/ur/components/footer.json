@@ -1,0 +1,23 @@
+{
+  "footer": {
+    "copyright": "© 2025 ٹیسٹ کمپنی۔ جملہ حقوق محفوظ ہیں۔",
+    "version": "ورژن {version}",
+    "links": {
+      "privacy": "رازداری کی پالیسی",
+      "terms": "سروس کی شرائط",
+      "contact": "ہم سے رابطہ کریں۔",
+      "about": "ہمارے بارے میں"
+    }
+  },
+  "language": {
+    "selector": "زبان منتخب کریں۔",
+    "current": "موجودہ زبان: {language}"
+  },
+  "social": {
+    "follow": "ہمیں فالو کریں۔",
+    "twitter": "ٹویٹر",
+    "facebook": "فیس بک",
+    "linkedin": "LinkedIn",
+    "github": "گٹ ہب"
+  }
+}

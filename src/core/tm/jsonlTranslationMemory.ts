@@ -7,13 +7,14 @@ import { FileSystem } from '../util/fs'
 import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
 import { toWorkspaceRelativePosix } from '../util/pathShared'
 import type { Pair, TranslationMemory } from './TranslationMemory'
-import type { TmEntry, JsonlTmLine } from './jsonlTmTypes'
+import { type TmEntry, type JsonlTmLine, TM_ORIGIN_DEFAULT, TM_STATUS_DEFAULT } from './jsonlTmTypes'
 import { JsonlTmMigrator } from './migrations/jsonlTmMigrator'
 import { V1ToV2JsonlTmMigration } from './migrations/v1ToV2JsonlTmMigration'
+import { V2ToV3JsonlTmMigration } from './migrations/v2ToV3JsonlTmMigration'
 
 const LOOKUP_SEPARATOR = '::'
 const KEY_SEPARATOR = '\u0000'
-const FILE_SCHEMA_VERSION = 2
+const FILE_SCHEMA_VERSION = 3
 
 export class JsonlTranslationMemory implements TranslationMemory {
   private readonly logger: Logger
@@ -29,7 +30,10 @@ export class JsonlTranslationMemory implements TranslationMemory {
   private readonly usedStrictKeysDuringPurge = new Set<string>()
   private purgeInProgress = false
   private readonly isNewDatabaseFlag: boolean
-  private readonly tmMigrator = new JsonlTmMigrator([new V1ToV2JsonlTmMigration()])
+  private readonly tmMigrator = new JsonlTmMigrator([
+    new V1ToV2JsonlTmMigration(),
+    new V2ToV3JsonlTmMigration()
+  ])
   private migrationOccurred = false
 
   constructor(tmFilePath: string, workspacePath: string, logger: Logger = NO_OP_LOGGER) {
@@ -197,7 +201,8 @@ export class JsonlTranslationMemory implements TranslationMemory {
         sourceText: pair.src,
         context,
         targetText: pair.dst,
-        status: 'ai_draft',
+        status: TM_STATUS_DEFAULT,
+        origin: TM_ORIGIN_DEFAULT,
         updatedAt: now
       }
 
@@ -230,6 +235,7 @@ export class JsonlTranslationMemory implements TranslationMemory {
         context: entry.context,
         target_text: entry.targetText,
         status: entry.status,
+        origin: entry.origin,
         updated_at: entry.updatedAt
       }))
 
@@ -245,6 +251,7 @@ export class JsonlTranslationMemory implements TranslationMemory {
         'context',
         'target_text',
         'status',
+        'origin',
         'updated_at'
       ]
     })
@@ -287,6 +294,7 @@ export class JsonlTranslationMemory implements TranslationMemory {
       context?: string
       target_text: string
       status?: string
+      origin?: string
       updated_at?: number
     }>
 
@@ -319,7 +327,8 @@ export class JsonlTranslationMemory implements TranslationMemory {
         sourceText: record.source_text,
         context,
         targetText: record.target_text,
-        status: record.status || 'ai_draft',
+        status: this.normalizeImportedStatus(record.status),
+        origin: this.normalizeImportedOrigin(record.origin),
         updatedAt
       }
 
@@ -392,6 +401,10 @@ export class JsonlTranslationMemory implements TranslationMemory {
     let deletedCount = 0
 
     for (const [key, entry] of this.strictData.entries()) {
+      if (entry.origin === 'human') {
+        continue
+      }
+
       if (!this.usedStrictKeysDuringPurge.has(key)) {
         this.strictData.delete(key)
         deletedCount++
@@ -466,7 +479,8 @@ export class JsonlTranslationMemory implements TranslationMemory {
           sourceText: parsed.sourceText,
           context: parsed.context,
           targetText: parsed.targetText,
-          status: typeof parsed.status === 'string' && parsed.status.trim().length > 0 ? parsed.status : 'ai_draft',
+          status: this.normalizeImportedStatus(parsed.status),
+          origin: this.normalizeImportedOrigin(parsed.origin),
           updatedAt: parsed.updatedAt
         })
       }
@@ -628,7 +642,8 @@ export class JsonlTranslationMemory implements TranslationMemory {
         continue
       }
 
-      if (candidate.updatedAt > latest.updatedAt) {
+      const originComparison = this.compareOriginPriority(candidate.origin) - this.compareOriginPriority(latest.origin)
+      if (originComparison > 0 || (originComparison === 0 && candidate.updatedAt > latest.updatedAt)) {
         latest = candidate
       }
     }
@@ -670,6 +685,7 @@ export class JsonlTranslationMemory implements TranslationMemory {
       context,
       targetText: fallbackEntry.targetText,
       status: fallbackEntry.status,
+      origin: fallbackEntry.origin,
       updatedAt: now
     }
 
@@ -753,6 +769,38 @@ export class JsonlTranslationMemory implements TranslationMemory {
     }
 
     return String(left).localeCompare(String(right))
+  }
+
+  private normalizeImportedStatus(status: string | undefined): string {
+    if (typeof status !== 'string' || status.trim().length === 0) {
+      return TM_STATUS_DEFAULT
+    }
+
+    if (status === 'ai_draft') {
+      return TM_STATUS_DEFAULT
+    }
+
+    return status
+  }
+
+  private normalizeImportedOrigin(origin: string | undefined): string {
+    if (typeof origin === 'string' && origin.trim().length > 0) {
+      return origin
+    }
+
+    return TM_ORIGIN_DEFAULT
+  }
+
+  private compareOriginPriority(origin: string): number {
+    if (origin === 'human') {
+      return 2
+    }
+
+    if (origin === 'ai') {
+      return 1
+    }
+
+    return 0
   }
 
   private isStructuredSourceFile(sourcePath: string): boolean {

@@ -1,0 +1,23 @@
+{
+  "footer": {
+    "copyright": "© Compañía de Pruebas 2025. Todos los derechos reservados.",
+    "version": "Versión {versión}",
+    "links": {
+      "privacy": "Política de privacidad",
+      "terms": "Términos de servicio",
+      "contact": "Contáctanos",
+      "about": "Sobre nosotros"
+    }
+  },
+  "language": {
+    "selector": "Idioma seleccionado",
+    "current": "Idioma actual: {idioma}"
+  },
+  "social": {
+    "follow": "Síguenos",
+    "twitter": "Twitter",
+    "facebook": "Facebook",
+    "linkedin": "LinkedIn",
+    "github": "GitHub"
+  }
+}

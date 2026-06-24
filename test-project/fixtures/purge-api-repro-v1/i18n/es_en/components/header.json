@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Application Control Panel",
+    "logo": "Logo alt text",
+    "menu": "Menu",
+    "search": "Search...",
+    "notifications": "Notifications",
+    "profile": "My profile"
+  },
+  "userMenu": {
+    "account": "Account Settings",
+    "preferences": "Preferences",
+    "help": "Help and support",
+    "logout": "Disconnect"
+  },
+  "notifications": {
+    "title": "Your notifications",
+    "empty": "No new notifications",
+    "markAllRead": "Mark everything as read",
+    "settings": "Notification settings"
+  }
+}

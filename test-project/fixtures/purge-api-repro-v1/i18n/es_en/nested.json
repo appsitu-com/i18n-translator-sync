@@ -1,0 +1,48 @@
+{
+  "common": {
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "apply": "Request",
+      "reset": "Reset to Default"
+    },
+    "labels": {
+      "name": "Name",
+      "email": "Email address",
+      "phone": "Phone Number",
+      "address": "Mailing address"
+    },
+    "notifications": {
+      "success": "Operation completed successfully",
+      "error": "An error occurred",
+      "warning": "Warning: proceed with caution",
+      "info": "For your information"
+    }
+  },
+  "forms": {
+    "validation": {
+      "required": "This field is required",
+      "minLength": "They must have at least {length} characters",
+      "maxLength": "Cannot exceed {length} characters",
+      "pattern": "Invalid format",
+      "match": "Fields don't match"
+    },
+    "placeholders": {
+      "search": "Search...",
+      "select": "Select an option",
+      "date": "MM/DD/YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+    }
+  },
+  "features": {
+    "darkMode": {
+      "enable": "Turn on dark mode",
+      "disable": "Turn off dark mode",
+      "auto": "Use System Configuration"
+    },
+    "accessibility": {
+      "highContrast": "High contrast",
+      "largeText": "Large text",
+      "screenReader": "Screen reader support"
+    }
+  }
+}

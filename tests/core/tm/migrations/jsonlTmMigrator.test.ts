@@ -40,6 +40,7 @@ describe('JsonlTmMigrator', () => {
         context: '',
         targetText: 'Bonjour',
         status: 'ai_draft',
+        origin: 'ai',
         updatedAt: 1
       }
     ]
@@ -88,6 +89,7 @@ describe('JsonlTmMigrator', () => {
           context: '',
           targetText: 'Bonjour',
           status: 'ai_draft',
+          origin: 'ai',
           updatedAt: 1
         }
       ],

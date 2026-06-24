@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { TmEntry, JsonlLine } from '../../../src/core/tm/jsonlTmTypes'
+import { TM_ORIGIN_DEFAULT, TM_STATUS_DEFAULT, type TmEntry, type JsonlTmLine } from '../../../src/core/tm/jsonlTmTypes'
 
 describe('jsonlTmTypes', () => {
   it('defines a valid cache entry shape', () => {
@@ -12,7 +12,8 @@ describe('jsonlTmTypes', () => {
       sourceText: 'Hello',
       context: '',
       targetText: 'Bonjour',
-      status: 'ai_draft',
+      status: TM_STATUS_DEFAULT,
+      origin: TM_ORIGIN_DEFAULT,
       updatedAt: 1234
     }
 
@@ -21,12 +22,12 @@ describe('jsonlTmTypes', () => {
   })
 
   it('defines a valid JSONL meta line shape', () => {
-    const line: JsonlLine = { type: 'meta', schemaVersion: 2 }
+    const line: JsonlTmLine = { type: 'meta', schemaVersion: 3 }
     expect(line.type).toBe('meta')
   })
 
   it('defines a valid JSONL entry line shape', () => {
-    const line: JsonlLine = {
+    const line: JsonlTmLine = {
       type: 'entry',
       engine: 'google',
       source: 'en',
@@ -36,7 +37,8 @@ describe('jsonlTmTypes', () => {
       sourceText: 'Hello',
       context: '',
       targetText: 'Bonjour',
-      status: 'ai_draft',
+      status: TM_STATUS_DEFAULT,
+      origin: TM_ORIGIN_DEFAULT,
       updatedAt: 1234
     }
 

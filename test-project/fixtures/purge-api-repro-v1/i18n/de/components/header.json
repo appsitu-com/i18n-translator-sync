@@ -1,0 +1,22 @@
+{
+  "header": {
+    "title": "Anwendung Dashboard",
+    "logo": "Logo-Alt-Text",
+    "menu": "Menü",
+    "search": "Suche...",
+    "notifications": "Benachrichtigungen",
+    "profile": "Mein Profil"
+  },
+  "userMenu": {
+    "account": "Kontoeinstellungen",
+    "preferences": "Präferenzen",
+    "help": "Hilfe & Unterstützung",
+    "logout": "Abmelden"
+  },
+  "notifications": {
+    "title": "Ihre Benachrichtigungen",
+    "empty": "Keine neuen Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "settings": "Einstellungen für Benachrichtigungen"
+  }
+}
