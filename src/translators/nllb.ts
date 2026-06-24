@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Translator, BulkTranslateOpts } from './types'
+import type { ITranslator, IBulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { ISO_TO_NLLB_LOCALE, NLLB_LOCALE_TO_LANGUAGE_NAME, NLLB_SUPPORTED_SCRIPT_LOCALE_CODES } from './nllbLanguageMap'
@@ -105,10 +105,10 @@ function parseTranslationsFromResponse(responseText: string, separator: string, 
   throw new Error(`NLLB Translator: expected ${expectedCount} translated segments but received ${chunks.length}.`)
 }
 
-export const NllbTranslator: Translator<INllbConfig> = {
+export const NllbTranslator: ITranslator<INllbConfig> = {
   name: 'nllb',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<INllbConfig>) {
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<INllbConfig>) {
     const cfg = opts.apiConfig
     const apiKey = cfg.apiKey
     const endpoint = cfg.endpoint.replace(/\/+$/, '')

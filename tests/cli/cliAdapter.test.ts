@@ -4,7 +4,7 @@ import { CliWorkspaceWatcher } from '../../src/cli/watcher';
 import { CliConfigProvider } from '../../src/cli/cliConfig';
 import { NodeFileSystem } from '../../src/core/util/fs';
 import { ConsoleLogger } from '../../src/core/util/baseLogger';
-import { TranslatorAdapter } from '../../src/core/adapters/baseAdapter';
+import { TranslatorAdapter } from '../../src/core/adapters/TranslatorAdapter';
 import * as env from '../../src/core/util/environmentSetup';
 import * as path from 'path';
 import { TRANSLATOR_JSON } from '../../src/core/constants';
@@ -73,7 +73,7 @@ vi.mock('../../src/core/util/fs', () => {
   };
 });
 
-vi.mock('../../src/core/adapters/baseAdapter', () => ({
+vi.mock('../../src/core/adapters/TranslatorAdapter', () => ({
   TranslatorAdapter: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     start: vi.fn().mockResolvedValue(undefined),
@@ -139,7 +139,7 @@ describe('CLITranslatorAdapter', () => {
       testWorkspacePath,
       expect.any(ConsoleLogger),
       expect.any(NodeFileSystem),
-      expect.any(Object), // ConfigProvider
+      expect.any(Object), // IConfigProvider
       testConfigPath
     );
   });

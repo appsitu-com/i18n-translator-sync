@@ -4,8 +4,8 @@ import {
   type TranslatorEngine
 } from './config'
 import { loadTranslatorConfig, type GetPassphrase } from './config'
-import { FileSystem } from './util/fs'
-import { Logger } from './util/baseLogger'
+import { IFileSystem } from './util/fs'
+import { ILogger } from './util/baseLogger'
 
 // ---------------------------------------------------------------------------
 // TranslateProjectConfig — the project-level subset of ITranslatorConfig
@@ -27,7 +27,7 @@ export type TranslateProjectConfig = Omit<ITranslatorConfig, 'translator' | 'roo
 }
 
 // Interface for platform-specific configuration
-export interface ConfigProvider {
+export interface IConfigProvider {
   /**
    * Load configuration (implementation depends on platform)
    */
@@ -50,14 +50,15 @@ export interface ConfigProvider {
 export const defaultConfig: TranslateProjectConfig =
   TranslateConfigSchema.parse({})
 
+
 /**
  * Extract a TranslateProjectConfig from a fully-loaded ITranslatorConfig,
- * falling back to VS Code / platform settings via the ConfigProvider for
+ * falling back to VS Code / platform settings via the IConfigProvider for
  * fields that are absent in translator.json.
  */
 export function toProjectConfig(
   config: ITranslatorConfig,
-  configProvider: ConfigProvider
+  configProvider: IConfigProvider
 ): TranslateProjectConfig {
   return {
     sourcePaths: config.sourcePaths?.length
@@ -137,9 +138,9 @@ export function toProjectConfig(
  */
 export function loadProjectConfig(
   rootPath: string,
-  configProvider: ConfigProvider,
-  logger: Logger,
-  _fileSystem?: FileSystem,
+  configProvider: IConfigProvider,
+  logger: ILogger,
+  _fileSystem?: IFileSystem,
   preloaded?: ITranslatorConfig,
   getPassphrase?: GetPassphrase
 ): TranslateProjectConfig {

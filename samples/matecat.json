@@ -1,0 +1,11 @@
+{
+  "newProjectDefaults": {
+    "project_name": "i18n review project",
+    "subject": "general",
+    "tms_engine": 1,
+    "mt_engine": 1,
+    "get_public_matches": true,
+    "pretranslate_100": 0,
+    "pretranslate_101": 0
+  }
+}

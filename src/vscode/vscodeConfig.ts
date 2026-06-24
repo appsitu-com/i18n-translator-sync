@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import JSON5 from 'json5';
-import { ConfigProvider } from '../core/coreConfig';
+import { IConfigProvider } from '../core/coreConfig';
 import { TRANSLATOR_JSON } from '../core/constants';
 import { substituteEnvVarsInObject } from '../core/util/envSubstitution';
 
 /**
  * VSCode configuration provider implementation
  */
-export class VsCodeConfigProvider implements ConfigProvider {
+export class VsCodeConfigProvider implements IConfigProvider {
   private config: Record<string, any> = {};
 
   /**

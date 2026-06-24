@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { DefaultTranslationExecutor } from '../../src/core/defaultTranslationExecutor'
-import { FileSystem, IUri } from '../../src/core/util/fs'
-import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationMemory } from '../../src/core/tm/TranslationMemory'
+import { DefaultTranslationExecutor } from '../../src/core/DefaultTranslationExecutor'
+import { IFileSystem, IUri } from '../../src/core/util/fs'
+import { ILogger } from '../../src/core/util/baseLogger'
+import { ITranslationMemory } from '../../src/core/tm/ITranslationMemory'
 
 describe('defaultTranslationExecutor', () => {
   let executor: DefaultTranslationExecutor
-  let mockFileSystem: FileSystem
-  let mockLogger: Logger
-  let mockCache: TranslationMemory
+  let mockFileSystem: IFileSystem
+  let mockLogger: ILogger
+  let mockCache: ITranslationMemory
 
   beforeEach(() => {
     // Create mock file system

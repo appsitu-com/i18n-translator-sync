@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatItemList, generateContextCsvWarnings, type ContextCsvStats } from '../../src/core/contextCsvWarnings'
+import { formatItemList, generateContextCsvWarnings, type IContextCsvStats } from '../../src/core/contextCsvWarnings'
 
 describe('contextCsvWarnings', () => {
   describe('formatItemList', () => {
@@ -54,7 +54,7 @@ describe('contextCsvWarnings', () => {
         'another.unknown': 'context'
       }
       const validPaths = new Set(['known.path'])
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: [],
         emptyValues: []
       }
@@ -70,7 +70,7 @@ describe('contextCsvWarnings', () => {
     it('should generate warning for duplicate paths', () => {
       const ctxMap = {}
       const validPaths = new Set()
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: ['duplicate1', 'duplicate2'],
         emptyValues: []
       }
@@ -86,7 +86,7 @@ describe('contextCsvWarnings', () => {
     it('should generate warning for empty values', () => {
       const ctxMap = {}
       const validPaths = new Set()
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: [],
         emptyValues: ['empty1', 'empty2', 'empty3']
       }
@@ -107,7 +107,7 @@ describe('contextCsvWarnings', () => {
         'known': 'context'
       }
       const validPaths = new Set(['known'])
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: ['dup1', 'dup2'],
         emptyValues: ['empty1']
       }
@@ -126,7 +126,7 @@ describe('contextCsvWarnings', () => {
         'known2': 'context'
       }
       const validPaths = new Set(['known1', 'known2'])
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: [],
         emptyValues: []
       }
@@ -139,7 +139,7 @@ describe('contextCsvWarnings', () => {
     it('should handle empty context map', () => {
       const ctxMap = {}
       const validPaths = new Set(['path1', 'path2'])
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: [],
         emptyValues: []
       }
@@ -153,7 +153,7 @@ describe('contextCsvWarnings', () => {
       const unknownPaths = Array.from({ length: 10 }, (_, i) => `unknown${i}`)
       const ctxMap = Object.fromEntries(unknownPaths.map(path => [path, 'context']))
       const validPaths = new Set()
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: Array.from({ length: 8 }, (_, i) => `dup${i}`),
         emptyValues: Array.from({ length: 12 }, (_, i) => `empty${i}`)
       }
@@ -172,7 +172,7 @@ describe('contextCsvWarnings', () => {
         '123': 'context'
       }
       const validPaths = new Set<unknown>(['string.path', 123, { obj: 'value' }])
-      const stats: ContextCsvStats = {
+      const stats: IContextCsvStats = {
         duplicates: [],
         emptyValues: []
       }

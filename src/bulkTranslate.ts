@@ -1,12 +1,12 @@
 import { getRegisteredTranslator } from './translators/registry'
-import type { TranslationMemory } from './core/tm/TranslationMemory'
+import type { ITranslationMemory } from './core/tm/ITranslationMemory'
 import type { EngineConfig } from './translators/types'
 import { normalizeLocaleWithMap } from './util/localeNorm'
 
 /**
  * Statistics about a translation operation
  */
-export interface TranslationStats {
+export interface ITranslationStats {
   /** Number of segments translated via API */
   apiCalls: number
   /** Number of segments fetched from cache */
@@ -87,10 +87,10 @@ export async function bulkTranslateWithEngine(
   contexts: (string | null | undefined)[],
   engineName: string,
   opts: { source: string; target: string; apiConfig: EngineConfig; rootDir: string },
-  cache: TranslationMemory,
+  cache: ITranslationMemory,
   sourcePath?: string,
   positions?: (number | string)[]
-): Promise<{ translations: string[]; stats: TranslationStats }> {
+): Promise<{ translations: string[]; stats: ITranslationStats }> {
   if (!texts.length) {
     return {
       translations: [],
@@ -235,7 +235,7 @@ export async function bulkTranslateWithEngine(
 
   // Note: For the copy engine, apiCalls represents the number of "identity mappings" created
   // though they don't consume API quota. We count them separately for consistency.
-  const stats: TranslationStats = {
+  const stats: ITranslationStats = {
     apiCalls: engineName === 'copy' ? 0 : misses.length,
     cacheHits: uniq.length - misses.length,
     total: uniq.length
@@ -243,3 +243,4 @@ export async function bulkTranslateWithEngine(
 
   return { translations, stats }
 }
+

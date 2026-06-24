@@ -14,14 +14,14 @@ import {
   InvalidTranslatorConfigError
 } from '../../../src/core/config/configLoader'
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
-import { Logger } from '../../../src/core/util/baseLogger'
+import { ILogger } from '../../../src/core/util/baseLogger'
 import type { ITranslatorConfig } from '../../../src/core/config'
 import { GEMINI_DEFAULT_ENDPOINT, GEMINI_DEFAULT_MODEL } from '../../../src/translators/gemini'
 import { UntrustedEndpointError } from '../../../src/core/util/endpointValidator'
 import type { EngineConfig } from '../../../src/translators/types'
 
 // Minimal logger for tests
-function createTestLogger(): Logger & { messages: string[] } {
+function createTestLogger(): ILogger & { messages: string[] } {
   const messages: string[] = []
   return {
     messages,
@@ -67,7 +67,7 @@ function maskConfigApiKeys(config: ITranslatorConfig): ITranslatorConfig {
  * Useful for debugging test output while keeping credentials hidden.
  * Displays to both logger and console for visibility in test output.
  */
-function displayLoadedConfig(config: ITranslatorConfig, logger: Logger): void {
+function displayLoadedConfig(config: ITranslatorConfig, logger: ILogger): void {
   const masked = maskConfigApiKeys(config)
   const configStr = JSON.stringify(masked, null, 2)
   logger.info(`Loaded ITranslatorConfig: ${configStr}`)

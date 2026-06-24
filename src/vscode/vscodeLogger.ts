@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { Logger, LogLevel } from '../core/util/baseLogger';
+import { ILogger, LogLevel } from '../core/util/baseLogger';
 
 /**
  * VSCode logger implementation
  */
-export class VSCodeLogger implements Logger {
+export class VSCodeLogger implements ILogger {
   constructor(private outputChannel: vscode.OutputChannel) {}
 
   setLevel(_level: LogLevel): void {

@@ -1,27 +1,27 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import JSON5 from 'json5';
-import { ConfigProvider } from '../core/coreConfig';
-import { FileSystem } from '../core/util/fs';
-import { Logger } from '../core/util/baseLogger';
+import { IConfigProvider } from '../core/coreConfig';
+import { IFileSystem } from '../core/util/fs';
+import { ILogger } from '../core/util/baseLogger';
 import { substituteEnvVarsInObject } from '../core/util/envSubstitution';
 
 /**
  * CLI configuration provider
  * Loads configuration from a project-level translator.json file and provides a VSCode-like interface
  */
-export class CliConfigProvider implements ConfigProvider {
+export class CliConfigProvider implements IConfigProvider {
   private config: Record<string, any> = {};
 
   /**
    * Create a new CLI configuration provider
-   * @param fs FileSystem abstraction
-   * @param logger Logger interface
+   * @param fs IFileSystem abstraction
+   * @param logger ILogger interface
    * @param configPath Path to the project's translator.json configuration file
    */
   constructor(
-    private fs: FileSystem,
-    private logger: Logger,
+    private fs: IFileSystem,
+    private logger: ILogger,
     private configPath: string
   ) {}
 

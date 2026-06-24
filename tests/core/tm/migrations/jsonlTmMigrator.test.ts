@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
-import type { Logger } from '../../../../src/core/util/baseLogger'
+import type { ILogger } from '../../../../src/core/util/baseLogger'
 import type { TmEntry } from '../../../../src/core/tm/jsonlTmTypes'
 import {
   JsonlTmMigrator,
-  type JsonlTmMigration,
+  type IJsonlTmMigration,
   type JsonlTmMigrationContext
-} from '../../../../src/core/tm/migrations/jsonlTmMigrator'
+} from '../../../../src/core/tm/migrations/JsonlTmMigrator'
 
-function createMockLogger(): Logger {
+function createMockLogger(): ILogger {
   return {
     debug: vi.fn(),
     info: vi.fn(),
@@ -18,7 +18,7 @@ function createMockLogger(): Logger {
   }
 }
 
-function createContext(logger: Logger): JsonlTmMigrationContext {
+function createContext(logger: ILogger): JsonlTmMigrationContext {
   return {
     workspacePath: '/workspace',
     logger
@@ -58,7 +58,7 @@ describe('JsonlTmMigrator', () => {
   })
 
   it('runs chained migrations in order', () => {
-    const migration1: JsonlTmMigration = {
+    const migration1: IJsonlTmMigration = {
       fromVersion: 1,
       toVersion: 2,
       migrate(currentEntries) {
@@ -66,7 +66,7 @@ describe('JsonlTmMigrator', () => {
       }
     }
 
-    const migration2: JsonlTmMigration = {
+    const migration2: IJsonlTmMigration = {
       fromVersion: 2,
       toVersion: 3,
       migrate(currentEntries) {

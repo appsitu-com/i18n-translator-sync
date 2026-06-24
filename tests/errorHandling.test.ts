@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import vscode from './mocks/vscode'
 import * as extension from '../src/extension'
-import { MateCatService } from '../src/core/matecat'
+import { MateCatService } from '../src/core/MateCatService'
 
 /**
  * Error Handling Tests
@@ -16,7 +16,7 @@ import { MateCatService } from '../src/core/matecat'
  */
 
 // Mock MateCatService module
-vi.mock('../src/core/matecat', () => ({
+vi.mock('../src/core/MateCatService', () => ({
   MateCatService: vi.fn().mockImplementation(() => ({
     pushTmToMateCat: vi.fn(),
     pullReviewedFromMateCat: vi.fn()

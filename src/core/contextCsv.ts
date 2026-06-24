@@ -1,4 +1,4 @@
-import { FileSystem, IUri } from './util/fs'
+import { IFileSystem, IUri } from './util/fs'
 
 export type ContextCsv = {
   map: Record<string, string>
@@ -6,7 +6,7 @@ export type ContextCsv = {
 }
 
 export async function loadContextCsvForJson(
-  fileSystem: FileSystem,
+  fileSystem: IFileSystem,
   jsonUri: IUri
 ): Promise<ContextCsv> {
   // Create CSV URI by replacing .json or .ts extension with .csv

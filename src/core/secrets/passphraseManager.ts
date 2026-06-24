@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Logger, NO_OP_LOGGER } from '../util/baseLogger';
+import { ILogger, NO_OP_LOGGER } from '../util/baseLogger';
 
 /**
  * Key used to encrypt/decrypt API keys in translator.env
@@ -24,9 +24,9 @@ export class PassphraseManager {
    * Create a new PassphraseManager
    *
    * @param context Optional VS Code extension context (not available in CLI/testing)
-    * @param logger Logger instance
+    * @param logger ILogger instance
    */
-    constructor(private context?: vscode.ExtensionContext, private logger: Logger = NO_OP_LOGGER) {
+    constructor(private context?: vscode.ExtensionContext, private logger: ILogger = NO_OP_LOGGER) {
   }
 
   async initialize(): Promise<void> {
@@ -129,9 +129,9 @@ export class PassphraseManager {
 //  * This must be called once when the extension is activated
 //  *
 //  * @param context VS Code extension context
-//  * @param logger Logger instance
+//  * @param logger ILogger instance
 //  */
-// export function initializePassphraseManager(context: vscode.ExtensionContext, logger: Logger): void {
+// export function initializePassphraseManager(context: vscode.ExtensionContext, logger: ILogger): void {
 //   // Replace the singleton with a fully initialized instance
 //   passphraseManager =  new PassphraseManager(context, logger)
 // }

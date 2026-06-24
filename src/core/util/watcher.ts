@@ -3,7 +3,7 @@ import { IUri } from './fs'
 /**
  * File change event interface
  */
-export interface FileChangeEvent {
+export interface IFileChangeEvent {
   /**
    * The URI of the file that changed
    */
@@ -18,7 +18,7 @@ export interface FileChangeEvent {
 /**
  * File rename event interface
  */
-export interface FileRenameEvent {
+export interface IFileRenameEvent {
   /**
    * The files that were renamed
    */
@@ -28,7 +28,7 @@ export interface FileRenameEvent {
 /**
  * File watcher event listeners
  */
-export interface FileWatcherListeners {
+export interface IFileWatcherListeners {
   /**
    * Called when a file is created
    */
@@ -48,14 +48,14 @@ export interface FileWatcherListeners {
 /**
  * Interface for file watchers
  */
-export interface FileWatcher {
+export interface IFileWatcher {
   /**
    * Watch files matching the given pattern and register event listeners
    * @param globPattern The glob pattern to watch
    * @param listeners The event listeners to register
    * @returns A disposable to stop watching
    */
-  watch(globPattern: string, listeners: FileWatcherListeners): Disposable
+  watch(globPattern: string, listeners: IFileWatcherListeners): IDisposable
 
   /**
    * Resolves when all active watches have completed their initial scan and
@@ -73,16 +73,16 @@ export interface FileWatcher {
 /**
  * Interface for workspace-level file system watchers
  */
-export interface WorkspaceWatcher {
+export interface IWorkspaceWatcher {
   /**
    * Create a file system watcher
    */
-  createFileSystemWatcher(): FileWatcher
+  createFileSystemWatcher(): IFileWatcher
 
   /**
    * Register a listener for file rename events
    */
-  onDidRenameFiles(listener: (e: FileRenameEvent) => void): Disposable
+  onDidRenameFiles(listener: (e: IFileRenameEvent) => void): IDisposable
 
   /**
    * Dispose all watchers
@@ -91,9 +91,9 @@ export interface WorkspaceWatcher {
 }
 
 /**
- * Disposable resource interface
+ * IDisposable resource interface
  */
-export interface Disposable {
+export interface IDisposable {
   /**
    * Dispose the resource
    */
@@ -103,6 +103,7 @@ export interface Disposable {
 /**
  * Create a disposable object from a dispose function
  */
-export function toDisposable(dispose: () => void): Disposable {
+
+export function toDisposable(dispose: () => void): IDisposable {
   return { dispose }
 }

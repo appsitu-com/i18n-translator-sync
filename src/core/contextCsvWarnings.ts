@@ -5,7 +5,7 @@
 /**
  * Interface for context CSV statistics from loadContextCsvForJson
  */
-export interface ContextCsvStats {
+export interface IContextCsvStats {
   duplicates: string[]
   emptyValues: string[]
   fileUri?: { fsPath: string } | null
@@ -33,7 +33,7 @@ export function formatItemList(items: string[], maxItems: number = 6): string {
 export function generateContextCsvWarnings(
   ctxMap: Record<string, any>,
   validPaths: Set<unknown>,
-  stats: ContextCsvStats
+  stats: IContextCsvStats
 ): string[] {
   const unknown = Object.keys(ctxMap).filter((k) => !validPaths.has(k))
   const msgs: string[] = []
@@ -52,3 +52,4 @@ export function generateContextCsvWarnings(
 
   return msgs
 }
+

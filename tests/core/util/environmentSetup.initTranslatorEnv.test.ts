@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { initTranslatorEnv, resetEnvInitialization } from '../../../src/core/util/environmentSetup'
-import type { FileSystem, IUri } from '../../../src/core/util/fs'
-import type { Logger } from '../../../src/core/util/baseLogger'
+import type { IFileSystem, IUri } from '../../../src/core/util/fs'
+import type { ILogger } from '../../../src/core/util/baseLogger'
 
-function createMockLogger(): Logger {
+function createMockLogger(): ILogger {
   return {
     info: vi.fn(),
     warn: vi.fn(),
@@ -14,7 +14,7 @@ function createMockLogger(): Logger {
   }
 }
 
-function createMissingFileSystem(): FileSystem {
+function createMissingFileSystem(): IFileSystem {
   return {
     readFile: vi.fn(async () => ''),
     writeFile: vi.fn(async () => undefined),

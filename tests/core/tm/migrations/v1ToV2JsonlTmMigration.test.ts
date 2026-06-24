@@ -2,16 +2,16 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { tmpdir } from 'node:os'
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
-import type { Logger } from '../../../../src/core/util/baseLogger'
+import type { ILogger } from '../../../../src/core/util/baseLogger'
 import type { TmEntry } from '../../../../src/core/tm/jsonlTmTypes'
 import * as extractorRegistry from '../../../../src/extractors/extractorRegistry'
-import { V1ToV2JsonlTmMigration } from '../../../../src/core/tm/migrations/v1ToV2JsonlTmMigration'
+import { V1ToV2JsonlTmMigration } from '../../../../src/core/tm/migrations/V1ToV2JsonlTmMigration'
 
 function makeTmpDir(prefix = 'i18n-jsonl-migration-test-') {
   return mkdtempSync(join(tmpdir(), prefix))
 }
 
-function createMockLogger(): Logger {
+function createMockLogger(): ILogger {
   return {
     debug: vi.fn(),
     info: vi.fn(),

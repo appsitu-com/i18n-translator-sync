@@ -3,21 +3,40 @@ import * as path from 'path'
 import { parse } from 'csv-parse/sync'
 import { stringify } from 'csv-stringify/sync'
 import { TRANSLATOR_DIR } from '../constants'
-import { FileSystem } from '../util/fs'
-import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
+import { IFileSystem } from '../util/fs'
+import { ILogger, NO_OP_LOGGER } from '../util/baseLogger'
 import { toWorkspaceRelativePosix } from '../util/pathShared'
-import type { Pair, TranslationMemory } from './TranslationMemory'
+import type { Pair, ITranslationMemory } from './ITranslationMemory'
 import { type TmEntry, type JsonlTmLine, TM_ORIGIN_DEFAULT, TM_STATUS_DEFAULT } from './jsonlTmTypes'
-import { JsonlTmMigrator } from './migrations/jsonlTmMigrator'
-import { V1ToV2JsonlTmMigration } from './migrations/v1ToV2JsonlTmMigration'
-import { V2ToV3JsonlTmMigration } from './migrations/v2ToV3JsonlTmMigration'
+import { JsonlTmMigrator, IJsonlTmMigrator } from './migrations/JsonlTmMigrator'
+import { V1ToV2JsonlTmMigration } from './migrations/V1ToV2JsonlTmMigration'
+import { V2ToV3JsonlTmMigration } from './migrations/V2ToV3JsonlTmMigration'
 
 const LOOKUP_SEPARATOR = '::'
 const KEY_SEPARATOR = '\u0000'
 const FILE_SCHEMA_VERSION = 3
 
-export class JsonlTranslationMemory implements TranslationMemory {
-  private readonly logger: Logger
+function createDefaultMigrator(): IJsonlTmMigrator {
+  return new JsonlTmMigrator([
+    new V1ToV2JsonlTmMigration(),
+    new V2ToV3JsonlTmMigration()
+  ])
+}
+
+export type JsonlTranslationMemoryDependencies = {
+  migrator?: IJsonlTmMigrator
+}
+
+export type JsonlTranslationMemoryCreateFromWorkspaceDependencies = {
+  createInstance?: (params: {
+    cachePath: string
+    workspacePath: string
+    logger?: ILogger
+  }) => JsonlTranslationMemory
+}
+
+export class JsonlTranslationMemory implements ITranslationMemory {
+  private readonly logger: ILogger
   private readonly workspacePath: string
   private readonly tmFilePath: string
   private readonly memoryOnly: boolean
@@ -30,17 +49,20 @@ export class JsonlTranslationMemory implements TranslationMemory {
   private readonly usedStrictKeysDuringPurge = new Set<string>()
   private purgeInProgress = false
   private readonly isNewDatabaseFlag: boolean
-  private readonly tmMigrator = new JsonlTmMigrator([
-    new V1ToV2JsonlTmMigration(),
-    new V2ToV3JsonlTmMigration()
-  ])
+  private readonly tmMigrator: IJsonlTmMigrator
   private migrationOccurred = false
 
-  constructor(tmFilePath: string, workspacePath: string, logger: Logger = NO_OP_LOGGER) {
+  constructor(
+    tmFilePath: string,
+    workspacePath: string,
+    logger: ILogger = NO_OP_LOGGER,
+    dependencies: JsonlTranslationMemoryDependencies = {}
+  ) {
     this.logger = logger
     this.workspacePath = workspacePath
     this.tmFilePath = tmFilePath
     this.memoryOnly = tmFilePath === ':memory:'
+    this.tmMigrator = dependencies.migrator ?? createDefaultMigrator()
 
     if (this.memoryOnly) {
       this.isNewDatabaseFlag = true
@@ -61,15 +83,22 @@ export class JsonlTranslationMemory implements TranslationMemory {
 
   static async createFromWorkspace(
     workspacePath: string,
-    fileSystem: FileSystem,
-    logger?: Logger
+    fileSystem: IFileSystem,
+    logger?: ILogger,
+    dependencies: JsonlTranslationMemoryCreateFromWorkspaceDependencies = {}
   ): Promise<JsonlTranslationMemory> {
     const cacheDir = path.join(workspacePath, TRANSLATOR_DIR)
     const cachePath = path.join(cacheDir, 'translation.jsonl')
 
     await fileSystem.createDirectory(fileSystem.createUri(cacheDir))
 
-    return new JsonlTranslationMemory(cachePath, workspacePath, logger)
+    return (
+      dependencies.createInstance?.({
+        cachePath,
+        workspacePath,
+        logger
+      }) ?? new JsonlTranslationMemory(cachePath, workspacePath, logger)
+    )
   }
 
   async getMany({

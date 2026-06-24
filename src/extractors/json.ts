@@ -1,5 +1,5 @@
 import JSON5 from 'json5'
-import { extractStructuredData, pathToString, StructuredDataExtraction, ExcludeOptions } from './structured'
+import { extractStructuredData, pathToString, StructuredDataExtraction, IExcludeOptions } from './structured'
 
 // Re-export the renamed type and function for backward compatibility
 export type JsonExtraction = StructuredDataExtraction
@@ -11,7 +11,7 @@ export const jsonPathToString = pathToString
  * Uses JSON5 for parsing, which supports single-quoted strings, unquoted keys,
  * trailing commas, and comments. Output is always strict JSON.
  */
-export function extractJSON(input: string, options?: ExcludeOptions): JsonExtraction {
+export function extractJSON(input: string, options?: IExcludeOptions): JsonExtraction {
   const obj = JSON5.parse(input)
 
   // Format function: always output strict JSON

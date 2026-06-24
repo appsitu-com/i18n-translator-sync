@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import * as path from 'path'
 import * as fs from 'fs'
 import { VSCodeTranslatorAdapter } from './vscode/vscodeAdapter'
-import { StatusBarManager, VSCodeStatusBarManager, TranslatorState } from './vscode/statusBar'
+import { IStatusBarManager, VSCodeStatusBarManager, ITranslatorState } from './vscode/statusBar'
 import { VSCodeLogger } from './vscode/vscodeLogger'
 import { TRANSLATOR_JSON, TRANSLATOR_ENV, TRANSLATOR_DIR } from './core/constants'
 import { MissingEnvironmentValueError } from './core/config'
@@ -10,7 +10,7 @@ import { MissingEnvironmentValueError } from './core/config'
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
 export let vsCodeAdapter: VSCodeTranslatorAdapter | null = null
-export let statusBarManager: StatusBarManager | null = null
+export let statusBarManager: IStatusBarManager | null = null
 
 /**
  * Get or create the singleton output channel
@@ -45,7 +45,7 @@ function getVSCodeAdapter(): VSCodeTranslatorAdapter {
 /**
  * Get the current translator state
  */
-function getTranslatorState(): TranslatorState {
+function getTranslatorState(): ITranslatorState {
   if (!vsCodeAdapter) {
     return { isRunning: false, isInitialized: false }
   }
@@ -373,9 +373,9 @@ export function onShowOutput(): void {
 
   if (adapter) {
     if (adapter.isRunning()) {
-      channel.appendLine('Status: Translator is currently RUNNING (watching for file changes)')
+      channel.appendLine('Status: ITranslator is currently RUNNING (watching for file changes)')
     } else {
-      channel.appendLine('Status: Translator is STOPPED (not watching for file changes)')
+      channel.appendLine('Status: ITranslator is STOPPED (not watching for file changes)')
     }
   } else {
     channel.appendLine('Status: Extension not yet activated')

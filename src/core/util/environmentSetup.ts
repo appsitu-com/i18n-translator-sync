@@ -1,15 +1,15 @@
 import dotenv from 'dotenv'
 import * as path from 'path'
-import { Logger } from './baseLogger'
-import { FileSystem, nodeFileSystem } from './fs'
+import { ILogger } from './baseLogger'
+import { IFileSystem, nodeFileSystem } from './fs'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
 import { TRANSLATOR_ENV } from '../constants'
 
 
 /**
- * Get the appropriate FileSystem implementation
+ * Get the appropriate IFileSystem implementation
  */
-function getFileSystem(fs?: FileSystem): FileSystem {
+function getFileSystem(fs?: IFileSystem): IFileSystem {
   return fs || nodeFileSystem
 }
 
@@ -34,8 +34,8 @@ export function resetEnvInitialization(): void {
  */
 export const initTranslatorEnv = async (
   rootDir: string,
-  logger: Logger,
-  fs?: FileSystem
+  logger: ILogger,
+  fs?: IFileSystem
 ): Promise<void> => {
   // Skip if already initialized
   if (isEnvInitialized) {
@@ -126,7 +126,7 @@ export type GetPassphraseFunction = () => string | undefined;
  */
 export function getEnvWithDecryption(
   name: string,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphraseFunction
 ): string {
   const val = process.env[name]
@@ -195,7 +195,7 @@ export function getEnvWithDecryption(
  * @param logger The logger instance
  * @returns The value of the environment variable
  */
-export function getEnv(name: string, logger: Logger): string {
+export function getEnv(name: string, logger: ILogger): string {
   const val = process.env[name]
   if (!val) {
     if (!warned.has(name)) {
@@ -249,7 +249,7 @@ export function getEnv(name: string, logger: Logger): string {
  */
 export function resolveEnvStringWithDecryption(
   v: unknown,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphraseFunction
 ): unknown {
   if (typeof v !== 'string') return v
@@ -281,7 +281,7 @@ export function resolveEnvStringWithDecryption(
  */
 export function resolveEnvObjectWithDecryption<T = any>(
   obj: T,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphraseFunction,
   workspacePath?: string
 ): T {
@@ -310,7 +310,7 @@ export function resolveEnvObjectWithDecryption<T = any>(
  * @param logger The logger instance
  * @param workspacePath Optional workspace path for resolving relative file paths
  */
-export function resolveEnvString(v: unknown, logger: Logger, _workspacePath?: string): unknown {
+export function resolveEnvString(v: unknown, logger: ILogger, _workspacePath?: string): unknown {
   if (typeof v !== 'string') return v
   const envRef = /^env:([A-Z0-9_]+)$/i.exec(v)
   if (envRef) {
@@ -325,7 +325,7 @@ export function resolveEnvString(v: unknown, logger: Logger, _workspacePath?: st
  * @param logger The logger instance
  * @param workspacePath Optional workspace path for resolving relative file paths
  */
-export function resolveEnvDeep<T = any>(obj: T, logger: Logger, workspacePath?: string): T {
+export function resolveEnvDeep<T = any>(obj: T, logger: ILogger, workspacePath?: string): T {
   if (obj == null || typeof obj !== 'object') return resolveEnvString(obj, logger, workspacePath) as T
   if (Array.isArray(obj)) return obj.map((v) => resolveEnvDeep(v, logger, workspacePath)) as any
   const out: any = {}

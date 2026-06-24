@@ -1,5 +1,5 @@
 import JSON5 from 'json5'
-import { extractStructuredData, StructuredDataExtraction, ExcludeOptions } from './structured'
+import { extractStructuredData, StructuredDataExtraction, IExcludeOptions } from './structured'
 
 /**
  * Regex matching the supported TS default-export shape.
@@ -83,7 +83,7 @@ export function wrapTsExport(prefix: string, jsOutput: string, suffix: string): 
  * Uses JSON5 for parsing, which supports unquoted keys, single-quoted strings,
  * trailing commas, and comments. Output preserves JS literal style.
  */
-export function extractTypeScript(input: string, options?: ExcludeOptions): StructuredDataExtraction {
+export function extractTypeScript(input: string, options?: IExcludeOptions): StructuredDataExtraction {
   const { prefix, json, suffix } = unwrapTsExport(input)
 
   let obj: unknown

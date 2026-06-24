@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { EnvPassphraseManager } from '../../../src/core/secrets/envPassphraseManager'
-import { Logger } from '../../../src/core/util/baseLogger'
+import { ILogger } from '../../../src/core/util/baseLogger'
 
 const ENV_VAR = 'TRANSLATOR_KEY'
 
-const createLogger = (): Logger => ({
+const createLogger = (): ILogger => ({
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
@@ -15,7 +15,7 @@ const createLogger = (): Logger => ({
 
 describe('EnvPassphraseManager', () => {
   const originalEnv = process.env[ENV_VAR]
-  let logger: Logger
+  let logger: ILogger
   let manager: EnvPassphraseManager
 
   beforeEach(() => {

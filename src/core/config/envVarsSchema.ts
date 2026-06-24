@@ -38,6 +38,9 @@ export const EnvVarsSchema = z.object({
   MYMEMORY_API_KEY: z.string().optional(),
   MYMEMORY_EMAIL: z.string().optional(),
 
+  // MateCAT
+  MATECAT_API_KEY: z.string().optional(),
+
   // Internal / runtime
   I18N_TRANSLATOR_ENV_DIR: z.string().optional(),
   TRANSLATOR_KEY: z.string().optional()

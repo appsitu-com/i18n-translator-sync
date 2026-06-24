@@ -1,43 +1,77 @@
-import { FileSystem, IUri } from './util/fs';
-import { Logger } from './util/baseLogger';
-import { TranslationMemory } from './tm/TranslationMemory';
-import { Disposable, FileRenameEvent, FileWatcher, WorkspaceWatcher } from './util/watcher';
-import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
+import { IFileSystem, IUri } from './util/fs';
+import { ILogger } from './util/baseLogger';
+import { ITranslationMemory } from './tm/ITranslationMemory';
+import { IDisposable, IFileRenameEvent, IFileWatcher, IWorkspaceWatcher } from './util/watcher';
+import { TranslateProjectConfig, IConfigProvider } from './coreConfig';
 import type { ITranslatorEngines } from './config';
-import { TranslatorPipeline } from './pipeline';
-import { MateCatService, MateCatSettings } from './matecat';
+import { TranslatorPipeline } from './TranslatorPipeline';
+import { IMateCatService, MateCatService, MateCatSettings, MateCatSettingsLoader, loadMateCatSettings } from './MateCatService';
 import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
 import * as path from 'path';
 import { toAbsPath } from './util/pathShared';
 import type { GetPassphrase } from './config';
 
+export interface ITranslatorPipeline {
+  resetRuntimeState(): void
+  processFile(
+    srcUri: IUri,
+    workspacePath: string,
+    config: TranslateProjectConfig,
+    translatorEngines?: ITranslatorEngines,
+    forceTranslation?: boolean
+  ): Promise<void>
+  removeFile(uri: IUri, workspacePath: string, config: TranslateProjectConfig): Promise<void>
+}
+
+type PipelineFactory = (
+  fileSystem: IFileSystem,
+  logger: ILogger,
+  cache: ITranslationMemory,
+  workspacePath: string,
+  executor?: ITranslationExecutor,
+  getPassphrase?: GetPassphrase
+) => ITranslatorPipeline
+
+type MateCatServiceFactory = (logger: ILogger) => IMateCatService
+
+export type TranslatorManagerDependencies = {
+  createPipeline?: PipelineFactory
+  createMateCatService?: MateCatServiceFactory
+  loadMateCatSettings?: MateCatSettingsLoader
+}
+
 /**
  * TranslatorManager manages the translation process for both CLI and VSCode extension
  */
 export class TranslatorManager {
-  private watchers: FileWatcher[] = [];
-  private pipeline: TranslatorPipeline;
-  private tm: TranslationMemory;
+  private watchers: IFileWatcher[] = [];
+  private pipeline: ITranslatorPipeline;
+  private tm: ITranslationMemory;
   private isWatching: boolean = false;
-  private mateCatService: MateCatService | null = null;
+  private mateCatService: IMateCatService | null = null;
   private onConfigChanged?: () => Promise<void>;
   private translatorEngines?: ITranslatorEngines;
+  private readonly dependencies: TranslatorManagerDependencies;
 
   constructor(
-    private fileSystem: FileSystem,
-    private logger: Logger,
-    cache: TranslationMemory,
+    private fileSystem: IFileSystem,
+    private logger: ILogger,
+    cache: ITranslationMemory,
     private workspacePath: string,
-    private workspaceWatcher: WorkspaceWatcher,
-    private configProvider: ConfigProvider,
+    private workspaceWatcher: IWorkspaceWatcher,
+    private configProvider: IConfigProvider,
     executor?: ITranslationExecutor,
     onConfigChanged?: () => Promise<void>,
     translatorEngines?: ITranslatorEngines,
-    getPassphrase?: GetPassphrase
+    getPassphrase?: GetPassphrase,
+    dependencies: TranslatorManagerDependencies = {}
   ) {
+    this.dependencies = dependencies;
     this.tm = cache;
-    this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
+    this.pipeline =
+      this.dependencies.createPipeline?.(fileSystem, logger, cache, workspacePath, executor, getPassphrase) ??
+      new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
     this.onConfigChanged = onConfigChanged;
     this.translatorEngines = translatorEngines;
 
@@ -51,7 +85,7 @@ export class TranslatorManager {
    */
   private initializeMateCat(): void {
     try {
-      this.mateCatService = new MateCatService(this.logger);
+      this.mateCatService = this.dependencies.createMateCatService?.(this.logger) ?? new MateCatService(this.logger);
       this.logger.info('MateCat integration initialized');
     } catch (error) {
       this.logger.error(`Failed to initialize MateCat: ${error}`);
@@ -309,7 +343,7 @@ export class TranslatorManager {
    * Handler for file rename events
    */
   private async onRename(
-    e: FileRenameEvent,
+    e: IFileRenameEvent,
     config: TranslateProjectConfig
   ): Promise<void> {
     for (const file of e.files) {
@@ -515,14 +549,8 @@ export class TranslatorManager {
    * Get MateCat settings from the config provider
    */
   private getMateCatSettings(): MateCatSettings {
-    return {
-      pushUrl: this.configProvider.get<string>('translator.matecat.pushUrl', ''),
-      pullUrl: this.configProvider.get<string>('translator.matecat.pullUrl', ''),
-      apiKey: this.configProvider.get<string>('translator.matecat.apiKey', ''),
-      projectId: this.configProvider.get<string>('translator.matecat.projectId', ''),
-      pullMethod: this.configProvider.get<'GET' | 'POST'>('translator.matecat.pullMethod', 'GET'),
-      extraHeaders: this.configProvider.get<Record<string, string>>('translator.matecat.extraHeaders', {})
-    };
+    const settingsLoader = this.dependencies.loadMateCatSettings ?? loadMateCatSettings
+    return settingsLoader(this.workspacePath, this.logger)
   }
 
   /**
@@ -651,8 +679,20 @@ export class TranslatorManager {
     // Get MateCat settings from config provider
     const settings = this.getMateCatSettings();
 
+    const sourceLocale = this.configProvider.get<string>('translator.sourceLocale', 'en')
+    const targetLocales = this.configProvider.get<string[]>('translator.targetLocales', [])
+
+    if (!Array.isArray(targetLocales) || targetLocales.length === 0) {
+      throw new Error('At least one target locale is required for MateCat push')
+    }
+
+    const runtimeFields = {
+      source_lang: sourceLocale,
+      target_lang: targetLocales.join(',')
+    }
+
     // Push translations
-    await this.mateCatService.pushTmToMateCat(this.tm, settings,
+    await this.mateCatService.pushTmToMateCat(this.tm, settings, runtimeFields,
       (message: string) => this.logger.info(message));
 
     this.logger.info('Successfully pushed translations to MateCat');

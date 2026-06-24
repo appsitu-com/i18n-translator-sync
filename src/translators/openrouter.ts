@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Translator, BulkTranslateOpts } from './types'
+import type { ITranslator, IBulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
 
@@ -48,10 +48,10 @@ const TRANSLATION_SCHEMA = {
   additionalProperties: false
 }
 
-export const OpenRouterTranslator: Translator<IOpenRouterConfig> = {
+export const OpenRouterTranslator: ITranslator<IOpenRouterConfig> = {
   name: 'openrouter',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IOpenRouterConfig>) {
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<IOpenRouterConfig>) {
     const cfg = opts.apiConfig
     const apiKey = cfg.apiKey
     const endpoint = cfg.endpoint.replace(/\/+$/, '')

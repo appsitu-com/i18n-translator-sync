@@ -16,7 +16,7 @@ import {
 } from './translatorConfigSchema'
 import { EnvVarsSchema, IEnvVars } from './envVarsSchema'
 import { TRANSLATOR_ENV, TRANSLATOR_JSON } from '../constants'
-import { Logger } from '../util/baseLogger'
+import { ILogger } from '../util/baseLogger'
 import { formatZodError } from '../util/formatZodError'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
 import { ALLOWED_DOMAINS, validateEngineEndpoint } from '../util/endpointValidator'
@@ -56,10 +56,10 @@ interface EnvValueAccessor {
  * then snapshot the known env vars into a typed IEnvVars object.
  *
  * @param rootDir   Workspace / project root directory
- * @param logger    Logger for diagnostic output
+ * @param logger    ILogger for diagnostic output
  * @returns A typed snapshot of the relevant environment variables
  */
-export function loadEnvVars(rootDir: string, logger: Logger): IEnvVars {
+export function loadEnvVars(rootDir: string, logger: ILogger): IEnvVars {
   const envPath = path.join(rootDir, TRANSLATOR_ENV)
 
   if (fs.existsSync(envPath)) {
@@ -106,7 +106,7 @@ export function snapshotEnvVars(): IEnvVars {
 export function resolveConfigEnvVars(
   value: unknown,
   envVars: IEnvVars,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase
 ): unknown {
   const envAccessor = createEnvValueAccessor(envVars)
@@ -151,7 +151,7 @@ export function resolveConfigEnvVars(
  */
 export function loadTranslatorConfig(
   rootDir: string,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase,
   configFilePath?: string
 ): ITranslatorConfig {
@@ -209,7 +209,7 @@ export function resolveAndValidateEngineConfig(
   engineName: ResolvedTranslatorEngine,
   engineConfig: EngineConfig | undefined,
   envVars: IEnvVars,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase
 ): EngineConfig | undefined {
   const schema = ENGINE_CONFIG_SCHEMAS[engineName]
@@ -243,7 +243,7 @@ export function resolveAndValidateEngineConfig(
  */
 export function logConfiguredEnginePlan(
   config: ITranslatorConfig,
-  logger: Logger
+  logger: ILogger
 ): void {
   const sourceLocale = config.sourceLocale
   const targetLocales = config.targetLocales
@@ -273,7 +273,7 @@ function logEnginePair(
   target: string,
   defaults: { md: string; json: string },
   overrides: Record<string, string>,
-  logger: Logger,
+  logger: ILogger,
   isBackTranslation: boolean
 ): void {
   const markdownEngine = pickEngine({
@@ -310,7 +310,7 @@ function logEnginePair(
 function resolveString(
   value: string,
   envAccessor: EnvValueAccessor,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase
 ): string {
   // env:VAR_NAME — whole-string reference
@@ -336,7 +336,7 @@ function resolveString(
 function resolveValue(
   value: unknown,
   envAccessor: EnvValueAccessor,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase
 ): unknown {
   if (typeof value === 'string') {
@@ -380,7 +380,7 @@ function createEnvValueAccessor(envVars: IEnvVars): EnvValueAccessor {
 function resolveConfigEnvVarsExceptTranslator(
   value: unknown,
   envVars: IEnvVars,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase
 ): unknown {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -408,7 +408,7 @@ function resolveConfigEnvVarsExceptTranslator(
 function decryptIfNeeded(
   value: string,
   varName: string,
-  logger: Logger,
+  logger: ILogger,
   getPassphrase?: GetPassphrase
 ): string {
   if (!isEncrypted(value)) return value

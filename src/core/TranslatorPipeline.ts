@@ -15,7 +15,7 @@ import {
   findSourcePathForFile
 } from './util/pathOperations'
 import { ITranslationExecutor } from './translationExecutor'
-import { DefaultTranslationExecutor } from './defaultTranslationExecutor'
+import { DefaultTranslationExecutor } from './DefaultTranslationExecutor'
 import type { GetPassphrase } from './config'
 
 /**

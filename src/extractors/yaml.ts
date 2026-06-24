@@ -1,12 +1,12 @@
 import * as yaml from 'js-yaml'
 import { JsonExtraction } from './json'
-import { extractStructuredData, ExcludeOptions } from './structured'
+import { extractStructuredData, IExcludeOptions } from './structured'
 
 /**
  * Extracts translatable strings from a YAML file
  * Uses the same approach as JSON extraction but with YAML parsing
  */
-export function extractYAML(input: string, options?: ExcludeOptions): JsonExtraction {
+export function extractYAML(input: string, options?: IExcludeOptions): JsonExtraction {
   // Parse YAML content - this will convert it to a JS object similar to JSON.parse
   const obj = yaml.load(input)
 

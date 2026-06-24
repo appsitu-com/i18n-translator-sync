@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { loadProjectConfig, defaultConfig, toProjectConfig, TranslateConfigSchema, type ConfigProvider, type TranslateProjectConfig } from '../../src/core/coreConfig'
-import { Logger } from '../../src/core/util/baseLogger'
+import { loadProjectConfig, defaultConfig, toProjectConfig, TranslateConfigSchema, type IConfigProvider, type TranslateProjectConfig } from '../../src/core/coreConfig'
+import { ILogger } from '../../src/core/util/baseLogger'
 import type { ITranslatorConfig } from '../../src/core/config'
 
 // Mock loadTranslatorConfig from the config module
@@ -17,8 +17,8 @@ vi.mock('../../src/core/config', async (importOriginal) => {
 })
 
 describe('Config', () => {
-  let mockLogger: Logger
-  let mockConfigProvider: ConfigProvider
+  let mockLogger: ILogger
+  let mockConfigProvider: IConfigProvider
 
   /** Helper to build a partial ITranslatorConfig (merged with defaults) */
   function makeConfig(overrides: Partial<ITranslatorConfig> = {}): ITranslatorConfig {

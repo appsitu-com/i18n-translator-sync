@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { TRANSLATOR_ENV } from '../../src/core/constants'
 import { OpenRouterTranslator, OPENROUTER_DEFAULT_MODEL, OPENROUTER_DEFAULT_ENDPOINT } from '../../src/translators/openrouter'
 import type { IOpenRouterConfig } from '../../src/translators/openrouter'
-import type { BulkTranslateOpts } from '../../src/translators/types'
+import type { IBulkTranslateOpts } from '../../src/translators/types'
 
 // Create a mock fetch function
 const mockFetch = vi.fn()
@@ -30,7 +30,7 @@ describe('OpenRouterTranslator', () => {
       vi.stubGlobal('fetch', mockFetch)
     })
 
-    const defaultOpts: BulkTranslateOpts<IOpenRouterConfig> = {
+    const defaultOpts: IBulkTranslateOpts<IOpenRouterConfig> = {
       sourceLocale: 'en',
       targetLocale: 'es',
       rootDir: '.',
@@ -136,7 +136,7 @@ describe('OpenRouterTranslator', () => {
 
         mockFetch.mockReturnValueOnce(Promise.resolve(mockResponse))
 
-        const customOpts: BulkTranslateOpts<IOpenRouterConfig> = {
+        const customOpts: IBulkTranslateOpts<IOpenRouterConfig> = {
           ...defaultOpts,
           apiConfig: {
             ...defaultOpts.apiConfig,
@@ -256,7 +256,7 @@ describe('OpenRouterTranslator', () => {
       })
 
       it('should throw error when API key is missing', async () => {
-        const optsWithoutKey: BulkTranslateOpts<IOpenRouterConfig> = {
+        const optsWithoutKey: IBulkTranslateOpts<IOpenRouterConfig> = {
           ...defaultOpts,
           apiConfig: {
             ...defaultOpts.apiConfig,
@@ -287,7 +287,7 @@ describe('OpenRouterTranslator', () => {
 
         mockFetch.mockReturnValueOnce(Promise.resolve(mockResponse))
 
-        const optsWithDefaultEndpoint: BulkTranslateOpts<IOpenRouterConfig> = {
+        const optsWithDefaultEndpoint: IBulkTranslateOpts<IOpenRouterConfig> = {
           ...defaultOpts,
           apiConfig: {
             apiKey: 'test-key',

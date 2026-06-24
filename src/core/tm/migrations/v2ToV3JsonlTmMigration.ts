@@ -1,7 +1,7 @@
 import { TM_ORIGIN_DEFAULT, TM_STATUS_DEFAULT, type TmEntry } from '../jsonlTmTypes'
-import type { JsonlTmMigration, JsonlTmMigrationContext } from './jsonlTmMigrator'
+import type { IJsonlTmMigration, JsonlTmMigrationContext } from './JsonlTmMigrator'
 
-export class V2ToV3JsonlTmMigration implements JsonlTmMigration {
+export class V2ToV3JsonlTmMigration implements IJsonlTmMigration {
   readonly fromVersion = 2
   readonly toVersion = 3
 

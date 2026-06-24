@@ -2,8 +2,8 @@ import { NodeFileSystem, nodeFileSystem } from '../core/util/fs';
 import { ConsoleLogger, LogLevel } from '../core/util/baseLogger';
 import { CliWorkspaceWatcher } from './watcher';
 import { CliConfigProvider } from './cliConfig';
-import { TranslatorAdapter } from '../core/adapters/baseAdapter';
-import { WorkspaceWatcher } from '../core/util/watcher';
+import { TranslatorAdapter } from '../core/adapters/TranslatorAdapter';
+import { IWorkspaceWatcher } from '../core/util/watcher';
 import { EnvPassphraseManager } from '../core/secrets/envPassphraseManager';
 import { loadProjectConfig } from '../core/coreConfig';
 import * as path from 'path';
@@ -47,7 +47,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
   /**
    * Implementation of the abstract method to create a workspace watcher for CLI
    */
-  protected createWatcher(): WorkspaceWatcher {
+  protected createWatcher(): IWorkspaceWatcher {
     return new CliWorkspaceWatcher(this.fileSystem, this.logger, this.workspacePath);
   }
 

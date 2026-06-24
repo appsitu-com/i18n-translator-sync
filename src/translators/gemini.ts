@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Translator, BulkTranslateOpts } from './types'
+import type { ITranslator, IBulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { normalizeLocaleWithMap } from '../util/localeNorm'
@@ -242,10 +242,10 @@ async function requestTranslation(
 }
 
 
-export const GeminiTranslator: Translator<IGeminiConfig> = {
+export const GeminiTranslator: ITranslator<IGeminiConfig> = {
   name: 'gemini',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IGeminiConfig>) {
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<IGeminiConfig>) {
     const cfg = opts.apiConfig
     if (!cfg.apiKey) throw new Error(`Gemini Translate: missing 'apiKey'`)
 

@@ -3,19 +3,19 @@ import { bulkTranslateWithEngine } from '../src/bulkTranslate'
 import { deregisterTranslator, registerTranslator } from '../src/translators/registry'
 import { NLLB_DEFAULT_SEPARATOR } from '../src/translators/nllb'
 import { GOOGLE_DEFAULT_ENDPOINT } from '../src/translators/google'
-import type { Translator } from '../src/translators/types'
-import type { TranslationMemory } from '../src/core/tm/TranslationMemory'
+import type { ITranslator } from '../src/translators/types'
+import type { ITranslationMemory } from '../src/core/tm/ITranslationMemory'
 import type { IGoogleConfig } from '../src/core/config'
 import type { INllbConfig } from '../src/translators/nllb'
 
-class FakeTranslator implements Translator {
+class FakeTranslator implements ITranslator {
   name = 'fake'
   async translateMany(texts: string[]) {
     return texts.map((t) => `[${t}]`)
   }
 }
 
-class ChunkedFakeTranslator implements Translator {
+class ChunkedFakeTranslator implements ITranslator {
   name = 'fake-chunked'
   readonly calls: number[] = []
 
@@ -25,7 +25,7 @@ class ChunkedFakeTranslator implements Translator {
   }
 }
 
-class MaxCharsFakeTranslator implements Translator {
+class MaxCharsFakeTranslator implements ITranslator {
   name = 'fake-maxchars'
   readonly calls: number[] = []
 
@@ -35,7 +35,7 @@ class MaxCharsFakeTranslator implements Translator {
   }
 }
 
-class NllbChunkingFakeTranslator implements Translator {
+class NllbChunkingFakeTranslator implements ITranslator {
   name = 'nllb'
   readonly calls: number[] = []
 
@@ -45,7 +45,7 @@ class NllbChunkingFakeTranslator implements Translator {
   }
 }
 
-class LocaleCaptureTranslator implements Translator {
+class LocaleCaptureTranslator implements ITranslator {
   name = 'fake-langmap'
   readonly calls: Array<{ sourceLocale: string; targetLocale: string }> = []
 
@@ -88,7 +88,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null, null],
       'fake',
       { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['A*', '[B]'])
@@ -113,7 +113,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null, null, null, null, null],
       'fake-chunked',
       { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['[A]', '[B]', '[C]', '[D]', '[E]'])
@@ -134,7 +134,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null, null, null, null],
       'fake-maxchars',
       { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['[AA]', '[BB]', '[C]', '[DD]'])
@@ -154,7 +154,7 @@ describe('bulkTranslateWithEngine()', () => {
         [null],
         'fake-maxchars',
         { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-        cache as unknown as TranslationMemory
+        cache as unknown as ITranslationMemory
       )
     ).rejects.toThrow('Segment exceeds max translation characters per segment (3 > 2)')
   })
@@ -177,7 +177,7 @@ describe('bulkTranslateWithEngine()', () => {
         apiConfig: { separator: NLLB_DEFAULT_SEPARATOR } as INllbConfig,
         rootDir: process.cwd()
       },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['[AAAAA]', '[BBBBB]'])
@@ -208,7 +208,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null],
       'fake-langmap',
       { source: 'en', target: 'fr', apiConfig, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     await bulkTranslateWithEngine(
@@ -216,7 +216,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null],
       'fake-langmap',
       { source: 'fr', target: 'en', apiConfig, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(localeCaptureTranslator.calls).toEqual([
@@ -238,7 +238,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null, null, null],
       'fake-chunked',
       { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['   ', '[A]', '\n\t'])
@@ -267,7 +267,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null, null, null],
       'fake',
       { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['  [A]  ', '\t[B]\n', '[C]'])
@@ -290,7 +290,7 @@ describe('bulkTranslateWithEngine()', () => {
       [null, null],
       'fake',
       { source: 'en', target: 'fr', apiConfig: {}, rootDir: process.cwd() },
-      cache as unknown as TranslationMemory
+      cache as unknown as ITranslationMemory
     )
 
     expect(out.translations).toEqual(['  [A]  ', '[A]'])

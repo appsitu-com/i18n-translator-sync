@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { DefaultTranslationExecutor } from '../../src/core/defaultTranslationExecutor'
-import { FileSystem } from '../../src/core/util/fs'
-import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationMemory } from '../../src/core/tm/TranslationMemory'
+import { DefaultTranslationExecutor } from '../../src/core/DefaultTranslationExecutor'
+import { IFileSystem } from '../../src/core/util/fs'
+import { ILogger } from '../../src/core/util/baseLogger'
+import { ITranslationMemory } from '../../src/core/tm/ITranslationMemory'
 import { GOOGLE_DEFAULT_ENDPOINT } from '../../src/translators/google'
 import * as path from 'path'
 
 describe('Google Translator Path Resolution', () => {
   let executor: DefaultTranslationExecutor
-  let mockFileSystem: FileSystem
-  let mockLogger: Logger
-  let mockCache: TranslationMemory
+  let mockFileSystem: IFileSystem
+  let mockLogger: ILogger
+  let mockCache: ITranslationMemory
   const workspacePath = '/test/workspace'
 
   beforeEach(() => {

@@ -23,7 +23,7 @@ export type ResolvedTranslatorEngine = Exclude<TranslatorEngine, 'auto'>
 
 export type { TranslatorEngine }
 
-export interface BulkTranslateOpts<T extends EngineConfig = EngineConfig> {
+export interface IBulkTranslateOpts<T extends EngineConfig = EngineConfig> {
   sourceLocale: string
   targetLocale: string
   apiConfig: T
@@ -31,7 +31,7 @@ export interface BulkTranslateOpts<T extends EngineConfig = EngineConfig> {
   rootDir: string
 }
 
-export interface Translator<T extends EngineConfig = EngineConfig> {
+export interface ITranslator<T extends EngineConfig = EngineConfig> {
   readonly name: string
-  translateMany(texts: string[], contexts: (string | null | undefined)[], opts: BulkTranslateOpts<T>): Promise<string[]>
+  translateMany(texts: string[], contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<T>): Promise<string[]>
 }

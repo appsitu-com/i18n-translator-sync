@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { loadContextCsvForJson } from '../../src/core/contextCsv';
-import { FileSystem, IUri } from '../../src/core/util/fs';
+import { IFileSystem, IUri } from '../../src/core/util/fs';
 
 describe('Core contextCsv', () => {
-  let mockFileSystem: FileSystem;
+  let mockFileSystem: IFileSystem;
   let csvUri: IUri;
   let jsonUri: IUri;
 

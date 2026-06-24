@@ -8,7 +8,7 @@ export type ExtractorKind = 'json' | 'yaml' | 'markdown'
  * Options for excluding keys/paths from translation.
  * Excluded values are preserved unchanged in rebuild output.
  */
-export interface ExcludeOptions {
+export interface IExcludeOptions {
   /** Key names to exclude at any depth */
   excludeKeys?: string[]
   /** Exact dotted paths to exclude (e.g. "meta.version") */
@@ -69,7 +69,7 @@ export function extractStructuredData(
   obj: any,
   formatOutput: (obj: any) => string,
   kind: ExtractorKind = 'json',
-  options?: ExcludeOptions
+  options?: IExcludeOptions
 ): StructuredDataExtraction {
   const paths: (string | number)[][] = []
   const segments: string[] = []
@@ -168,3 +168,4 @@ export function extractStructuredData(
 
   return { kind, segments, paths, rebuild, makeContexts }
 }
+

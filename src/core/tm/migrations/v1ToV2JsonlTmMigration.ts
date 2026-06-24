@@ -3,9 +3,9 @@ import * as path from 'path'
 import { TRANSLATOR_DIR } from '../../constants'
 import { extractForFile, jsonPathToString } from '../../../extractors/extractorRegistry'
 import type { TmEntry } from '../jsonlTmTypes'
-import type { JsonlTmMigration, JsonlTmMigrationContext } from './jsonlTmMigrator'
+import type { IJsonlTmMigration, JsonlTmMigrationContext } from './JsonlTmMigrator'
 
-export class V1ToV2JsonlTmMigration implements JsonlTmMigration {
+export class V1ToV2JsonlTmMigration implements IJsonlTmMigration {
   readonly fromVersion = 1
   readonly toVersion = 2
 

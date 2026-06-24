@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { bulkTranslateWithEngine, TranslationStats } from '../src/bulkTranslate'
+import { bulkTranslateWithEngine, ITranslationStats } from '../src/bulkTranslate'
 import { registerTranslator, deregisterTranslator } from '../src/translators/registry'
 import { CopyTranslator } from '../src/translators/copy'
-import type { TranslationMemory } from '../src/core/tm/TranslationMemory'
+import type { ITranslationMemory } from '../src/core/tm/ITranslationMemory'
 
 /**
  * Comprehensive cache integration tests to catch separator mismatches
@@ -246,10 +246,10 @@ describe('Cache Integration - Separator and Hit/Miss Coverage', () => {
 })
 
 /**
- * Mock implementation of TranslationMemory for testing
+ * Mock implementation of ITranslationMemory for testing
  * Tracks all calls to verify behavior
  */
-class MockCache implements TranslationMemory {
+class MockCache implements ITranslationMemory {
   private data = new Map<string, Map<string, Map<string, Map<string, string>>>>()
   getCalls: Array<{
     engine: string

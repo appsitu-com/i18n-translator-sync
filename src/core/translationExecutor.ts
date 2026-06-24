@@ -1,11 +1,11 @@
 import { IUri } from './util/fs'
 import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
-import { TranslationStats } from '../bulkTranslate'
+import { ITranslationStats } from '../bulkTranslate'
 
 /**
  * Represents a single translation command that would be executed
  */
-export interface TranslationCommand {
+export interface ITranslationCommand {
   /** Type of operation */
   type: 'translate' | 'write'
   /** Source segments to translate (for translate operations) */
@@ -61,7 +61,7 @@ export interface ITranslationExecutor {
     sourceFile: string,
     isBackTranslation: boolean,
     segmentPositions?: (number | string)[],
-  ): Promise<{ translations: string[]; stats: TranslationStats }>
+  ): Promise<{ translations: string[]; stats: ITranslationStats }>
 
   /**
    * Write content to a target file
@@ -77,3 +77,4 @@ export interface ITranslationExecutor {
     isBackTranslation: boolean
   ): Promise<void>
 }
+

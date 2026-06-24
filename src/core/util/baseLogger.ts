@@ -12,7 +12,7 @@ export enum LogLevel {
 /**
  * Platform-agnostic logger interface for output
  */
-export interface Logger {
+export interface ILogger {
   /**
    * Log an informational message
    */
@@ -49,7 +49,8 @@ export interface Logger {
   setLevel?(level: LogLevel): void
 }
 
-export const NO_OP_LOGGER: Logger = {
+
+export const NO_OP_LOGGER: ILogger = {
   info: () => {},
   warn: () => {},
   error: () => {},
@@ -59,9 +60,9 @@ export const NO_OP_LOGGER: Logger = {
 }
 
 /**
- * Logger implementation that writes to console
+ * ILogger implementation that writes to console
  */
-export class ConsoleLogger implements Logger {
+export class ConsoleLogger implements ILogger {
   private readonly prefix: string
   private level: LogLevel = LogLevel.Info
 

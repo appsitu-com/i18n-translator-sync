@@ -1,24 +1,24 @@
-import { ITranslationExecutor, TranslationCommand } from './translationExecutor'
-import { IUri, FileSystem } from './util/fs'
+import { ITranslationExecutor, ITranslationCommand } from './translationExecutor'
+import { IUri, IFileSystem } from './util/fs'
 import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
-import { TranslationStats } from '../bulkTranslate'
+import { ITranslationStats } from '../bulkTranslate'
 
 /**
  * Mock implementation for testing that captures translation commands instead of executing them
  * This allows tests to verify what translations would be performed without actually performing them
  */
 export class MockTranslationExecutor implements ITranslationExecutor {
-  private _commands: TranslationCommand[] = []
-  private fileSystem?: FileSystem
+  private _commands: ITranslationCommand[] = []
+  private fileSystem?: IFileSystem
 
-  constructor(fileSystem?: FileSystem) {
+  constructor(fileSystem?: IFileSystem) {
     this.fileSystem = fileSystem
   }
 
   /**
    * Get all captured translation commands
    */
-  get commands(): ReadonlyArray<TranslationCommand> {
+  get commands(): ReadonlyArray<ITranslationCommand> {
     return this._commands
   }
 
@@ -32,21 +32,21 @@ export class MockTranslationExecutor implements ITranslationExecutor {
   /**
    * Get all translation commands (excluding write commands)
    */
-  get translationCommands(): ReadonlyArray<TranslationCommand> {
+  get translationCommands(): ReadonlyArray<ITranslationCommand> {
     return this._commands.filter(cmd => cmd.type === 'translate')
   }
 
   /**
    * Get all write commands (excluding translation commands)
    */
-  get writeCommands(): ReadonlyArray<TranslationCommand> {
+  get writeCommands(): ReadonlyArray<ITranslationCommand> {
     return this._commands.filter(cmd => cmd.type === 'write')
   }
 
   /**
    * Get commands for a specific source file
    */
-  getCommandsForFile(sourceFile: string): ReadonlyArray<TranslationCommand> {
+  getCommandsForFile(sourceFile: string): ReadonlyArray<ITranslationCommand> {
     return this._commands.filter(cmd => cmd.sourceFile === sourceFile)
   }
 
@@ -87,7 +87,7 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     sourceFile: string,
     isBackTranslation: boolean,
     _segmentPositions?: (number | string)[],
-  ): Promise<{ translations: string[]; stats: TranslationStats }> {
+  ): Promise<{ translations: string[]; stats: ITranslationStats }> {
     // Capture the translation command
     this._commands.push({
       type: 'translate',
@@ -103,7 +103,7 @@ export class MockTranslationExecutor implements ITranslationExecutor {
     // Return mock translated segments (just prefix with [TRANSLATED])
     const translations = segments.map(segment => `[TRANSLATED:${sourceLocale}->${targetLocale}] ${segment}`)
 
-    const stats: TranslationStats = {
+    const stats: ITranslationStats = {
       apiCalls: segments.length,
       cacheHits: 0,
       total: segments.length

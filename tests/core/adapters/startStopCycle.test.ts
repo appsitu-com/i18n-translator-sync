@@ -21,7 +21,7 @@ vi.mock('../../../src/core/coreConfig', () => ({
   })
 }))
 
-vi.mock('../../../src/core/translatorManager', () => ({
+vi.mock('../../../src/core/TranslatorManager', () => ({
   TranslatorManager: vi.fn().mockImplementation(() => ({
     startWatching: vi.fn().mockResolvedValue(undefined),
     dispose: vi.fn(),
@@ -30,7 +30,7 @@ vi.mock('../../../src/core/translatorManager', () => ({
   }))
 }))
 
-vi.mock('../../../src/core/tm/TranslationMemory', () => ({
+vi.mock('../../../src/core/tm/ITranslationMemory', () => ({
   JsonlTranslationMemory: vi.fn().mockImplementation(() => ({
     // minimal shape; tests don't call methods directly
     close: vi.fn()
@@ -38,11 +38,11 @@ vi.mock('../../../src/core/tm/TranslationMemory', () => ({
 }))
 
 // Now import modules under test
-import { TranslatorAdapter } from '../../../src/core/adapters/baseAdapter'
-import { Logger } from '../../../src/core/util/baseLogger'
-import { FileSystem } from '../../../src/core/util/fs'
-import { ConfigProvider } from '../../../src/core/coreConfig'
-import { WorkspaceWatcher } from '../../../src/core/util/watcher'
+import { TranslatorAdapter } from '../../../src/core/adapters/TranslatorAdapter'
+import { ILogger } from '../../../src/core/util/baseLogger'
+import { IFileSystem } from '../../../src/core/util/fs'
+import { IConfigProvider } from '../../../src/core/coreConfig'
+import { IWorkspaceWatcher } from '../../../src/core/util/watcher'
 
 // (previous mock declarations moved above imports)
 
@@ -56,7 +56,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
     // Mock implementation
   }
 
-  protected createWatcher(): WorkspaceWatcher {
+  protected createWatcher(): IWorkspaceWatcher {
     return {
       watch: vi.fn(),
       dispose: vi.fn()
@@ -66,9 +66,9 @@ class TestTranslatorAdapter extends TranslatorAdapter {
 
 describe('TranslatorAdapter Start-Stop Cycle', () => {
   let adapter: TestTranslatorAdapter
-  let mockLogger: Logger
-  let mockFileSystem: FileSystem
-  let mockConfigProvider: ConfigProvider
+  let mockLogger: ILogger
+  let mockFileSystem: IFileSystem
+  let mockConfigProvider: IConfigProvider
 
   beforeEach(() => {
     // Create mocks

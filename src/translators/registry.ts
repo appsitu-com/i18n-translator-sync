@@ -1,24 +1,24 @@
-import type { ResolvedTranslatorEngine, Translator, TranslatorEngine } from './types'
+import type { ResolvedTranslatorEngine, ITranslator, TranslatorEngine } from './types'
 import { selectEngine } from './auto'
 
 const DEFAULT_TRANSLATION_LIMIT = Number.MAX_SAFE_INTEGER
 const DEFAULT_TRANSLATION_MAX_CHARS = Number.MAX_SAFE_INTEGER
 const DEFAULT_TRANSLATION_MAX_ITEM_CHARS = Number.MAX_SAFE_INTEGER
 
-export interface TranslatorRegistration {
+export interface ITranslatorRegistration {
   limit?: number
   maxchars?: number
   maxitemchars?: number
 }
 
-export interface RegisteredTranslator {
-  translator: Translator
+export interface IRegisteredTranslator {
+  translator: ITranslator
   limit: number
   maxchars: number
   maxitemchars: number
 }
 
-const REGISTRY = new Map<string, RegisteredTranslator>()
+const REGISTRY = new Map<string, IRegisteredTranslator>()
 
 function normalizePositiveInteger(value: number | undefined, fallback: number): number {
   if (typeof value !== 'number') {
@@ -32,7 +32,7 @@ function normalizePositiveInteger(value: number | undefined, fallback: number): 
   return Math.floor(value)
 }
 
-export function registerTranslator(t: Translator, registration: TranslatorRegistration = {}) {
+export function registerTranslator(t: ITranslator, registration: ITranslatorRegistration = {}) {
   const maxchars = normalizePositiveInteger(registration.maxchars, DEFAULT_TRANSLATION_MAX_CHARS)
   const maxitemchars = Math.min(
     normalizePositiveInteger(registration.maxitemchars, DEFAULT_TRANSLATION_MAX_ITEM_CHARS),
@@ -47,15 +47,16 @@ export function registerTranslator(t: Translator, registration: TranslatorRegist
   })
 }
 
-export function getTranslator(name: string): Translator {
+export function getTranslator(name: string): ITranslator {
   return getRegisteredTranslator(name).translator
 }
 
-export function getRegisteredTranslator(name: string): RegisteredTranslator {
+export function getRegisteredTranslator(name: string): IRegisteredTranslator {
   const t = REGISTRY.get(name)
   if (!t) throw new Error(`Translator not registered: ${name}`)
   return t
 }
+
 
 export function deregisterTranslator(name: string) {
   REGISTRY.delete(name)

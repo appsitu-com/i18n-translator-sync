@@ -6,7 +6,7 @@ import remarkMdx from 'remark-mdx';
 import yaml from 'js-yaml'
 
 import { visit } from 'unist-util-visit'
-import { ExcludeOptions } from './structured'
+import { IExcludeOptions } from './structured'
 
 export type MarkdownExtraction = {
   kind: 'markdown';
@@ -24,7 +24,7 @@ export type MarkdownExtraction = {
 export function extractMarkdownOrMDX(
   markdown: string,
   frontmatterKeys?: string[],
-  excludeOptions?: ExcludeOptions
+  excludeOptions?: IExcludeOptions
 ): MarkdownExtraction {
   const processor = remark().use(frontmatter, ['yaml']).use(remarkMdx).use(stringify, { bullet: '-' });
 
@@ -46,7 +46,7 @@ export function extractMarkdownOrMDX(
     return { kind: 'markdown', segments, rebuild }
 }
 
-function extractFromAST(tree: any, frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): string[] {
+function extractFromAST(tree: any, frontmatterKeys?: string[], excludeOptions?: IExcludeOptions): string[] {
   const segments: string[] = []
   visit(tree, (node) => {
     for (const attr of translateMarkdownAttributes(node.type)) {
@@ -64,7 +64,7 @@ function extractFromAST(tree: any, frontmatterKeys?: string[], excludeOptions?: 
     return segments
   }
 
-  function updateASTWithTranslations(tree: any, translations: string[], frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): void {
+  function updateASTWithTranslations(tree: any, translations: string[], frontmatterKeys?: string[], excludeOptions?: IExcludeOptions): void {
     visit(tree, (node) => {
       for (const attr of translateMarkdownAttributes(node.type)) {
         const val = node[attr]
@@ -99,7 +99,7 @@ function translateMarkdownAttributes(nodeType: string): string[] {
     }
   }
 
-  function extractFromFrontMatter(value: string, segments: string[], frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): void {
+  function extractFromFrontMatter(value: string, segments: string[], frontmatterKeys?: string[], excludeOptions?: IExcludeOptions): void {
     if (!frontmatterKeys || frontmatterKeys.length === 0) return
     const frontmatter = yaml.load(value) as Record<string, any> // parse frontmatter as YAML
     const keys = Object.keys(frontmatter)
@@ -113,7 +113,7 @@ function translateMarkdownAttributes(nodeType: string): string[] {
     }
   }
 
- function updateFrontmatterWithTranslations(value: string, translations: string[], frontmatterKeys?: string[], excludeOptions?: ExcludeOptions): string {
+ function updateFrontmatterWithTranslations(value: string, translations: string[], frontmatterKeys?: string[], excludeOptions?: IExcludeOptions): string {
     if (!frontmatterKeys || frontmatterKeys.length === 0) return value
 
     const frontmatter = yaml.load(value) as Record<string, any> // parse frontmatter as YAML
@@ -134,7 +134,7 @@ function translateMarkdownAttributes(nodeType: string): string[] {
   }
 
 /** Check if a front matter key should be excluded from translation. */
-function isFrontmatterKeyExcluded(key: string, options?: ExcludeOptions): boolean {
+function isFrontmatterKeyExcluded(key: string, options?: IExcludeOptions): boolean {
   if (!options) return false
   const excludeKeys = options.excludeKeys ?? []
   const excludeKeyPaths = options.excludeKeyPaths ?? []

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable } from '../../../src/core/util/watcher';
+import { IFileWatcher, IWorkspaceWatcher, IDisposable, toDisposable } from '../../../src/core/util/watcher';
 import { IUri } from '../../../src/core/util/fs';
 
 describe('Watcher', () => {
@@ -18,14 +18,14 @@ describe('Watcher', () => {
   describe('Interface contracts', () => {
     // Test to ensure type safety and contract adherence
     it('should define proper interfaces', () => {
-      // Create a minimal implementation of FileWatcher to verify interface
-      const mockFileWatcher: FileWatcher = {
+      // Create a minimal implementation of IFileWatcher to verify interface
+      const mockFileWatcher: IFileWatcher = {
         watch: vi.fn(() => ({ dispose: vi.fn() })),
         dispose: vi.fn()
       };
 
-      // Create a minimal implementation of WorkspaceWatcher to verify interface
-      const mockWorkspaceWatcher: WorkspaceWatcher = {
+      // Create a minimal implementation of IWorkspaceWatcher to verify interface
+      const mockWorkspaceWatcher: IWorkspaceWatcher = {
         createFileSystemWatcher: vi.fn(() => mockFileWatcher),
         onDidRenameFiles: vi.fn(() => ({ dispose: vi.fn() })),
         dispose: vi.fn()

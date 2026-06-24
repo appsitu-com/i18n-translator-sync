@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { resolveEnvDeep, resolveEnvObjectWithDecryption } from '../../../src/core/util/environmentSetup'
-import { Logger } from '../../../src/core/util/baseLogger'
+import { ILogger } from '../../../src/core/util/baseLogger'
 
 describe('Environment Setup - File Path Resolution', () => {
-  let mockLogger: Logger
+  let mockLogger: ILogger
 
   beforeEach(() => {
     mockLogger = {

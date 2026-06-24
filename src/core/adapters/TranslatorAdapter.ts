@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { toAbsPath } from '../util/pathShared';
-import { TranslatorManager } from '../translatorManager';
+import { TranslatorManager } from '../TranslatorManager';
 import { loadProjectConfig, toProjectConfig, TranslateProjectConfig } from '../coreConfig';
 import { ILogger } from '../util/baseLogger';
 import { IFileSystem, IUri } from '../util/fs';

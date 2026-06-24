@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import type { Logger } from '../../../../src/core/util/baseLogger'
+import type { ILogger } from '../../../../src/core/util/baseLogger'
 import type { TmEntry } from '../../../../src/core/tm/jsonlTmTypes'
-import { V2ToV3JsonlTmMigration } from '../../../../src/core/tm/migrations/v2ToV3JsonlTmMigration'
+import { V2ToV3JsonlTmMigration } from '../../../../src/core/tm/migrations/V2ToV3JsonlTmMigration'
 
-function createMockLogger(): Logger {
+function createMockLogger(): ILogger {
   return {
     debug: () => undefined,
     info: () => undefined,

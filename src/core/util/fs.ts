@@ -24,7 +24,7 @@ export interface IUri {
 /**
  * File stats interface
  */
-export interface FileStat {
+export interface IFileStat {
   /**
    * File size in bytes
    */
@@ -46,7 +46,7 @@ export interface FileStat {
  * This provides a common abstraction layer that can be implemented
  * for both VSCode and Node.js environments
  */
-export interface FileSystem {
+export interface IFileSystem {
   /**
    * Read file content as string
    */
@@ -90,7 +90,7 @@ export interface FileSystem {
   /**
    * Get file stats (size, creation time, modification time)
    */
-  stat(uri: IUri): Promise<FileStat>
+  stat(uri: IUri): Promise<IFileStat>
 
   /**
    * Check if a path is a directory
@@ -101,7 +101,8 @@ export interface FileSystem {
 /**
  * Node.js file system implementation
  */
-export class NodeFileSystem implements FileSystem {
+
+export class NodeFileSystem implements IFileSystem {
   async readFile(uri: IUri): Promise<string> {
     return fs.readFile(uri.fsPath, { encoding: 'utf8' })
   }
@@ -176,7 +177,7 @@ export class NodeFileSystem implements FileSystem {
   /**
    * Get file stats
    */
-  async stat(uri: IUri): Promise<FileStat> {
+  async stat(uri: IUri): Promise<IFileStat> {
     try {
       const stats = await fs.stat(uri.fsPath)
       return {

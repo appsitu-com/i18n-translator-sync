@@ -18,7 +18,7 @@ const createMockStatusBarInstance = () => ({
 vi.mock('../src/vscode/statusBar', () => ({
   VSCodeStatusBarManager: vi.fn(() => createMockStatusBarInstance()),
   MockStatusBarManager: vi.fn(() => createMockStatusBarInstance()),
-  TranslatorState: {}
+  ITranslatorState: {}
 }))
 // Mock the config module
 vi.mock('../src/config', () => {

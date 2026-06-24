@@ -1,12 +1,12 @@
-import type { Logger } from '../../util/baseLogger'
+import type { ILogger } from '../../util/baseLogger'
 import type { TmEntry } from '../jsonlTmTypes'
 
 export type JsonlTmMigrationContext = {
   workspacePath: string
-  logger: Logger
+  logger: ILogger
 }
 
-export interface JsonlTmMigration {
+export interface IJsonlTmMigration {
   readonly fromVersion: number
   readonly toVersion: number
   migrate(entries: TmEntry[], context: JsonlTmMigrationContext): TmEntry[]
@@ -18,10 +18,22 @@ export type JsonlTmMigrationResult = {
   finalVersion: number
 }
 
-export class JsonlTmMigrator {
-  private readonly migrationByFromVersion = new Map<number, JsonlTmMigration>()
+export type JsonlTmMigratorRunParams = {
+  entries: TmEntry[]
+  schemaVersion: number
+  targetVersion: number
+  context: JsonlTmMigrationContext
+}
 
-  constructor(migrations: JsonlTmMigration[]) {
+export interface IJsonlTmMigrator {
+  run(params: JsonlTmMigratorRunParams): JsonlTmMigrationResult
+}
+
+
+export class JsonlTmMigrator implements IJsonlTmMigrator {
+  private readonly migrationByFromVersion = new Map<number, IJsonlTmMigration>()
+
+  constructor(migrations: IJsonlTmMigration[]) {
     for (const migration of migrations) {
       this.migrationByFromVersion.set(migration.fromVersion, migration)
     }
@@ -32,12 +44,7 @@ export class JsonlTmMigrator {
     schemaVersion,
     targetVersion,
     context
-  }: {
-    entries: TmEntry[]
-    schemaVersion: number
-    targetVersion: number
-    context: JsonlTmMigrationContext
-  }): JsonlTmMigrationResult {
+  }: JsonlTmMigratorRunParams): JsonlTmMigrationResult {
     if (schemaVersion >= targetVersion) {
       return {
         entries,

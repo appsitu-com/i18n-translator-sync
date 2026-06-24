@@ -1,9 +1,9 @@
 import { ITranslationExecutor } from './translationExecutor'
-import { IUri, FileSystem } from './util/fs'
-import { Logger } from './util/baseLogger'
-import { TranslationMemory } from './tm/TranslationMemory'
+import { IUri, IFileSystem } from './util/fs'
+import { ILogger } from './util/baseLogger'
+import { ITranslationMemory } from './tm/ITranslationMemory'
 import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
-import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
+import { bulkTranslateWithEngine, ITranslationStats } from '../bulkTranslate'
 import {
   snapshotEnvVars,
   resolveAndValidateEngineConfig,
@@ -25,9 +25,9 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
   >()
 
   constructor(
-    private fileSystem: FileSystem,
-    private logger: Logger,
-    private tm: TranslationMemory,
+    private fileSystem: IFileSystem,
+    private logger: ILogger,
+    private tm: ITranslationMemory,
     private workspacePath: string,
     private getPassphrase?: GetPassphrase
   ) {}
@@ -45,7 +45,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     sourceFile: string,
     _isBackTranslation: boolean,
     segmentPositions?: (number | string)[],
-  ): Promise<{ translations: string[]; stats: TranslationStats }> {
+  ): Promise<{ translations: string[]; stats: ITranslationStats }> {
     // If using copy engine, just return original segments
     if (engineName === 'copy') {
       return {

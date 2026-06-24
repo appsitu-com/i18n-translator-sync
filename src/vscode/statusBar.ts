@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 /**
  * Represents the current state of the translator
  */
-export interface TranslatorState {
+export interface ITranslatorState {
   isRunning: boolean;
   isInitialized: boolean;
 }
@@ -11,7 +11,7 @@ export interface TranslatorState {
 /**
  * Interface for managing the status bar item
  */
-export interface StatusBarManager {
+export interface IStatusBarManager {
   /**
    * Create and show the status bar item
    */
@@ -20,7 +20,7 @@ export interface StatusBarManager {
   /**
    * Update the status bar based on the current translator state
    */
-  updateStatus(state: TranslatorState): void;
+  updateStatus(state: ITranslatorState): void;
 
   /**
    * Hide and dispose the status bar item
@@ -31,7 +31,7 @@ export interface StatusBarManager {
 /**
  * VSCode implementation of the status bar manager
  */
-export class VSCodeStatusBarManager implements StatusBarManager {
+export class VSCodeStatusBarManager implements IStatusBarManager {
   private statusBarItem: vscode.StatusBarItem | null = null;
   private context: vscode.ExtensionContext;
 
@@ -60,7 +60,7 @@ export class VSCodeStatusBarManager implements StatusBarManager {
     }
   }
 
-  updateStatus(state: TranslatorState): void {
+  updateStatus(state: ITranslatorState): void {
     if (!this.statusBarItem) {
       return;
     }
@@ -91,17 +91,17 @@ export class VSCodeStatusBarManager implements StatusBarManager {
 /**
  * Mock implementation for testing
  */
-export class MockStatusBarManager implements StatusBarManager {
+export class MockStatusBarManager implements IStatusBarManager {
   public isCreated = false;
   public isDisposed = false;
-  public lastState: TranslatorState | null = null;
+  public lastState: ITranslatorState | null = null;
   public updateCount = 0;
 
   create(): void {
     this.isCreated = true;
   }
 
-  updateStatus(state: TranslatorState): void {
+  updateStatus(state: ITranslatorState): void {
     this.lastState = state;
     this.updateCount++;
   }
@@ -111,3 +111,4 @@ export class MockStatusBarManager implements StatusBarManager {
     this.isCreated = false;
   }
 }
+

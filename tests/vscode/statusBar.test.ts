@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { MockStatusBarManager, TranslatorState } from '../../src/vscode/statusBar';
+import { MockStatusBarManager, ITranslatorState } from '../../src/vscode/statusBar';
 
-describe('StatusBarManager', () => {
+describe('IStatusBarManager', () => {
   let statusBarManager: MockStatusBarManager;
 
   beforeEach(() => {
@@ -29,7 +29,7 @@ describe('StatusBarManager', () => {
     });
 
     it('should track status updates', () => {
-      const state: TranslatorState = { isRunning: true, isInitialized: true };
+      const state: ITranslatorState = { isRunning: true, isInitialized: true };
 
       expect(statusBarManager.updateCount).toBe(0);
       expect(statusBarManager.lastState).toBeNull();
@@ -41,8 +41,8 @@ describe('StatusBarManager', () => {
     });
 
     it('should handle multiple status updates', () => {
-      const state1: TranslatorState = { isRunning: false, isInitialized: true };
-      const state2: TranslatorState = { isRunning: true, isInitialized: true };
+      const state1: ITranslatorState = { isRunning: false, isInitialized: true };
+      const state2: ITranslatorState = { isRunning: true, isInitialized: true };
 
       statusBarManager.updateStatus(state1);
       statusBarManager.updateStatus(state2);
@@ -52,9 +52,9 @@ describe('StatusBarManager', () => {
     });
   });
 
-  describe('TranslatorState', () => {
+  describe('ITranslatorState', () => {
     it('should handle uninitialized state', () => {
-      const state: TranslatorState = { isRunning: false, isInitialized: false };
+      const state: ITranslatorState = { isRunning: false, isInitialized: false };
 
       statusBarManager.updateStatus(state);
 
@@ -65,7 +65,7 @@ describe('StatusBarManager', () => {
     });
 
     it('should handle initialized but not running state', () => {
-      const state: TranslatorState = { isRunning: false, isInitialized: true };
+      const state: ITranslatorState = { isRunning: false, isInitialized: true };
 
       statusBarManager.updateStatus(state);
 
@@ -76,7 +76,7 @@ describe('StatusBarManager', () => {
     });
 
     it('should handle running state', () => {
-      const state: TranslatorState = { isRunning: true, isInitialized: true };
+      const state: ITranslatorState = { isRunning: true, isInitialized: true };
 
       statusBarManager.updateStatus(state);
 

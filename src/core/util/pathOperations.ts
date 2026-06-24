@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { FileSystem, IUri } from './fs'
+import { IFileSystem, IUri } from './fs'
 import { TranslateProjectConfig } from '../coreConfig'
 import { normalizePath, containsLocale, replaceLocaleInPath, replaceLocaleInPathForBackTranslation } from './pathShared'
 
@@ -199,7 +199,7 @@ export function createBackTranslationPath(
  * @param translationTargetLocale - The locale we're translating TO
  */
 export function createTargetUri(
-  fs: FileSystem,
+  fs: IFileSystem,
   workspacePath: string,
   translationSourceLocale: string,
   translationTargetLocale: string,
@@ -224,7 +224,7 @@ export function createTargetUri(
  * @param forwardTranslationTargetLocale - The locale we translated TO in forward translation
  */
 export function createBackTranslationUri(
-  fs: FileSystem,
+  fs: IFileSystem,
   workspacePath: string,
   forwardTranslationTargetLocale: string,
   relativePath: string,

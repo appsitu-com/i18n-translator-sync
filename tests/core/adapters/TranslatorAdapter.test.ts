@@ -1,18 +1,18 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { TranslatorAdapter } from '../../../src/core/adapters/baseAdapter';
-import { Logger } from '../../../src/core/util/baseLogger';
-import { FileSystem, IUri } from '../../../src/core/util/fs';
-import { ConfigProvider } from '../../../src/core/coreConfig';
-import { WorkspaceWatcher } from '../../../src/core/util/watcher';
-import { TranslatorManager } from '../../../src/core/translatorManager';
-import { JsonlTranslationMemory, TranslationMemory } from '../../../src/core/tm/TranslationMemory';
+import { TranslatorAdapter } from '../../../src/core/adapters/TranslatorAdapter';
+import { ILogger } from '../../../src/core/util/baseLogger';
+import { IFileSystem, IUri } from '../../../src/core/util/fs';
+import { IConfigProvider } from '../../../src/core/coreConfig';
+import { IWorkspaceWatcher } from '../../../src/core/util/watcher';
+import { TranslatorManager } from '../../../src/core/TranslatorManager';
+import { JsonlTranslationMemory, ITranslationMemory } from '../../../src/core/tm/ITranslationMemory';
 import * as path from 'path';
 import * as coreConfig from '../../../src/core/coreConfig';
 
 import { createTranslatorManagerMock } from '../../mocks/translatorManager';
 
 // Mock dependencies
-vi.mock('../../../src/core/translatorManager', () => {
+vi.mock('../../../src/core/TranslatorManager', () => {
   return {
     TranslatorManager: vi.fn().mockImplementation(() => ({
       startWatching: vi.fn().mockResolvedValue(undefined),
@@ -27,7 +27,7 @@ vi.mock('../../../src/core/translatorManager', () => {
   };
 });
 
-vi.mock('../../../src/core/tm/TranslationMemory', () => ({
+vi.mock('../../../src/core/tm/ITranslationMemory', () => ({
   JsonlTranslationMemory: vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     exportCSV: vi.fn().mockResolvedValue(undefined),
@@ -68,7 +68,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
     // no-op for tests
   }
 
-  protected createWatcher(): WorkspaceWatcher {
+  protected createWatcher(): IWorkspaceWatcher {
     return {
       createFileSystemWatcher: vi.fn().mockReturnValue({
         onDidCreate: vi.fn(),
@@ -101,7 +101,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
   }
 
   // Expose protected methods for testing
-  public async testGetCache(): Promise<TranslationMemory | undefined> {
+  public async testGetCache(): Promise<ITranslationMemory | undefined> {
     return await this.getTm();
   }
 
@@ -120,9 +120,9 @@ class TestTranslatorAdapter extends TranslatorAdapter {
 
 describe('TranslatorAdapter', () => {
   let adapter: TestTranslatorAdapter;
-  let mockLogger: Logger;
-  let mockFileSystem: FileSystem;
-  let mockConfigProvider: ConfigProvider;
+  let mockLogger: ILogger;
+  let mockFileSystem: IFileSystem;
+  let mockConfigProvider: IConfigProvider;
   const testWorkspacePath = '/test/workspace';
 
   beforeEach(() => {
@@ -162,7 +162,7 @@ describe('TranslatorAdapter', () => {
       // Mock implementations for methods used in the base adapter
       fileExistsSync: vi.fn().mockReturnValue(true),
       directoryExistsSync: vi.fn().mockReturnValue(true)
-    } as unknown as FileSystem;
+    } as unknown as IFileSystem;
 
     mockConfigProvider = {
       load: vi.fn().mockResolvedValue(undefined),

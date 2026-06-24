@@ -52,10 +52,10 @@ package "Core" {
   }
 
   package "Core Abstractions" {
-    interface "FileSystem" as IFileSystem
-    interface "Logger" as ILogger
-    interface "WorkspaceWatcher" as IWatcher
-    interface "ConfigProvider" as IConfig
+    interface "IFileSystem" as IFileSystem
+    interface "ILogger" as ILogger
+    interface "IWorkspaceWatcher" as IWatcher
+    interface "IConfigProvider" as IConfig
   }
 }
 
@@ -118,7 +118,7 @@ The core layer contains all platform-independent functionality and abstractions.
 
 ### Key Abstractions
 
-#### FileSystem (`src/core/util/fs.ts`)
+#### IFileSystem (`src/core/util/fs.ts`)
 Provides platform-agnostic file operations:
 
 ```typescript
@@ -139,7 +139,7 @@ export interface URI {
   path: string
 }
 
-export interface FileSystem {
+export interface IFileSystem {
   /**
    * Read file content as string
    */
@@ -182,7 +182,7 @@ export interface FileSystem {
 }
 ```
 
-#### Logger (`src/core/util/logger.ts`)
+#### ILogger (`src/core/util/baseLogger.ts`)
 Provides platform-agnostic logging:
 
 ```typescript
@@ -193,7 +193,7 @@ export enum LogLevel {
   Error = 3
 }
 
-export interface Logger {
+export interface ILogger {
   setLevel(level: LogLevel): void;
   info(message: string): void;
   warn(message: string): void;
@@ -204,15 +204,15 @@ export interface Logger {
 
 #### Watcher (`src/core/util/watcher.ts`)
 Provides platform-agnostic file watching:
-- `FileWatcher`: Interface for watching file changes
-- `WorkspaceWatcher`: Interface for watching workspace-level changes
-- `Disposable`: Interface for cleanup operations
+- `IFileWatcher`: Interface for watching file changes
+- `IWorkspaceWatcher`: Interface for watching workspace-level changes
+- `IDisposable`: Interface for cleanup operations
 
-#### ConfigProvider (`src/core/config.ts`)
+#### IConfigProvider (`src/core/coreConfig.ts`)
 Provides platform-agnostic configuration access:
 
 ```typescript
-export interface ConfigProvider {
+export interface IConfigProvider {
   get<T>(section: string, defaultValue?: T): T;
   update(section: string, value: any): Promise<void>;
 }
@@ -229,10 +229,10 @@ Central orchestrator for all translation operations:
 ```typescript
 export class TranslatorManager {
   constructor(
-    fileSystem: FileSystem,
-    logger: Logger,
-    tm: TranslationMemory,
-    configProvider: ConfigProvider
+    fileSystem: IFileSystem,
+    logger: ILogger,
+    tm: ITranslationMemory,
+    configProvider: IConfigProvider
   ) { /* ... */ }
 
   // Core operations
@@ -280,11 +280,11 @@ export class VSCodeAdapter {
 ```
 
 #### VSCodeFileSystem (`src/vscode/filesystem.ts`)
-- Implements `FileSystem` using VSCode's workspace APIs
+- Implements `IFileSystem` using VSCode's workspace APIs
 - Wraps VSCode's `Uri` objects with our `URI` interface
 
 #### VSCodeLogger (`src/vscode/logger.ts`)
-- Implements `Logger` using VSCode's output channel
+- Implements `ILogger` using VSCode's output channel
 - Provides visibility within the VSCode UI
 
 #### VSCodeWorkspaceWatcher (`src/vscode/watcher.ts`)
@@ -319,32 +319,32 @@ export class CliCommands {
 ```
 
 #### NodeFileSystem (`src/core/util/fs.ts`)
-- Node.js implementation of FileSystem interface
+- Node.js implementation of IFileSystem interface
 - Uses Node.js fs/promises API
 
-#### ConsoleLogger (`src/core/util/logger.ts`)
-- Console implementation of Logger interface
+#### ConsoleLogger (`src/core/util/baseLogger.ts`)
+- Console implementation of ILogger interface
 - Uses standard console for output
 
 #### CLIWorkspaceWatcher (`src/cli/watcher.ts`)
-- CLI implementation of WorkspaceWatcher interface
+- CLI implementation of IWorkspaceWatcher interface
 - Uses file system watcher library for file watching
 
 ```typescript
-export class CLIWorkspaceWatcher implements WorkspaceWatcher {
+export class CLIWorkspaceWatcher implements IWorkspaceWatcher {
   constructor(
-    private fs: FileSystem,
-    private logger: Logger,
+    private fs: IFileSystem,
+    private logger: ILogger,
     private workspacePath: string
   ) { /* ... */ }
 
-  createFileSystemWatcher(pattern: string): FileWatcher { /* ... */ }
+  createFileSystemWatcher(pattern: string): IFileWatcher { /* ... */ }
   dispose(): void { /* ... */ }
 }
 ```
 
 #### CLIConfigProvider (`src/cli/config.ts`)
-- CLI implementation of ConfigProvider interface
+- CLI implementation of IConfigProvider interface
 - Uses JSON file for configuration storage
 
 ## Integration Points and Data Flow
@@ -453,7 +453,7 @@ Adapter --> Entry: Command completed
    - TranslatorManager orchestrates processing
 
 2. **Configuration Loading**
-   - Platform-specific ConfigProvider loads configuration
+   - Platform-specific IConfigProvider loads configuration
    - TranslatorManager applies configuration to the process
 
 3. **Translation Process**

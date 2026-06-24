@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Translator, BulkTranslateOpts } from './types'
+import type { ITranslator, IBulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { withRetry } from '../util/retry'
 
@@ -68,7 +68,7 @@ const LOCALE_MAP: Record<string, string> = {
   'iu-Latn': 'iu'
 }
 
-export class MyMemoryTranslator implements Translator<IMyMemoryConfig> {
+export class MyMemoryTranslator implements ITranslator<IMyMemoryConfig> {
   name = 'mymemory'
 
   // Default normalizer: lowercase language, keep region if any
@@ -81,7 +81,7 @@ export class MyMemoryTranslator implements Translator<IMyMemoryConfig> {
     return LOCALE_MAP[locale] ?? this.defaultNorm(locale)
   }
 
-  async translateMany(texts: string[], _contexts: string[], opts: BulkTranslateOpts<IMyMemoryConfig>) {
+  async translateMany(texts: string[], _contexts: string[], opts: IBulkTranslateOpts<IMyMemoryConfig>) {
     const cfg = opts.apiConfig
     const endpoint = cfg.endpoint.replace(/\/+$/, '')
     const email = cfg.email

@@ -1,14 +1,14 @@
 import { PassphraseManager } from '../core/secrets/passphraseManager'
 import * as vscode from 'vscode'
-import { TranslatorAdapter } from '../core/adapters/baseAdapter'
-import { WorkspaceWatcher } from '../core/util/watcher'
+import { TranslatorAdapter } from '../core/adapters/TranslatorAdapter'
+import { IWorkspaceWatcher } from '../core/util/watcher'
 import { VSCodeFileSystem } from './filesystem'
 import { VSCodeWorkspaceWatcher } from './watcher'
 import { VsCodeConfigProvider } from './vscodeConfig'
 import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
-import { Logger } from '../core/util/baseLogger'
+import { ILogger } from '../core/util/baseLogger'
 import { loadProjectConfig } from '../core/coreConfig'
-import { TranslationMemory } from '../core/tm/TranslationMemory'
+import { ITranslationMemory } from '../core/tm/ITranslationMemory'
 
 /**
  * VSCode adapter for the TranslatorManager
@@ -18,7 +18,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   private initialized = false
   private passphraseManager: PassphraseManager | null = null
 
-  constructor(logger: Logger) {
+  constructor(logger: ILogger) {
     // Create platform-specific components using the provided output channel
     const fileSystem = new VSCodeFileSystem()
     const configProvider = new VsCodeConfigProvider()
@@ -117,7 +117,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   /**
    * Implementation of the abstract method to create a workspace watcher for VSCode
    */
-  protected createWatcher(): WorkspaceWatcher {
+  protected createWatcher(): IWorkspaceWatcher {
     // Get the workspace folder for the watcher
     const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
     if (!workspaceFolder) {
@@ -311,7 +311,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   /**
    * Get the cache instance (public accessor for extension commands)
    */
-  getTmInstance(): TranslationMemory | undefined {
+  getTmInstance(): ITranslationMemory | undefined {
     return this.tm
   }
 

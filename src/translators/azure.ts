@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Translator, BulkTranslateOpts } from './types'
+import type { ITranslator, IBulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { randomUUID } from 'crypto'
@@ -31,10 +31,10 @@ export const AzureConfigSchema = z.object({
 /** Inferred Azure config type */
 export type IAzureConfig = z.infer<typeof AzureConfigSchema>
 
-export const AzureTranslator: Translator<IAzureConfig> = {
+export const AzureTranslator: ITranslator<IAzureConfig> = {
   name: 'azure',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IAzureConfig>) {
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<IAzureConfig>) {
     const cfg = opts.apiConfig
     const endpoint = cfg.endpoint.replace(/\/+$/, '')
     const apiKey = cfg.apiKey

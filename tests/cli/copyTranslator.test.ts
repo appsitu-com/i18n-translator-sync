@@ -9,8 +9,8 @@ import { ConsoleLogger } from '../../src/core/util/baseLogger';
 import { CopyTranslator } from '../../src/translators/copy';
 import type { ICopyConfig } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
-import { TranslatorPipeline } from '../../src/core/pipeline';
-import { JsonlTranslationMemory } from '../../src/core/tm/TranslationMemory';
+import { TranslatorPipeline } from '../../src/core/TranslatorPipeline';
+import { JsonlTranslationMemory } from '../../src/core/tm/ITranslationMemory';
 
 // Helper function to create temp config file
 async function createTempConfigFile(translator?: { copy: any }) {

@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as dotenv from 'dotenv';
 import { PassphraseManager } from './passphraseManager';
 import { encryptApiKey, isEncrypted } from './keyEncryption';
-import { Logger } from '../util/baseLogger';
+import { ILogger } from '../util/baseLogger';
 import { TRANSLATOR_ENV } from '../constants';
 
 /**
@@ -13,7 +13,7 @@ import { TRANSLATOR_ENV } from '../constants';
 export async function setupEncryption(
   context: vscode.ExtensionContext,
   passphraseManager: PassphraseManager,
-  logger: Logger
+  logger: ILogger
 ): Promise<void> {
   try {
     // Prompt for new passphrase

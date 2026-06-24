@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FileSystem, IUri } from '../core/util/fs';
+import { IFileSystem, IUri } from '../core/util/fs';
 
 /**
  * VSCode URI wrapper for core URI interface
@@ -41,7 +41,7 @@ export function toVSCodeUri(uri: IUri): vscode.Uri {
 /**
  * VSCode file system implementation
  */
-export class VSCodeFileSystem implements FileSystem {
+export class VSCodeFileSystem implements IFileSystem {
   async readFile(uri: IUri): Promise<string> {
     const vscodeUri = uri instanceof VSCodeUri ? uri.uri : vscode.Uri.file(uri.fsPath);
     const bytes = await vscode.workspace.fs.readFile(vscodeUri);

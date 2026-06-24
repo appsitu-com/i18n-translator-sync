@@ -37,7 +37,7 @@ export const window = {
   }))
 }
 
-// Simple mock for workspace.fs - doesn't need to be a full FileSystem implementation
+// Simple mock for workspace.fs - doesn't need to be a full IFileSystem implementation
 const simpleFileSystemMock = {
   readFile: vi.fn(),
   writeFile: vi.fn(),
@@ -103,9 +103,9 @@ export const EventEmitter = vi.fn().mockImplementation(() => ({
 
 export const Position = vi.fn()
 export const Range = vi.fn()
-export const Disposable = {
+export const IDisposable = {
   from: vi.fn()
 }
 export const ThemeColor = vi.fn()
 
-export default { window, workspace, Uri, commands, FileType, StatusBarAlignment, languages, EventEmitter, Position, Range, Disposable, ThemeColor }
+export default { window, workspace, Uri, commands, FileType, StatusBarAlignment, languages, EventEmitter, Position, Range, IDisposable, ThemeColor }

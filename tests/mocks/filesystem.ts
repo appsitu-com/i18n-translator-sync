@@ -1,10 +1,10 @@
 import { vi } from 'vitest';
-import { FileSystem, IUri } from '../../src/core/util/fs';
+import { IFileSystem, IUri } from '../../src/core/util/fs';
 
 /**
- * Creates a mock FileSystem with the given files
+ * Creates a mock IFileSystem with the given files
  */
-export function createMockFileSystem(files: Record<string, string> = {}): FileSystem {
+export function createMockFileSystem(files: Record<string, string> = {}): IFileSystem {
   // Normalize all paths to use forward slashes for consistent testing
   const normalizedFiles: Record<string, string> = {};
   for (const [path, content] of Object.entries(files)) {

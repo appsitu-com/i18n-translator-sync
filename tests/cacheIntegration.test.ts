@@ -8,7 +8,7 @@ describe('Cache Integration - Separator Consistency', () => {
   it('should use :: separator consistently between bulkTranslate and cache', () => {
     // The separator must match between:
     // 1. bulkTranslateWithEngine in src/bulkTranslate.ts
-    // 2. cache.getMany in src/core/tm/jsonlTranslationMemory.ts
+    // 2. cache.getMany in src/core/tm/JsonlTranslationMemory.ts
 
     const BULKTRANSLATE_SEPARATOR = '::'
     const CACHE_SEPARATOR = '::'

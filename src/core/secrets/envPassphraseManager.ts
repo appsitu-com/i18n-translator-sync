@@ -1,4 +1,4 @@
-import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
+import { ILogger, NO_OP_LOGGER } from '../util/baseLogger'
 import { IPassphraseManager } from './passphraseManager'
 
 /**
@@ -7,7 +7,7 @@ import { IPassphraseManager } from './passphraseManager'
 export class EnvPassphraseManager implements IPassphraseManager {
   private passphrase: string | undefined
 
-  constructor(private readonly envVar: string = 'TRANSLATOR_KEY', private readonly logger: Logger = NO_OP_LOGGER) {}
+  constructor(private readonly envVar: string = 'TRANSLATOR_KEY', private readonly logger: ILogger = NO_OP_LOGGER) {}
 
   async loadPassphrase(): Promise<void> {
     this.passphrase = process.env[this.envVar]

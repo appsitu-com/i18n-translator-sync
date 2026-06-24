@@ -8,12 +8,12 @@ import { extractJSON, JsonExtraction } from './json'
 import { extractMarkdownOrMDX, MarkdownExtraction } from './markdown'
 import { extractYAML } from './yaml'
 import { extractTypeScript } from './typescript'
-import { ExcludeOptions } from './structured'
+import { IExcludeOptions } from './structured'
 
 export function extractForFile(
   filename: string,
   content: string,
-  options?: ExcludeOptions
+  options?: IExcludeOptions
 ): JsonExtraction | MarkdownExtraction {
   const lowerFilename = filename.toLowerCase()
 

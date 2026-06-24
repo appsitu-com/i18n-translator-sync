@@ -6,16 +6,16 @@ import {
   deregisterTranslator,
   pickEngine
 } from '../../src/translators/registry'
-import type { Translator } from '../../src/translators/types'
+import type { ITranslator } from '../../src/translators/types'
 
 describe('translators/registry', () => {
   // Mock translator for testing
-  const mockTranslator: Translator = {
+  const mockTranslator: ITranslator = {
     name: 'test-translator',
     translateMany: async (texts: string[]) => texts.map(() => 'translated')
   }
 
-  const mockTranslator2: Translator = {
+  const mockTranslator2: ITranslator = {
     name: 'another-translator',
     translateMany: async (texts: string[]) => texts.map(() => 'another-translation')
   }
@@ -65,7 +65,7 @@ describe('translators/registry', () => {
     it('should replace translator with same name', () => {
       registerTranslator(mockTranslator)
 
-      const updatedTranslator: Translator = {
+      const updatedTranslator: ITranslator = {
         ...mockTranslator,
         translateMany: async (texts: string[]) => texts.map(() => 'updated-translation')
       }

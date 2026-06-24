@@ -1,24 +1,24 @@
 import * as chokidar from 'chokidar';
 import * as path from 'path';
-import { Logger } from '../core/util/baseLogger';
-import { FileSystem } from '../core/util/fs';
-import { FileWatcher, WorkspaceWatcher, Disposable, toDisposable, FileRenameEvent, FileWatcherListeners } from '../core/util/watcher';
+import { ILogger } from '../core/util/baseLogger';
+import { IFileSystem } from '../core/util/fs';
+import { IFileWatcher, IWorkspaceWatcher, IDisposable, toDisposable, IFileRenameEvent, IFileWatcherListeners } from '../core/util/watcher';
 
 /**
  * CLI implementation of file watcher using Chokidar
  */
-class CliFileWatcher implements FileWatcher {
-  private disposables: Disposable[] = [];
+class CliFileWatcher implements IFileWatcher {
+  private disposables: IDisposable[] = [];
   private watchers: Map<string, chokidar.FSWatcher> = new Map();
   private readyPromises: Promise<void>[] = [];
 
   constructor(
-    private fs: FileSystem,
-    private logger: Logger,
+    private fs: IFileSystem,
+    private logger: ILogger,
     private workspacePath: string
   ) {}
 
-  watch(globPattern: string, listeners: FileWatcherListeners): Disposable {
+  watch(globPattern: string, listeners: IFileWatcherListeners): IDisposable {
     this.logger.debug(`Creating watcher for pattern: ${globPattern}`);
 
     // Convert glob pattern to chokidar pattern by joining with workspace path
@@ -98,16 +98,16 @@ class CliFileWatcher implements FileWatcher {
 /**
  * CLI implementation of workspace watcher
  */
-export class CliWorkspaceWatcher implements WorkspaceWatcher {
-  private disposables: Disposable[] = [];
-  private renameListeners: Array<(e: FileRenameEvent) => void> = [];
+export class CliWorkspaceWatcher implements IWorkspaceWatcher {
+  private disposables: IDisposable[] = [];
+  private renameListeners: Array<(e: IFileRenameEvent) => void> = [];
   private watchers: CliFileWatcher[] = [];
   private deletedFiles = new Map<string, { path: string, timestamp: number }>();
   private checkIntervalId: NodeJS.Timeout | null = null;
 
   constructor(
-    private fs: FileSystem,
-    private logger: Logger,
+    private fs: IFileSystem,
+    private logger: ILogger,
     private workspacePath: string
   ) {
     // Start monitoring for renames (deletions followed by creations)
@@ -142,7 +142,7 @@ export class CliWorkspaceWatcher implements WorkspaceWatcher {
   processRename(oldPath: string, newPath: string): void {
     this.logger.debug(`Detected rename: ${oldPath} -> ${newPath}`);
 
-    const event: FileRenameEvent = {
+    const event: IFileRenameEvent = {
       files: [{
         oldUri: this.fs.createUri(oldPath),
         newUri: this.fs.createUri(newPath)
@@ -154,7 +154,7 @@ export class CliWorkspaceWatcher implements WorkspaceWatcher {
     }
   }
 
-  createFileSystemWatcher(): FileWatcher {
+  createFileSystemWatcher(): IFileWatcher {
     const watcher = new CliFileWatcher(
       this.fs,
       this.logger,
@@ -167,7 +167,7 @@ export class CliWorkspaceWatcher implements WorkspaceWatcher {
     return watcher;
   }
 
-  onDidRenameFiles(listener: (e: FileRenameEvent) => void): Disposable {
+  onDidRenameFiles(listener: (e: IFileRenameEvent) => void): IDisposable {
     this.renameListeners.push(listener);
 
     const disposable = toDisposable(() => {

@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
-import { FileWatcher, WorkspaceWatcher, Disposable, FileRenameEvent, FileWatcherListeners } from '../core/util/watcher';
+import { IFileWatcher, IWorkspaceWatcher, IDisposable, IFileRenameEvent, IFileWatcherListeners } from '../core/util/watcher';
 import { VSCodeUri, VSCodeFileSystem } from './filesystem';
 
 /**
  * VSCode file watcher implementation
  */
-class VSCodeFileWatcher implements FileWatcher {
-  private disposables: Disposable[] = [];
+class VSCodeFileWatcher implements IFileWatcher {
+  private disposables: IDisposable[] = [];
   private watchers: Map<string, vscode.FileSystemWatcher> = new Map();
   private workspaceFolder: vscode.WorkspaceFolder;
 
@@ -14,7 +14,7 @@ class VSCodeFileWatcher implements FileWatcher {
     this.workspaceFolder = workspaceFolder;
   }
 
-  watch(globPattern: string, listeners: FileWatcherListeners): Disposable {
+  watch(globPattern: string, listeners: IFileWatcherListeners): IDisposable {
     // Create a RelativePattern to ensure VS Code watches relative to the correct workspace folder
     // This is especially important on Windows and for multi-root workspaces
     const relativePattern = new vscode.RelativePattern(this.workspaceFolder, globPattern);
@@ -78,8 +78,8 @@ class VSCodeFileWatcher implements FileWatcher {
 /**
  * VSCode workspace watcher implementation
  */
-export class VSCodeWorkspaceWatcher implements WorkspaceWatcher {
-  private disposables: Disposable[] = [];
+export class VSCodeWorkspaceWatcher implements IWorkspaceWatcher {
+  private disposables: IDisposable[] = [];
   private fileSystem = new VSCodeFileSystem();
   private workspaceFolder: vscode.WorkspaceFolder;
 
@@ -92,14 +92,14 @@ export class VSCodeWorkspaceWatcher implements WorkspaceWatcher {
     }
   }
 
-  createFileSystemWatcher(): FileWatcher {
+  createFileSystemWatcher(): IFileWatcher {
     return new VSCodeFileWatcher(this.workspaceFolder);
   }
 
-  onDidRenameFiles(listener: (e: FileRenameEvent) => void): Disposable {
+  onDidRenameFiles(listener: (e: IFileRenameEvent) => void): IDisposable {
     const subscription = vscode.workspace.onDidRenameFiles(renameEvent => {
       // Convert VS Code rename event to our format
-      const event: FileRenameEvent = {
+      const event: IFileRenameEvent = {
         files: renameEvent.files.map(file => ({
           oldUri: new VSCodeUri(file.oldUri),
           newUri: new VSCodeUri(file.newUri)

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { Translator, BulkTranslateOpts } from './types'
+import type { ITranslator, IBulkTranslateOpts } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { normalizeLocaleWithMap, toLanguage } from '../util/localeNorm'
@@ -163,10 +163,10 @@ export const DeepLConfigSchema = z.object({
 /** Inferred DeepL config type */
 export type IDeepLConfig = z.infer<typeof DeepLConfigSchema>
 
-export const DeepLTranslator: Translator<IDeepLConfig> = {
+export const DeepLTranslator: ITranslator<IDeepLConfig> = {
   name: 'deepl',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IDeepLConfig>) {
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<IDeepLConfig>) {
     const cfg = opts.apiConfig
     const authKey = cfg.apiKey
     const endpoint = cfg.endpoint.replace(/\/+$/, '')

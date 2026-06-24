@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { TranslationCommand, ITranslationExecutor } from '../../src/core/translationExecutor'
+import { ITranslationCommand, ITranslationExecutor } from '../../src/core/translationExecutor'
 import { IUri } from '../../src/core/util/fs'
 import type { ResolvedTranslatorEngine, EngineConfig } from '../../src/translators/types'
 
 describe('TranslationExecutor Interface', () => {
-  it('should define TranslationCommand structure correctly', () => {
-    const command: TranslationCommand = {
+  it('should define ITranslationCommand structure correctly', () => {
+    const command: ITranslationCommand = {
       type: 'translate',
       segments: ['Hello', 'World'],
       contexts: [null, 'greeting'],
@@ -33,7 +33,7 @@ describe('TranslationExecutor Interface', () => {
       scheme: 'file'
     }
 
-    const command: TranslationCommand = {
+    const command: ITranslationCommand = {
       type: 'write',
       targetUri: mockUri,
       content: '{"hello": "bonjour"}',
@@ -80,8 +80,8 @@ describe('TranslationExecutor Interface', () => {
     expect(typeof mockExecutor.writeTranslation).toBe('function')
   })
 
-  it('should support optional properties in TranslationCommand', () => {
-    const minimalCommand: TranslationCommand = {
+  it('should support optional properties in ITranslationCommand', () => {
+    const minimalCommand: ITranslationCommand = {
       type: 'translate'
     }
 

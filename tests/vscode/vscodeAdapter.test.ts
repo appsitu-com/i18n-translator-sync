@@ -6,7 +6,7 @@ vi.mock('vscode', () => {
 });
 
 // Now mock other dependencies
-vi.mock('../../src/core/adapters/baseAdapter', () => ({
+vi.mock('../../src/core/adapters/TranslatorAdapter', () => ({
   TranslatorAdapter: vi.fn().mockImplementation(() => ({
     initialize: vi.fn().mockResolvedValue(undefined),
     start: vi.fn().mockResolvedValue(undefined),
@@ -70,7 +70,7 @@ vi.mock('../../src/vscode/filesystem', () => ({
 
 // Now import the modules after all mocks are set up
 import { VSCodeTranslatorAdapter } from '../../src/vscode/vscodeAdapter';
-import { TranslatorAdapter } from '../../src/core/adapters/baseAdapter';
+import { TranslatorAdapter } from '../../src/core/adapters/TranslatorAdapter';
 import { VsCodeConfigProvider } from '../../src/vscode/vscodeConfig';
 import { VSCodeFileSystem } from '../../src/vscode/filesystem';
 import * as vscode from 'vscode';
@@ -163,7 +163,7 @@ describe('VSCodeTranslatorAdapter', () => {
     expect(VSCodeFileSystem).toHaveBeenCalled();
     expect(TranslatorAdapter).toHaveBeenCalledWith(
       '/test/workspace',
-      expect.any(Object), // Logger
+      expect.any(Object), // ILogger
       expect.any(Object), // VSCodeFileSystem
       expect.any(Object)  // VSCodeConfigProvider
     );

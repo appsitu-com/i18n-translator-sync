@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { NllbTranslator, NLLB_DEFAULT_MODEL, NLLB_DEFAULT_SEPARATOR, NLLB_DEFAULT_OPENROUTER_ENDPOINT } from '../../src/translators/nllb'
-import type { BulkTranslateOpts } from '../../src/translators/types'
+import type { IBulkTranslateOpts } from '../../src/translators/types'
 import type { INllbConfig } from '../../src/translators/nllb'
 
 const mockFetch = vi.fn()
@@ -22,7 +22,7 @@ describe('NllbTranslator', () => {
     vi.stubGlobal('fetch', mockFetch)
   })
 
-  const defaultOpts: BulkTranslateOpts<INllbConfig> = {
+  const defaultOpts: IBulkTranslateOpts<INllbConfig> = {
     sourceLocale: 'en',
     targetLocale: 'fr',
     rootDir: '.',
@@ -64,7 +64,7 @@ describe('NllbTranslator', () => {
   it('uses mapped NLLB locale codes from langMap', async () => {
     mockFetch.mockReturnValueOnce(createMockResponse('Hola'))
 
-    const mappedOpts: BulkTranslateOpts<INllbConfig> = {
+    const mappedOpts: IBulkTranslateOpts<INllbConfig> = {
       ...defaultOpts,
       sourceLocale: 'en-US',
       targetLocale: 'es-ES',
@@ -84,7 +84,7 @@ describe('NllbTranslator', () => {
   it('uses configured unified model field when provided', async () => {
     mockFetch.mockReturnValueOnce(createMockResponse('Bonjour'))
 
-    const optsWithModel: BulkTranslateOpts<INllbConfig> = {
+    const optsWithModel: IBulkTranslateOpts<INllbConfig> = {
       ...defaultOpts,
       apiConfig: {
         ...(defaultOpts.apiConfig as INllbConfig),
@@ -101,7 +101,7 @@ describe('NllbTranslator', () => {
   })
 
   it('throws for missing api key', async () => {
-    const opts: BulkTranslateOpts<INllbConfig> = {
+    const opts: IBulkTranslateOpts<INllbConfig> = {
       ...defaultOpts,
       apiConfig: {
         endpoint: NLLB_DEFAULT_OPENROUTER_ENDPOINT,

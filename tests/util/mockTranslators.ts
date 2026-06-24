@@ -4,7 +4,7 @@ import { vi } from 'vitest'
  * Shared test utilities for mocking HTTP requests in translator tests
  */
 
-export interface MockFetchOptions {
+export interface IMockFetchOptions {
   /**
    * Function to transform the request body into a response
    */
@@ -20,7 +20,7 @@ export interface MockFetchOptions {
  * @param options Configuration for the mock fetch behavior
  * @returns Cleanup function to restore original fetch
  */
-export function setupMockFetch(options: MockFetchOptions): () => void {
+export function setupMockFetch(options: IMockFetchOptions): () => void {
   const originalFetch = globalThis.fetch as any
   const { responseTransformer, callsArray } = options
 

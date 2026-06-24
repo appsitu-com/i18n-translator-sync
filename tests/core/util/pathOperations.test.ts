@@ -10,7 +10,7 @@ import {
   createTargetUri,
   createBackTranslationUri
 } from '../../../src/core/util/pathOperations'
-import { FileSystem, IUri } from '../../../src/core/util/fs'
+import { IFileSystem, IUri } from '../../../src/core/util/fs'
 import { TranslateProjectConfig } from '../../../src/core/coreConfig'
 
 // Create a sample configuration for tests
@@ -24,8 +24,8 @@ function createTestConfig(overrides: Partial<TranslateProjectConfig> = {}): Tran
   } as TranslateProjectConfig
 }
 
-// Mock FileSystem for URI tests
-function createMockFileSystem(): FileSystem {
+// Mock IFileSystem for URI tests
+function createMockFileSystem(): IFileSystem {
   return {
     createUri: (fsPath: string): IUri => ({
       fsPath: fsPath.replace(/\\/g, '/'),
@@ -48,7 +48,7 @@ function createMockFileSystem(): FileSystem {
     readDirectory: async () => [],
     stat: async () => ({ size: 0, ctime: 0, mtime: 0 }),
     watch: () => ({ dispose: () => {} })
-  } as unknown as FileSystem
+  } as unknown as IFileSystem
 }
 
 describe('Core Paths Module', () => {

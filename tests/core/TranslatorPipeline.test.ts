@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { describe, it, vi, expect, beforeEach, afterEach } from 'vitest'
-import { TranslatorPipeline } from '../../src/core/pipeline'
-import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
+import { TranslatorPipeline } from '../../src/core/TranslatorPipeline'
+import { MockTranslationExecutor } from '../../src/core/MockTranslationExecutor'
 import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig'
 import { registerAllTranslators } from '../../src/translators/translatorRegistry'
 

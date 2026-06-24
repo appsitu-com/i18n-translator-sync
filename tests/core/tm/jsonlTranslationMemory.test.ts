@@ -3,15 +3,16 @@ import { tmpdir } from 'node:os'
 import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse } from 'csv-parse/sync'
-import { JsonlTranslationMemory } from '../../../src/core/tm/jsonlTranslationMemory'
-import { FileSystem } from '../../../src/core/util/fs'
-import { Logger } from '../../../src/core/util/baseLogger'
+import { JsonlTranslationMemory } from '../../../src/core/tm/JsonlTranslationMemory'
+import { IFileSystem } from '../../../src/core/util/fs'
+import { ILogger } from '../../../src/core/util/baseLogger'
+import { IJsonlTmMigrator } from '../../../src/core/tm/migrations/JsonlTmMigrator'
 
 function makeTmpDir(prefix = 'i18n-jsonl-cache-test-') {
   return mkdtempSync(join(tmpdir(), prefix))
 }
 
-function createMockLogger(): Logger {
+function createMockLogger(): ILogger {
   return {
     debug: vi.fn(),
     info: vi.fn(),
@@ -22,7 +23,7 @@ function createMockLogger(): Logger {
   }
 }
 
-function createMockFileSystem(): FileSystem {
+function createMockFileSystem(): IFileSystem {
   return {
     createDirectory: vi.fn().mockResolvedValue(undefined),
     createUri: vi.fn((p: string) => ({ fsPath: p })),
@@ -32,7 +33,7 @@ function createMockFileSystem(): FileSystem {
     delete: vi.fn(),
     readDirectory: vi.fn(),
     stat: vi.fn()
-  } as unknown as FileSystem
+  } as unknown as IFileSystem
 }
 
 const V1_CACHE_FIXTURE_PATH = join(process.cwd(), 'test-project', '.translator', 'translation-v1.jsonl')
@@ -567,6 +568,34 @@ describe('JsonlTranslationMemory', () => {
 
     expect(fileSystem.createDirectory).toHaveBeenCalled()
     expect(result.get('Hello::')?.translation).toBe('Ciao')
+  })
+
+  it('supports createFromWorkspace interface-only instance factory injection', async () => {
+    const logger = createMockLogger()
+    const fileSystem = createMockFileSystem()
+    const injectedCache = new JsonlTranslationMemory(':memory:', dir)
+    const createInstance = vi.fn().mockReturnValue(injectedCache)
+
+    const cache = await JsonlTranslationMemory.createFromWorkspace(dir, fileSystem, logger, {
+      createInstance
+    })
+
+    expect(cache).toBe(injectedCache)
+    expect(createInstance).toHaveBeenCalledOnce()
+  })
+
+  it('supports constructor migrator interface injection', async () => {
+    const migrator: IJsonlTmMigrator = {
+      run: vi.fn().mockReturnValue({
+        entries: [],
+        didMigrate: false,
+        finalVersion: 3
+      })
+    }
+
+    new JsonlTranslationMemory(cachePath, dir, createMockLogger(), { migrator })
+
+    expect(migrator.run).not.toHaveBeenCalled()
   })
 
   it('supports memory-only mode with :memory:', async () => {

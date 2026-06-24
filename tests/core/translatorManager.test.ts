@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { TranslatorManager } from '../../src/core/translatorManager';
+import { TranslatorManager } from '../../src/core/TranslatorManager';
 import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig';
-import { FileSystem } from '../../src/core/util/fs';
-import { Logger } from '../../src/core/util/baseLogger';
-import { FileWatcher, WorkspaceWatcher } from '../../src/core/util/watcher';
+import { IFileSystem } from '../../src/core/util/fs';
+import { ILogger } from '../../src/core/util/baseLogger';
+import { IFileWatcher, IWorkspaceWatcher } from '../../src/core/util/watcher';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
 import * as path from 'path';
 
@@ -82,10 +82,10 @@ const defaultProjectConfig: TranslateProjectConfig = {
 };
 
 describe('TranslatorManager', () => {
-  let fileSystem: FileSystem;
-  let logger: Logger;
+  let fileSystem: IFileSystem;
+  let logger: ILogger;
   let cache: any;
-  let workspaceWatcher: WorkspaceWatcher;
+  let workspaceWatcher: IWorkspaceWatcher;
   let configProvider: any;
   let translatorManager: TranslatorManager;
   let mockFileWatcher: any;
@@ -97,6 +97,8 @@ describe('TranslatorManager', () => {
     workspaceWatcher = createMockWorkspaceWatcher();
     configProvider = createMockConfigProvider();
     mockFileWatcher = createMockFileWatcher();
+
+    vi.mocked(configProvider.get).mockImplementation((_section: string, defaultValue?: unknown) => defaultValue)
 
     // Setup mock workspace watcher
     vi.mocked(workspaceWatcher.createFileSystemWatcher).mockReturnValue(mockFileWatcher);
@@ -199,19 +201,38 @@ describe('TranslatorManager', () => {
 
   describe('MateCat integration', () => {
     beforeEach(() => {
+      if (!translatorManager) {
+        translatorManager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined
+        )
+      }
+
       // Mock the MateCat service with functions that don't throw errors
       (translatorManager as any).mateCatService = {
         pushTmToMateCat: vi.fn().mockResolvedValue(undefined),
         pullReviewedFromMateCat: vi.fn().mockResolvedValue(5)
       };
 
+      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.sourceLocale') return 'en-US'
+        if (section === 'translator.targetLocales') return ['fr-FR']
+        return defaultValue
+      })
+
       // Mock the getMateCatSettings method to return valid settings
-      (translatorManager as any).getMateCatSettings = vi.fn().mockReturnValue({
-        pushUrl: 'http://example.com/push',
-        pullUrl: 'http://example.com/pull',
+      vi.spyOn(TranslatorManager.prototype as any, 'getMateCatSettings').mockReturnValue({
         apiKey: 'test-key',
-        projectId: 'test-project'
-      });
+        newProjectDefaults: {
+          project_name: 'Demo'
+        }
+      })
     });
 
     it('should push translations to MateCat', async () => {
@@ -225,6 +246,39 @@ describe('TranslatorManager', () => {
       expect((translatorManager as any).mateCatService.pullReviewedFromMateCat).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('Successfully pulled translations from MateCat');
     });
+
+    it('supports interface-only MateCat dependency injection', async () => {
+      const pushTmToMateCat = vi.fn().mockResolvedValue(undefined)
+      const pullReviewedFromMateCat = vi.fn().mockResolvedValue(0)
+
+      const injectedManager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createMateCatService: () => ({
+            pushTmToMateCat,
+            pullReviewedFromMateCat
+          })
+        }
+      )
+
+      await injectedManager.pushToMateCat()
+
+      expect(pushTmToMateCat).toHaveBeenCalledWith(
+        cache,
+        expect.objectContaining({ apiKey: 'test-key' }),
+        { source_lang: 'en-US', target_lang: 'fr-FR' },
+        expect.any(Function)
+      )
+    })
   });
 
   describe('File event handlers', () => {

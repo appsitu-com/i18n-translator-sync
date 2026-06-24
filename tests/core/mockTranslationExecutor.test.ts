@@ -1,19 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
-import { TranslatorPipeline } from '../../src/core/pipeline'
-import { TranslatorManager } from '../../src/core/translatorManager'
-import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationMemory } from '../../src/core/tm/TranslationMemory'
-import { TranslateProjectConfig, ConfigProvider, defaultConfig } from '../../src/core/coreConfig'
+import { MockTranslationExecutor } from '../../src/core/MockTranslationExecutor'
+import { TranslatorPipeline } from '../../src/core/TranslatorPipeline'
+import { TranslatorManager } from '../../src/core/TranslatorManager'
+import { ILogger } from '../../src/core/util/baseLogger'
+import { ITranslationMemory } from '../../src/core/tm/ITranslationMemory'
+import { TranslateProjectConfig, IConfigProvider, defaultConfig } from '../../src/core/coreConfig'
 
 // Mock dependencies
-vi.mock('../../src/core/tm/TranslationMemory')
+vi.mock('../../src/core/tm/ITranslationMemory')
 vi.mock('../../src/core/util/watcher')
 
 describe('MockTranslationExecutor - Dry Run Functionality', () => {
   let mockExecutor: MockTranslationExecutor
-  let mockLogger: Logger
-  let mockCache: TranslationMemory
+  let mockLogger: ILogger
+  let mockCache: ITranslationMemory
   let mockFs: any
   let pipeline: TranslatorPipeline
 
@@ -55,8 +55,8 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       warn: vi.fn(),
       error: vi.fn(),
       debug: vi.fn()
-    } as unknown as Logger
-    mockCache = {} as TranslationMemory
+    } as unknown as ILogger
+    mockCache = {} as ITranslationMemory
 
     pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor)
   })
@@ -297,7 +297,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
         onDidRenameFiles: vi.fn()
       }
 
-      const configProvider: ConfigProvider = {
+      const configProvider: IConfigProvider = {
         get: vi.fn().mockReturnValue({}),
         update: vi.fn()
       }

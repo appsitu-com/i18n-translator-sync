@@ -66,7 +66,8 @@ The XLIFF 2.0 standard uses these standard status values.
 
 ## Solution
 
-The `matecat.json` configuration file defines all MateCAT specific settings and is required when MateCAT is selected as our `reviewer.tool` in `translator.json`.
+The `matecat.json` configuration file is used for default form-data parameters for `POST /api/v1/new` project creation requests.
+MateCAT endpoint base URL and HTTP methods are defined in code (not configurable). Authentication uses `MATECAT_API_KEY` loaded from `translator.env`.
 The `reviewer.targetLocales.include` and `reviewer.targetLocales.exclude` rules can filter the subset of target languages to be reviewed.
 
 `.translator/review/$locale/upload/` = XLIFF and TMX files to uploaded to MateCAT
@@ -76,7 +77,7 @@ The `reviewer.targetLocales.include` and `reviewer.targetLocales.exclude` rules 
 
 | Endpoint          | Purpose                                                 |
 | ----------------- | ------------------------------------------------------- |
-| `POST /api/new`   | Creates a new project with attached XLIFF and TMX files |
+| `POST /api/v1/new`   | Creates a new project with attached XLIFF and TMX files |
 | `GET /api/status` | Check project status                                    |
 | `GET /api/stats`  | Check translation progress                              |
 | `GET /api/url`    | Get download links                                      |

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { BulkTranslateOpts, Translator } from './types'
+import type { IBulkTranslateOpts, ITranslator } from './types'
 import { LangMapSchema, RetrySchema } from './sharedSchemas'
 import { postJson } from '../util/http'
 import { withRetry } from '../util/retry'
@@ -206,10 +206,10 @@ async function requestGoogleAccessToken(pathToCredentials: string, rootDir: stri
   }
 }
 
-export const GoogleTranslator: Translator<IGoogleConfig> = {
+export const GoogleTranslator: ITranslator<IGoogleConfig> = {
   name: 'google',
 
-  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: BulkTranslateOpts<IGoogleConfig>) {
+  async translateMany(texts: string[], _contexts: (string | null | undefined)[], opts: IBulkTranslateOpts<IGoogleConfig>) {
     const cfg = opts.apiConfig
     const credentialsPath = cfg.apiKey
     const endpoint = cfg.endpoint.replace(/\/+$/, '')
