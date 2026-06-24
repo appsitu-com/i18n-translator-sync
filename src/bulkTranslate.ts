@@ -1,5 +1,5 @@
 import { getRegisteredTranslator } from './translators/registry'
-import type { TranslationCache } from './core/cache/TranslationCache'
+import type { TranslationCache } from './core/tm/TranslationCache'
 import type { EngineConfig } from './translators/types'
 import { normalizeLocaleWithMap } from './util/localeNorm'
 

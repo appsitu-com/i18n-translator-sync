@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { bulkTranslateWithEngine, TranslationStats } from '../src/bulkTranslate'
 import { registerTranslator, deregisterTranslator } from '../src/translators/registry'
 import { CopyTranslator } from '../src/translators/copy'
-import type { TranslationCache } from '../src/core/cache/TranslationCache'
+import type { TranslationCache } from '../src/core/tm/TranslationCache'
 
 /**
  * Comprehensive cache integration tests to catch separator mismatches

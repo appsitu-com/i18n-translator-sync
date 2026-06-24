@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { Logger } from '../../../../src/core/util/baseLogger'
-import type { CacheEntry } from '../../../../src/core/cache/jsonlCacheTypes'
+import type { CacheEntry } from '../../../../src/core/tm/jsonlCacheTypes'
 import {
   JsonlCacheMigrator,
   type JsonlCacheMigration,
   type JsonlCacheMigrationContext
-} from '../../../../src/core/cache/migrations/jsonlCacheMigrator'
+} from '../../../../src/core/tm/migrations/jsonlCacheMigrator'
 
 function createMockLogger(): Logger {
   return {

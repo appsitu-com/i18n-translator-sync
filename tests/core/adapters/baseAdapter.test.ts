@@ -5,7 +5,7 @@ import { FileSystem, IUri } from '../../../src/core/util/fs';
 import { ConfigProvider } from '../../../src/core/coreConfig';
 import { WorkspaceWatcher } from '../../../src/core/util/watcher';
 import { TranslatorManager } from '../../../src/core/translatorManager';
-import { JsonlTranslationCache, TranslationCache } from '../../../src/core/cache/TranslationCache';
+import { JsonlTranslationCache, TranslationCache } from '../../../src/core/tm/TranslationCache';
 import * as path from 'path';
 import * as coreConfig from '../../../src/core/coreConfig';
 
@@ -27,7 +27,7 @@ vi.mock('../../../src/core/translatorManager', () => {
   };
 });
 
-vi.mock('../../../src/core/cache/TranslationCache', () => ({
+vi.mock('../../../src/core/tm/TranslationCache', () => ({
   JsonlTranslationCache: vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     exportCSV: vi.fn().mockResolvedValue(undefined),

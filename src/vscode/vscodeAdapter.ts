@@ -8,7 +8,7 @@ import { VsCodeConfigProvider } from './vscodeConfig'
 import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
 import { Logger } from '../core/util/baseLogger'
 import { loadProjectConfig } from '../core/coreConfig'
-import { TranslationCache } from '../core/cache/TranslationCache'
+import { TranslationCache } from '../core/tm/TranslationCache'
 
 /**
  * VSCode adapter for the TranslatorManager

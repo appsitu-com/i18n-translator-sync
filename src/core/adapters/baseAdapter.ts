@@ -6,7 +6,7 @@ import { loadProjectConfig, toProjectConfig } from '../coreConfig';
 import { Logger } from '../util/baseLogger';
 import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
-import { JsonlTranslationCache, TranslationCache } from '../cache/TranslationCache';
+import { JsonlTranslationCache, TranslationCache } from '../tm/TranslationCache';
 import { ConfigProvider } from '../coreConfig';
 import { TRANSLATOR_DIR } from '../constants';
 import { initTranslatorEnv } from '../util/environmentSetup';

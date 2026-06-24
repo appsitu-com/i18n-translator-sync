@@ -4,7 +4,7 @@ import { deregisterTranslator, registerTranslator } from '../src/translators/reg
 import { NLLB_DEFAULT_SEPARATOR } from '../src/translators/nllb'
 import { GOOGLE_DEFAULT_ENDPOINT } from '../src/translators/google'
 import type { Translator } from '../src/translators/types'
-import type { TranslationCache } from '../src/core/cache/TranslationCache'
+import type { TranslationCache } from '../src/core/tm/TranslationCache'
 import type { IGoogleConfig } from '../src/core/config'
 import type { INllbConfig } from '../src/translators/nllb'
 

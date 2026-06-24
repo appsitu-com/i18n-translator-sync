@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse } from 'csv-parse/sync'
-import { JsonlTranslationCache } from '../../../src/core/cache/jsonlTranslationCache'
+import { JsonlTranslationCache } from '../../../src/core/tm/jsonlTranslationCache'
 import { FileSystem } from '../../../src/core/util/fs'
 import { Logger } from '../../../src/core/util/baseLogger'
 

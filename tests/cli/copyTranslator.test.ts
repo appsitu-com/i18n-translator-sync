@@ -10,7 +10,7 @@ import { CopyTranslator } from '../../src/translators/copy';
 import type { ICopyConfig } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
 import { TranslatorPipeline } from '../../src/core/pipeline';
-import { JsonlTranslationCache } from '../../src/core/cache/TranslationCache';
+import { JsonlTranslationCache } from '../../src/core/tm/TranslationCache';
 
 // Helper function to create temp config file
 async function createTempConfigFile(translator?: { copy: any }) {

@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os'
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Logger } from '../../../../src/core/util/baseLogger'
-import type { CacheEntry } from '../../../../src/core/cache/jsonlCacheTypes'
-import { V1ToV2JsonlCacheMigration } from '../../../../src/core/cache/migrations/v1ToV2JsonlCacheMigration'
+import type { CacheEntry } from '../../../../src/core/tm/jsonlCacheTypes'
+import { V1ToV2JsonlCacheMigration } from '../../../../src/core/tm/migrations/v1ToV2JsonlCacheMigration'
 
 function makeTmpDir(prefix = 'i18n-jsonl-migration-test-') {
   return mkdtempSync(join(tmpdir(), prefix))

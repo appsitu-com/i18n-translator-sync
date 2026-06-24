@@ -1,7 +1,7 @@
 import { ITranslationExecutor } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
-import { TranslationCache } from './cache/TranslationCache'
+import { TranslationCache } from './tm/TranslationCache'
 import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
 import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
 import {

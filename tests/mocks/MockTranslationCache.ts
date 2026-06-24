@@ -1,4 +1,4 @@
-import { type Pair, type TranslationCache } from '../../src/core/cache/TranslationCache';
+import { type Pair, type TranslationCache } from '../../src/core/tm/TranslationCache';
 import * as fs from 'fs';
 import * as nodePath from 'path';
 

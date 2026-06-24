@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import type { CacheEntry, JsonlLine } from '../../../src/core/cache/jsonlCacheTypes'
+import type { CacheEntry, JsonlLine } from '../../../src/core/tm/jsonlCacheTypes'
 
 describe('jsonlCacheTypes', () => {
   it('defines a valid cache entry shape', () => {
