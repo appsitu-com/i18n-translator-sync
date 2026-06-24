@@ -1,27 +1,27 @@
 import type { Logger } from '../../util/baseLogger'
-import type { CacheEntry } from '../jsonlCacheTypes'
+import type { TmEntry } from '../jsonlTmTypes'
 
-export type JsonlCacheMigrationContext = {
+export type JsonlTmMigrationContext = {
   workspacePath: string
   logger: Logger
 }
 
-export interface JsonlCacheMigration {
+export interface JsonlTmMigration {
   readonly fromVersion: number
   readonly toVersion: number
-  migrate(entries: CacheEntry[], context: JsonlCacheMigrationContext): CacheEntry[]
+  migrate(entries: TmEntry[], context: JsonlTmMigrationContext): TmEntry[]
 }
 
-export type JsonlCacheMigrationResult = {
-  entries: CacheEntry[]
+export type JsonlTmMigrationResult = {
+  entries: TmEntry[]
   didMigrate: boolean
   finalVersion: number
 }
 
-export class JsonlCacheMigrator {
-  private readonly migrationByFromVersion = new Map<number, JsonlCacheMigration>()
+export class JsonlTmMigrator {
+  private readonly migrationByFromVersion = new Map<number, JsonlTmMigration>()
 
-  constructor(migrations: JsonlCacheMigration[]) {
+  constructor(migrations: JsonlTmMigration[]) {
     for (const migration of migrations) {
       this.migrationByFromVersion.set(migration.fromVersion, migration)
     }
@@ -33,11 +33,11 @@ export class JsonlCacheMigrator {
     targetVersion,
     context
   }: {
-    entries: CacheEntry[]
+    entries: TmEntry[]
     schemaVersion: number
     targetVersion: number
-    context: JsonlCacheMigrationContext
-  }): JsonlCacheMigrationResult {
+    context: JsonlTmMigrationContext
+  }): JsonlTmMigrationResult {
     if (schemaVersion >= targetVersion) {
       return {
         entries,
@@ -54,7 +54,7 @@ export class JsonlCacheMigrator {
       const migration = this.migrationByFromVersion.get(currentVersion)
       if (!migration) {
         context.logger.warn(
-          `No JSONL cache migration found for schema v${currentVersion}; keeping existing entries as-is`
+          `No JSONL TM migration found for schema v${currentVersion}; keeping existing entries as-is`
         )
         break
       }

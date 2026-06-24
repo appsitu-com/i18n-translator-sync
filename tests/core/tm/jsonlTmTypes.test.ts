@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import type { CacheEntry, JsonlLine } from '../../../src/core/tm/jsonlCacheTypes'
+import type { TmEntry, JsonlLine } from '../../../src/core/tm/jsonlTmTypes'
 
-describe('jsonlCacheTypes', () => {
+describe('jsonlTmTypes', () => {
   it('defines a valid cache entry shape', () => {
-    const entry: CacheEntry = {
+    const entry: TmEntry = {
       engine: 'google',
       source: 'en',
       target: 'fr',

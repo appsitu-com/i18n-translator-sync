@@ -1,5 +1,5 @@
 import { getRegisteredTranslator } from './translators/registry'
-import type { TranslationCache } from './core/tm/TranslationCache'
+import type { TranslationMemory } from './core/tm/TranslationMemory'
 import type { EngineConfig } from './translators/types'
 import { normalizeLocaleWithMap } from './util/localeNorm'
 
@@ -87,7 +87,7 @@ export async function bulkTranslateWithEngine(
   contexts: (string | null | undefined)[],
   engineName: string,
   opts: { source: string; target: string; apiConfig: EngineConfig; rootDir: string },
-  cache: TranslationCache,
+  cache: TranslationMemory,
   sourcePath?: string,
   positions?: (number | string)[]
 ): Promise<{ translations: string[]; stats: TranslationStats }> {

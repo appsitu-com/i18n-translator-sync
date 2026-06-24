@@ -48,7 +48,7 @@ package "Core" {
     [TranslatorManager]
     [Pipeline]
     [MateCat Integration]
-    [Translation Cache]
+    [Translation Memory]
   }
 
   package "Core Abstractions" {
@@ -67,7 +67,7 @@ CliAdapter --> TranslatorManager
 
 TranslatorManager --> Pipeline
 TranslatorManager --> "MateCat Integration"
-TranslatorManager --> "Translation Cache"
+TranslatorManager --> "Translation Memory"
 
 TranslatorManager --> IFileSystem
 TranslatorManager --> ILogger
@@ -231,7 +231,7 @@ export class TranslatorManager {
   constructor(
     fileSystem: FileSystem,
     logger: Logger,
-    cache: TranslationCache,
+    tm: TranslationMemory,
     configProvider: ConfigProvider
   ) { /* ... */ }
 
@@ -251,8 +251,8 @@ The translation pipeline processes files through these steps:
 5. Rebuild the file with translated strings
 6. Write the output to the target language directories
 
-#### Translation Cache (`src/core/cache/jsonlTranslationCache.ts`)
-Manages the translation cache:
+#### Translation Memory (`src/core/tm/jsonlTranslationMemory.ts`)
+Manages the translation memory (TM):
 - Stores previously translated segments
 - Optimizes translation speed and reduces API calls
 - Handles import/export of translation memory
@@ -426,10 +426,10 @@ Activate Pipeline
 Pipeline -> Pipeline: Extract strings
 Pipeline -> Engine: Translate strings
 Activate Engine
-Engine -> Cache: Check cache
-Activate Cache
-Cache --> Engine: Cached translations
-Engine -> Cache: Store translations
+Engine -> TM: Check TM
+Activate TM
+TM --> Engine: Cached translations
+Engine -> TM: Store translations
 Engine --> Pipeline: Translated strings
 Deactivate Engine
 Pipeline -> FS: Write translated file
@@ -439,8 +439,8 @@ Deactivate Pipeline
 note over Entry: User command
 Entry -> Adapter: Push to MateCat
 Adapter -> Manager: pushToMateCat()
-Manager -> Cache: Export translations
-Cache --> Manager: Translation data
+Manager -> TM: Export translations
+  TM --> Manager: Translation data
 Manager --> Adapter: Push complete
 Adapter --> Entry: Command completed
 
@@ -459,12 +459,12 @@ Adapter --> Entry: Command completed
 3. **Translation Process**
    - TranslatorManager triggers pipeline processing
    - Pipeline extracts content using appropriate extractor
-   - Content is translated and stored in cache
+   - Content is translated and stored in the translation memory
    - Output files are generated in target language directories
 
 4. **MateCat Integration**
    - TranslatorManager provides methods for MateCat operations
-   - Push/pull operations interact with the cache
+   - Push/pull operations interact with the translation memory
 
 ## Extractors
 

@@ -21,15 +21,15 @@ For information about the internal architecture of the extension, see [Architect
 │   │   ├── registry.ts   # Registration of all translation engines
 │   │   └── types.ts      # Common interfaces for translation engines
 │   ├── core/             # Core business logic
-│   │   ├── cache/        # Translation cache implementations
-│   │   │   └── jsonlTranslationCache.ts # JSONL translation cache
+│   │   ├── tm/           # Translation memory implementations
+│   │   │   └── jsonlTranslationMemory.ts # JSONL translation memory
 │   │   └── util/         # Core utilities
 │   ├── util/             # Utility functions
 │   ├── extension.ts      # Main extension entry point
 │   ├── pipeline.ts       # Translation pipeline
 │   └── config.ts         # Configuration loading
 ├── tests/                # Test files
-│   ├── core/cache/       # Core cache tests
+│   ├── core/tm/          # Core translation memory tests
 │   ├── fixtures/         # Test data
 │   ├── mocks/            # Mock implementations
 │   └── *.test.ts         # Test suites

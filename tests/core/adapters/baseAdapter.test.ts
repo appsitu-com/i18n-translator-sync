@@ -5,7 +5,7 @@ import { FileSystem, IUri } from '../../../src/core/util/fs';
 import { ConfigProvider } from '../../../src/core/coreConfig';
 import { WorkspaceWatcher } from '../../../src/core/util/watcher';
 import { TranslatorManager } from '../../../src/core/translatorManager';
-import { JsonlTranslationCache, TranslationCache } from '../../../src/core/tm/TranslationCache';
+import { JsonlTranslationMemory, TranslationMemory } from '../../../src/core/tm/TranslationMemory';
 import * as path from 'path';
 import * as coreConfig from '../../../src/core/coreConfig';
 
@@ -27,8 +27,8 @@ vi.mock('../../../src/core/translatorManager', () => {
   };
 });
 
-vi.mock('../../../src/core/tm/TranslationCache', () => ({
-  JsonlTranslationCache: vi.fn().mockImplementation(() => ({
+vi.mock('../../../src/core/tm/TranslationMemory', () => ({
+  JsonlTranslationMemory: vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     exportCSV: vi.fn().mockResolvedValue(undefined),
     importCSV: vi.fn().mockResolvedValue(0),
@@ -101,8 +101,8 @@ class TestTranslatorAdapter extends TranslatorAdapter {
   }
 
   // Expose protected methods for testing
-  public async testGetCache(): Promise<TranslationCache | undefined> {
-    return await this.getCache();
+  public async testGetCache(): Promise<TranslationMemory | undefined> {
+    return await this.getTm();
   }
 
   public testHandleFileOpen(path: string): Promise<void> {
@@ -184,7 +184,7 @@ describe('TranslatorAdapter', () => {
       await adapter.initialize();
 
       expect(mockConfigProvider.load).toHaveBeenCalled();
-      expect(JsonlTranslationCache).toHaveBeenCalled();
+      expect(JsonlTranslationMemory).toHaveBeenCalled();
       expect(TranslatorManager).toHaveBeenCalled();
       expect(adapter.getTranslatorManager()).toBeDefined();
     });
@@ -339,7 +339,7 @@ describe('TranslatorAdapter', () => {
       await adapter.initialize();
       await adapter.start();
 
-      const cache = vi.mocked(JsonlTranslationCache).mock.results.slice(-1)[0]?.value as any;
+      const cache = vi.mocked(JsonlTranslationMemory).mock.results.slice(-1)[0]?.value as any;
       expect(cache).toBeDefined();
       cache.exportCSV = vi.fn().mockRejectedValueOnce(new Error('Export failed'));
 
@@ -377,7 +377,7 @@ describe('TranslatorAdapter', () => {
         autoImport: false
       });
 
-      const cache = vi.mocked(JsonlTranslationCache).mock.results.slice(-1)[0]?.value as any;
+      const cache = vi.mocked(JsonlTranslationMemory).mock.results.slice(-1)[0]?.value as any;
       expect(cache).toBeDefined();
       cache.purge = vi.fn().mockResolvedValueOnce({ deletedCount: 0 });
       cache.completePurge = vi.fn().mockResolvedValueOnce({ deletedCount: 3 });
@@ -419,7 +419,7 @@ describe('TranslatorAdapter', () => {
   describe('startup auto-import', () => {
     it('imports translations.csv on new database when autoImport is enabled', async () => {
       const importCSV = vi.fn().mockResolvedValue(3);
-      vi.mocked(JsonlTranslationCache).mockImplementationOnce(() => ({
+      vi.mocked(JsonlTranslationMemory).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
         importCSV,
@@ -455,7 +455,7 @@ describe('TranslatorAdapter', () => {
 
     it('falls back to configured csvExportPath when translations.csv is missing', async () => {
       const importCSV = vi.fn().mockResolvedValue(2);
-      vi.mocked(JsonlTranslationCache).mockImplementationOnce(() => ({
+      vi.mocked(JsonlTranslationMemory).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
         importCSV,
@@ -493,7 +493,7 @@ describe('TranslatorAdapter', () => {
 
     it('skips startup import when autoImport is disabled', async () => {
       const importCSV = vi.fn().mockResolvedValue(1);
-      vi.mocked(JsonlTranslationCache).mockImplementationOnce(() => ({
+      vi.mocked(JsonlTranslationMemory).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
         importCSV,

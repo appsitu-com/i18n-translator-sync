@@ -1,7 +1,7 @@
 import { ITranslationExecutor } from './translationExecutor'
 import { IUri, FileSystem } from './util/fs'
 import { Logger } from './util/baseLogger'
-import { TranslationCache } from './tm/TranslationCache'
+import { TranslationMemory } from './tm/TranslationMemory'
 import { ResolvedTranslatorEngine, EngineConfig } from '../translators/types'
 import { bulkTranslateWithEngine, TranslationStats } from '../bulkTranslate'
 import {
@@ -27,7 +27,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
   constructor(
     private fileSystem: FileSystem,
     private logger: Logger,
-    private cache: TranslationCache,
+    private tm: TranslationMemory,
     private workspacePath: string,
     private getPassphrase?: GetPassphrase
   ) {}
@@ -78,7 +78,7 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
         apiConfig: resolvedEngineConfig,
         rootDir: this.workspacePath
       },
-      this.cache,
+      this.tm,
       sourceFile,
       segmentPositions
     )

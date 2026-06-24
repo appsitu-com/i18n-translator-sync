@@ -340,7 +340,7 @@ describe('VSCodeTranslatorAdapter', () => {
         clearMigrationFlag: vi.fn()
       }
 
-      ;(adapter as any).cache = cacheMock
+      ;(adapter as any).tm = cacheMock
       ;(adapter as any).translatorManager = undefined
       adapter.initialize = vi.fn().mockResolvedValue(undefined)
       adapter.purge = vi.fn().mockResolvedValue({ deletedCount: 0 })
@@ -364,7 +364,7 @@ describe('VSCodeTranslatorAdapter', () => {
         clearMigrationFlag: vi.fn()
       }
 
-      ;(adapter as any).cache = cacheMock
+      ;(adapter as any).tm = cacheMock
       ;(adapter as any).translatorManager = undefined
       adapter.initialize = vi.fn().mockResolvedValue(undefined)
       adapter.purge = vi.fn().mockResolvedValue({ deletedCount: 3 })

@@ -1,7 +1,7 @@
 import * as path from 'path'
 import { FileSystem, IUri } from './util/fs'
 import { Logger } from './util/baseLogger'
-import { TranslationCache } from './tm/TranslationCache'
+import { TranslationMemory } from './tm/TranslationMemory'
 import { extractForFile, jsonPathToString } from '../extractors/extractorRegistry'
 import { loadContextCsvForJson } from './contextCsv'
 import { pickEngine } from '../translators/registry'
@@ -24,20 +24,20 @@ import type { GetPassphrase } from './config'
 export class TranslatorPipeline {
   private fileSystem: FileSystem
   private logger: Logger
-  private cache: TranslationCache
+  private tm: TranslationMemory
   private executor: ITranslationExecutor
 
   constructor(
     fileSystem: FileSystem,
     logger: Logger,
-    cache: TranslationCache,
+    cache: TranslationMemory,
     workspacePath: string,
     executor?: ITranslationExecutor,
     getPassphrase?: GetPassphrase
   ) {
     this.fileSystem = fileSystem
     this.logger = logger
-    this.cache = cache
+    this.tm = cache
     this.executor =
       executor ||
       new DefaultTranslationExecutor(
@@ -199,15 +199,15 @@ export class TranslatorPipeline {
   }
 
   private async shouldTranslateForCacheState(sourcePath: string): Promise<boolean> {
-    if (typeof this.cache.hasSourcePath === 'function') {
-      const hasSourcePath = await this.cache.hasSourcePath(sourcePath)
+    if (typeof this.tm.hasSourcePath === 'function') {
+      const hasSourcePath = await this.tm.hasSourcePath(sourcePath)
       if (!hasSourcePath) {
         return true
       }
     }
 
-    if (typeof this.cache.hasPendingPurge === 'function') {
-      const hasPendingPurge = await this.cache.hasPendingPurge()
+    if (typeof this.tm.hasPendingPurge === 'function') {
+      const hasPendingPurge = await this.tm.hasPendingPurge()
       if (hasPendingPurge) {
         return true
       }

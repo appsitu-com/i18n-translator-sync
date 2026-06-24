@@ -3,17 +3,17 @@ import { MockTranslationExecutor } from '../../src/core/mockTranslationExecutor'
 import { TranslatorPipeline } from '../../src/core/pipeline'
 import { TranslatorManager } from '../../src/core/translatorManager'
 import { Logger } from '../../src/core/util/baseLogger'
-import { TranslationCache } from '../../src/core/tm/TranslationCache'
+import { TranslationMemory } from '../../src/core/tm/TranslationMemory'
 import { TranslateProjectConfig, ConfigProvider, defaultConfig } from '../../src/core/coreConfig'
 
 // Mock dependencies
-vi.mock('../../src/core/tm/TranslationCache')
+vi.mock('../../src/core/tm/TranslationMemory')
 vi.mock('../../src/core/util/watcher')
 
 describe('MockTranslationExecutor - Dry Run Functionality', () => {
   let mockExecutor: MockTranslationExecutor
   let mockLogger: Logger
-  let mockCache: TranslationCache
+  let mockCache: TranslationMemory
   let mockFs: any
   let pipeline: TranslatorPipeline
 
@@ -56,7 +56,7 @@ describe('MockTranslationExecutor - Dry Run Functionality', () => {
       error: vi.fn(),
       debug: vi.fn()
     } as unknown as Logger
-    mockCache = {} as TranslationCache
+    mockCache = {} as TranslationMemory
 
     pipeline = new TranslatorPipeline(mockFs, mockLogger, mockCache, '/test/workspace', mockExecutor)
   })

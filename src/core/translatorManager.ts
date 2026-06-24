@@ -1,6 +1,6 @@
 import { FileSystem, IUri } from './util/fs';
 import { Logger } from './util/baseLogger';
-import { TranslationCache } from './tm/TranslationCache';
+import { TranslationMemory } from './tm/TranslationMemory';
 import { Disposable, FileRenameEvent, FileWatcher, WorkspaceWatcher } from './util/watcher';
 import { TranslateProjectConfig, ConfigProvider } from './coreConfig';
 import type { ITranslatorEngines } from './config';
@@ -18,7 +18,7 @@ import type { GetPassphrase } from './config';
 export class TranslatorManager {
   private watchers: FileWatcher[] = [];
   private pipeline: TranslatorPipeline;
-  private cache: TranslationCache;
+  private tm: TranslationMemory;
   private isWatching: boolean = false;
   private mateCatService: MateCatService | null = null;
   private onConfigChanged?: () => Promise<void>;
@@ -27,7 +27,7 @@ export class TranslatorManager {
   constructor(
     private fileSystem: FileSystem,
     private logger: Logger,
-    cache: TranslationCache,
+    cache: TranslationMemory,
     private workspacePath: string,
     private workspaceWatcher: WorkspaceWatcher,
     private configProvider: ConfigProvider,
@@ -36,7 +36,7 @@ export class TranslatorManager {
     translatorEngines?: ITranslatorEngines,
     getPassphrase?: GetPassphrase
   ) {
-    this.cache = cache;
+    this.tm = cache;
     this.pipeline = new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
     this.onConfigChanged = onConfigChanged;
     this.translatorEngines = translatorEngines;
@@ -282,7 +282,7 @@ export class TranslatorManager {
     const csvExportPath = config.csvExportPath || 'translator.csv';
     const csvPath = toAbsPath(csvExportPath, this.workspacePath);
 
-    await this.cache.exportCSV(csvPath);
+    await this.tm.exportCSV(csvPath);
     this.logger.info(`Auto-exported cache to ${csvPath}`);
   }
 
@@ -652,7 +652,7 @@ export class TranslatorManager {
     const settings = this.getMateCatSettings();
 
     // Push translations
-    await this.mateCatService.pushCacheToMateCat(this.cache, settings,
+    await this.mateCatService.pushTmToMateCat(this.tm, settings,
       (message: string) => this.logger.info(message));
 
     this.logger.info('Successfully pushed translations to MateCat');
@@ -675,7 +675,7 @@ export class TranslatorManager {
     const settings = this.getMateCatSettings();
 
     // Pull translations
-    await this.mateCatService.pullReviewedFromMateCat(this.cache, settings,
+    await this.mateCatService.pullReviewedFromMateCat(this.tm, settings,
       (message: string) => this.logger.info(message));
 
     this.logger.info('Successfully pulled translations from MateCat');
@@ -725,6 +725,6 @@ export class TranslatorManager {
    */
   dispose(): void {
     this.stopWatching();
-    this.cache.close();
+    this.tm.close();
   }
 }

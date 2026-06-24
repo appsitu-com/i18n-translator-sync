@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { Logger } from './util/baseLogger';
-import { TranslationCache } from './tm/TranslationCache';
+import { TranslationMemory } from './tm/TranslationMemory';
 
 /**
  * MateCat integration settings
@@ -59,18 +59,18 @@ export class MateCatService {
   /**
    * Export cache to a CSV file
    */
-  private async exportCacheCsv(cache: TranslationCache, tmpDir?: string): Promise<string> {
+  private async exportTmCsv(tm: TranslationMemory, tmpDir?: string): Promise<string> {
     const dir = tmpDir || fs.mkdtempSync(path.join(os.tmpdir(), 'matecat-'));
     const csvPath = path.join(dir, 'translations.csv');
-    await cache.exportCSV(csvPath);
+    await tm.exportCSV(csvPath);
     return csvPath;
   }
 
   /**
    * Push translation cache to MateCat for review
    */
-  public async pushCacheToMateCat(
-    cache: TranslationCache,
+  public async pushTmToMateCat(
+    tm: TranslationMemory,
     settings: MateCatSettings,
     notifyCallback?: (message: string) => void
   ): Promise<void> {
@@ -83,7 +83,7 @@ export class MateCatService {
 
     this.logger.info(`Pushing translations to MateCat: ${url}`);
 
-    const csv = await this.exportCacheCsv(cache);
+    const csv = await this.exportTmCsv(tm);
     const boundary = `----mcform${Math.random().toString(16).slice(2)}`;
     const bodyParts: any[] = [];
     const append = (chunk: string | Buffer) => bodyParts.push(
@@ -124,7 +124,7 @@ export class MateCatService {
       this.logger.info('Successfully pushed translations to MateCat');
 
       if (notifyCallback) {
-        notifyCallback('MateCat: CSV cache pushed for review.');
+        notifyCallback('MateCat: CSV TM pushed for review.');
       }
     } catch (error) {
       this.logger.error(`Error pushing to MateCat: ${error}`);
@@ -136,7 +136,7 @@ export class MateCatService {
    * Pull reviewed translations from MateCat
    */
   public async pullReviewedFromMateCat(
-    cache: TranslationCache,
+    tm: TranslationMemory,
     settings: MateCatSettings,
     notifyCallback?: (message: string) => void
   ): Promise<number> {
@@ -176,7 +176,7 @@ export class MateCatService {
       const csvPath = path.join(tmp, 'reviewed.csv');
       fs.writeFileSync(csvPath, buf);
 
-      const imported = await cache.importCSV(csvPath);
+      const imported = await tm.importCSV(csvPath);
 
       this.logger.info(`Imported ${imported} reviewed translations from MateCat`);
 

@@ -91,8 +91,8 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
   async exportCache(csvPath?: string): Promise<void> {
     try {
       // Get the cache
-      const cache = await this.getCache(true);
-      if (!cache) {
+      const tm = await this.getTm(true);
+      if (!tm) {
         this.logger.error('Cache not available. Start the translator first to create the cache.');
         return;
       }
@@ -115,7 +115,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
       }
 
       this.logger.info(`Exporting cache to ${outputPath}...`);
-      await cache.exportCSV(outputPath);
+      await tm.exportCSV(outputPath);
       this.logger.info(`Cache exported successfully to ${outputPath}`);
     } catch (error: any) {
       this.logger.error(`Failed to export cache: ${error.message || String(error)}`);
@@ -130,8 +130,8 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
   async importCache(csvPath: string): Promise<void> {
     try {
       // Get the cache
-      const cache = await this.getCache();
-      if (!cache) {
+      const tm = await this.getTm();
+      if (!tm) {
         this.logger.error('Cache not available.');
         return;
       }
@@ -140,7 +140,7 @@ export class CLITranslatorAdapter extends TranslatorAdapter {
       const inputPath = toAbsPath(csvPath, this.workspacePath);
 
       this.logger.info(`Importing cache from ${inputPath}...`);
-      const count = await cache.importCSV(inputPath);
+      const count = await tm.importCSV(inputPath);
       this.logger.info(`Cache import completed. Imported ${count} translations.`);
     } catch (error: any) {
       this.logger.error(`Failed to import cache: ${error.message || String(error)}`);

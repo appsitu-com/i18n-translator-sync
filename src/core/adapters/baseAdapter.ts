@@ -6,7 +6,7 @@ import { loadProjectConfig, toProjectConfig } from '../coreConfig';
 import { Logger } from '../util/baseLogger';
 import { FileSystem } from '../util/fs';
 import { WorkspaceWatcher } from '../util/watcher';
-import { JsonlTranslationCache, TranslationCache } from '../tm/TranslationCache';
+import { JsonlTranslationMemory, TranslationMemory } from '../tm/TranslationMemory';
 import { ConfigProvider } from '../coreConfig';
 import { TRANSLATOR_DIR } from '../constants';
 import { initTranslatorEnv } from '../util/environmentSetup';
@@ -19,7 +19,7 @@ import { loadTranslatorConfig, type ITranslatorEngines, type ITranslatorConfig }
  */
 export abstract class TranslatorAdapter {
   protected translatorManager?: TranslatorManager;
-  protected cache?: TranslationCache;
+  protected tm?: TranslationMemory;
   protected running = false;
   protected translatorEngines?: ITranslatorEngines;
   protected translatorConfig?: ITranslatorConfig;
@@ -55,7 +55,7 @@ export abstract class TranslatorAdapter {
   /**
    * Get or create the cache
    */
-  protected async getCache(dbMustExist = false): Promise<TranslationCache | undefined> {
+  protected async getTm(dbMustExist = false): Promise<TranslationMemory | undefined> {
     const dbPath = path.join(this.workspacePath, TRANSLATOR_DIR, 'translation.jsonl');
 
     // Check if the database file exists (for dbMustExist mode)
@@ -69,13 +69,13 @@ export abstract class TranslatorAdapter {
     }
 
     // Ensure the cache directory exists
-    const cacheDir = path.dirname(dbPath);
-    const dirUri = this.fileSystem.createUri(cacheDir);
+    const tmDir = path.dirname(dbPath);
+    const dirUri = this.fileSystem.createUri(tmDir);
     await this.fileSystem.createDirectory(dirUri);
 
-    this.cache = new JsonlTranslationCache(dbPath, this.workspacePath, this.logger);
+    this.tm = new JsonlTranslationMemory(dbPath, this.workspacePath, this.logger);
 
-    return this.cache;
+    return this.tm;
   }
 
   /**
@@ -107,7 +107,7 @@ export abstract class TranslatorAdapter {
    * Perform auto-import of translations from CSV if configured
    */
   private async performAutoImport(): Promise<void> {
-    if (!this.cache) {
+    if (!this.tm) {
       return;
     }
 
@@ -136,7 +136,7 @@ export abstract class TranslatorAdapter {
 
       // Perform import
       this.logger.info(`Auto-importing translations from ${csvPath}`);
-      const count = await this.cache.importCSV(csvPath);
+      const count = await this.tm.importCSV(csvPath);
       this.logger.info(`Auto-imported ${count} translations from CSV`);
     } catch (error: any) {
       this.logger.warn(`Auto-import failed: ${error.message || String(error)}`);
@@ -239,13 +239,13 @@ export abstract class TranslatorAdapter {
       this.translatorEngines = translatorConfig.translator;
 
       // Get cache (using await since it's now async)
-      this.cache = await this.getCache();
-      if (!this.cache) {
+      this.tm = await this.getTm();
+      if (!this.tm) {
         return;
       }
 
       // Perform auto-import if database is new and autoImport is enabled
-      if (this.cache.isNew?.()) {
+      if (this.tm.isNew?.()) {
         await this.performAutoImport();
       }
 
@@ -261,7 +261,7 @@ export abstract class TranslatorAdapter {
         this.translatorManager = new TranslatorManager(
           this.fileSystem,
           this.logger,
-          this.cache,
+          this.tm,
           this.workspacePath,
           watcher,
           this.configProvider,
@@ -505,10 +505,10 @@ export abstract class TranslatorAdapter {
 
       const shouldAutoExport = projectConfig.autoExport ?? true;
       const csvExportPath = projectConfig.csvExportPath || 'translator.csv';
-      if (shouldAutoExport && this.cache) {
+      if (shouldAutoExport && this.tm) {
         const csvPath = toAbsPath(csvExportPath, this.workspacePath);
         try {
-          await this.cache.exportCSV(csvPath);
+          await this.tm.exportCSV(csvPath);
           this.logger.info(`Auto-exported cache to ${csvPath}`);
         } catch (exportError: any) {
           this.logger.warn(`Auto-export failed: ${exportError?.message || String(exportError)}`);
@@ -531,7 +531,7 @@ export abstract class TranslatorAdapter {
    */
   async purge(): Promise<{ deletedCount: number; backupPath?: string }> {
     if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before purge()');
-    if (!this.cache) throw new Error('Cache not initialized');
+    if (!this.tm) throw new Error('TM not initialized');
 
     try {
       this.logger.info('Starting cache purge operation...');
@@ -562,7 +562,7 @@ export abstract class TranslatorAdapter {
       }
 
       this.logger.info('Marking all translations as unused...');
-      await this.cache.purge();
+      await this.tm.purge();
 
       this.logger.info('Retranslating all files to mark used translations...');
       const progressCallback = (current: number, total: number, file: string) => {
@@ -574,12 +574,12 @@ export abstract class TranslatorAdapter {
       await this.translatorManager.bulkTranslate(projectConfig, progressCallback, false);
 
       this.logger.info('Deleting unused translations...');
-      const result = await this.cache.completePurge();
+      const result = await this.tm.completePurge();
       this.logger.info(`Purged ${result.deletedCount} unused translations`);
 
       if (shouldAutoExport) {
         this.logger.info(`Auto-exporting cache to: ${csvPath}`);
-        await this.cache.exportCSV(csvPath);
+        await this.tm.exportCSV(csvPath);
       }
 
       return {

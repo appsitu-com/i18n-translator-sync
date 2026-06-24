@@ -6,22 +6,22 @@ import { TRANSLATOR_DIR } from '../constants'
 import { FileSystem } from '../util/fs'
 import { Logger, NO_OP_LOGGER } from '../util/baseLogger'
 import { toWorkspaceRelativePosix } from '../util/pathShared'
-import type { Pair, TranslationCache } from './TranslationCache'
-import type { CacheEntry, JsonlLine } from './jsonlCacheTypes'
-import { JsonlCacheMigrator } from './migrations/jsonlCacheMigrator'
-import { V1ToV2JsonlCacheMigration } from './migrations/v1ToV2JsonlCacheMigration'
+import type { Pair, TranslationMemory } from './TranslationMemory'
+import type { TmEntry, JsonlTmLine } from './jsonlTmTypes'
+import { JsonlTmMigrator } from './migrations/jsonlTmMigrator'
+import { V1ToV2JsonlTmMigration } from './migrations/v1ToV2JsonlTmMigration'
 
 const LOOKUP_SEPARATOR = '::'
 const KEY_SEPARATOR = '\u0000'
 const FILE_SCHEMA_VERSION = 2
 
-export class JsonlTranslationCache implements TranslationCache {
+export class JsonlTranslationMemory implements TranslationMemory {
   private readonly logger: Logger
   private readonly workspacePath: string
-  private readonly cacheFilePath: string
+  private readonly tmFilePath: string
   private readonly memoryOnly: boolean
   // Maps strict keys (engine+source+target+sourcePath+textPos+sourceText+context) to cache entries
-  private readonly strictData = new Map<string, CacheEntry>()
+  private readonly strictData = new Map<string, TmEntry>()
   // Maps fallback keys (engine+source+target+sourceText+context) to sets of strict keys
   private readonly fallbackIndex = new Map<string, Set<string>>()
 
@@ -29,26 +29,26 @@ export class JsonlTranslationCache implements TranslationCache {
   private readonly usedStrictKeysDuringPurge = new Set<string>()
   private purgeInProgress = false
   private readonly isNewDatabaseFlag: boolean
-  private readonly cacheMigrator = new JsonlCacheMigrator([new V1ToV2JsonlCacheMigration()])
+  private readonly tmMigrator = new JsonlTmMigrator([new V1ToV2JsonlTmMigration()])
   private migrationOccurred = false
 
-  constructor(cacheFilePath: string, workspacePath: string, logger: Logger = NO_OP_LOGGER) {
+  constructor(tmFilePath: string, workspacePath: string, logger: Logger = NO_OP_LOGGER) {
     this.logger = logger
     this.workspacePath = workspacePath
-    this.cacheFilePath = cacheFilePath
-    this.memoryOnly = cacheFilePath === ':memory:'
+    this.tmFilePath = tmFilePath
+    this.memoryOnly = tmFilePath === ':memory:'
 
     if (this.memoryOnly) {
       this.isNewDatabaseFlag = true
       return
     }
 
-    const dir = path.dirname(cacheFilePath)
+    const dir = path.dirname(tmFilePath)
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
     }
 
-    this.isNewDatabaseFlag = !fs.existsSync(cacheFilePath)
+    this.isNewDatabaseFlag = !fs.existsSync(tmFilePath)
 
     if (!this.isNewDatabaseFlag) {
       this.loadFromDisk()
@@ -59,13 +59,13 @@ export class JsonlTranslationCache implements TranslationCache {
     workspacePath: string,
     fileSystem: FileSystem,
     logger?: Logger
-  ): Promise<JsonlTranslationCache> {
+  ): Promise<JsonlTranslationMemory> {
     const cacheDir = path.join(workspacePath, TRANSLATOR_DIR)
     const cachePath = path.join(cacheDir, 'translation.jsonl')
 
     await fileSystem.createDirectory(fileSystem.createUri(cacheDir))
 
-    return new JsonlTranslationCache(cachePath, workspacePath, logger)
+    return new JsonlTranslationMemory(cachePath, workspacePath, logger)
   }
 
   async getMany({
@@ -188,7 +188,7 @@ export class JsonlTranslationCache implements TranslationCache {
       const strictKey = this.makeStrictKey(engine, sourceLocale, targetLocale, normalizedSourcePath, textPos, pair.src, context)
       const fallbackKey = this.makeFallbackKey(engine, sourceLocale, targetLocale, pair.src, context)
 
-      const next: CacheEntry = {
+      const next: TmEntry = {
         engine,
         source: sourceLocale,
         target: targetLocale,
@@ -310,7 +310,7 @@ export class JsonlTranslationCache implements TranslationCache {
         this.sourcePaths.add(normalizedSourcePath)
       }
 
-      const entry: CacheEntry = {
+      const entry: TmEntry = {
         engine: record.engine_name,
         source: record.source_lang,
         target: record.target_lang,
@@ -425,13 +425,13 @@ export class JsonlTranslationCache implements TranslationCache {
 
   private loadFromDisk(): void {
     try {
-      const raw = fs.readFileSync(this.cacheFilePath, 'utf8')
+      const raw = fs.readFileSync(this.tmFilePath, 'utf8')
       if (!raw.trim()) {
         return
       }
 
       const lines = raw.split(/\r?\n/)
-      const entries: CacheEntry[] = []
+      const entries: TmEntry[] = []
       let schemaVersion = 1
 
       for (const line of lines) {
@@ -440,11 +440,11 @@ export class JsonlTranslationCache implements TranslationCache {
           continue
         }
 
-        let parsed: JsonlLine
+        let parsed: JsonlTmLine
         try {
-          parsed = JSON.parse(trimmed) as JsonlLine
+          parsed = JSON.parse(trimmed) as JsonlTmLine
         } catch {
-          this.logger.warn(`Ignoring invalid JSONL cache line in ${this.cacheFilePath}`)
+          this.logger.warn(`Ignoring invalid JSONL cache line in ${this.tmFilePath}`)
           continue
         }
 
@@ -471,7 +471,7 @@ export class JsonlTranslationCache implements TranslationCache {
         })
       }
 
-      const migrationResult = this.cacheMigrator.run({
+      const migrationResult = this.tmMigrator.run({
         entries,
         schemaVersion,
         targetVersion: FILE_SCHEMA_VERSION,
@@ -516,7 +516,7 @@ export class JsonlTranslationCache implements TranslationCache {
         this.persistToDisk()
       }
     } catch (error) {
-      this.logger.warn(`Failed to load JSONL cache ${this.cacheFilePath}: ${String(error)}`)
+      this.logger.warn(`Failed to load JSONL cache ${this.tmFilePath}: ${String(error)}`)
       this.strictData.clear()
       this.fallbackIndex.clear()
       this.sourcePaths.clear()
@@ -528,38 +528,38 @@ export class JsonlTranslationCache implements TranslationCache {
       return
     }
 
-    const lines: string[] = [JSON.stringify({ type: 'meta', schemaVersion: FILE_SCHEMA_VERSION } satisfies JsonlLine)]
+    const lines: string[] = [JSON.stringify({ type: 'meta', schemaVersion: FILE_SCHEMA_VERSION } satisfies JsonlTmLine)]
 
     for (const entry of this.strictData.values()) {
-      lines.push(JSON.stringify({ type: 'entry', ...entry } satisfies JsonlLine))
+      lines.push(JSON.stringify({ type: 'entry', ...entry } satisfies JsonlTmLine))
     }
 
-    const dir = path.dirname(this.cacheFilePath)
+    const dir = path.dirname(this.tmFilePath)
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true })
     }
 
     const serialized = `${lines.join('\n')}\n`
-    const tempFile = `${this.cacheFilePath}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
+    const tempFile = `${this.tmFilePath}.${process.pid}.${Date.now()}.${Math.random().toString(16).slice(2)}.tmp`
 
     fs.writeFileSync(tempFile, serialized, 'utf8')
 
     try {
-      fs.renameSync(tempFile, this.cacheFilePath)
+      fs.renameSync(tempFile, this.tmFilePath)
     } catch (error) {
       if (this.isTransientRenameError(error)) {
         this.logger.warn(
-          `Atomic cache rename failed for ${this.cacheFilePath}; attempting non-atomic copy fallback (${String(error)})`
+          `Atomic cache rename failed for ${this.tmFilePath}; attempting non-atomic copy fallback (${String(error)})`
         )
 
         try {
-          fs.copyFileSync(tempFile, this.cacheFilePath)
+          fs.copyFileSync(tempFile, this.tmFilePath)
           this.logger.info(
-            `Cache persisted via non-atomic copy fallback for ${this.cacheFilePath} (no data loss expected)`
+            `Cache persisted via non-atomic copy fallback for ${this.tmFilePath} (no data loss expected)`
           )
         } catch (copyError) {
           this.logger.error(
-            `Failed to persist JSONL cache ${this.cacheFilePath} after rename and copy fallback: ${String(copyError)}`
+            `Failed to persist JSONL cache ${this.tmFilePath} after rename and copy fallback: ${String(copyError)}`
           )
         }
       } else {
@@ -607,7 +607,7 @@ export class JsonlTranslationCache implements TranslationCache {
     targetLocale: string,
     sourceText: string,
     context: string
-  ): CacheEntry | undefined {
+  ): TmEntry | undefined {
     const fallbackKey = this.makeFallbackKey(engine, sourceLocale, targetLocale, sourceText, context)
     const strictKeys = this.fallbackIndex.get(fallbackKey)
 
@@ -615,7 +615,7 @@ export class JsonlTranslationCache implements TranslationCache {
       return undefined
     }
 
-    let latest: CacheEntry | undefined
+    let latest: TmEntry | undefined
 
     for (const strictKey of strictKeys) {
       const candidate = this.strictData.get(strictKey)
@@ -655,12 +655,12 @@ export class JsonlTranslationCache implements TranslationCache {
     textPos: number | string
     sourceText: string
     context: string
-    fallbackEntry: CacheEntry
-  }): CacheEntry {
+    fallbackEntry: TmEntry
+  }): TmEntry {
     const fallbackKey = this.makeFallbackKey(engine, sourceLocale, targetLocale, sourceText, context)
     const now = this.nowSeconds()
 
-    const promotedEntry: CacheEntry = {
+    const promotedEntry: TmEntry = {
       engine,
       source: sourceLocale,
       target: targetLocale,

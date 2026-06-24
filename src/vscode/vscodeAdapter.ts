@@ -8,7 +8,7 @@ import { VsCodeConfigProvider } from './vscodeConfig'
 import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
 import { Logger } from '../core/util/baseLogger'
 import { loadProjectConfig } from '../core/coreConfig'
-import { TranslationCache } from '../core/tm/TranslationCache'
+import { TranslationMemory } from '../core/tm/TranslationMemory'
 
 /**
  * VSCode adapter for the TranslatorManager
@@ -46,7 +46,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   }
 
   private async handleCacheMigrationPrompt(): Promise<void> {
-    if (!this.cache?.didMigrateFromV1()) {
+    if (!this.tm?.didMigrateFromV1()) {
       return
     }
 
@@ -63,7 +63,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
       vscode.window.showInformationMessage(`Migration purge completed: removed ${result.deletedCount} entries.${details}`)
     }
 
-    this.cache.clearMigrationFlag()
+    this.tm.clearMigrationFlag()
   }
 
   /**
@@ -311,8 +311,8 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   /**
    * Get the cache instance (public accessor for extension commands)
    */
-  getCacheInstance(): TranslationCache | undefined {
-    return this.cache
+  getTmInstance(): TranslationMemory | undefined {
+    return this.tm
   }
 
   /**

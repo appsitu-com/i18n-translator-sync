@@ -422,9 +422,9 @@ async function exportCache(): Promise<void> {
     }
 
     // Export
-    const cache = adapter.getCacheInstance()
-    if (cache) {
-      await cache.exportCSV(uri.fsPath)
+    const tm = adapter.getTmInstance()
+    if (tm) {
+      await tm.exportCSV(uri.fsPath)
       vscode.window.showInformationMessage(`Cache exported to ${uri.fsPath}`)
       channel.appendLine(`Cache exported to ${uri.fsPath}`)
     } else {
@@ -487,9 +487,9 @@ async function importCache(): Promise<void> {
     }
 
     // Import
-    const cache = adapter.getCacheInstance()
-    if (cache) {
-      const count = await cache.importCSV(uris[0].fsPath)
+    const tm = adapter.getTmInstance()
+    if (tm) {
+      const count = await tm.importCSV(uris[0].fsPath)
       vscode.window.showInformationMessage(`Imported ${count} translations from ${uris[0].fsPath}`)
       channel.appendLine(`Imported ${count} translations from ${uris[0].fsPath}`)
     } else {

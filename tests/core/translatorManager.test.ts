@@ -201,7 +201,7 @@ describe('TranslatorManager', () => {
     beforeEach(() => {
       // Mock the MateCat service with functions that don't throw errors
       (translatorManager as any).mateCatService = {
-        pushCacheToMateCat: vi.fn().mockResolvedValue(undefined),
+        pushTmToMateCat: vi.fn().mockResolvedValue(undefined),
         pullReviewedFromMateCat: vi.fn().mockResolvedValue(5)
       };
 
@@ -216,7 +216,7 @@ describe('TranslatorManager', () => {
 
     it('should push translations to MateCat', async () => {
       await translatorManager.pushToMateCat();
-      expect((translatorManager as any).mateCatService.pushCacheToMateCat).toHaveBeenCalled();
+      expect((translatorManager as any).mateCatService.pushTmToMateCat).toHaveBeenCalled();
       expect(logger.info).toHaveBeenCalledWith('Successfully pushed translations to MateCat');
     });
 

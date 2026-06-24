@@ -1,6 +1,6 @@
 export type Pair = { src: string; dst: string; ctx?: string | null; pos?: number | string }
 
-export interface TranslationCache {
+export interface TranslationMemory {
   /**
    * Get multiple translations from the cache
    */
@@ -76,4 +76,4 @@ export interface TranslationCache {
   close(): void
 }
 
-export { JsonlTranslationCache } from './jsonlTranslationCache'
+export { JsonlTranslationMemory } from './jsonlTranslationMemory'

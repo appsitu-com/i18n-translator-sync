@@ -18,7 +18,7 @@ import { MateCatService } from '../src/core/matecat'
 // Mock MateCatService module
 vi.mock('../src/core/matecat', () => ({
   MateCatService: vi.fn().mockImplementation(() => ({
-    pushCacheToMateCat: vi.fn(),
+    pushTmToMateCat: vi.fn(),
     pullReviewedFromMateCat: vi.fn()
   }))
 }));
@@ -74,11 +74,11 @@ describe('Error Handling', () => {
     // Create a MateCatService instance with mocked methods
     const mateCatService = new MateCatService({} as any)
     // Add the method and then spy on it
-    mateCatService.pushCacheToMateCat = vi.fn().mockRejectedValueOnce(expectedError)
+    mateCatService.pushTmToMateCat = vi.fn().mockRejectedValueOnce(expectedError)
 
     // Directly simulate the error handling in pushToMateCat
     try {
-      await mateCatService.pushCacheToMateCat({} as any, {} as any)
+      await mateCatService.pushTmToMateCat({} as any, {} as any)
     } catch (err) {
       vscode.window.showErrorMessage(`MateCat push failed: ${(err as Error).message}`)
     }

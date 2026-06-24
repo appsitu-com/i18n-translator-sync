@@ -1,11 +1,11 @@
-import { type Pair, type TranslationCache } from '../../src/core/tm/TranslationCache';
+import { type Pair, type TranslationMemory } from '../../src/core/tm/TranslationMemory';
 import * as fs from 'fs';
 import * as nodePath from 'path';
 
 /**
  * Mock implementation of the translation cache for testing.
  */
-export class MockTranslationCache implements TranslationCache {
+export class MockTranslationMemory implements TranslationMemory {
   private path: string;
   private translations: Map<string, { translated_text: string, updated_at: number }> = new Map();
 
@@ -171,4 +171,4 @@ export class MockTranslationCache implements TranslationCache {
 }
 
 // Export the mock cache for use in tests
-export { type Pair, type TranslationCache };
+export { type Pair, type TranslationMemory };

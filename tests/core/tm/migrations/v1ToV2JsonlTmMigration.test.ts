@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os'
 import { mkdtempSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Logger } from '../../../../src/core/util/baseLogger'
-import type { CacheEntry } from '../../../../src/core/tm/jsonlCacheTypes'
-import { V1ToV2JsonlCacheMigration } from '../../../../src/core/tm/migrations/v1ToV2JsonlCacheMigration'
+import type { TmEntry } from '../../../../src/core/tm/jsonlTmTypes'
+import { V1ToV2JsonlTmMigration } from '../../../../src/core/tm/migrations/v1ToV2JsonlTmMigration'
 
 function makeTmpDir(prefix = 'i18n-jsonl-migration-test-') {
   return mkdtempSync(join(tmpdir(), prefix))
@@ -21,7 +21,7 @@ function createMockLogger(): Logger {
   }
 }
 
-describe('V1ToV2JsonlCacheMigration', () => {
+describe('V1ToV2JsonlTmMigration', () => {
   let workspacePath: string
 
   beforeEach(() => {
@@ -37,10 +37,10 @@ describe('V1ToV2JsonlCacheMigration', () => {
     mkdirSync(sourceDir, { recursive: true })
     writeFileSync(join(sourceDir, 'messages.json'), '{"greeting":"Hello"}', 'utf8')
 
-    const migration = new V1ToV2JsonlCacheMigration()
+    const migration = new V1ToV2JsonlTmMigration()
     const logger = createMockLogger()
 
-    const entries: CacheEntry[] = [
+    const entries: TmEntry[] = [
       {
         engine: 'test',
         source: 'en',
@@ -66,10 +66,10 @@ describe('V1ToV2JsonlCacheMigration', () => {
     mkdirSync(sourceDir, { recursive: true })
     writeFileSync(join(sourceDir, 'messages.json'), '{"greeting":"Hi"}', 'utf8')
 
-    const migration = new V1ToV2JsonlCacheMigration()
+    const migration = new V1ToV2JsonlTmMigration()
     const logger = createMockLogger()
 
-    const entries: CacheEntry[] = [
+    const entries: TmEntry[] = [
       {
         engine: 'test',
         source: 'en',
@@ -101,7 +101,7 @@ describe('V1ToV2JsonlCacheMigration', () => {
     writeFileSync(legacyWal, 'legacy-wal', 'utf8')
     writeFileSync(legacyShm, 'legacy-shm', 'utf8')
 
-    const migration = new V1ToV2JsonlCacheMigration()
+    const migration = new V1ToV2JsonlTmMigration()
     const logger = createMockLogger()
     const migrated = migration.migrate([], { workspacePath, logger })
 

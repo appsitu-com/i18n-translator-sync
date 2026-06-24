@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { mkdtempSync, rmSync, existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { parse } from 'csv-parse/sync'
-import { JsonlTranslationCache } from '../../../src/core/tm/jsonlTranslationCache'
+import { JsonlTranslationMemory } from '../../../src/core/tm/jsonlTranslationMemory'
 import { FileSystem } from '../../../src/core/util/fs'
 import { Logger } from '../../../src/core/util/baseLogger'
 
@@ -38,7 +38,7 @@ function createMockFileSystem(): FileSystem {
 const V1_CACHE_FIXTURE_PATH = join(process.cwd(), 'test-project', '.translator', 'translation-v1.jsonl')
 const TS_EXAMPLE_SOURCE_PATH = join(process.cwd(), 'test-project', 'i18n', 'en', 'ts-example', 'messages.ts')
 
-describe('JsonlTranslationCache', () => {
+describe('JsonlTranslationMemory', () => {
   let dir: string
   let cachePath: string
 
@@ -56,7 +56,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('stores and retrieves entries with strict context + position keys', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'deepl',
@@ -84,7 +84,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('stores structured path positions as cache keys', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'deepl',
@@ -120,7 +120,7 @@ describe('JsonlTranslationCache', () => {
       'utf8'
     )
 
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     const result = await cache.getMany({
       engine: 'test',
@@ -146,7 +146,7 @@ describe('JsonlTranslationCache', () => {
     writeFileSync(join(sourceDir, 'messages.ts'), readFileSync(TS_EXAMPLE_SOURCE_PATH, 'utf8'), 'utf8')
     writeFileSync(cachePath, readFileSync(V1_CACHE_FIXTURE_PATH, 'utf8'), 'utf8')
 
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     expect(cache.didMigrateFromV1()).toBe(true)
 
@@ -177,7 +177,7 @@ describe('JsonlTranslationCache', () => {
       'utf8'
     )
 
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     expect(cache.didMigrateFromV1()).toBe(true)
 
@@ -202,7 +202,7 @@ describe('JsonlTranslationCache', () => {
       'utf8'
     )
 
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     expect(cache.didMigrateFromV1()).toBe(true)
 
@@ -242,7 +242,7 @@ describe('JsonlTranslationCache', () => {
       'utf8'
     )
 
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     expect(cache.didMigrateFromV1()).toBe(true)
     expect(existsSync(legacyDb)).toBe(false)
@@ -251,7 +251,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('persists data across reopen', async () => {
-    let cache = new JsonlTranslationCache(cachePath, dir)
+    let cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'google',
@@ -263,7 +263,7 @@ describe('JsonlTranslationCache', () => {
 
     cache.close()
 
-    cache = new JsonlTranslationCache(cachePath, dir)
+    cache = new JsonlTranslationMemory(cachePath, dir)
     const result = await cache.getMany({
       engine: 'google',
       sourceLocale: 'en',
@@ -279,7 +279,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('supports fallback lookup across renamed source files', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'deepl',
@@ -304,7 +304,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('matches entries when source text differs only by edge whitespace', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'azure',
@@ -329,7 +329,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('promotes fallback entries to exact path-based textPos matches', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'deepl',
@@ -367,7 +367,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('keeps promoted exact matches and purges unused fallback rows', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'test',
@@ -410,7 +410,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('promotes fallback from directory-scoped legacy rows for structured lookups', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'test',
@@ -450,7 +450,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('supports export and import CSV', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'test',
@@ -466,7 +466,7 @@ describe('JsonlTranslationCache', () => {
     expect(existsSync(csvPath)).toBe(true)
     expect(readFileSync(csvPath, 'utf8')).toContain('source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,updated_at')
 
-    const restored = new JsonlTranslationCache(join(dir, 'restored.jsonl'), dir)
+    const restored = new JsonlTranslationMemory(join(dir, 'restored.jsonl'), dir)
     const imported = await restored.importCSV(csvPath)
 
     expect(imported).toBe(1)
@@ -486,7 +486,7 @@ describe('JsonlTranslationCache', () => {
 
   it('handles missing CSV imports', async () => {
     const logger = createMockLogger()
-    const cache = new JsonlTranslationCache(cachePath, dir, logger)
+    const cache = new JsonlTranslationMemory(cachePath, dir, logger)
 
     const imported = await cache.importCSV(join(dir, 'missing.csv'))
 
@@ -495,7 +495,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('implements purge mark-and-sweep parity', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'test',
@@ -544,7 +544,7 @@ describe('JsonlTranslationCache', () => {
     const logger = createMockLogger()
     const fileSystem = createMockFileSystem()
 
-    const cache = await JsonlTranslationCache.createFromWorkspace(dir, fileSystem, logger)
+    const cache = await JsonlTranslationMemory.createFromWorkspace(dir, fileSystem, logger)
 
     await cache.putMany({
       engine: 'test',
@@ -569,7 +569,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('supports memory-only mode with :memory:', async () => {
-    const cache = new JsonlTranslationCache(':memory:', dir)
+    const cache = new JsonlTranslationMemory(':memory:', dir)
 
     await cache.putMany({
       engine: 'test',
@@ -593,7 +593,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('imports CSV rows without updated_at', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
     const csvPath = join(dir, 'no-updated-at.csv')
 
     writeFileSync(
@@ -631,7 +631,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('imports and exports status field from CSV', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
     const csvPath = join(dir, 'status.csv')
 
     writeFileSync(
@@ -658,7 +658,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('preserves string path text_pos through CSV import and export', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
     const csvPath = join(dir, 'path-text-pos.csv')
 
     writeFileSync(
@@ -684,7 +684,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('drops legacy numeric structured rows during CSV import', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
     const csvPath = join(dir, 'legacy-structured-numeric.csv')
 
     writeFileSync(
@@ -710,7 +710,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('treats source directory as present when cached file entries exist under it', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
       engine: 'test',
@@ -726,7 +726,7 @@ describe('JsonlTranslationCache', () => {
   })
 
   it('preserves updated_at when purge only re-marks used entries', async () => {
-    const cache = new JsonlTranslationCache(cachePath, dir)
+    const cache = new JsonlTranslationMemory(cachePath, dir)
     const csvPath = join(dir, 'seed.csv')
 
     writeFileSync(

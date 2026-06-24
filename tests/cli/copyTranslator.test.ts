@@ -10,7 +10,7 @@ import { CopyTranslator } from '../../src/translators/copy';
 import type { ICopyConfig } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
 import { TranslatorPipeline } from '../../src/core/pipeline';
-import { JsonlTranslationCache } from '../../src/core/tm/TranslationCache';
+import { JsonlTranslationMemory } from '../../src/core/tm/TranslationMemory';
 
 // Helper function to create temp config file
 async function createTempConfigFile(translator?: { copy: any }) {
@@ -45,14 +45,14 @@ describe('CLI Copy Translator Tests', () => {
   let tempDir: string;
   let configPath: string;
   let configProvider: CliConfigProvider;
-  let cache: JsonlTranslationCache;
+  let cache: JsonlTranslationMemory;
   let pipeline: TranslatorPipeline;
 
   beforeEach(async () => {
     // Setup test environment
     fileSystem = new NodeFileSystem();
     logger = new ConsoleLogger('test');
-    cache = new JsonlTranslationCache(':memory:', process.cwd());
+    cache = new JsonlTranslationMemory(':memory:', process.cwd());
 
     // Clear the registry before each test
     try {

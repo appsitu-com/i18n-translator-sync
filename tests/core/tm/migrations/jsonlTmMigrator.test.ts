@@ -1,11 +1,11 @@
 import { describe, it, expect, vi } from 'vitest'
 import type { Logger } from '../../../../src/core/util/baseLogger'
-import type { CacheEntry } from '../../../../src/core/tm/jsonlCacheTypes'
+import type { TmEntry } from '../../../../src/core/tm/jsonlTmTypes'
 import {
-  JsonlCacheMigrator,
-  type JsonlCacheMigration,
-  type JsonlCacheMigrationContext
-} from '../../../../src/core/tm/migrations/jsonlCacheMigrator'
+  JsonlTmMigrator,
+  type JsonlTmMigration,
+  type JsonlTmMigrationContext
+} from '../../../../src/core/tm/migrations/jsonlTmMigrator'
 
 function createMockLogger(): Logger {
   return {
@@ -18,18 +18,18 @@ function createMockLogger(): Logger {
   }
 }
 
-function createContext(logger: Logger): JsonlCacheMigrationContext {
+function createContext(logger: Logger): JsonlTmMigrationContext {
   return {
     workspacePath: '/workspace',
     logger
   }
 }
 
-describe('JsonlCacheMigrator', () => {
+describe('JsonlTmMigrator', () => {
   it('returns input entries unchanged when already at target version', () => {
-    const migrator = new JsonlCacheMigrator([])
+    const migrator = new JsonlTmMigrator([])
     const logger = createMockLogger()
-    const entries: CacheEntry[] = [
+    const entries: TmEntry[] = [
       {
         engine: 'google',
         source: 'en',
@@ -57,7 +57,7 @@ describe('JsonlCacheMigrator', () => {
   })
 
   it('runs chained migrations in order', () => {
-    const migration1: JsonlCacheMigration = {
+    const migration1: JsonlTmMigration = {
       fromVersion: 1,
       toVersion: 2,
       migrate(currentEntries) {
@@ -65,7 +65,7 @@ describe('JsonlCacheMigrator', () => {
       }
     }
 
-    const migration2: JsonlCacheMigration = {
+    const migration2: JsonlTmMigration = {
       fromVersion: 2,
       toVersion: 3,
       migrate(currentEntries) {
@@ -73,7 +73,7 @@ describe('JsonlCacheMigrator', () => {
       }
     }
 
-    const migrator = new JsonlCacheMigrator([migration1, migration2])
+    const migrator = new JsonlTmMigrator([migration1, migration2])
     const logger = createMockLogger()
 
     const result = migrator.run({
@@ -104,7 +104,7 @@ describe('JsonlCacheMigrator', () => {
 
   it('logs a warning and stops when a migration step is missing', () => {
     const logger = createMockLogger()
-    const migrator = new JsonlCacheMigrator([
+    const migrator = new JsonlTmMigrator([
       {
         fromVersion: 1,
         toVersion: 2,

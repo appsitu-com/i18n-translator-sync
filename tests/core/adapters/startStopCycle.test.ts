@@ -30,8 +30,8 @@ vi.mock('../../../src/core/translatorManager', () => ({
   }))
 }))
 
-vi.mock('../../../src/core/tm/TranslationCache', () => ({
-  JsonlTranslationCache: vi.fn().mockImplementation(() => ({
+vi.mock('../../../src/core/tm/TranslationMemory', () => ({
+  JsonlTranslationMemory: vi.fn().mockImplementation(() => ({
     // minimal shape; tests don't call methods directly
     close: vi.fn()
   }))

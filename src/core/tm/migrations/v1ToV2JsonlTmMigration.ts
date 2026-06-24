@@ -2,22 +2,22 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { TRANSLATOR_DIR } from '../../constants'
 import { extractForFile, jsonPathToString } from '../../../extractors/extractorRegistry'
-import type { CacheEntry } from '../jsonlCacheTypes'
-import type { JsonlCacheMigration, JsonlCacheMigrationContext } from './jsonlCacheMigrator'
+import type { TmEntry } from '../jsonlTmTypes'
+import type { JsonlTmMigration, JsonlTmMigrationContext } from './jsonlTmMigrator'
 
-export class V1ToV2JsonlCacheMigration implements JsonlCacheMigration {
+export class V1ToV2JsonlTmMigration implements JsonlTmMigration {
   readonly fromVersion = 1
   readonly toVersion = 2
 
-  migrate(entries: CacheEntry[], context: JsonlCacheMigrationContext): CacheEntry[] {
+  migrate(entries: TmEntry[], context: JsonlTmMigrationContext): TmEntry[] {
     const migratedEntries = this.migrateStructuredTextPositions(entries, context.workspacePath)
     this.deleteLegacySqliteFiles(context)
     return migratedEntries
   }
 
-  private migrateStructuredTextPositions(entries: CacheEntry[], workspacePath: string): CacheEntry[] {
-    const migratedEntries: CacheEntry[] = []
-    const bySourcePath = new Map<string, CacheEntry[]>()
+  private migrateStructuredTextPositions(entries: TmEntry[], workspacePath: string): TmEntry[] {
+    const migratedEntries: TmEntry[] = []
+    const bySourcePath = new Map<string, TmEntry[]>()
 
     for (const entry of entries) {
       const group = bySourcePath.get(entry.sourcePath)
@@ -94,7 +94,7 @@ export class V1ToV2JsonlCacheMigration implements JsonlCacheMigration {
     }
   }
 
-  private pushOnlyPathEntries(sourceEntries: CacheEntry[], migratedEntries: CacheEntry[]): void {
+  private pushOnlyPathEntries(sourceEntries: TmEntry[], migratedEntries: TmEntry[]): void {
     for (const entry of sourceEntries) {
       if (typeof entry.textPos === 'number') {
         continue
@@ -103,7 +103,7 @@ export class V1ToV2JsonlCacheMigration implements JsonlCacheMigration {
     }
   }
 
-  private deleteLegacySqliteFiles(context: JsonlCacheMigrationContext): void {
+  private deleteLegacySqliteFiles(context: JsonlTmMigrationContext): void {
     const legacyDbPath = path.join(context.workspacePath, TRANSLATOR_DIR, 'translation.db')
     const candidates = [
       legacyDbPath,
@@ -123,12 +123,12 @@ export class V1ToV2JsonlCacheMigration implements JsonlCacheMigration {
         fs.unlinkSync(filePath)
         removedCount++
       } catch (error) {
-        context.logger.warn(`Failed to remove legacy cache file ${filePath}: ${String(error)}`)
+        context.logger.warn(`Failed to remove legacy TM file ${filePath}: ${String(error)}`)
       }
     }
 
     if (removedCount > 0) {
-      context.logger.info(`Removed ${removedCount} legacy SQLite cache file(s) during JSONL migration`)
+      context.logger.info(`Removed ${removedCount} legacy SQLite TM file(s) during JSONL TM migration`)
     }
   }
 

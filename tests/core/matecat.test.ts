@@ -37,7 +37,7 @@ describe('MateCatService', () => {
     }
   })
 
-  it('pushCacheToMateCat posts multipart and reports success', async () => {
+  it('pushTmToMateCat posts multipart and reports success', async () => {
     const cache = new FakeCache()
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -48,7 +48,7 @@ describe('MateCatService', () => {
       }
     })
 
-    await expect(mateCatService.pushCacheToMateCat(cache as any, settings)).resolves.toBeUndefined()
+    await expect(mateCatService.pushTmToMateCat(cache as any, settings)).resolves.toBeUndefined()
     expect(fetch).toHaveBeenCalledOnce()
   })
 

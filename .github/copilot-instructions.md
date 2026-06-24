@@ -13,7 +13,6 @@ Key reminders:
 - It supports multiple translation engines.
   - Translation engines include Azure, Google, DeepL, OpenRouter, Gemini, and a 'Copy' which is a non-translating engine.
 - Some engines support context aware translations.
-- The extension is written in TypeScript and uses a JSONL cache with in-memory indexes for persistence.
 - It supports translating both directory structures and individual files, with flexible source path configuration.
 
 ## MCP
@@ -103,7 +102,7 @@ Key reminders:
 - Context CSV handling is in `src/contextCsv.ts`.
 - Shared logic for structured data (JSON/YAML) is in `src/extractors/structured.ts`.
 - Configuration is loaded from `translator.json` or VS Code settings (see `src/config.ts`).
-- The translation cache uses JSONL persistence with in-memory indexes (see `src/core/cache/jsonlTranslationCache.ts`).
+- The translation memory (TM) uses JSONL persistence with in-memory indexes (see `src/core/tm/jsonlTranslationMemory.ts`).
 - Maintain language neutrality in code - don't assume English (or any specific language) is always the source language
 
 ## Coding Guidelines

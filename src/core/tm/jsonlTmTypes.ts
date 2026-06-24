@@ -1,4 +1,4 @@
-export type CacheEntry = {
+export type TmEntry = {
   engine: string     // Translation engine name, for example "google", "deepl", or "copy"
   source: string     // Source locale code used for this translation, for example "en"
   target: string     // Target locale code used for this translation, for example "fr"
@@ -11,4 +11,4 @@ export type CacheEntry = {
   updatedAt: number  // Unix timestamp in seconds when the row was last written
 }
 
-export type JsonlLine = { type: 'meta'; schemaVersion: number } | ({ type: 'entry' } & CacheEntry)
+export type JsonlTmLine = { type: 'meta'; schemaVersion: number } | ({ type: 'entry' } & TmEntry)
