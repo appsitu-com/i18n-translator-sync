@@ -951,4 +951,67 @@ describe('JsonlTranslationMemory', () => {
     expect(rows[0].origin).toBe('ai')
   })
 
+  it('preserves review-imported human rows during purge complete sweep', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Hello', dst: 'Bonjour', pos: 0 }],
+      sourcePath: 'src/messages.json',
+      status: 'reviewed',
+      origin: 'human',
+      updatedAt: 12345
+    })
+
+    await cache.putMany({
+      engine: 'test',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Bye', dst: 'Au revoir', pos: 1 }],
+      sourcePath: 'src/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      updatedAt: 12346
+    })
+
+    await cache.purge()
+    await cache.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello'],
+      contexts: [null],
+      sourcePath: 'src/messages.json',
+      positions: [0]
+    })
+
+    const purgeResult = await cache.completePurge()
+    expect(purgeResult.deletedCount).toBe(1)
+
+    const humanResult = await cache.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello'],
+      contexts: [null],
+      sourcePath: 'src/messages.json',
+      positions: [0]
+    })
+
+    const aiResult = await cache.getMany({
+      engine: 'test',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Bye'],
+      contexts: [null],
+      sourcePath: 'src/messages.json',
+      positions: [1]
+    })
+
+    expect(humanResult.get('Hello::')?.translation).toBe('Bonjour')
+    expect(aiResult.size).toBe(0)
+  })
+
 })

@@ -199,21 +199,25 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     sourceLocale,
     targetLocale,
     pairs,
-    sourcePath = ''
+    sourcePath = '',
+    status = TM_STATUS_DEFAULT,
+    origin = TM_ORIGIN_DEFAULT,
+    updatedAt = this.nowSeconds()
   }: {
     engine: string
     sourceLocale: string
     targetLocale: string
     pairs: Pair[]
     sourcePath?: string
+    status?: string
+    origin?: string
+    updatedAt?: number
   }): Promise<void> {
     const normalizedSourcePath = this.normalizeSourcePath(sourcePath)
 
     if (normalizedSourcePath) {
       this.sourcePaths.add(normalizedSourcePath)
     }
-
-    const now = this.nowSeconds()
 
     for (const pair of pairs) {
       const textPos = pair.pos ?? 0
@@ -230,9 +234,9 @@ export class JsonlTranslationMemory implements ITranslationMemory {
         sourceText: pair.src,
         context,
         targetText: pair.dst,
-        status: TM_STATUS_DEFAULT,
-        origin: TM_ORIGIN_DEFAULT,
-        updatedAt: now
+        status,
+        origin,
+        updatedAt
       }
 
       this.strictData.set(strictKey, next)

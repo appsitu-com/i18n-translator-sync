@@ -100,14 +100,26 @@ export class TranslatorManager {
         fileSystem: this.fileSystem,
         logger: this.logger,
         configProvider: this.configProvider,
-        serviceDependencies: this.dependencies.reviewServiceDependencies
+        serviceDependencies: {
+          ...this.dependencies.reviewServiceDependencies,
+          matecat: {
+            ...this.dependencies.reviewServiceDependencies?.matecat,
+            translationMemory: this.tm
+          }
+        }
       }) ??
       createReviewServiceFromConfig({
         workspacePath: this.workspacePath,
         fileSystem: this.fileSystem,
         logger: this.logger,
         configProvider: this.configProvider,
-        serviceDependencies: this.dependencies.reviewServiceDependencies
+        serviceDependencies: {
+          ...this.dependencies.reviewServiceDependencies,
+          matecat: {
+            ...this.dependencies.reviewServiceDependencies?.matecat,
+            translationMemory: this.tm
+          }
+        }
       })
 
     return this.reviewService

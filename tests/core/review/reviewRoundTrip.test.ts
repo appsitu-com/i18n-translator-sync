@@ -4,81 +4,109 @@ import { tmpdir } from 'os'
 import * as path from 'path'
 import { TranslatorManager } from '../../../src/core/TranslatorManager'
 import type { IConfigProvider } from '../../../src/core/coreConfig'
+import { JsonlTranslationMemory } from '../../../src/core/tm/JsonlTranslationMemory'
 import { nodeFileSystem } from '../../../src/core/util/fs'
 import type { ILogger } from '../../../src/core/util/baseLogger'
 import type { IWorkspaceWatcher } from '../../../src/core/util/watcher'
-import type {
-  IReviewService,
-  ReviewProjectStatus,
-  ReviewPushRequest
-} from '../../../src/core/review/reviewService'
+import {
+  type IMateCatCreatedProject,
+  type IMateCatProjectRef,
+  type IMateCatProjectStatus,
+  type IMateCatPulledFile,
+  type IMateCatReviewProjectRequest,
+  type IMateCatService,
+  type MateCatSettings
+} from '../../../src/core/review/MateCatService'
+import { MateCatReviewService } from '../../../src/core/review/mateCatReviewService'
+import type { IReviewService } from '../../../src/core/review/reviewService'
 
-type PendingProject = {
+type StoredProject = {
   projectId: string
+  projectPass: string
   status: string
-  updates: Array<{ filePath: string; content: string }>
+  uploads: IMateCatReviewProjectRequest['uploads']
 }
 
-class FakeRoundTripReviewService implements IReviewService {
-  private readonly projects = new Map<string, PendingProject>()
+class FakeRoundTripMateCatService implements IMateCatService {
+  private readonly projects = new Map<string, StoredProject>()
   private projectCounter = 0
-  private lastPush: ReviewPushRequest | undefined
+  private lastRequest: IMateCatReviewProjectRequest | undefined
 
-  constructor(private readonly workspacePath: string) {}
-
-  async pushReviewProject(request: ReviewPushRequest): Promise<void> {
+  async createReviewProject(
+    _settings: MateCatSettings,
+    request: IMateCatReviewProjectRequest
+  ): Promise<IMateCatCreatedProject> {
     this.projectCounter += 1
     const projectId = `fake-${this.projectCounter}`
-    this.lastPush = request
+    const projectPass = `pass-${this.projectCounter}`
 
     this.projects.set(projectId, {
       projectId,
+      projectPass,
       status: 'in_progress',
-      updates: []
+      uploads: request.uploads
     })
-  }
+    this.lastRequest = request
 
-  async getPendingReviewStatus(): Promise<ReviewProjectStatus[]> {
-    return Array.from(this.projects.values()).map((project) => ({
-      projectId: project.projectId,
-      status: project.status
-    }))
-  }
-
-  async pullReviewedProjects(): Promise<void> {
-    for (const [projectId, project] of this.projects.entries()) {
-      if (project.status !== 'completed') {
-        continue
-      }
-
-      for (const update of project.updates) {
-        mkdirSync(path.dirname(update.filePath), { recursive: true })
-        writeFileSync(update.filePath, update.content, 'utf8')
-      }
-
-      this.projects.delete(projectId)
+    return {
+      projectId,
+      projectPass
     }
   }
 
-  getLastPushedRequest(): ReviewPushRequest | undefined {
-    return this.lastPush
+  async checkReviewProjectStatus(
+    _settings: MateCatSettings,
+    projects: IMateCatProjectRef[]
+  ): Promise<IMateCatProjectStatus[]> {
+    return projects.map((project) => ({
+      projectId: project.projectId,
+      status: this.projects.get(project.projectId)?.status ?? 'unknown'
+    }))
+  }
+
+  async pullReviewedTranslations(
+    _settings: MateCatSettings,
+    projects: IMateCatProjectRef[]
+  ): Promise<IMateCatPulledFile[]> {
+    const pulledFiles: IMateCatPulledFile[] = []
+
+    for (const project of projects) {
+      const storedProject = this.projects.get(project.projectId)
+      if (!storedProject || storedProject.status !== 'completed') {
+        continue
+      }
+
+      for (const upload of storedProject.uploads) {
+        pulledFiles.push({
+          projectId: project.projectId,
+          fileName: upload.fileName,
+          content: this.buildReviewedContent(upload.content.toString('utf8'))
+        })
+      }
+    }
+
+    return pulledFiles
+  }
+
+  setProjectStatus(projectId: string, status: string): void {
+    const project = this.projects.get(projectId)
+    if (!project) {
+      throw new Error(`No project found for id ${projectId}`)
+    }
+
+    project.status = status
   }
 
   getProjectIds(): string[] {
     return Array.from(this.projects.keys())
   }
 
-  stageProjectUpdate(projectId: string, relativeFilePath: string, content: string, status: string = 'completed'): void {
-    const project = this.projects.get(projectId)
-    if (!project) {
-      throw new Error(`No pending project found for id ${projectId}`)
-    }
+  getLastRequest(): IMateCatReviewProjectRequest | undefined {
+    return this.lastRequest
+  }
 
-    project.status = status
-    project.updates.push({
-      filePath: path.join(this.workspacePath, relativeFilePath),
-      content
-    })
+  private buildReviewedContent(content: string): string {
+    return content.replace(/\(AI[^)]*\)/g, '(Human)')
   }
 }
 
@@ -101,9 +129,19 @@ function createNoOpWorkspaceWatcher(): IWorkspaceWatcher {
   }
 }
 
-function createDefaultConfigProvider(): IConfigProvider {
+function createConfigProvider(): IConfigProvider {
   return {
-    get: vi.fn((_: string, defaultValue?: unknown) => defaultValue),
+    get: vi.fn((section: string, defaultValue?: unknown) => {
+      if (section === 'translator.sourceLocale') {
+        return 'en'
+      }
+
+      if (section === 'translator.targetLocales') {
+        return ['fr']
+      }
+
+      return defaultValue
+    }),
     update: vi.fn()
   }
 }
@@ -114,235 +152,336 @@ function writeFile(workspacePath: string, relativePath: string, content: string)
   writeFileSync(absolutePath, content, 'utf8')
 }
 
+function createUploadXliff(suffix: string = ''): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2">
+  <file source-language="en" target-language="fr" original="i18n/fr/messages.json">
+    <body>
+      <trans-unit id="1">
+        <source>Hello</source>
+        <target>Bonjour (AI${suffix})</target>
+      </trans-unit>
+      <trans-unit id="2">
+        <source>Goodbye</source>
+        <target>Au revoir (AI${suffix})</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>`
+}
+
+function createTranslatedFileContent(suffix: string = ''): string {
+  return JSON.stringify({ greeting: `Bonjour (AI${suffix})`, farewell: `Au revoir (AI${suffix})` }, null, 2)
+}
+
+function createTranslationMemory(workspacePath: string, logger: ILogger): JsonlTranslationMemory {
+  return new JsonlTranslationMemory(path.join(workspacePath, '.translator', 'translation.jsonl'), workspacePath, logger)
+}
+
+function createReviewService(
+  workspacePath: string,
+  fileSystem: ReturnType<typeof nodeFileSystem.constructor>,
+  logger: ILogger,
+  configProvider: IConfigProvider,
+  translationMemory: JsonlTranslationMemory,
+  mateCatService: FakeRoundTripMateCatService
+): IReviewService {
+  return new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    createMateCatService: () => mateCatService,
+    translationMemory
+  })
+}
+
 function createManager(
   workspacePath: string,
-  fakeReviewService: IReviewService
+  logger: ILogger,
+  translationMemory: JsonlTranslationMemory,
+  reviewService: IReviewService
 ): TranslatorManager {
   return new TranslatorManager(
     nodeFileSystem,
-    createNoOpLogger(),
-    {
-      putMany: vi.fn(),
-      getMany: vi.fn(),
-      close: vi.fn(),
-      exportCSV: vi.fn(),
-      importCSV: vi.fn(),
-      hasSourcePath: vi.fn().mockResolvedValue(false),
-      hasPendingPurge: vi.fn().mockResolvedValue(false),
-      purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
-      completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
-      isNew: vi.fn().mockReturnValue(false),
-      didMigrateFromV1: vi.fn().mockReturnValue(false),
-      clearMigrationFlag: vi.fn()
-    },
+    logger,
+    translationMemory,
     workspacePath,
     createNoOpWorkspaceWatcher(),
-    createDefaultConfigProvider(),
+    createConfigProvider(),
     undefined,
     undefined,
     undefined,
     undefined,
     {
-      createReviewService: (): IReviewService => fakeReviewService
+      createReviewService: () => reviewService
     }
   )
 }
 
-describe('Review round-trip (fake service)', () => {
+describe('Review round-trip (real XLIFF export/import flow)', () => {
   let workspacePath = ''
+  let originalApiKey: string | undefined
 
   beforeEach(() => {
+    originalApiKey = process.env.MATECAT_API_KEY
+    process.env.MATECAT_API_KEY = 'roundtrip-test-key'
     workspacePath = mkdtempSync(path.join(tmpdir(), 'i18n-review-roundtrip-'))
+    writeFile(
+      workspacePath,
+      'matecat.json',
+      JSON.stringify({ newProjectDefaults: { project_name: 'RoundTrip' } }, null, 2)
+    )
   })
 
   afterEach(() => {
     if (workspacePath) {
       rmSync(workspacePath, { recursive: true, force: true })
     }
+
+    if (originalApiKey === undefined) {
+      delete process.env.MATECAT_API_KEY
+    } else {
+      process.env.MATECAT_API_KEY = originalApiKey
+    }
   })
 
-  it('pushes artifacts, reports status, pulls updates, and applies reviewed content to translated files', async () => {
-    writeFile(
+  it('exports XLIFF, pulls reviewed XLIFF, imports reviewed TM rows, and preserves the downloaded review file', async () => {
+    const logger = createNoOpLogger()
+    const translationMemory = createTranslationMemory(workspacePath, logger)
+    const fakeMateCatService = new FakeRoundTripMateCatService()
+    const reviewService = createReviewService(
       workspacePath,
-      '.translator/review/fr/upload/messages.xliff',
-      '<xliff><file><unit id="1"></unit><unit id="2"></unit></file></xliff>'
+      nodeFileSystem,
+      logger,
+      createConfigProvider(),
+      translationMemory,
+      fakeMateCatService
     )
-    writeFile(
-      workspacePath,
-      'i18n/fr/messages.json',
-      JSON.stringify({ greeting: 'Bonjour (AI)', farewell: 'Au revoir (AI)' }, null, 2)
-    )
+    const manager = createManager(workspacePath, logger, translationMemory, reviewService)
 
-    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = createManager(workspacePath, fakeReviewService)
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', createUploadXliff())
+    writeFile(workspacePath, 'i18n/fr/messages.json', createTranslatedFileContent())
+
+    await translationMemory.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      pairs: [
+        { src: 'Hello', dst: 'Bonjour (AI)', ctx: '1', pos: 1 },
+        { src: 'Goodbye', dst: 'Au revoir (AI)', ctx: '2', pos: 2 }
+      ]
+    })
 
     const preview = await manager.getReviewPushPreview()
     expect(preview).toEqual({ translationCount: 2, artifactCount: 1 })
 
     await manager.pushReviewProject()
 
-    const pushedRequest = fakeReviewService.getLastPushedRequest()
-    expect(pushedRequest).toBeDefined()
-    expect(pushedRequest?.artifacts).toHaveLength(1)
-    expect(pushedRequest?.artifacts[0]?.filePath).toContain('.translator')
-    expect(pushedRequest?.artifacts[0]?.filePath).toContain('messages.xliff')
+    const pushedRequest = fakeMateCatService.getLastRequest()
+    expect(pushedRequest?.uploads).toHaveLength(1)
+    expect(pushedRequest?.uploads[0]?.content.toString('utf8')).toContain('<trans-unit id="1">')
+    expect(pushedRequest?.uploads[0]?.content.toString('utf8')).toContain('Bonjour (AI)')
 
-    const pending = await manager.getPendingReviewStatus()
-    const [projectId] = fakeReviewService.getProjectIds()
-    expect(pending).toEqual([
-      {
-        projectId,
-        status: 'in_progress'
-      }
-    ])
-
+    const [projectId] = fakeMateCatService.getProjectIds()
+    expect(projectId).toBeDefined()
     if (!projectId) {
       throw new Error('Expected a pushed project id to be available')
     }
 
-    fakeReviewService.stageProjectUpdate(
-      projectId,
-      'i18n/fr/messages.json',
-      JSON.stringify({ greeting: 'Bonjour (Human)', farewell: 'Au revoir (Human)' }, null, 2)
-    )
+    fakeMateCatService.setProjectStatus(projectId, 'completed')
 
-    const completed = await manager.getPendingReviewStatus()
-    expect(completed).toEqual([
-      {
-        projectId,
-        status: 'completed'
-      }
-    ])
+    const pending = await manager.getPendingReviewStatus()
+    expect(pending).toEqual([{ projectId, status: 'completed' }])
 
     await manager.pullReviewedProjects()
 
-    const updated = JSON.parse(
-      readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')
-    ) as { greeting: string; farewell: string }
-    expect(updated).toEqual({
-      greeting: 'Bonjour (Human)',
-      farewell: 'Au revoir (Human)'
+    const lookup = await translationMemory.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello', 'Goodbye'],
+      contexts: ['1', '2'],
+      sourcePath: 'i18n/fr/messages.json',
+      positions: [1, 2]
     })
 
-    const afterPull = await manager.getPendingReviewStatus()
-    expect(afterPull).toEqual([])
-  })
+    expect(lookup.get('Hello::1')).toEqual({ translation: 'Bonjour (Human)', textPos: 1 })
+    expect(lookup.get('Goodbye::2')).toEqual({ translation: 'Au revoir (Human)', textPos: 2 })
 
-  it('keeps translated files unchanged when no project is completed', async () => {
-    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
-    writeFile(
-      workspacePath,
-      'i18n/fr/messages.json',
-      JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2)
+    const tmDump = readFileSync(path.join(workspacePath, '.translator', 'translation.jsonl'), 'utf8')
+    expect(tmDump).toContain('"status":"reviewed"')
+    expect(tmDump).toContain('"origin":"human"')
+
+    const downloadedXliff = readFileSync(
+      path.join(workspacePath, '.translator', 'review', 'download', projectId, 'messages.xliff'),
+      'utf8'
     )
+    expect(downloadedXliff).toContain('Bonjour (Human)')
+    expect(downloadedXliff).toContain('Au revoir (Human)')
 
-    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = createManager(workspacePath, fakeReviewService)
+    await translationMemory.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/other.json',
+      status: 'final',
+      origin: 'ai',
+      updatedAt: Date.now() + 10_000,
+      pairs: [
+        { src: 'Hello', dst: 'Bonjour (AI v2)', ctx: 'alt-1', pos: 10 },
+        { src: 'Goodbye', dst: 'Au revoir (AI v2)', ctx: 'alt-2', pos: 20 }
+      ]
+    })
 
-    await manager.pushReviewProject()
-    await manager.pullReviewedProjects()
+    const fallbackLookup = await translationMemory.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello', 'Goodbye'],
+      contexts: ['1', '2'],
+      sourcePath: 'i18n/fr/new-context.json',
+      positions: [1, 2]
+    })
 
-    const unchanged = JSON.parse(
-      readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')
-    ) as { greeting: string }
+    expect(fallbackLookup.get('Hello::1')?.translation).toBe('Bonjour (Human)')
+    expect(fallbackLookup.get('Goodbye::2')?.translation).toBe('Au revoir (Human)')
 
-    expect(unchanged).toEqual({ greeting: 'Bonjour (AI)' })
-  })
-
-  it('applies only completed projects when pending and completed projects coexist', async () => {
-    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
-    writeFile(workspacePath, '.translator/review/es/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
-    writeFile(workspacePath, 'i18n/fr/messages.json', JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2))
-    writeFile(workspacePath, 'i18n/es/messages.json', JSON.stringify({ greeting: 'Hola (AI)' }, null, 2))
-
-    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = createManager(workspacePath, fakeReviewService)
-
-    await manager.pushReviewProject()
-    await manager.pushReviewProject()
-
-    const [firstProjectId, secondProjectId] = fakeReviewService.getProjectIds()
-    fakeReviewService.stageProjectUpdate(
-      firstProjectId,
-      'i18n/fr/messages.json',
-      JSON.stringify({ greeting: 'Bonjour (Human)' }, null, 2)
-    )
-    fakeReviewService.stageProjectUpdate(
-      secondProjectId,
-      'i18n/es/messages.json',
-      JSON.stringify({ greeting: 'Hola (Human)' }, null, 2),
-      'in_progress'
-    )
-
-    await manager.pullReviewedProjects()
-
-    const fr = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')) as { greeting: string }
-    const es = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/es/messages.json'), 'utf8')) as { greeting: string }
-
-    expect(fr).toEqual({ greeting: 'Bonjour (Human)' })
-    expect(es).toEqual({ greeting: 'Hola (AI)' })
-
-    const remainingStatuses = await manager.getPendingReviewStatus()
-    expect(remainingStatuses).toEqual([{ projectId: secondProjectId, status: 'in_progress' }])
-  })
-
-  it('merges multiple completed projects in a single pull', async () => {
-    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
-    writeFile(workspacePath, '.translator/review/es/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
-    writeFile(workspacePath, 'i18n/fr/messages.json', JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2))
-    writeFile(workspacePath, 'i18n/es/messages.json', JSON.stringify({ greeting: 'Hola (AI)' }, null, 2))
-
-    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = createManager(workspacePath, fakeReviewService)
-
-    await manager.pushReviewProject()
-    await manager.pushReviewProject()
-
-    const [firstProjectId, secondProjectId] = fakeReviewService.getProjectIds()
-    fakeReviewService.stageProjectUpdate(
-      firstProjectId,
-      'i18n/fr/messages.json',
-      JSON.stringify({ greeting: 'Bonjour (Human)' }, null, 2)
-    )
-    fakeReviewService.stageProjectUpdate(
-      secondProjectId,
-      'i18n/es/messages.json',
-      JSON.stringify({ greeting: 'Hola (Human)' }, null, 2)
-    )
-
-    await manager.pullReviewedProjects()
-
-    const fr = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')) as { greeting: string }
-    const es = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/es/messages.json'), 'utf8')) as { greeting: string }
-
-    expect(fr).toEqual({ greeting: 'Bonjour (Human)' })
-    expect(es).toEqual({ greeting: 'Hola (Human)' })
     expect(await manager.getPendingReviewStatus()).toEqual([])
   })
 
-  it('does not change output when pulling the same completed project twice', async () => {
-    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
-    writeFile(workspacePath, 'i18n/fr/messages.json', JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2))
+  it('leaves the TM unchanged when no reviewed project is completed', async () => {
+    const logger = createNoOpLogger()
+    const translationMemory = createTranslationMemory(workspacePath, logger)
+    const fakeMateCatService = new FakeRoundTripMateCatService()
+    const reviewService = createReviewService(
+      workspacePath,
+      nodeFileSystem,
+      logger,
+      createConfigProvider(),
+      translationMemory,
+      fakeMateCatService
+    )
+    const manager = createManager(workspacePath, logger, translationMemory, reviewService)
 
-    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = createManager(workspacePath, fakeReviewService)
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', createUploadXliff())
+    writeFile(workspacePath, 'i18n/fr/messages.json', createTranslatedFileContent())
+
+    await translationMemory.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      pairs: [
+        { src: 'Hello', dst: 'Bonjour (AI)', ctx: '1', pos: 1 },
+        { src: 'Goodbye', dst: 'Au revoir (AI)', ctx: '2', pos: 2 }
+      ]
+    })
+
+    await manager.pushReviewProject()
+    await manager.pullReviewedProjects()
+
+    const lookup = await translationMemory.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello', 'Goodbye'],
+      contexts: ['1', '2'],
+      sourcePath: 'i18n/fr/messages.json',
+      positions: [1, 2]
+    })
+
+    expect(lookup.get('Hello::1')).toEqual({ translation: 'Bonjour (AI)', textPos: 1 })
+    expect(lookup.get('Goodbye::2')).toEqual({ translation: 'Au revoir (AI)', textPos: 2 })
+  })
+
+  it('supports a second review cycle without duplicating or corrupting TM rows', async () => {
+    const logger = createNoOpLogger()
+    const translationMemory = createTranslationMemory(workspacePath, logger)
+    const fakeMateCatService = new FakeRoundTripMateCatService()
+    const reviewService = createReviewService(
+      workspacePath,
+      nodeFileSystem,
+      logger,
+      createConfigProvider(),
+      translationMemory,
+      fakeMateCatService
+    )
+    const manager = createManager(workspacePath, logger, translationMemory, reviewService)
+
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', createUploadXliff())
+    writeFile(workspacePath, 'i18n/fr/messages.json', createTranslatedFileContent())
+
+    await translationMemory.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      pairs: [
+        { src: 'Hello', dst: 'Bonjour (AI)', ctx: '1', pos: 1 },
+        { src: 'Goodbye', dst: 'Au revoir (AI)', ctx: '2', pos: 2 }
+      ]
+    })
 
     await manager.pushReviewProject()
 
-    const [projectId] = fakeReviewService.getProjectIds()
-    fakeReviewService.stageProjectUpdate(
-      projectId,
-      'i18n/fr/messages.json',
-      JSON.stringify({ greeting: 'Bonjour (Human)' }, null, 2)
-    )
+    const [firstProjectId] = fakeMateCatService.getProjectIds()
+    if (!firstProjectId) {
+      throw new Error('Expected first pushed project id to be available')
+    }
 
+    fakeMateCatService.setProjectStatus(firstProjectId, 'completed')
     await manager.pullReviewedProjects()
 
-    const firstPull = readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')
-    await manager.pullReviewedProjects()
-    const secondPull = readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', createUploadXliff(' v2'))
+    writeFile(workspacePath, 'i18n/fr/messages.json', createTranslatedFileContent(' v2'))
 
-    expect(secondPull).toBe(firstPull)
-    expect(JSON.parse(secondPull) as { greeting: string }).toEqual({ greeting: 'Bonjour (Human)' })
+    await translationMemory.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      pairs: [
+        { src: 'Hello', dst: 'Bonjour (AI v2)', ctx: '1', pos: 1 },
+        { src: 'Goodbye', dst: 'Au revoir (AI v2)', ctx: '2', pos: 2 }
+      ]
+    })
+
+    await manager.pushReviewProject()
+
+    const projectIds = fakeMateCatService.getProjectIds()
+    expect(projectIds).toHaveLength(2)
+
+    const secondProjectId = projectIds[1]
+    if (!secondProjectId) {
+      throw new Error('Expected second pushed project id to be available')
+    }
+
+    fakeMateCatService.setProjectStatus(secondProjectId, 'completed')
+    await manager.pullReviewedProjects()
+
+    const lookup = await translationMemory.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello', 'Goodbye'],
+      contexts: ['1', '2'],
+      sourcePath: 'i18n/fr/messages.json',
+      positions: [1, 2]
+    })
+
+    expect(lookup.get('Hello::1')?.translation).toBe('Bonjour (Human)')
+    expect(lookup.get('Goodbye::2')?.translation).toBe('Au revoir (Human)')
+
+    const tmDump = readFileSync(path.join(workspacePath, '.translator', 'translation.jsonl'), 'utf8')
+    expect(tmDump.match(/"sourceText":"Hello"/g)).not.toBeNull()
+    expect(tmDump.match(/"sourceText":"Hello"/g)).toHaveLength(1)
+    expect(tmDump.match(/"sourceText":"Goodbye"/g)).not.toBeNull()
+    expect(tmDump.match(/"sourceText":"Goodbye"/g)).toHaveLength(1)
   })
 })

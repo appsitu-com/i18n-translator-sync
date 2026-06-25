@@ -138,4 +138,20 @@ After implementing changes, verify:
 - **`any` type usage**: ~10 instances
 - **Estimated refactoring effort**: 2-3 days
 
+## ✅ REVIEW WORKFLOW COVERAGE
+
+Status: implemented and validated.
+
+- [x] End-to-end review round trip exports XLIFF, pulls reviewed XLIFF, and imports reviewed TM rows
+- [x] Downloaded reviewed XLIFF file is preserved after pull
+- [x] Second push -> pull review cycle stays deterministic and does not duplicate TM rows
+- [x] Reviewed human rows win fallback ranking over newer AI rows
+- [x] Importer handles empty payloads and missing file metadata
+- [x] Importer handles multiple file blocks, repeated segment ids, and same source text across files
+- [x] Importer keeps same source text distinct across contexts
+- [x] Service imports all reviewed files for one completed project
+- [x] Service keeps pending projects open when another project completes
+- [x] Service leaves pending projects untouched when download fails
+- [x] TM purge preserves review-imported human rows
+
 Remember: "Code must be built for reuse, not just to make it work" - prioritize modular, testable, and maintainable solutions.

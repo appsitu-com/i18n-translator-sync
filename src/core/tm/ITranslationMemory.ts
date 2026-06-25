@@ -23,6 +23,9 @@ export interface ITranslationMemory {
     targetLocale: string
     pairs: Pair[]
     sourcePath?: string
+    status?: string
+    origin?: string
+    updatedAt?: number
   }): Promise<void>
 
   /**

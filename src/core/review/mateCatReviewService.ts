@@ -2,7 +2,9 @@ import * as path from 'path'
 import { loadProjectConfig, type IConfigProvider } from '../coreConfig'
 import type { IFileSystem } from '../util/fs'
 import type { ILogger } from '../util/baseLogger'
+import type { ITranslationMemory } from '../tm/ITranslationMemory'
 import type { IReviewService, ReviewPushRequest } from './reviewService'
+import { mergeReviewedXliffFilesIntoTranslationMemory } from './xliffReviewImporter'
 import {
   type IMateCatCreatedProject,
   type IMateCatProjectRef,
@@ -26,6 +28,7 @@ type PendingReviewProject = {
 export type MateCatReviewServiceDependencies = {
   createMateCatService?: (logger: ILogger) => IMateCatService
   loadMateCatSettings?: MateCatSettingsLoader
+  translationMemory?: ITranslationMemory
 }
 
 export class MateCatReviewService implements IReviewService {
@@ -280,6 +283,14 @@ export class MateCatReviewService implements IReviewService {
     const pulledFiles = await this.mateCatService.pullReviewedTranslations(settings, this.toMateCatProjectRefs(completedProjects))
     const savedCount = await this.persistPulledReviewFiles(pulledFiles)
     this.logger.info(`MateCat: downloaded ${savedCount} reviewed file(s)`)
+
+    if (this.dependencies.translationMemory) {
+      await mergeReviewedXliffFilesIntoTranslationMemory(
+        pulledFiles,
+        this.dependencies.translationMemory,
+        this.logger
+      )
+    }
 
     const remainingProjects = pendingProjects.filter((project) => !completedProjectIds.has(project.projectId))
     await this.savePendingReviewProjects(remainingProjects)

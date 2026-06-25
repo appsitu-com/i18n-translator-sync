@@ -1,3 +1,15 @@
+## Release 0.11.2
+
+### Features
+
+- Added reviewed XLIFF import into translation memory during MateCAT review pulls.
+- Added end-to-end review round-trip coverage for XLIFF export, pull, import, and repeated review cycles.
+
+### Tests
+
+- Added importer edge-case coverage for empty payloads, missing metadata, repeated segment ids, and cross-file/source-context handling.
+- Added service and TM regression coverage for pending-project failures, fallback ranking, and purge behavior.
+
 ## Release 0.11.1
 
 ### Features
