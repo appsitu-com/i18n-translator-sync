@@ -393,4 +393,107 @@ describe('XLIFF reviewed import', () => {
     expect(persisted).toContain('"status":"reviewed"')
     expect(persisted).toContain('"origin":"human"')
   })
+
+  it('updates the same TM key when reviewed target text changes', async () => {
+    workspacePath = mkdtempSync(path.join(tmpdir(), 'i18n-xliff-import-'))
+    mkdirSync(workspacePath, { recursive: true })
+    const tmPath = path.join(workspacePath, 'translation.jsonl')
+    const tm = new JsonlTranslationMemory(tmPath, workspacePath, logger)
+
+    await tm.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      pairs: [{ src: 'Hello', dst: 'Bonjour (AI)', ctx: '1', pos: 1 }]
+    })
+
+    const imported = await mergeReviewedXliffFilesIntoTranslationMemory(
+      [
+        {
+          projectId: 'mc-1',
+          fileName: 'reviewed.xliff',
+          content: `<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2">
+  <file source-language="en" target-language="fr" original="i18n/fr/messages.json">
+    <body>
+      <trans-unit id="1">
+        <source>Hello</source>
+        <target>Bonjour (Human)</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>`,
+        }
+      ],
+      tm,
+      logger
+    )
+
+    expect(imported).toBe(1)
+
+    const lookup = await tm.getMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Hello'],
+      contexts: ['1'],
+      sourcePath: 'i18n/fr/messages.json',
+      positions: [1]
+    })
+
+    expect(lookup.get('Hello::1')).toEqual({ translation: 'Bonjour (Human)', textPos: 1 })
+
+    const persisted = readFileSync(tmPath, 'utf8')
+    expect(persisted.match(/"sourceText":"Hello"/g)).toHaveLength(1)
+    expect(persisted).toContain('"origin":"human"')
+  })
+
+  it('skips reviewed units whose target text did not change', async () => {
+    workspacePath = mkdtempSync(path.join(tmpdir(), 'i18n-xliff-import-'))
+    mkdirSync(workspacePath, { recursive: true })
+    const tmPath = path.join(workspacePath, 'translation.jsonl')
+    const tm = new JsonlTranslationMemory(tmPath, workspacePath, logger)
+
+    await tm.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      sourcePath: 'i18n/fr/messages.json',
+      status: 'initial',
+      origin: 'ai',
+      pairs: [{ src: 'Hello', dst: 'Bonjour', ctx: '1', pos: 1 }]
+    })
+
+    const imported = await mergeReviewedXliffFilesIntoTranslationMemory(
+      [
+        {
+          projectId: 'mc-1',
+          fileName: 'reviewed.xliff',
+          content: `<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2">
+  <file source-language="en" target-language="fr" original="i18n/fr/messages.json">
+    <body>
+      <trans-unit id="1">
+        <source>Hello</source>
+        <target>Bonjour</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>`,
+        }
+      ],
+      tm,
+      logger
+    )
+
+    expect(imported).toBe(0)
+
+    const persisted = readFileSync(tmPath, 'utf8')
+    expect(persisted.match(/"sourceText":"Hello"/g)).toHaveLength(1)
+    expect(persisted).toContain('"origin":"ai"')
+    expect(persisted).not.toContain('"origin":"human"')
+  })
 })

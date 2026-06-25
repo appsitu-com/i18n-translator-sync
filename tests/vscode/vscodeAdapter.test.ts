@@ -337,6 +337,64 @@ describe('VSCodeTranslatorAdapter', () => {
       expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('MateCat push canceled')
     })
 
+    it('asks for push mode when reviewer.push is ask and cancels when no mode is selected', async () => {
+      ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorConfig = { reviewer: { push: 'ask' } }
+
+      const pushReviewProject = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorManager = {
+        getReviewPushPreview: vi.fn().mockResolvedValue({ translationCount: 5, artifactCount: 2 }),
+        pushReviewProject
+      }
+
+      vi.mocked(vscode.window.showInformationMessage).mockImplementation(async (message: string) => {
+        if (message === 'Choose what to push to Human Review') {
+          return undefined as any
+        }
+        return undefined as any
+      })
+
+      await adapter.pushToMateCat()
+
+      expect(pushReviewProject).not.toHaveBeenCalled()
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        'Choose what to push to Human Review',
+        { modal: true },
+        'All keys',
+        'Changed AI keys'
+      )
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('MateCat push canceled')
+    })
+
+    it('uses changes mode when reviewer.push is ask and user selects changed AI keys', async () => {
+      ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorConfig = { reviewer: { push: 'ask' } }
+
+      const pushReviewProject = vi.fn().mockResolvedValue(undefined)
+      const getReviewPushPreview = vi.fn().mockResolvedValue({ translationCount: 5, artifactCount: 2 })
+      ;(adapter as any).translatorManager = {
+        getReviewPushPreview,
+        pushReviewProject
+      }
+
+      vi.mocked(vscode.window.showInformationMessage).mockImplementation(async (message: string) => {
+        if (message === 'Choose what to push to Human Review') {
+          return 'Changed AI keys' as any
+        }
+        if (message === 'Push 5 translation(s) for review to MateCat?') {
+          return 'Push' as any
+        }
+        return undefined as any
+      })
+
+      await adapter.pushToMateCat()
+
+      expect(getReviewPushPreview).toHaveBeenCalledWith('changes')
+      expect(pushReviewProject).toHaveBeenCalledWith('changes')
+    })
+
     it('shows no-ready message and skips pull when no projects are completed', async () => {
       ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
       ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)

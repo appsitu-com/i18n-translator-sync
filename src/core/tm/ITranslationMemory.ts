@@ -39,6 +39,11 @@ export interface ITranslationMemory {
   exportTMX(filePath: string, options?: { origin?: string }): Promise<number>
 
   /**
+   * Export the cache to an XLIFF file
+   */
+  exportXLIFF(filePath: string, options?: { origin?: string }): Promise<number>
+
+  /**
    * Import translations from a CSV file
    */
   importCSV(filePath: string): Promise<number>

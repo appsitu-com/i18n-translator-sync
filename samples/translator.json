@@ -23,6 +23,7 @@
 
   // ========== HUMAN REVIEW TARGET FILTERS ==========
   "reviewer": {
+    "push": "all",                         // Push mode: "all" = push all keys (gives human translator best context)  | "changes" = only send untranslated keys | "ask" = Ask me which one.
     "targetLocales": {
       "include": [],                          // Include only these locales for review push (empty = all)
       "exclude": []                           // Exclude these locales from review push

@@ -232,4 +232,27 @@ describe('TranslatorConfigSchema', () => {
     const result = TranslatorConfigSchema.safeParse(raw)
     expect(result.success).toBe(true)
   })
+
+  it('applies default reviewer.push when reviewer is present', () => {
+    const result = TranslatorConfigSchema.parse({
+      reviewer: {
+        targetLocales: {
+          include: ['fr'],
+          exclude: []
+        }
+      }
+    })
+
+    expect(result.reviewer?.push).toBe('all')
+  })
+
+  it('rejects invalid reviewer.push mode', () => {
+    const result = TranslatorConfigSchema.safeParse({
+      reviewer: {
+        push: 'invalid',
+        targetLocales: { include: [], exclude: [] }
+      }
+    })
+    expect(result.success).toBe(false)
+  })
 })

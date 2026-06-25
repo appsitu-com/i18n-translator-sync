@@ -19,6 +19,7 @@ const XLIFF_FILE_PATTERN = /<file\b([^>]*)>([\s\S]*?)<\/file>/gi
 const XLIFF_UNIT_PATTERN = /<(?:trans-unit|unit)\b([^>]*)>([\s\S]*?)<\/(?:trans-unit|unit)>|<(?:trans-unit|unit)\b([^>]*)\/>/gi
 const SOURCE_PATTERN = /<source\b[^>]*>([\s\S]*?)<\/source>/i
 const TARGET_PATTERN = /<target\b[^>]*>([\s\S]*?)<\/target>/i
+const LOOKUP_SEPARATOR = '::'
 
 function parseAttributes(attributeSource: string): Record<string, string> {
   const attributes: Record<string, string> = {}
@@ -130,24 +131,44 @@ export async function mergeReviewedXliffFilesIntoTranslationMemory(
         continue
       }
 
-      const pairs: Pair[] = file.units.map((unit, index) => ({
+      const unitPairs: Pair[] = file.units.map((unit, index) => ({
         src: unit.sourceText,
         dst: unit.targetText,
         ctx: unit.id,
         pos: parseUnitPosition(unit.id, index)
       }))
 
+      const existingTranslations = await translationMemory.getMany({
+        engine: 'matecat',
+        sourceLocale: file.sourceLocale,
+        targetLocale: file.targetLocale,
+        texts: unitPairs.map((pair) => pair.src),
+        contexts: unitPairs.map((pair) => pair.ctx ?? null),
+        sourcePath: file.sourcePath,
+        positions: unitPairs.map((pair) => pair.pos ?? 0)
+      })
+
+      const changedPairs = unitPairs.filter((pair) => {
+        const lookupKey = `${pair.src}${LOOKUP_SEPARATOR}${(pair.ctx ?? '').toString()}`
+        const existing = existingTranslations.get(lookupKey)?.translation
+        return existing === undefined || existing !== pair.dst
+      })
+
+      if (changedPairs.length === 0) {
+        continue
+      }
+
       await translationMemory.putMany({
         engine: 'matecat',
         sourceLocale: file.sourceLocale,
         targetLocale: file.targetLocale,
-        pairs,
+        pairs: changedPairs,
         sourcePath: file.sourcePath,
         status: 'reviewed',
         origin: 'human'
       })
 
-      importedUnits += pairs.length
+      importedUnits += changedPairs.length
     }
   }
 

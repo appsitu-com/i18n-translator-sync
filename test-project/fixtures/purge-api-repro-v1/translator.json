@@ -18,6 +18,7 @@
     "azure": ["es"]
   },
   "reviewer": {
+    "push": "all",
     "targetLocales": {
       "include": [],
       "exclude": []

@@ -63,6 +63,7 @@ const createMockCache = () => ({
     fs.writeFileSync(filePath, 'source_text,target_text\nHello,Bonjour\n', 'utf8')
   }),
   exportTMX: vi.fn(async () => 0),
+  exportXLIFF: vi.fn(async () => 0),
   importCSV: vi.fn(),
   getStats: vi.fn()
 });
@@ -333,6 +334,98 @@ describe('TranslatorManager', () => {
             filePath: path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
             fileName: 'local-tm-human.tmx',
             contentType: 'application/tmx+xml'
+          }
+        ]
+      })
+    })
+
+    it('uses ai-origin filter for generated XLIFF when push mode is changes', async () => {
+      vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+      vi.mocked(cache.exportTMX).mockResolvedValue(0)
+      vi.mocked(cache.exportXLIFF).mockResolvedValue(2)
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      await manager.pushReviewProject('changes')
+
+      expect(cache.exportTMX).toHaveBeenCalledWith(
+        path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
+        { origin: 'human' }
+      )
+      expect(cache.exportXLIFF).toHaveBeenCalledWith(
+        path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
+        { origin: 'ai' }
+      )
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        artifacts: [
+          {
+            filePath: path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
+            fileName: 'local-tm-review.xliff',
+            contentType: 'application/xliff+xml'
+          }
+        ]
+      })
+    })
+
+    it('uses unfiltered generated XLIFF when push mode is all', async () => {
+      vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+      vi.mocked(cache.exportTMX).mockResolvedValue(0)
+      vi.mocked(cache.exportXLIFF).mockResolvedValue(3)
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      await manager.pushReviewProject('all')
+
+      expect(cache.exportXLIFF).toHaveBeenCalledWith(
+        path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
+        undefined
+      )
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        artifacts: [
+          {
+            filePath: path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
+            fileName: 'local-tm-review.xliff',
+            contentType: 'application/xliff+xml'
           }
         ]
       })

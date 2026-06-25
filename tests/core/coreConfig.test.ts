@@ -272,5 +272,31 @@ describe('Config', () => {
 
       expect((result as any).translator).toBeUndefined()
     })
+
+    it('should use reviewer push mode from translator config when present', () => {
+      const config = makeConfig({
+        reviewer: {
+          push: 'changes',
+          targetLocales: { include: [], exclude: [] }
+        }
+      } as any)
+
+      const result = toProjectConfig(config, mockConfigProvider)
+
+      expect(result.reviewer?.push).toBe('changes')
+    })
+
+    it('should fall back to provider reviewer push mode when absent in translator config', () => {
+      const config = makeConfig({ reviewer: undefined })
+
+      vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
+        if (section === 'translator.reviewer.push') return 'ask'
+        return defaultValue
+      })
+
+      const result = toProjectConfig(config, mockConfigProvider)
+
+      expect(result.reviewer?.push).toBe('ask')
+    })
   })
 })

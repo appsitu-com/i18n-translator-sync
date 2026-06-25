@@ -255,8 +255,29 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
     }
 
     try {
+      let pushMode: 'all' | 'changes' = 'all'
+      const configuredPushMode = this.translatorConfig?.reviewer?.push ?? 'all'
+
+      if (configuredPushMode === 'changes') {
+        pushMode = 'changes'
+      } else if (configuredPushMode === 'ask') {
+        const selectedMode = await vscode.window.showInformationMessage(
+          'Choose what to push to Human Review',
+          { modal: true },
+          'All keys',
+          'Changed AI keys'
+        )
+
+        if (!selectedMode) {
+          vscode.window.showInformationMessage('MateCat push canceled')
+          return
+        }
+
+        pushMode = selectedMode === 'Changed AI keys' ? 'changes' : 'all'
+      }
+
       if (this.translatorManager.getReviewPushPreview) {
-        const preview = await this.translatorManager.getReviewPushPreview()
+        const preview = await this.translatorManager.getReviewPushPreview(pushMode)
         if (preview.translationCount === 0) {
           vscode.window.showInformationMessage('No translations requiring review were found')
           return
@@ -274,10 +295,10 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
         }
       }
 
-      await super.pushToMateCat()
+      await this.translatorManager.pushReviewProject(pushMode)
       vscode.window.showInformationMessage('Successfully pushed translations to MateCat')
     } catch (e: any) {
-      if (e instanceof MissingEnvironmentValueError) {
+      if (typeof MissingEnvironmentValueError === 'function' && e instanceof MissingEnvironmentValueError) {
         throw e
       }
       vscode.window.showErrorMessage(`MateCat push failed: ${e.message}`)

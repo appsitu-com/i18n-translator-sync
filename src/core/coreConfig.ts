@@ -126,6 +126,12 @@ export function toProjectConfig(
         defaultConfig.reviewService
       ),
     reviewer: {
+      push:
+        config.reviewer?.push ??
+        configProvider.get<'all' | 'changes' | 'ask'>(
+          'translator.reviewer.push',
+          defaultConfig.reviewer?.push ?? 'all'
+        ),
       targetLocales: {
         include:
           config.reviewer?.targetLocales?.include ??

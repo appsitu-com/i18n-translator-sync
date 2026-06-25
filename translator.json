@@ -10,6 +10,7 @@
     "azure": ["es:en", "ja:en"]
   },
   "reviewer": {
+    "push": "all",
     "targetLocales": {
       "include": [],
       "exclude": []

@@ -48,6 +48,7 @@ describe('DefaultTranslationExecutor whitespace handling', () => {
       putMany: vi.fn(),
       exportCSV: vi.fn(),
       exportTMX: vi.fn(),
+      exportXLIFF: vi.fn(),
       importCSV: vi.fn(),
       close: vi.fn()
     }

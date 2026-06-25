@@ -52,6 +52,7 @@ describe('TranslatorPipeline', () => {
       putMany: vi.fn(async () => {}),
       exportCSV: vi.fn(async () => {}),
       exportTMX: vi.fn(async () => 0),
+      exportXLIFF: vi.fn(async () => 0),
       importCSV: vi.fn(async () => 0),
       hasSourcePath: vi.fn(async () => true),
       hasPendingPurge: vi.fn(async () => false),

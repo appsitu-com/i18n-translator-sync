@@ -19,8 +19,8 @@ export interface ITranslatorManager {
   setTranslatorEngines(engines: ITranslatorEngines | undefined): void
   startWatching(config: TranslateProjectConfig): Promise<void>
   stopWatching(): Promise<void>
-  pushReviewProject(): Promise<void>
-  getReviewPushPreview?(): Promise<{ translationCount: number; artifactCount: number }>
+  pushReviewProject(pushMode?: 'all' | 'changes'): Promise<void>
+  getReviewPushPreview?(pushMode?: 'all' | 'changes'): Promise<{ translationCount: number; artifactCount: number }>
   pullReviewedProjects(): Promise<void>
   getPendingReviewStatus(): Promise<ReviewProjectStatus[]>
   translateSingleFile(fileUri: IUri, config: TranslateProjectConfig, force?: boolean): Promise<void>
@@ -439,12 +439,12 @@ export abstract class TranslatorAdapter {
   /**
    * Push translations to MateCat
    */
-  async pushToMateCat(): Promise<void> {
+  async pushToMateCat(pushMode: 'all' | 'changes' = 'all'): Promise<void> {
     if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before pushToMateCat()');
 
     try {
       // Use the TranslatorManager's review-service integration
-      await this.translatorManager.pushReviewProject();
+      await this.translatorManager.pushReviewProject(pushMode);
       this.logger.info('Successfully pushed translations to MateCat');
     } catch (e: any) {
       this.logger.error(`MateCat push failed: ${e.message}`);

@@ -273,12 +273,12 @@ describe('Review round-trip (real XLIFF export/import flow)', () => {
     })
 
     const preview = await manager.getReviewPushPreview()
-    expect(preview).toEqual({ translationCount: 2, artifactCount: 1 })
+    expect(preview).toEqual({ translationCount: 4, artifactCount: 2 })
 
     await manager.pushReviewProject()
 
     const pushedRequest = fakeMateCatService.getLastRequest()
-    expect(pushedRequest?.uploads).toHaveLength(1)
+    expect(pushedRequest?.uploads).toHaveLength(2)
     expect(pushedRequest?.uploads[0]?.content.toString('utf8')).toContain('<trans-unit id="1">')
     expect(pushedRequest?.uploads[0]?.content.toString('utf8')).toContain('Bonjour (AI)')
 

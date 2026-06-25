@@ -346,6 +346,70 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     return entries.length
   }
 
+  async exportXLIFF(filePath: string, options: { origin?: string } = {}): Promise<number> {
+    const entries = this.selectEntriesForReviewExport(options.origin?.trim())
+
+    if (entries.length === 0) {
+      this.logger.info(`Skipped XLIFF export to ${filePath} (no matching translations)`)
+      return 0
+    }
+
+    const groupedByFile = new Map<string, TmEntry[]>()
+
+    for (const entry of entries) {
+      const fileKey = `${entry.source}\u0000${entry.target}\u0000${entry.sourcePath || 'translation-memory'}`
+      const group = groupedByFile.get(fileKey)
+      if (group) {
+        group.push(entry)
+      } else {
+        groupedByFile.set(fileKey, [entry])
+      }
+    }
+
+    const fileBlocks = Array.from(groupedByFile.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([fileKey, fileEntries]) => {
+        const [sourceLocale, targetLocale, sourcePath] = fileKey.split('\u0000')
+
+        fileEntries.sort((left, right) => this.compareTextPos(left.textPos, right.textPos))
+
+        const transUnits = fileEntries
+          .map((entry, index) => {
+            const unitId = this.escapeXml((entry.context || String(entry.textPos || index + 1)).trim() || String(index + 1))
+            const sourceText = this.escapeXml(entry.sourceText)
+            const targetText = this.escapeXml(entry.targetText)
+
+            return [
+              `      <trans-unit id="${unitId}">`,
+              `        <source>${sourceText}</source>`,
+              `        <target>${targetText}</target>`,
+              '      </trans-unit>'
+            ].join('\n')
+          })
+          .join('\n')
+
+        return [
+          `  <file source-language="${this.escapeXml(sourceLocale)}" target-language="${this.escapeXml(targetLocale)}" original="${this.escapeXml(sourcePath)}">`,
+          '    <body>',
+          transUnits,
+          '    </body>',
+          '  </file>'
+        ].join('\n')
+      })
+
+    const xliffContent = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<xliff version="1.2">',
+      fileBlocks.join('\n'),
+      '</xliff>',
+      ''
+    ].join('\n')
+
+    fs.writeFileSync(filePath, xliffContent, 'utf8')
+    this.logger.info(`Exported ${entries.length} translations to ${filePath} (XLIFF)`)
+    return entries.length
+  }
+
   async importCSV(filePath: string): Promise<number> {
     if (!fs.existsSync(filePath)) {
       this.logger.warn(`CSV file not found: ${filePath}`)
@@ -927,6 +991,46 @@ export class JsonlTranslationMemory implements ITranslationMemory {
       lowerPath.endsWith('.mjs') ||
       lowerPath.endsWith('.cjs')
     )
+  }
+
+  private selectEntriesForReviewExport(originFilter?: string): TmEntry[] {
+    const selected = new Map<string, TmEntry>()
+
+    for (const entry of this.strictData.values()) {
+      if (originFilter && entry.origin !== originFilter) {
+        continue
+      }
+
+      const entryKey = [
+        entry.source,
+        entry.target,
+        entry.sourcePath,
+        String(entry.textPos),
+        this.normalizeKeyText(entry.sourceText),
+        entry.context
+      ].join(KEY_SEPARATOR)
+
+      const current = selected.get(entryKey)
+      if (!current || this.isPreferredReviewExportCandidate(entry, current)) {
+        selected.set(entryKey, entry)
+      }
+    }
+
+    return Array.from(selected.values())
+  }
+
+  private isPreferredReviewExportCandidate(candidate: TmEntry, current: TmEntry): boolean {
+    const originComparison = this.compareOriginPriority(candidate.origin) - this.compareOriginPriority(current.origin)
+    if (originComparison !== 0) {
+      return originComparison > 0
+    }
+
+    const statusComparison = this.compareStatusPriority(candidate.status) - this.compareStatusPriority(current.status)
+    if (statusComparison !== 0) {
+      return statusComparison > 0
+    }
+
+    return candidate.updatedAt > current.updatedAt
   }
 
   private escapeXml(value: string): string {

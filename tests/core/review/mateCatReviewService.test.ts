@@ -25,10 +25,11 @@ function createConfigProvider(): IConfigProvider {
 
 function createTranslationMemoryMock(): ITranslationMemory {
   return {
-    getMany: vi.fn(),
+    getMany: vi.fn().mockResolvedValue(new Map()),
     putMany: vi.fn().mockResolvedValue(undefined),
     exportCSV: vi.fn(),
     exportTMX: vi.fn().mockResolvedValue(0),
+    exportXLIFF: vi.fn().mockResolvedValue(0),
     importCSV: vi.fn(),
     hasSourcePath: vi.fn(),
     hasPendingPurge: vi.fn(),

@@ -8,6 +8,7 @@ import { TranslatorPipeline } from './TranslatorPipeline';
 import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
 import * as path from 'path';
+import * as fs from 'fs';
 import { toAbsPath } from './util/pathShared';
 import type { GetPassphrase } from './config';
 import type { IReviewService, ReviewArtifact, ReviewProjectStatus, ReviewPushRequest } from './review/reviewService';
@@ -54,6 +55,7 @@ export class TranslatorManager {
   private static readonly XLIFF_UNIT_PATTERN = /<(?:unit|trans-unit)\b/gi
   private static readonly REVIEW_LOCALE_PATH_PATTERN = /[\\/]\.translator[\\/]review[\\/]([^\\/]+)[\\/]/i
   private static readonly GENERATED_TM_TMX_PATH = '.translator/review/upload/local-tm-human.tmx'
+  private static readonly GENERATED_REVIEW_XLIFF_PATH = '.translator/review/upload/local-tm-review.xliff'
 
   private watchers: IFileWatcher[] = [];
   private pipeline: ITranslatorPipeline;
@@ -706,10 +708,10 @@ export class TranslatorManager {
   /**
    * Push translations to configured review service
    */
-  async pushReviewProject(): Promise<void> {
+  async pushReviewProject(pushMode: 'all' | 'changes' = 'all'): Promise<void> {
     this.logger.info('Pushing translations to review service');
 
-    const { request } = await this.prepareReviewPushRequest()
+    const { request } = await this.prepareReviewPushRequest(pushMode)
 
     await this.getReviewService().pushReviewProject(request)
 
@@ -720,8 +722,8 @@ export class TranslatorManager {
    * Build a lightweight preview for the review push flow.
    * @returns Translation unit count from XLIFF artifacts and total artifact count
    */
-  async getReviewPushPreview(): Promise<{ translationCount: number; artifactCount: number }> {
-    const { request, translationCount } = await this.prepareReviewPushRequest()
+  async getReviewPushPreview(pushMode: 'all' | 'changes' = 'all'): Promise<{ translationCount: number; artifactCount: number }> {
+    const { request, translationCount } = await this.prepareReviewPushRequest(pushMode)
     return {
       translationCount,
       artifactCount: request.artifacts.length
@@ -812,6 +814,7 @@ export class TranslatorManager {
    */
   private async createGeneratedTmReviewArtifact(): Promise<ReviewArtifact | undefined> {
     const generatedTmxPath = path.join(this.workspacePath, TranslatorManager.GENERATED_TM_TMX_PATH)
+    fs.mkdirSync(path.dirname(generatedTmxPath), { recursive: true })
     const exportedCount = await this.tm.exportTMX(generatedTmxPath, { origin: 'human' })
 
     if (exportedCount === 0) {
@@ -822,6 +825,30 @@ export class TranslatorManager {
       filePath: generatedTmxPath,
       fileName: path.basename(generatedTmxPath),
       contentType: 'application/tmx+xml'
+    }
+  }
+
+  /**
+   * Export generated XLIFF for review uploads.
+   * - `originFilter = 'ai'`: include only AI-origin units (changes mode)
+   * - `originFilter = undefined`: include all origins; prior human units provide whole-file context for reviewers
+   */
+  private async createGeneratedXliffReviewArtifact(originFilter?: 'ai'): Promise<ReviewArtifact | undefined> {
+    const generatedXliffPath = path.join(this.workspacePath, TranslatorManager.GENERATED_REVIEW_XLIFF_PATH)
+    fs.mkdirSync(path.dirname(generatedXliffPath), { recursive: true })
+    const exportedCount = await this.tm.exportXLIFF(
+      generatedXliffPath,
+      originFilter ? { origin: originFilter } : undefined
+    )
+
+    if (exportedCount === 0) {
+      return undefined
+    }
+
+    return {
+      filePath: generatedXliffPath,
+      fileName: path.basename(generatedXliffPath),
+      contentType: 'application/xliff+xml'
     }
   }
 
@@ -840,7 +867,7 @@ export class TranslatorManager {
    * Computes a translation unit count from XLIFF files for push confirmation UX.
    * @returns Prepared review request and translation unit count preview
    */
-  private async prepareReviewPushRequest(): Promise<{ request: ReviewPushRequest; translationCount: number }> {
+  private async prepareReviewPushRequest(pushMode: 'all' | 'changes' = 'all'): Promise<{ request: ReviewPushRequest; translationCount: number }> {
     const workspaceUri = this.fileSystem.createUri(this.workspacePath)
     const allFiles = await this.findAllFilesInDir(workspaceUri)
     const localeFilters = this.getReviewLocaleFilters()
@@ -856,24 +883,33 @@ export class TranslatorManager {
         contentType: this.getReviewArtifactContentType(fileUri.fsPath)
       }))
 
+    const originFilter: 'ai' | undefined = pushMode === 'changes' ? 'ai' : undefined
+
     const generatedTmArtifact = await this.createGeneratedTmReviewArtifact()
     if (generatedTmArtifact && !reviewArtifacts.some((artifact) => artifact.filePath === generatedTmArtifact.filePath)) {
       reviewArtifacts.push(generatedTmArtifact)
+    }
+
+    const generatedXliffArtifact = await this.createGeneratedXliffReviewArtifact(originFilter)
+    if (generatedXliffArtifact && !reviewArtifacts.some((artifact) => artifact.filePath === generatedXliffArtifact.filePath)) {
+      reviewArtifacts.push(generatedXliffArtifact)
     }
 
     if (reviewArtifacts.length === 0) {
       throw new Error('Review push requires at least one .tmx, .xlf, or .xliff file in the workspace')
     }
 
-    const xliffArtifactUris = reviewArtifactUris.filter((fileUri) => {
-      const lowerPath = fileUri.fsPath.toLowerCase()
-      return lowerPath.endsWith('.xlf') || lowerPath.endsWith('.xliff')
-    })
+    const xliffArtifactPaths = reviewArtifacts
+      .map((artifact) => artifact.filePath)
+      .filter((filePath) => {
+        const lowerPath = filePath.toLowerCase()
+        return lowerPath.endsWith('.xlf') || lowerPath.endsWith('.xliff')
+      })
 
     let translationCount = 0
-    for (const xliffUri of xliffArtifactUris) {
-      const xliffContent = await this.fileSystem.readFile(xliffUri)
-      translationCount += this.countXliffUnits(xliffContent)
+    for (const xliffPath of xliffArtifactPaths) {
+      const xliffContent = await this.fileSystem.readFile(this.fileSystem.createUri(xliffPath))
+      translationCount += this.countXliffUnits(xliffContent ?? '')
     }
 
     return {

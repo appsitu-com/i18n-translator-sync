@@ -104,7 +104,7 @@ export class MockTranslationMemory implements ITranslationMemory {
 
   async exportTMX(filePath: string, options?: { origin?: string }): Promise<number> {
     const entries = Array.from(this.translations.entries())
-      .filter(() => !options?.origin || options.origin === 'human')
+      .filter(() => !options?.origin || options.origin === 'human' || options.origin === 'ai')
 
     if (entries.length === 0) {
       return 0
@@ -140,6 +140,48 @@ export class MockTranslationMemory implements ITranslationMemory {
     ].join('\n')
 
     fs.writeFileSync(filePath, tmx, 'utf8')
+    return entries.length
+  }
+
+  async exportXLIFF(filePath: string, options?: { origin?: string }): Promise<number> {
+    const entries = Array.from(this.translations.entries())
+      .filter(() => !options?.origin || options.origin === 'human' || options.origin === 'ai')
+
+    if (entries.length === 0) {
+      return 0
+    }
+
+    const escapeXml = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+
+    const units = entries.map(([key, value], index) => {
+      const [, , , srcText] = key.split(':')
+      return [
+        `      <trans-unit id="${index + 1}">`,
+        `        <source>${escapeXml(srcText)}</source>`,
+        `        <target>${escapeXml(value.translated_text)}</target>`,
+        '      </trans-unit>'
+      ].join('\n')
+    })
+
+    const xliff = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<xliff version="1.2">',
+      '  <file source-language="en" target-language="en" original="translation-memory">',
+      '    <body>',
+      units.join('\n'),
+      '    </body>',
+      '  </file>',
+      '</xliff>',
+      ''
+    ].join('\n')
+
+    fs.writeFileSync(filePath, xliff, 'utf8')
     return entries.length
   }
 

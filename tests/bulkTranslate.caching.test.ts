@@ -344,6 +344,10 @@ class MockCache implements ITranslationMemory {
     return 0
   }
 
+  async exportXLIFF(): Promise<number> {
+    return 0
+  }
+
   async importCSV(): Promise<number> {
     return 0
   }

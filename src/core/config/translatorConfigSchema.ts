@@ -62,9 +62,11 @@ const ENGINES = [
 ] as const
 
 const REVIEW_SERVICES = ['matecat'] as const
+const REVIEW_PUSH_MODES = ['all', 'changes', 'ask'] as const
 
 export const TranslatorEngineSchema = z.enum(ENGINES)
 export const ReviewServiceSchema = z.enum(REVIEW_SERVICES)
+export const ReviewPushModeSchema = z.enum(REVIEW_PUSH_MODES)
 
 const ReviewerTargetLocalesSchema = z
   .object({
@@ -76,7 +78,8 @@ const ReviewerTargetLocalesSchema = z
 
 const ReviewerConfigSchema = z
   .object({
-    targetLocales: ReviewerTargetLocalesSchema
+    targetLocales: ReviewerTargetLocalesSchema,
+    push: ReviewPushModeSchema.optional().default('all')
   })
   .optional()
 
