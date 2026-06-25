@@ -9,6 +9,12 @@
     "deepl": ["fr", "de"],
     "azure": ["es:en", "ja:en"]
   },
+  "reviewer": {
+    "targetLocales": {
+      "include": [],
+      "exclude": []
+    }
+  },
   "translator": {
     "copy": {},
     "google": {

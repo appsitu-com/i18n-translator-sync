@@ -21,6 +21,14 @@
     "azure": ["es:en", "ja:en"]           // Use Azure for Spanish and Japanese back translations
   },
 
+  // ========== HUMAN REVIEW TARGET FILTERS ==========
+  "reviewer": {
+    "targetLocales": {
+      "include": [],                          // Include only these locales for review push (empty = all)
+      "exclude": []                           // Exclude these locales from review push
+    }
+  },
+
   // ========== KEY EXCLUSION RULES ==========
   "excludeKeys": [],                      // Key names to exclude (matches at any depth)
   "excludeKeyPaths": [],                  // Exact dotted paths to exclude (e.g., "meta.version")

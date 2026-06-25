@@ -17,6 +17,12 @@
     "deepl": ["fr", "de", "zh-CN"],
     "azure": ["es"]
   },
+  "reviewer": {
+    "targetLocales": {
+      "include": [],
+      "exclude": []
+    }
+  },
   "translator": {
     "copy": {},
     "google": {
