@@ -298,5 +298,31 @@ describe('Config', () => {
 
       expect(result.reviewer?.push).toBe('ask')
     })
+
+    it('should use reviewer project prefix from translator config when present', () => {
+      const config = makeConfig({
+        reviewer: {
+          project: 'custom-prefix',
+          targetLocales: { include: [], exclude: [] }
+        }
+      } as any)
+
+      const result = toProjectConfig(config, mockConfigProvider)
+
+      expect(result.reviewer?.project).toBe('custom-prefix')
+    })
+
+    it('should fall back to provider reviewer project prefix when absent in translator config', () => {
+      const config = makeConfig({ reviewer: undefined })
+
+      vi.mocked(mockConfigProvider.get).mockImplementation((section: string, defaultValue: any) => {
+        if (section === 'translator.reviewer.project') return 'provider-prefix'
+        return defaultValue
+      })
+
+      const result = toProjectConfig(config, mockConfigProvider)
+
+      expect(result.reviewer?.project).toBe('provider-prefix')
+    })
   })
 })

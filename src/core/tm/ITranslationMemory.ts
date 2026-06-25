@@ -36,12 +36,12 @@ export interface ITranslationMemory {
   /**
    * Export the cache to a TMX file
    */
-  exportTMX(filePath: string, options?: { origin?: string }): Promise<number>
+  exportTMX(filePath: string, options?: { origin?: string; targetLocale?: string }): Promise<number>
 
   /**
    * Export the cache to an XLIFF file
    */
-  exportXLIFF(filePath: string, options?: { origin?: string }): Promise<number>
+  exportXLIFF(filePath: string, options?: { origin?: string; targetLocale?: string }): Promise<number>
 
   /**
    * Import translations from a CSV file

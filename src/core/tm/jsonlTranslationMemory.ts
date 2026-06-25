@@ -293,10 +293,19 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     this.logger.info(`Exported ${rows.length} translations to ${filePath}`)
   }
 
-  async exportTMX(filePath: string, options: { origin?: string } = {}): Promise<number> {
+  async exportTMX(filePath: string, options: { origin?: string; targetLocale?: string } = {}): Promise<number> {
     const originFilter = options.origin?.trim()
+    const targetLocaleFilter = options.targetLocale?.trim()
     const entries = Array.from(this.strictData.values())
-      .filter((entry) => (originFilter ? entry.origin === originFilter : true))
+      .filter((entry) => {
+        if (originFilter && entry.origin !== originFilter) {
+          return false
+        }
+        if (targetLocaleFilter && entry.target !== targetLocaleFilter) {
+          return false
+        }
+        return true
+      })
       .sort((a, b) => {
         if (a.source !== b.source) {
           return a.source.localeCompare(b.source)
@@ -346,8 +355,8 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     return entries.length
   }
 
-  async exportXLIFF(filePath: string, options: { origin?: string } = {}): Promise<number> {
-    const entries = this.selectEntriesForReviewExport(options.origin?.trim())
+  async exportXLIFF(filePath: string, options: { origin?: string; targetLocale?: string } = {}): Promise<number> {
+    const entries = this.selectEntriesForReviewExport(options.origin?.trim(), options.targetLocale?.trim())
 
     if (entries.length === 0) {
       this.logger.info(`Skipped XLIFF export to ${filePath} (no matching translations)`)
@@ -993,11 +1002,15 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     )
   }
 
-  private selectEntriesForReviewExport(originFilter?: string): TmEntry[] {
+  private selectEntriesForReviewExport(originFilter?: string, targetLocaleFilter?: string): TmEntry[] {
     const selected = new Map<string, TmEntry>()
 
     for (const entry of this.strictData.values()) {
       if (originFilter && entry.origin !== originFilter) {
+        continue
+      }
+
+      if (targetLocaleFilter && entry.target !== targetLocaleFilter) {
         continue
       }
 

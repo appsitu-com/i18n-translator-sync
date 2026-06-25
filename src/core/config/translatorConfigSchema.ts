@@ -79,7 +79,8 @@ const ReviewerTargetLocalesSchema = z
 const ReviewerConfigSchema = z
   .object({
     targetLocales: ReviewerTargetLocalesSchema,
-    push: ReviewPushModeSchema.optional().default('all')
+    push: ReviewPushModeSchema.optional().default('all'),
+    project: z.string().optional().default('')
   })
   .optional()
 

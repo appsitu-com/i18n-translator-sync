@@ -58,37 +58,55 @@ export class MateCatReviewService implements IReviewService {
     return locale.trim().toLowerCase()
   }
 
-  private resolveReviewTargetLocales(): string[] {
-    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
-    const configuredTargetLocales = projectConfig.targetLocales
-    const includeLocales = projectConfig.reviewer?.targetLocales?.include ?? []
-    const excludeLocales = projectConfig.reviewer?.targetLocales?.exclude ?? []
+  private async resolveFallbackProjectName(projectPrefix: string | undefined, targetLocale: string): Promise<string> {
+    const packageJsonPath = path.join(this.workspacePath, 'package.json')
+    const packageJsonUri = this.fileSystem.createUri(packageJsonPath)
+    const defaultBaseName = 'translation-review'
 
-    const targetLocales = Array.isArray(configuredTargetLocales) ? configuredTargetLocales : []
-    const includeSet = new Set((Array.isArray(includeLocales) ? includeLocales : []).map((locale) => this.normalizeLocale(locale)))
-    const excludeSet = new Set((Array.isArray(excludeLocales) ? excludeLocales : []).map((locale) => this.normalizeLocale(locale)))
+    const localeSuffix = targetLocale.trim().replace(/\s+/g, '')
 
-    return targetLocales.filter((locale) => {
-      const normalizedLocale = this.normalizeLocale(locale)
-      if (includeSet.size > 0 && !includeSet.has(normalizedLocale)) {
-        return false
+    let baseName =
+      typeof projectPrefix === 'string' && projectPrefix.trim().length > 0
+        ? projectPrefix.trim()
+        : defaultBaseName
+
+    if (baseName !== defaultBaseName) {
+      return localeSuffix.length > 0 ? `${baseName}-${localeSuffix}` : baseName
+    }
+
+    try {
+      const exists = await this.fileSystem.fileExists(packageJsonUri)
+      if (exists) {
+        const rawPackageJson = await this.fileSystem.readFile(packageJsonUri)
+        const parsed = JSON.parse(rawPackageJson) as { name?: unknown }
+        if (typeof parsed.name === 'string' && parsed.name.trim().length > 0) {
+          baseName = parsed.name.trim().replace(/^@/, '').replace(/[\/]/g, '-')
+        }
       }
-      return !excludeSet.has(normalizedLocale)
-    })
+    } catch (error) {
+      this.logger.warn(
+        `Unable to resolve package name from package.json for MateCat project naming: ${error instanceof Error ? error.message : String(error)}`
+      )
+    }
+
+    return localeSuffix.length > 0 ? `${baseName}-${localeSuffix}` : baseName
   }
 
-  private buildMateCatProjectFields(settings: MateCatSettings): MateCatNewProjectDefaults {
+  private async buildMateCatProjectFields(settings: MateCatSettings, targetLocale: string): Promise<MateCatNewProjectDefaults> {
     const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
     const sourceLocale = projectConfig.sourceLocale
-    const targetLocales = this.resolveReviewTargetLocales()
+    const reviewerProjectPrefix = projectConfig.reviewer?.project
 
-    if (!Array.isArray(targetLocales) || targetLocales.length === 0) {
-      throw new Error('At least one target locale is required for MateCat push')
-    }
+    const configuredProjectName = settings.newProjectDefaults.project_name
+    const resolvedProjectName =
+      typeof configuredProjectName === 'string' && configuredProjectName.trim().length > 0
+        ? configuredProjectName.trim()
+        : await this.resolveFallbackProjectName(reviewerProjectPrefix, targetLocale)
 
     const runtimeFields: MateCatRuntimeNewProjectFields = {
       source_lang: sourceLocale,
-      target_lang: targetLocales.join(',')
+      target_lang: targetLocale,
+      project_name: resolvedProjectName
     }
 
     const mergedFields: MateCatNewProjectDefaults = {
@@ -245,7 +263,12 @@ export class MateCatReviewService implements IReviewService {
 
   async pushReviewProject(request: ReviewPushRequest): Promise<void> {
     const settings = this.getMateCatSettings()
-    const fields = this.buildMateCatProjectFields(settings)
+    const targetLocale = request.targetLocale?.trim()
+    if (!targetLocale) {
+      throw new Error('MateCat push requires a target locale per request')
+    }
+
+    const fields = await this.buildMateCatProjectFields(settings, targetLocale)
     const uploads = await this.buildMateCatReviewUploads(request)
 
     const createdProject = await this.mateCatService.createReviewProject(settings, {
@@ -254,7 +277,7 @@ export class MateCatReviewService implements IReviewService {
     })
 
     await this.trackPendingReviewProject(createdProject)
-    this.logger.info('MateCat: new project created with uploaded review file(s).')
+    this.logger.info(`MateCat: new project created for locale ${targetLocale} with uploaded review file(s).`)
   }
 
   async pullReviewedProjects(): Promise<void> {
@@ -280,21 +303,27 @@ export class MateCatReviewService implements IReviewService {
     }
 
     const completedProjects = pendingProjects.filter((project) => completedProjectIds.has(project.projectId))
-    const pulledFiles = await this.mateCatService.pullReviewedTranslations(settings, this.toMateCatProjectRefs(completedProjects))
-    const savedCount = await this.persistPulledReviewFiles(pulledFiles)
-    this.logger.info(`MateCat: downloaded ${savedCount} reviewed file(s)`)
+    const successfullyMergedProjects = new Set<string>()
 
-    if (this.dependencies.translationMemory) {
-      await mergeReviewedXliffFilesIntoTranslationMemory(
-        pulledFiles,
-        this.dependencies.translationMemory,
-        this.logger
-      )
+    for (const project of completedProjects) {
+      const pulledFiles = await this.mateCatService.pullReviewedTranslations(settings, this.toMateCatProjectRefs([project]))
+      const savedCount = await this.persistPulledReviewFiles(pulledFiles)
+      this.logger.info(`MateCat: downloaded ${savedCount} reviewed file(s) for project ${project.projectId}`)
+
+      if (this.dependencies.translationMemory) {
+        await mergeReviewedXliffFilesIntoTranslationMemory(
+          pulledFiles,
+          this.dependencies.translationMemory,
+          this.logger
+        )
+      }
+
+      successfullyMergedProjects.add(project.projectId)
     }
 
-    const remainingProjects = pendingProjects.filter((project) => !completedProjectIds.has(project.projectId))
+    const remainingProjects = pendingProjects.filter((project) => !successfullyMergedProjects.has(project.projectId))
     await this.savePendingReviewProjects(remainingProjects)
-    this.logger.info(`MateCat: closed ${completedProjectIds.size} pending project(s) after successful pull merge`)
+    this.logger.info(`MateCat: closed ${successfullyMergedProjects.size} pending project(s) after successful pull merge`)
   }
 
   async getPendingReviewStatus(): Promise<IMateCatProjectStatus[]> {

@@ -104,7 +104,12 @@ describe('TranslatorManager', () => {
     configProvider = createMockConfigProvider();
     mockFileWatcher = createMockFileWatcher();
 
-    vi.mocked(configProvider.get).mockImplementation((_section: string, defaultValue?: unknown) => defaultValue)
+    vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+      if (section === 'translator.targetLocales') {
+        return ['fr']
+      }
+      return defaultValue
+    })
 
     // Setup mock workspace watcher
     vi.mocked(workspaceWatcher.createFileSystemWatcher).mockReturnValue(mockFileWatcher);
@@ -284,6 +289,7 @@ describe('TranslatorManager', () => {
       await manager.pushReviewProject()
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(1)
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        targetLocale: 'fr',
         artifacts: [
           {
             filePath: '/workspace/review.tmx',
@@ -324,14 +330,15 @@ describe('TranslatorManager', () => {
       await manager.pushReviewProject()
 
       expect(cache.exportTMX).toHaveBeenCalledWith(
-        path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
-        { origin: 'human' }
+        path.join('/workspace', '.translator/review/fr/upload/local-tm-human.tmx'),
+        { origin: 'human', targetLocale: 'fr' }
       )
 
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        targetLocale: 'fr',
         artifacts: [
           {
-            filePath: path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
+            filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-human.tmx'),
             fileName: 'local-tm-human.tmx',
             contentType: 'application/tmx+xml'
           }
@@ -369,17 +376,18 @@ describe('TranslatorManager', () => {
       await manager.pushReviewProject('changes')
 
       expect(cache.exportTMX).toHaveBeenCalledWith(
-        path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
-        { origin: 'human' }
+        path.join('/workspace', '.translator/review/fr/upload/local-tm-human.tmx'),
+        { origin: 'human', targetLocale: 'fr' }
       )
       expect(cache.exportXLIFF).toHaveBeenCalledWith(
-        path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
-        { origin: 'ai' }
+        path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
+        { origin: 'ai', targetLocale: 'fr' }
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        targetLocale: 'fr',
         artifacts: [
           {
-            filePath: path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
+            filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
             fileName: 'local-tm-review.xliff',
             contentType: 'application/xliff+xml'
           }
@@ -417,13 +425,14 @@ describe('TranslatorManager', () => {
       await manager.pushReviewProject('all')
 
       expect(cache.exportXLIFF).toHaveBeenCalledWith(
-        path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
-        undefined
+        path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
+        { targetLocale: 'fr' }
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        targetLocale: 'fr',
         artifacts: [
           {
-            filePath: path.join('/workspace', '.translator/review/upload/local-tm-review.xliff'),
+            filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
             fileName: 'local-tm-review.xliff',
             contentType: 'application/xliff+xml'
           }

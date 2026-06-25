@@ -102,7 +102,7 @@ export class MockTranslationMemory implements ITranslationMemory {
     fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
   }
 
-  async exportTMX(filePath: string, options?: { origin?: string }): Promise<number> {
+  async exportTMX(filePath: string, options?: { origin?: string; targetLocale?: string }): Promise<number> {
     const entries = Array.from(this.translations.entries())
       .filter(() => !options?.origin || options.origin === 'human' || options.origin === 'ai')
 
@@ -143,7 +143,7 @@ export class MockTranslationMemory implements ITranslationMemory {
     return entries.length
   }
 
-  async exportXLIFF(filePath: string, options?: { origin?: string }): Promise<number> {
+  async exportXLIFF(filePath: string, options?: { origin?: string; targetLocale?: string }): Promise<number> {
     const entries = Array.from(this.translations.entries())
       .filter(() => !options?.origin || options.origin === 'human' || options.origin === 'ai')
 

@@ -255,4 +255,15 @@ describe('TranslatorConfigSchema', () => {
     })
     expect(result.success).toBe(false)
   })
+
+  it('preserves reviewer.project when provided', () => {
+    const result = TranslatorConfigSchema.parse({
+      reviewer: {
+        project: 'my-review-project',
+        targetLocales: { include: [], exclude: [] }
+      }
+    })
+
+    expect(result.reviewer?.project).toBe('my-review-project')
+  })
 })

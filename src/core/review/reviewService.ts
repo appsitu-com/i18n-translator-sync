@@ -10,6 +10,7 @@ export type ReviewArtifact = {
 }
 
 export type ReviewPushRequest = {
+  targetLocale: string
   artifacts: ReviewArtifact[]
 }
 

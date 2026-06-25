@@ -132,6 +132,12 @@ export function toProjectConfig(
           'translator.reviewer.push',
           defaultConfig.reviewer?.push ?? 'all'
         ),
+      project:
+        config.reviewer?.project ??
+        configProvider.get<string>(
+          'translator.reviewer.project',
+          defaultConfig.reviewer?.project ?? ''
+        ),
       targetLocales: {
         include:
           config.reviewer?.targetLocales?.include ??
