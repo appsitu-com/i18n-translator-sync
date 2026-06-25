@@ -216,5 +216,5 @@ describe('deepl api', () => {
     })
 
     expect(out.map((t) => t.toLowerCase())).toEqual(['bonjour', 'monde'])
-  })
+  }, 5000)
 })
