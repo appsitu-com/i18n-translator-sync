@@ -53,6 +53,7 @@ export class TranslatorManager {
   private static readonly REVIEW_ARTIFACT_EXTENSIONS = ['.tmx', '.xlf', '.xliff']
   private static readonly XLIFF_UNIT_PATTERN = /<(?:unit|trans-unit)\b/gi
   private static readonly REVIEW_LOCALE_PATH_PATTERN = /[\\/]\.translator[\\/]review[\\/]([^\\/]+)[\\/]/i
+  private static readonly GENERATED_TM_TMX_PATH = '.translator/review/upload/local-tm-human.tmx'
 
   private watchers: IFileWatcher[] = [];
   private pipeline: ITranslatorPipeline;
@@ -806,6 +807,25 @@ export class TranslatorManager {
   }
 
   /**
+   * Export local human-reviewed TM rows into a TMX file for CAT upload.
+   * @returns Upload artifact metadata when TMX rows were exported
+   */
+  private async createGeneratedTmReviewArtifact(): Promise<ReviewArtifact | undefined> {
+    const generatedTmxPath = path.join(this.workspacePath, TranslatorManager.GENERATED_TM_TMX_PATH)
+    const exportedCount = await this.tm.exportTMX(generatedTmxPath, { origin: 'human' })
+
+    if (exportedCount === 0) {
+      return undefined
+    }
+
+    return {
+      filePath: generatedTmxPath,
+      fileName: path.basename(generatedTmxPath),
+      contentType: 'application/tmx+xml'
+    }
+  }
+
+  /**
    * Count translation units in XLIFF content for preflight reporting.
    * @param xliffContent Raw XLIFF file content
    * @returns Number of matched <unit> or <trans-unit> tags
@@ -835,6 +855,11 @@ export class TranslatorManager {
         fileName: path.basename(fileUri.fsPath),
         contentType: this.getReviewArtifactContentType(fileUri.fsPath)
       }))
+
+    const generatedTmArtifact = await this.createGeneratedTmReviewArtifact()
+    if (generatedTmArtifact && !reviewArtifacts.some((artifact) => artifact.filePath === generatedTmArtifact.filePath)) {
+      reviewArtifacts.push(generatedTmArtifact)
+    }
 
     if (reviewArtifacts.length === 0) {
       throw new Error('Review push requires at least one .tmx, .xlf, or .xliff file in the workspace')

@@ -62,6 +62,7 @@ const createMockCache = () => ({
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, 'source_text,target_text\nHello,Bonjour\n', 'utf8')
   }),
+  exportTMX: vi.fn(async () => 0),
   importCSV: vi.fn(),
   getStats: vi.fn()
 });
@@ -291,6 +292,50 @@ describe('TranslatorManager', () => {
         ]
       })
       expect(logger.info).toHaveBeenCalledWith('Successfully pushed translations to review service')
+    })
+
+    it('generates and pushes local human TMX when no review artifacts exist', async () => {
+      vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+      vi.mocked(cache.exportTMX).mockResolvedValue(2)
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      await manager.pushReviewProject()
+
+      expect(cache.exportTMX).toHaveBeenCalledWith(
+        path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
+        { origin: 'human' }
+      )
+
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        artifacts: [
+          {
+            filePath: path.join('/workspace', '.translator/review/upload/local-tm-human.tmx'),
+            fileName: 'local-tm-human.tmx',
+            contentType: 'application/tmx+xml'
+          }
+        ]
+      })
     })
 
     it('should pull translations via review service', async () => {

@@ -31,6 +31,7 @@ vi.mock('../../../src/core/tm/ITranslationMemory', () => ({
   JsonlTranslationMemory: vi.fn().mockImplementation(() => ({
     close: vi.fn(),
     exportCSV: vi.fn().mockResolvedValue(undefined),
+    exportTMX: vi.fn().mockResolvedValue(0),
     importCSV: vi.fn().mockResolvedValue(0),
     hasSourcePath: vi.fn().mockResolvedValue(true),
     hasPendingPurge: vi.fn().mockResolvedValue(false),
@@ -382,6 +383,7 @@ describe('TranslatorAdapter', () => {
       cache.purge = vi.fn().mockResolvedValueOnce({ deletedCount: 0 });
       cache.completePurge = vi.fn().mockResolvedValueOnce({ deletedCount: 3 });
       cache.exportCSV = vi.fn().mockResolvedValue(undefined);
+      cache.exportTMX = vi.fn().mockResolvedValue(0);
 
       const result = await adapter.purge();
 
@@ -422,6 +424,7 @@ describe('TranslatorAdapter', () => {
       vi.mocked(JsonlTranslationMemory).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
+        exportTMX: vi.fn().mockResolvedValue(0),
         importCSV,
         isNew: vi.fn().mockReturnValue(true),
         purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
@@ -458,6 +461,7 @@ describe('TranslatorAdapter', () => {
       vi.mocked(JsonlTranslationMemory).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
+        exportTMX: vi.fn().mockResolvedValue(0),
         importCSV,
         isNew: vi.fn().mockReturnValue(true),
         purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
@@ -496,6 +500,7 @@ describe('TranslatorAdapter', () => {
       vi.mocked(JsonlTranslationMemory).mockImplementationOnce(() => ({
         close: vi.fn(),
         exportCSV: vi.fn().mockResolvedValue(undefined),
+        exportTMX: vi.fn().mockResolvedValue(0),
         importCSV,
         isNew: vi.fn().mockReturnValue(true),
         purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),

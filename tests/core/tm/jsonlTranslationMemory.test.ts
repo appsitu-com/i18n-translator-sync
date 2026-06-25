@@ -573,6 +573,62 @@ describe('JsonlTranslationMemory', () => {
     expect(result.get('Hello::')?.translation).toBe('Hallo')
   })
 
+  it('exports only human-origin rows to TMX when origin filter is set', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Hello', dst: 'Bonjour', pos: 0 }],
+      sourcePath: 'src/messages.json',
+      origin: 'human',
+      status: 'reviewed'
+    })
+
+    await cache.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Bye', dst: 'Au revoir', pos: 1 }],
+      sourcePath: 'src/messages.json',
+      origin: 'ai',
+      status: 'translated'
+    })
+
+    const tmxPath = join(dir, 'human-only.tmx')
+    const exported = await cache.exportTMX(tmxPath, { origin: 'human' })
+
+    expect(exported).toBe(1)
+    const tmx = readFileSync(tmxPath, 'utf8')
+    expect(tmx).toContain('<tmx version="1.4">')
+    expect(tmx).toContain('<seg>Hello</seg>')
+    expect(tmx).toContain('<seg>Bonjour</seg>')
+    expect(tmx).not.toContain('<seg>Bye</seg>')
+  })
+
+  it('escapes XML entities when exporting TMX', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'matecat',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Fish & Chips <tag>', dst: 'Poisson & Frites "ok"', pos: 0 }],
+      sourcePath: 'src/messages.json',
+      origin: 'human',
+      status: 'reviewed'
+    })
+
+    const tmxPath = join(dir, 'escaped.tmx')
+    const exported = await cache.exportTMX(tmxPath, { origin: 'human' })
+
+    expect(exported).toBe(1)
+    const tmx = readFileSync(tmxPath, 'utf8')
+    expect(tmx).toContain('Fish &amp; Chips &lt;tag&gt;')
+    expect(tmx).toContain('Poisson &amp; Frites &quot;ok&quot;')
+  })
+
   it('handles missing CSV imports', async () => {
     const logger = createMockLogger()
     const cache = new JsonlTranslationMemory(cachePath, dir, logger)

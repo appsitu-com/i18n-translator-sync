@@ -102,6 +102,47 @@ export class MockTranslationMemory implements ITranslationMemory {
     fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
   }
 
+  async exportTMX(filePath: string, options?: { origin?: string }): Promise<number> {
+    const entries = Array.from(this.translations.entries())
+      .filter(() => !options?.origin || options.origin === 'human')
+
+    if (entries.length === 0) {
+      return 0
+    }
+
+    const escapeXml = (value: string) =>
+      value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;')
+
+    const rows = entries.map(([key, value]) => {
+      const [, srcLang, tgtLang, srcText] = key.split(':')
+      return [
+        '    <tu>',
+        `      <tuv xml:lang="${escapeXml(srcLang)}"><seg>${escapeXml(srcText)}</seg></tuv>`,
+        `      <tuv xml:lang="${escapeXml(tgtLang)}"><seg>${escapeXml(value.translated_text)}</seg></tuv>`,
+        '    </tu>'
+      ].join('\n')
+    })
+
+    const tmx = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<tmx version="1.4">',
+      '  <header creationtool="i18n-translator-sync" creationtoolversion="0.12.0" segtype="sentence" adminlang="en" srclang="en" datatype="PlainText"/>',
+      '  <body>',
+      rows.join('\n'),
+      '  </body>',
+      '</tmx>',
+      ''
+    ].join('\n')
+
+    fs.writeFileSync(filePath, tmx, 'utf8')
+    return entries.length
+  }
+
   async importCSV(filePath: string): Promise<number> {
     if (!fs.existsSync(filePath)) return 0;
 

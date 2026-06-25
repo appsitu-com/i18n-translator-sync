@@ -28,6 +28,7 @@ function createTranslationMemoryMock(): ITranslationMemory {
     getMany: vi.fn(),
     putMany: vi.fn().mockResolvedValue(undefined),
     exportCSV: vi.fn(),
+    exportTMX: vi.fn().mockResolvedValue(0),
     importCSV: vi.fn(),
     hasSourcePath: vi.fn(),
     hasPendingPurge: vi.fn(),

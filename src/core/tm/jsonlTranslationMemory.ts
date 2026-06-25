@@ -293,6 +293,59 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     this.logger.info(`Exported ${rows.length} translations to ${filePath}`)
   }
 
+  async exportTMX(filePath: string, options: { origin?: string } = {}): Promise<number> {
+    const originFilter = options.origin?.trim()
+    const entries = Array.from(this.strictData.values())
+      .filter((entry) => (originFilter ? entry.origin === originFilter : true))
+      .sort((a, b) => {
+        if (a.source !== b.source) {
+          return a.source.localeCompare(b.source)
+        }
+        if (a.target !== b.target) {
+          return a.target.localeCompare(b.target)
+        }
+        if (a.sourcePath !== b.sourcePath) {
+          return a.sourcePath.localeCompare(b.sourcePath)
+        }
+        return this.compareTextPos(a.textPos, b.textPos)
+      })
+
+    if (entries.length === 0) {
+      this.logger.info(`Skipped TMX export to ${filePath} (no matching translations)`)
+      return 0
+    }
+
+    const tuRows = entries.map((entry) => {
+      const sourceLang = this.escapeXml(entry.source)
+      const targetLang = this.escapeXml(entry.target)
+      const sourceText = this.escapeXml(entry.sourceText)
+      const targetText = this.escapeXml(entry.targetText)
+
+      return [
+        '    <tu>',
+        `      <tuv xml:lang="${sourceLang}"><seg>${sourceText}</seg></tuv>`,
+        `      <tuv xml:lang="${targetLang}"><seg>${targetText}</seg></tuv>`,
+        '    </tu>'
+      ].join('\n')
+    })
+
+    const firstSourceLang = this.escapeXml(entries[0].source)
+    const tmxContent = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<tmx version="1.4">',
+      `  <header creationtool="i18n-translator-sync" creationtoolversion="0.12.0" segtype="sentence" adminlang="en" srclang="${firstSourceLang}" datatype="PlainText"/>`,
+      '  <body>',
+      tuRows.join('\n'),
+      '  </body>',
+      '</tmx>',
+      ''
+    ].join('\n')
+
+    fs.writeFileSync(filePath, tmxContent, 'utf8')
+    this.logger.info(`Exported ${entries.length} translations to ${filePath} (TMX)`)
+    return entries.length
+  }
+
   async importCSV(filePath: string): Promise<number> {
     if (!fs.existsSync(filePath)) {
       this.logger.warn(`CSV file not found: ${filePath}`)
@@ -874,6 +927,15 @@ export class JsonlTranslationMemory implements ITranslationMemory {
       lowerPath.endsWith('.mjs') ||
       lowerPath.endsWith('.cjs')
     )
+  }
+
+  private escapeXml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;')
   }
 
 }

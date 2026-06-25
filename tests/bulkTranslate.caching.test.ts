@@ -340,6 +340,10 @@ class MockCache implements ITranslationMemory {
     // Not needed for tests
   }
 
+  async exportTMX(): Promise<number> {
+    return 0
+  }
+
   async importCSV(): Promise<number> {
     return 0
   }

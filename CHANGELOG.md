@@ -1,14 +1,39 @@
-## Release 0.11.2
+## Release 0.12.0
+
+MateCat.com API integration - Human translation and review workflow
+
+### New commands
+
+- `Translator: Push to MateCat`
+- `Translator: Pull from MateCat`
+- `Translator: MateCat Review Status`
 
 ### Features
 
-- Added reviewed XLIFF import into translation memory during MateCAT review pulls.
-- Added end-to-end review round-trip coverage for XLIFF export, pull, import, and repeated review cycles.
+- Added MateCAT review push preflight preview and pull status transition handling.
+- Added automatic TMX export from local human translation-memory rows and upload to MateCAT during review project creation.
+- Added XLIFF import into local translation memory during review pull.
+- Added translation-memory fallback ranking by origin, status, and timestamp.
+- Added translation-memory schema v3 migration support.
 
 ### Tests
 
+- Added end-to-end review round-trip coverage for XLIFF export, pull, import, and repeated review cycles.
 - Added importer edge-case coverage for empty payloads, missing metadata, repeated segment ids, and cross-file/source-context handling.
 - Added service and TM regression coverage for pending-project failures, fallback ranking, and purge behavior.
+- Added fake-service round-trip tests, expanded review round-trip coverage, and review artifact counting tests.
+- Added MateCAT pull preflight and status-transition test coverage.
+
+### Fixes
+
+- Centralized config parsing and MateCAT default validation.
+- Centralized translation whitespace handling.
+- Refactored review service abstraction and orchestration.
+- Standardized interface and file naming conventions.
+
+### Documentation
+
+- Added review manager JSDoc for the push preflight preview flow.
 
 ## Release 0.11.1
 
