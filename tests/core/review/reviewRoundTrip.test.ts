@@ -22,7 +22,6 @@ type PendingProject = {
 class FakeRoundTripReviewService implements IReviewService {
   private readonly projects = new Map<string, PendingProject>()
   private projectCounter = 0
-  private lastProjectId: string | undefined
   private lastPush: ReviewPushRequest | undefined
 
   constructor(private readonly workspacePath: string) {}
@@ -30,7 +29,6 @@ class FakeRoundTripReviewService implements IReviewService {
   async pushReviewProject(request: ReviewPushRequest): Promise<void> {
     this.projectCounter += 1
     const projectId = `fake-${this.projectCounter}`
-    this.lastProjectId = projectId
     this.lastPush = request
 
     this.projects.set(projectId, {
@@ -66,22 +64,17 @@ class FakeRoundTripReviewService implements IReviewService {
     return this.lastPush
   }
 
-  getLastProjectId(): string | undefined {
-    return this.lastProjectId
+  getProjectIds(): string[] {
+    return Array.from(this.projects.keys())
   }
 
-  stageCompletedUpdate(relativeFilePath: string, content: string): void {
-    const projectId = this.lastProjectId
-    if (!projectId) {
-      throw new Error('No pushed project is available to stage updates')
-    }
-
+  stageProjectUpdate(projectId: string, relativeFilePath: string, content: string, status: string = 'completed'): void {
     const project = this.projects.get(projectId)
     if (!project) {
       throw new Error(`No pending project found for id ${projectId}`)
     }
 
-    project.status = 'completed'
+    project.status = status
     project.updates.push({
       filePath: path.join(this.workspacePath, relativeFilePath),
       content
@@ -121,6 +114,40 @@ function writeFile(workspacePath: string, relativePath: string, content: string)
   writeFileSync(absolutePath, content, 'utf8')
 }
 
+function createManager(
+  workspacePath: string,
+  fakeReviewService: IReviewService
+): TranslatorManager {
+  return new TranslatorManager(
+    nodeFileSystem,
+    createNoOpLogger(),
+    {
+      putMany: vi.fn(),
+      getMany: vi.fn(),
+      close: vi.fn(),
+      exportCSV: vi.fn(),
+      importCSV: vi.fn(),
+      hasSourcePath: vi.fn().mockResolvedValue(false),
+      hasPendingPurge: vi.fn().mockResolvedValue(false),
+      purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+      completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
+      isNew: vi.fn().mockReturnValue(false),
+      didMigrateFromV1: vi.fn().mockReturnValue(false),
+      clearMigrationFlag: vi.fn()
+    },
+    workspacePath,
+    createNoOpWorkspaceWatcher(),
+    createDefaultConfigProvider(),
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    {
+      createReviewService: (): IReviewService => fakeReviewService
+    }
+  )
+}
+
 describe('Review round-trip (fake service)', () => {
   let workspacePath = ''
 
@@ -147,34 +174,7 @@ describe('Review round-trip (fake service)', () => {
     )
 
     const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = new TranslatorManager(
-      nodeFileSystem,
-      createNoOpLogger(),
-      {
-        putMany: vi.fn(),
-        getMany: vi.fn(),
-        close: vi.fn(),
-        exportCSV: vi.fn(),
-        importCSV: vi.fn(),
-        hasSourcePath: vi.fn().mockResolvedValue(false),
-        hasPendingPurge: vi.fn().mockResolvedValue(false),
-        purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
-        completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
-        isNew: vi.fn().mockReturnValue(false),
-        didMigrateFromV1: vi.fn().mockReturnValue(false),
-        clearMigrationFlag: vi.fn()
-      },
-      workspacePath,
-      createNoOpWorkspaceWatcher(),
-      createDefaultConfigProvider(),
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      {
-        createReviewService: (): IReviewService => fakeReviewService
-      }
-    )
+    const manager = createManager(workspacePath, fakeReviewService)
 
     const preview = await manager.getReviewPushPreview()
     expect(preview).toEqual({ translationCount: 2, artifactCount: 1 })
@@ -188,14 +188,20 @@ describe('Review round-trip (fake service)', () => {
     expect(pushedRequest?.artifacts[0]?.filePath).toContain('messages.xliff')
 
     const pending = await manager.getPendingReviewStatus()
+    const [projectId] = fakeReviewService.getProjectIds()
     expect(pending).toEqual([
       {
-        projectId: fakeReviewService.getLastProjectId(),
+        projectId,
         status: 'in_progress'
       }
     ])
 
-    fakeReviewService.stageCompletedUpdate(
+    if (!projectId) {
+      throw new Error('Expected a pushed project id to be available')
+    }
+
+    fakeReviewService.stageProjectUpdate(
+      projectId,
       'i18n/fr/messages.json',
       JSON.stringify({ greeting: 'Bonjour (Human)', farewell: 'Au revoir (Human)' }, null, 2)
     )
@@ -203,7 +209,7 @@ describe('Review round-trip (fake service)', () => {
     const completed = await manager.getPendingReviewStatus()
     expect(completed).toEqual([
       {
-        projectId: fakeReviewService.getLastProjectId(),
+        projectId,
         status: 'completed'
       }
     ])
@@ -231,34 +237,7 @@ describe('Review round-trip (fake service)', () => {
     )
 
     const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
-    const manager = new TranslatorManager(
-      nodeFileSystem,
-      createNoOpLogger(),
-      {
-        putMany: vi.fn(),
-        getMany: vi.fn(),
-        close: vi.fn(),
-        exportCSV: vi.fn(),
-        importCSV: vi.fn(),
-        hasSourcePath: vi.fn().mockResolvedValue(false),
-        hasPendingPurge: vi.fn().mockResolvedValue(false),
-        purge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
-        completePurge: vi.fn().mockResolvedValue({ deletedCount: 0 }),
-        isNew: vi.fn().mockReturnValue(false),
-        didMigrateFromV1: vi.fn().mockReturnValue(false),
-        clearMigrationFlag: vi.fn()
-      },
-      workspacePath,
-      createNoOpWorkspaceWatcher(),
-      createDefaultConfigProvider(),
-      undefined,
-      undefined,
-      undefined,
-      undefined,
-      {
-        createReviewService: (): IReviewService => fakeReviewService
-      }
-    )
+    const manager = createManager(workspacePath, fakeReviewService)
 
     await manager.pushReviewProject()
     await manager.pullReviewedProjects()
@@ -268,5 +247,102 @@ describe('Review round-trip (fake service)', () => {
     ) as { greeting: string }
 
     expect(unchanged).toEqual({ greeting: 'Bonjour (AI)' })
+  })
+
+  it('applies only completed projects when pending and completed projects coexist', async () => {
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
+    writeFile(workspacePath, '.translator/review/es/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
+    writeFile(workspacePath, 'i18n/fr/messages.json', JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2))
+    writeFile(workspacePath, 'i18n/es/messages.json', JSON.stringify({ greeting: 'Hola (AI)' }, null, 2))
+
+    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
+    const manager = createManager(workspacePath, fakeReviewService)
+
+    await manager.pushReviewProject()
+    await manager.pushReviewProject()
+
+    const [firstProjectId, secondProjectId] = fakeReviewService.getProjectIds()
+    fakeReviewService.stageProjectUpdate(
+      firstProjectId,
+      'i18n/fr/messages.json',
+      JSON.stringify({ greeting: 'Bonjour (Human)' }, null, 2)
+    )
+    fakeReviewService.stageProjectUpdate(
+      secondProjectId,
+      'i18n/es/messages.json',
+      JSON.stringify({ greeting: 'Hola (Human)' }, null, 2),
+      'in_progress'
+    )
+
+    await manager.pullReviewedProjects()
+
+    const fr = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')) as { greeting: string }
+    const es = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/es/messages.json'), 'utf8')) as { greeting: string }
+
+    expect(fr).toEqual({ greeting: 'Bonjour (Human)' })
+    expect(es).toEqual({ greeting: 'Hola (AI)' })
+
+    const remainingStatuses = await manager.getPendingReviewStatus()
+    expect(remainingStatuses).toEqual([{ projectId: secondProjectId, status: 'in_progress' }])
+  })
+
+  it('merges multiple completed projects in a single pull', async () => {
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
+    writeFile(workspacePath, '.translator/review/es/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
+    writeFile(workspacePath, 'i18n/fr/messages.json', JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2))
+    writeFile(workspacePath, 'i18n/es/messages.json', JSON.stringify({ greeting: 'Hola (AI)' }, null, 2))
+
+    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
+    const manager = createManager(workspacePath, fakeReviewService)
+
+    await manager.pushReviewProject()
+    await manager.pushReviewProject()
+
+    const [firstProjectId, secondProjectId] = fakeReviewService.getProjectIds()
+    fakeReviewService.stageProjectUpdate(
+      firstProjectId,
+      'i18n/fr/messages.json',
+      JSON.stringify({ greeting: 'Bonjour (Human)' }, null, 2)
+    )
+    fakeReviewService.stageProjectUpdate(
+      secondProjectId,
+      'i18n/es/messages.json',
+      JSON.stringify({ greeting: 'Hola (Human)' }, null, 2)
+    )
+
+    await manager.pullReviewedProjects()
+
+    const fr = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')) as { greeting: string }
+    const es = JSON.parse(readFileSync(path.join(workspacePath, 'i18n/es/messages.json'), 'utf8')) as { greeting: string }
+
+    expect(fr).toEqual({ greeting: 'Bonjour (Human)' })
+    expect(es).toEqual({ greeting: 'Hola (Human)' })
+    expect(await manager.getPendingReviewStatus()).toEqual([])
+  })
+
+  it('does not change output when pulling the same completed project twice', async () => {
+    writeFile(workspacePath, '.translator/review/fr/upload/messages.xliff', '<xliff><file><unit id="1"/></file></xliff>')
+    writeFile(workspacePath, 'i18n/fr/messages.json', JSON.stringify({ greeting: 'Bonjour (AI)' }, null, 2))
+
+    const fakeReviewService = new FakeRoundTripReviewService(workspacePath)
+    const manager = createManager(workspacePath, fakeReviewService)
+
+    await manager.pushReviewProject()
+
+    const [projectId] = fakeReviewService.getProjectIds()
+    fakeReviewService.stageProjectUpdate(
+      projectId,
+      'i18n/fr/messages.json',
+      JSON.stringify({ greeting: 'Bonjour (Human)' }, null, 2)
+    )
+
+    await manager.pullReviewedProjects()
+
+    const firstPull = readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')
+    await manager.pullReviewedProjects()
+    const secondPull = readFileSync(path.join(workspacePath, 'i18n/fr/messages.json'), 'utf8')
+
+    expect(secondPull).toBe(firstPull)
+    expect(JSON.parse(secondPull) as { greeting: string }).toEqual({ greeting: 'Bonjour (Human)' })
   })
 })
