@@ -128,15 +128,15 @@
       },
       {
         "command": "translator.push",
-        "title": "Translator: Push to MateCat"
+        "title": "Translator: Human Review -> Push"
       },
       {
         "command": "translator.pull",
-        "title": "Translator: Pull from MateCat"
+        "title": "Translator: Human Review <- Pull"
       },
       {
         "command": "translator.status",
-        "title": "Translator: MateCat Review Status"
+        "title": "Translator: Human Review Status"
       },
       {
         "command": "translator.showOutput",

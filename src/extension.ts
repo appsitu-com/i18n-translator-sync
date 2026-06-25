@@ -435,9 +435,9 @@ export function onShowOutput(): void {
   channel.appendLine('- Translator: Start (starts file watching and auto-translation)')
   channel.appendLine('- Translator: Stop (stops file watching)')
   channel.appendLine('- Translator: Restart (restart watching)')
-  channel.appendLine('- Translator: Push to MateCat (works without starting)')
-  channel.appendLine('- Translator: Pull from MateCat (works without starting)')
-  channel.appendLine('- Translator: MateCat Review Status (works without starting)')
+  channel.appendLine('- Translator: Human Review -> Push (works without starting)')
+  channel.appendLine('- Translator: Human Review <- Pull (works without starting)')
+  channel.appendLine('- Translator: Human Review Status (works without starting)')
   // channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
   channel.appendLine('- Translator: Show Output (this command)')
   channel.appendLine('')
@@ -683,17 +683,17 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
   // Always available commands
   items.push(
     {
-      label: '$(cloud-upload) Push to MateCat',
+      label: '$(cloud-upload) Human Review -> Push',
       description: 'Upload source files to MateCat for professional translation',
       command: 'translator.push'
     },
     {
-      label: '$(cloud-download) Pull from MateCat',
+      label: '$(cloud-download) Human Review <- Pull',
       description: 'Download completed translations from MateCat',
       command: 'translator.pull'
     },
     {
-      label: '$(pulse) MateCat Review Status',
+      label: '$(pulse) Human Review Status',
       description: 'Check status of pending MateCat projects',
       command: 'translator.status'
     },

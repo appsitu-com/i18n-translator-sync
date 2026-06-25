@@ -4,9 +4,9 @@ MateCat.com API integration - Human translation and review workflow
 
 ### New commands
 
-- `Translator: Push to MateCat`
-- `Translator: Pull from MateCat`
-- `Translator: MateCat Review Status`
+- `Translator: Human Review -> Push`
+- `Translator: Human Review <- Pull`
+- `Translator: Human Review Status`
 
 ### Features
 
