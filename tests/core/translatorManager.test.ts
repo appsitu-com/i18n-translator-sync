@@ -383,6 +383,45 @@ describe('TranslatorManager', () => {
       expect(preview).toEqual({ translationCount: 0, artifactCount: 1 })
     })
 
+    it('counts both unit and trans-unit markers within XLIFF review artifacts', async () => {
+      vi.mocked(fileSystem.readDirectory).mockImplementation(async (uri) => {
+        if (uri.fsPath === '/workspace') {
+          return [
+            { name: 'mixed.xliff', isDirectory: false },
+            { name: 'notes.tmx', isDirectory: false }
+          ]
+        }
+
+        return []
+      })
+
+      vi.mocked(fileSystem.readFile).mockImplementation(async (uri) => {
+        if (uri.fsPath.endsWith('mixed.xliff')) {
+          return '<xliff><file><unit id="1"/><trans-unit id="2"/><unit id="3"/></file></xliff>'
+        }
+        return ''
+      })
+
+      const preview = await translatorManager.getReviewPushPreview()
+      expect(preview).toEqual({ translationCount: 3, artifactCount: 2 })
+    })
+
+    it('does not count non-XLIFF artifacts toward translation count', async () => {
+      vi.mocked(fileSystem.readDirectory).mockImplementation(async (uri) => {
+        if (uri.fsPath === '/workspace') {
+          return [
+            { name: 'glossary.tmx', isDirectory: false },
+            { name: 'metadata.txt', isDirectory: false }
+          ]
+        }
+
+        return []
+      })
+
+      const preview = await translatorManager.getReviewPushPreview()
+      expect(preview).toEqual({ translationCount: 0, artifactCount: 1 })
+    })
+
     it('filters review artifacts by reviewer.targetLocales.include', async () => {
       mockLocalizedReviewArtifactFiles()
 
