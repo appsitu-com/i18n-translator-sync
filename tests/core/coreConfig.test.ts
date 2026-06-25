@@ -86,7 +86,8 @@ describe('Config', () => {
           copyOnlyFiles: [],
           csvExportPath: 'translator.csv',
           autoExport: true,
-          autoImport: false
+          autoImport: false,
+          reviewService: 'matecat'
         })
       }
     })
@@ -142,7 +143,8 @@ describe('Config', () => {
         copyOnlyFiles: [],
         csvExportPath: 'translator.csv',
         autoExport: true,
-        autoImport: false
+        autoImport: false,
+        reviewService: 'matecat'
       })
     })
   })

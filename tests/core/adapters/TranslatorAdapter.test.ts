@@ -19,8 +19,8 @@ vi.mock('../../../src/core/TranslatorManager', () => {
       stopWatching: vi.fn().mockResolvedValue(undefined),
       translateSingleFile: vi.fn().mockResolvedValue(undefined),
       bulkTranslate: vi.fn().mockResolvedValue(5),
-      pushToMateCat: vi.fn().mockResolvedValue(undefined),
-      pullFromMateCat: vi.fn().mockResolvedValue(undefined),
+      pushReviewProject: vi.fn().mockResolvedValue(undefined),
+      pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
       setTranslatorEngines: vi.fn(),
       dispose: vi.fn()
     }))
@@ -93,8 +93,8 @@ class TestTranslatorAdapter extends TranslatorAdapter {
       this.translatorManager.stopWatching = this.translatorManager.stopWatching || vi.fn().mockResolvedValue(undefined);
       this.translatorManager.translateSingleFile = this.translatorManager.translateSingleFile || vi.fn().mockResolvedValue(undefined);
       this.translatorManager.bulkTranslate = this.translatorManager.bulkTranslate || vi.fn().mockResolvedValue(5);
-      this.translatorManager.pushToMateCat = this.translatorManager.pushToMateCat || vi.fn().mockResolvedValue(undefined);
-      this.translatorManager.pullFromMateCat = this.translatorManager.pullFromMateCat || vi.fn().mockResolvedValue(undefined);
+      this.translatorManager.pushReviewProject = this.translatorManager.pushReviewProject || vi.fn().mockResolvedValue(undefined);
+      this.translatorManager.pullReviewedProjects = this.translatorManager.pullReviewedProjects || vi.fn().mockResolvedValue(undefined);
       this.translatorManager.setTranslatorEngines = this.translatorManager.setTranslatorEngines || vi.fn();
       this.translatorManager.dispose = this.translatorManager.dispose || vi.fn();
     }
@@ -402,7 +402,7 @@ describe('TranslatorAdapter', () => {
       await adapter.pushToMateCat();
 
       const translatorManager = adapter.getTranslatorManager();
-      expect(translatorManager?.pushToMateCat).toHaveBeenCalled();
+      expect(translatorManager?.pushReviewProject).toHaveBeenCalled();
     });
 
     it('should pull from MateCat', async () => {
@@ -412,7 +412,7 @@ describe('TranslatorAdapter', () => {
       await adapter.pullFromMateCat();
 
       const translatorManager = adapter.getTranslatorManager();
-      expect(translatorManager?.pullFromMateCat).toHaveBeenCalled();
+      expect(translatorManager?.pullReviewedProjects).toHaveBeenCalled();
     });
   });
 

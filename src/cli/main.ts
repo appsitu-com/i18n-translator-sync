@@ -23,6 +23,7 @@ export async function runCli(): Promise<void> {
     .option('--config <path>', 'Path to custom configuration file (defaults to <workspace>/translator.json)')
     .option('--push-matecat', 'Push translations to MateCat')
     .option('--pull-matecat', 'Pull translations from MateCat')
+    .option('--status-matecat', 'Check status of pending MateCat review projects')
     .option('--export-cache [path]', 'Export translation cache to CSV file')
     .option('--import-cache <path>', 'Import translation cache from CSV file')
     .option('--purge-cache', 'Purge unused translations from cache (creates backup when CSV exists)')
@@ -81,6 +82,17 @@ export async function runCli(): Promise<void> {
   } else if (options.pullMatecat) {
     await adapter.pullFromMateCat()
     console.log('MateCat pull operation completed. Exiting.')
+    process.exit(0)
+  } else if (options.statusMatecat) {
+    const statuses = await adapter.getMateCatReviewStatus()
+    if (statuses.length === 0) {
+      console.log('No pending MateCat review projects found.')
+    } else {
+      for (const status of statuses) {
+        console.log(`- ${status.projectId}: ${status.status}`)
+      }
+    }
+    console.log('MateCat status operation completed. Exiting.')
     process.exit(0)
   } else if (options.bulkTranslate) {
     await adapter.bulkTranslate(options.force)

@@ -61,7 +61,10 @@ const ENGINES = [
   'auto'
 ] as const
 
+const REVIEW_SERVICES = ['matecat'] as const
+
 export const TranslatorEngineSchema = z.enum(ENGINES)
+export const ReviewServiceSchema = z.enum(REVIEW_SERVICES)
 
 // ---------------------------------------------------------------------------
 // Top-level translator.json schema
@@ -144,6 +147,11 @@ export const TranslatorConfigSchema = z.object({
     .optional()
     .default(false)
     .describe('Automatically import from CSV when database is first created'),
+
+  // Review service provider (professional review workflow)
+  reviewService: ReviewServiceSchema.optional()
+    .default('matecat')
+    .describe('Review service provider for push/pull/status workflows'),
 
   // Nested engine configurations
   translator: TranslatorEnginesSchema.optional()

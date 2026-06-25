@@ -5,6 +5,39 @@ import { IFileSystem, nodeFileSystem } from './fs'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
 import { TRANSLATOR_ENV } from '../constants'
 
+export class MissingEnvironmentValueError extends Error {
+  constructor(public readonly variableName: string) {
+    super(
+      `Missing required environment value "${variableName}". Set it in process.env, translator.env, or directly in translator.json.`
+    )
+    this.name = 'MissingEnvironmentValueError'
+  }
+}
+
+export function getRequiredEnvironmentValue(
+  variableName: string,
+  source?: Record<string, string | undefined>
+): string {
+  const resolved = source?.[variableName] ?? process.env[variableName]
+  if (resolved === undefined || resolved === '') {
+    throw new MissingEnvironmentValueError(variableName)
+  }
+
+  return resolved
+}
+
+export interface EnvValueAccessor {
+  get(name: string): string
+}
+
+export function createEnvValueAccessor(source?: Record<string, string | undefined>): EnvValueAccessor {
+  return {
+    get(name: string): string {
+      return getRequiredEnvironmentValue(name, source)
+    }
+  }
+}
+
 
 /**
  * Get the appropriate IFileSystem implementation
@@ -96,13 +129,6 @@ export const initTranslatorEnv = async (
   isEnvInitialized = true
 }
 
-export class MissingEnvVarError extends Error {
-  constructor(public readonly varName: string) {
-    super(`Environment variable "${varName}" is not set`)
-    this.name = 'MissingEnvVarError'
-  }
-}
-
 export class EncryptedKeyAccessError extends Error {
   constructor(public readonly varName: string) {
     super(`Cannot access encrypted key "${varName}" without a passphrase`)
@@ -111,6 +137,39 @@ export class EncryptedKeyAccessError extends Error {
 }
 
 const warned = new Set<string>()
+
+function logMissingEnvironmentVariable(name: string, logger: ILogger): void {
+  if (warned.has(name)) {
+    return
+  }
+
+  warned.add(name)
+
+  // Determine which API service needs a key
+  let serviceInfo = ''
+  let docsUrl = ''
+
+  if (name.includes('AZURE')) {
+    serviceInfo = 'Azure Translator'
+    docsUrl = 'https://learn.microsoft.com/azure/ai-services/translator/translator-how-to-signup'
+  } else if (name.includes('GOOGLE')) {
+    serviceInfo = 'Google Translate'
+    docsUrl = 'https://cloud.google.com/translate/docs/setup'
+  } else if (name.includes('DEEPL')) {
+    serviceInfo = 'DeepL'
+    docsUrl = 'https://www.deepl.com/pro-api'
+  } else if (name.includes('OPENROUTER')) {
+    serviceInfo = 'OpenRouter'
+    docsUrl = 'https://openrouter.ai/'
+  } else if (name.includes('GEMINI')) {
+    serviceInfo = 'Gemini AI'
+    docsUrl = 'https://ai.google.dev/tutorials/setup'
+  }
+
+  logger.error(
+    `${serviceInfo} API key missing. Configure "${name}" in your translator.env file. Refer to ${docsUrl} for setup instructions.`
+  )
+}
 
 /**
  * Get a passphrase function type definition
@@ -129,37 +188,16 @@ export function getEnvWithDecryption(
   logger: ILogger,
   getPassphrase?: GetPassphraseFunction
 ): string {
-  const val = process.env[name]
-  if (!val) {
-    if (!warned.has(name)) {
-      warned.add(name)
-
-      // Determine which API service needs a key
-      let serviceInfo = ''
-      let docsUrl = ''
-
-      if (name.includes('AZURE')) {
-        serviceInfo = 'Azure Translator'
-        docsUrl = 'https://learn.microsoft.com/azure/ai-services/translator/translator-how-to-signup'
-      } else if (name.includes('GOOGLE')) {
-        serviceInfo = 'Google Translate'
-        docsUrl = 'https://cloud.google.com/translate/docs/setup'
-      } else if (name.includes('DEEPL')) {
-        serviceInfo = 'DeepL'
-        docsUrl = 'https://www.deepl.com/pro-api'
-      } else if (name.includes('OPENROUTER')) {
-        serviceInfo = 'OpenRouter'
-        docsUrl = 'https://openrouter.ai/'
-      } else if (name.includes('GEMINI')) {
-        serviceInfo = 'Gemini AI'
-        docsUrl = 'https://ai.google.dev/tutorials/setup'
-      }
-
-      logger.error(
-        `${serviceInfo} API key missing. Configure "${name}" in your translator.env file. Refer to ${docsUrl} for setup instructions.`
-      )
+  let val: string
+  try {
+    val = getRequiredEnvironmentValue(name)
+  } catch (error: unknown) {
+    if (error instanceof MissingEnvironmentValueError) {
+      logMissingEnvironmentVariable(name, logger)
+      throw error
     }
-    throw new MissingEnvVarError(name)
+
+    throw error
   }
 
   // Check if the value is encrypted and needs to be decrypted
@@ -196,38 +234,16 @@ export function getEnvWithDecryption(
  * @returns The value of the environment variable
  */
 export function getEnv(name: string, logger: ILogger): string {
-  const val = process.env[name]
-  if (!val) {
-    if (!warned.has(name)) {
-      warned.add(name)
-
-      // Determine which API service needs a key
-      let serviceInfo = ''
-      let docsUrl = ''
-
-      if (name.includes('AZURE')) {
-        serviceInfo = 'Azure Translator'
-        docsUrl = 'https://learn.microsoft.com/azure/ai-services/translator/translator-how-to-signup'
-      } else if (name.includes('GOOGLE')) {
-        serviceInfo = 'Google Translate'
-        docsUrl = 'https://cloud.google.com/translate/docs/setup'
-      } else if (name.includes('DEEPL')) {
-        serviceInfo = 'DeepL'
-        docsUrl = 'https://www.deepl.com/pro-api'
-      } else if (name.includes('OPENROUTER')) {
-        serviceInfo = 'OpenRouter'
-        docsUrl = 'https://openrouter.ai/'
-      } else if (name.includes('GEMINI')) {
-        serviceInfo = 'Gemini AI'
-        docsUrl = 'https://ai.google.dev/tutorials/setup'
-      }
-
-      // In test environment, skip the UI part
-      logger.error(
-        `${serviceInfo} API key missing. Configure "${name}" in your translator.env file. Refer to ${docsUrl} for setup instructions.`
-      )
+  let val: string
+  try {
+    val = getRequiredEnvironmentValue(name)
+  } catch (error: unknown) {
+    if (error instanceof MissingEnvironmentValueError) {
+      logMissingEnvironmentVariable(name, logger)
+      throw error
     }
-    throw new MissingEnvVarError(name)
+
+    throw error
   }
 
   // Check if encrypted and warn

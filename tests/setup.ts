@@ -25,10 +25,12 @@ if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
   const workspaceEnvFile = path.resolve(__dirname, '../translator.env');
   const testProjectEnvFile = path.resolve(__dirname, '../test-project/translator.env');
   const translatorEnvDirVar = 'I18N_TRANSLATOR_ENV_DIR';
+  let loadedFromTestProject = false
 
   if (fs.existsSync(testProjectEnvFile)) {
     const result = dotenv.config({ path: testProjectEnvFile, override: true, quiet: true });
     process.env[translatorEnvDirVar] = path.dirname(testProjectEnvFile);
+    loadedFromTestProject = true
     if (result.error) {
       console.error('Error loading test-project/translator.env:', result.error);
     }
@@ -42,6 +44,11 @@ if (process.env[TEST_ENV_LOADED_FLAG] !== '1') {
     // console.warn('No translator.env file found for tests, using fallback initialization');
     const rootDir = path.resolve(__dirname, '..');
     initTranslatorEnv(rootDir, testLogger, nodeFileSystem);
+  }
+
+  // If test-project env exists but is missing keys, fill gaps from workspace env.
+  if (loadedFromTestProject && fs.existsSync(workspaceEnvFile)) {
+    dotenv.config({ path: workspaceEnvFile, override: false, quiet: true })
   }
 
   process.env[TEST_ENV_LOADED_FLAG] = '1';

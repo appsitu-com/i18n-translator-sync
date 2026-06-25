@@ -127,6 +127,18 @@
         "title": "Translator: Restart"
       },
       {
+        "command": "translator.push",
+        "title": "Translator: Push to MateCat"
+      },
+      {
+        "command": "translator.pull",
+        "title": "Translator: Pull from MateCat"
+      },
+      {
+        "command": "translator.status",
+        "title": "Translator: MateCat Review Status"
+      },
+      {
         "command": "translator.showOutput",
         "title": "Translator: Show Output"
       },

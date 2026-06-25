@@ -5,12 +5,17 @@ import { IDisposable, IFileRenameEvent, IFileWatcher, IWorkspaceWatcher } from '
 import { TranslateProjectConfig, IConfigProvider } from './coreConfig';
 import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './TranslatorPipeline';
-import { IMateCatService, MateCatService, MateCatSettings, MateCatSettingsLoader, loadMateCatSettings } from './MateCatService';
 import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
 import * as path from 'path';
 import { toAbsPath } from './util/pathShared';
 import type { GetPassphrase } from './config';
+import type { IReviewService, ReviewArtifact, ReviewProjectStatus, ReviewPushRequest } from './review/reviewService';
+import {
+  createReviewServiceFromConfig,
+  type ReviewServiceDependencies,
+  type ReviewServiceFactoryOptions
+} from './review/reviewServiceFactory';
 
 export interface ITranslatorPipeline {
   resetRuntimeState(): void
@@ -33,23 +38,25 @@ type PipelineFactory = (
   getPassphrase?: GetPassphrase
 ) => ITranslatorPipeline
 
-type MateCatServiceFactory = (logger: ILogger) => IMateCatService
+type ReviewServiceFactory = (params: ReviewServiceFactoryOptions) => IReviewService
 
 export type TranslatorManagerDependencies = {
   createPipeline?: PipelineFactory
-  createMateCatService?: MateCatServiceFactory
-  loadMateCatSettings?: MateCatSettingsLoader
+  createReviewService?: ReviewServiceFactory
+  reviewServiceDependencies?: ReviewServiceDependencies
 }
 
 /**
  * TranslatorManager manages the translation process for both CLI and VSCode extension
  */
 export class TranslatorManager {
+  private static readonly REVIEW_ARTIFACT_EXTENSIONS = ['.tmx', '.xlf', '.xliff']
+
   private watchers: IFileWatcher[] = [];
   private pipeline: ITranslatorPipeline;
   private tm: ITranslationMemory;
   private isWatching: boolean = false;
-  private mateCatService: IMateCatService | null = null;
+  private reviewService: IReviewService | null = null;
   private onConfigChanged?: () => Promise<void>;
   private translatorEngines?: ITranslatorEngines;
   private readonly dependencies: TranslatorManagerDependencies;
@@ -74,23 +81,34 @@ export class TranslatorManager {
       new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
     this.onConfigChanged = onConfigChanged;
     this.translatorEngines = translatorEngines;
-
-    // Initialize MateCat integration
-    this.initializeMateCat();
   }
 
   /**
-   * Initialize MateCat integration
+   * Initialize configured review service
    * @private
    */
-  private initializeMateCat(): void {
-    try {
-      this.mateCatService = this.dependencies.createMateCatService?.(this.logger) ?? new MateCatService(this.logger);
-      this.logger.info('MateCat integration initialized');
-    } catch (error) {
-      this.logger.error(`Failed to initialize MateCat: ${error}`);
-      this.mateCatService = null;
+  private getReviewService(): IReviewService {
+    if (this.reviewService) {
+      return this.reviewService
     }
+
+    this.reviewService =
+      this.dependencies.createReviewService?.({
+        workspacePath: this.workspacePath,
+        fileSystem: this.fileSystem,
+        logger: this.logger,
+        configProvider: this.configProvider,
+        serviceDependencies: this.dependencies.reviewServiceDependencies
+      }) ??
+      createReviewServiceFromConfig({
+        workspacePath: this.workspacePath,
+        fileSystem: this.fileSystem,
+        logger: this.logger,
+        configProvider: this.configProvider,
+        serviceDependencies: this.dependencies.reviewServiceDependencies
+      })
+
+    return this.reviewService
   }
 
   /**
@@ -545,12 +563,13 @@ export class TranslatorManager {
     this.logger.info('Pull completed');
   }
 
-  /**
-   * Get MateCat settings from the config provider
-   */
-  private getMateCatSettings(): MateCatSettings {
-    const settingsLoader = this.dependencies.loadMateCatSettings ?? loadMateCatSettings
-    return settingsLoader(this.workspacePath, this.logger)
+  async getPendingReviewStatus(): Promise<ReviewProjectStatus[]> {
+    this.logger.info('Checking review project status')
+    const statuses = await this.getReviewService().getPendingReviewStatus()
+    if (statuses.length === 0) {
+      this.logger.info('No pending review projects found')
+    }
+    return statuses
   }
 
   /**
@@ -664,61 +683,56 @@ export class TranslatorManager {
   }
 
   /**
-   * Push translations to MateCat
+   * Push translations to configured review service
    */
-  async pushToMateCat(): Promise<void> {
-    this.logger.info('Pushing translations to MateCat');
+  async pushReviewProject(): Promise<void> {
+    this.logger.info('Pushing translations to review service');
 
-    if (!this.mateCatService) {
-      this.initializeMateCat();
-      if (!this.mateCatService) {
-        throw new Error('MateCat integration not available');
-      }
+    const request = await this.prepareReviewPushRequest()
+
+    await this.getReviewService().pushReviewProject(request)
+
+    this.logger.info('Successfully pushed translations to review service');
+  }
+
+  private isReviewArtifactFile(filePath: string): boolean {
+    const normalizedPath = filePath.toLowerCase()
+    return TranslatorManager.REVIEW_ARTIFACT_EXTENSIONS.some((extension) => normalizedPath.endsWith(extension))
+  }
+
+  private getReviewArtifactContentType(filePath: string): string {
+    return filePath.toLowerCase().endsWith('.tmx') ? 'application/tmx+xml' : 'application/xliff+xml'
+  }
+
+  private async prepareReviewPushRequest(): Promise<ReviewPushRequest> {
+    const workspaceUri = this.fileSystem.createUri(this.workspacePath)
+    const allFiles = await this.findAllFilesInDir(workspaceUri)
+    const reviewArtifacts: ReviewArtifact[] = allFiles
+      .filter((fileUri) => this.isReviewArtifactFile(fileUri.fsPath))
+      .map((fileUri) => ({
+        filePath: fileUri.fsPath,
+        fileName: path.basename(fileUri.fsPath),
+        contentType: this.getReviewArtifactContentType(fileUri.fsPath)
+      }))
+
+    if (reviewArtifacts.length === 0) {
+      throw new Error('Review push requires at least one .tmx, .xlf, or .xliff file in the workspace')
     }
 
-    // Get MateCat settings from config provider
-    const settings = this.getMateCatSettings();
-
-    const sourceLocale = this.configProvider.get<string>('translator.sourceLocale', 'en')
-    const targetLocales = this.configProvider.get<string[]>('translator.targetLocales', [])
-
-    if (!Array.isArray(targetLocales) || targetLocales.length === 0) {
-      throw new Error('At least one target locale is required for MateCat push')
+    return {
+      artifacts: reviewArtifacts
     }
-
-    const runtimeFields = {
-      source_lang: sourceLocale,
-      target_lang: targetLocales.join(',')
-    }
-
-    // Push translations
-    await this.mateCatService.pushTmToMateCat(this.tm, settings, runtimeFields,
-      (message: string) => this.logger.info(message));
-
-    this.logger.info('Successfully pushed translations to MateCat');
   }
 
   /**
-   * Pull translations from MateCat
+   * Pull reviewed translations from configured review service
    */
-  async pullFromMateCat(): Promise<void> {
-    this.logger.info('Pulling translations from MateCat');
+  async pullReviewedProjects(): Promise<void> {
+    this.logger.info('Pulling reviewed translations from review service');
 
-    if (!this.mateCatService) {
-      this.initializeMateCat();
-      if (!this.mateCatService) {
-        throw new Error('MateCat integration not available');
-      }
-    }
+    await this.getReviewService().pullReviewedProjects()
 
-    // Get MateCat settings from config provider
-    const settings = this.getMateCatSettings();
-
-    // Pull translations
-    await this.mateCatService.pullReviewedFromMateCat(this.tm, settings,
-      (message: string) => this.logger.info(message));
-
-    this.logger.info('Successfully pulled translations from MateCat');
+    this.logger.info('Successfully pulled reviewed translations from review service');
   }
 
   /**

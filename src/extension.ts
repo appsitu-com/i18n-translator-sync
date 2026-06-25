@@ -6,6 +6,7 @@ import { IStatusBarManager, VSCodeStatusBarManager, ITranslatorState } from './v
 import { VSCodeLogger } from './vscode/vscodeLogger'
 import { TRANSLATOR_JSON, TRANSLATOR_ENV, TRANSLATOR_DIR } from './core/constants'
 import { MissingEnvironmentValueError } from './core/config'
+import type { ReviewProjectStatus } from './core/review/reviewService'
 
 // Exported for testing
 export let outputChannel: vscode.OutputChannel
@@ -64,6 +65,62 @@ function updateStatusBar(): void {
   if (statusBarManager) {
     const state = getTranslatorState()
     statusBarManager.updateStatus(state)
+  }
+}
+
+/**
+ * Open translator.env in the workspace editor if available.
+ */
+function openTranslatorEnvFile(): void {
+  if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+    return
+  }
+
+  const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, TRANSLATOR_ENV)
+  if (!fs.existsSync(envFile)) {
+    return
+  }
+
+  void vscode.workspace.openTextDocument(envFile).then((doc) => {
+    void vscode.window.showTextDocument(doc)
+  })
+}
+
+/**
+ * Shared external-service flow for missing environment variables.
+ */
+function promptSetMissingEnvironmentValue(variableName: string): void {
+  const action = 'Set in translator.env'
+  void vscode.window
+    .showErrorMessage(
+      `Missing environment value "${variableName}". Set this variable in translator.env or your environment.`,
+      action
+    )
+    .then((selection) => {
+      if (selection === action) {
+        openTranslatorEnvFile()
+      }
+    })
+}
+
+async function executeWithMissingEnvironmentPrompt<T>(
+  operation: () => Promise<T>,
+  onError?: (error: unknown) => void | Promise<void>
+): Promise<T | undefined> {
+  try {
+    return await operation()
+  } catch (error: unknown) {
+    if (error instanceof MissingEnvironmentValueError) {
+      promptSetMissingEnvironmentValue(error.variableName)
+      return undefined
+    }
+
+    if (onError) {
+      await onError(error)
+      return undefined
+    }
+
+    throw error
   }
 }
 
@@ -222,79 +279,49 @@ async function checkAndCreateConfigFiles(context: vscode.ExtensionContext): Prom
  * Start the translator
  */
 export async function onStartTranslator(context: vscode.ExtensionContext): Promise<void> {
-  try {
-    // Ensure configuration files exist before starting the server
-    await checkAndCreateConfigFiles(context)
+  await executeWithMissingEnvironmentPrompt(
+    async () => {
+      // Ensure configuration files exist before starting the server
+      await checkAndCreateConfigFiles(context)
 
-    // Get the singleton adapter
-    const adapter = getVSCodeAdapter()
-    await adapter.startWithContext(context)
+      // Get the singleton adapter
+      const adapter = getVSCodeAdapter()
+      await adapter.startWithContext(context)
 
-    // Update status bar to reflect running state
-    updateStatusBar()
+      // Update status bar to reflect running state
+      updateStatusBar()
 
-    // When manually started, check if we need to ask about auto-start
-    const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
+      // When manually started, check if we need to ask about auto-start
+      const autoStartSetting = vscode.workspace.getConfiguration('translator').get<string>('autoStart', 'ask')
 
-    // Only prompt if the setting is still 'ask'
-    if (autoStartSetting === 'ask') {
-      const response = await vscode.window.showInformationMessage(
-        'Do you want to automatically start the translator whenever you open this workspace?',
-        'Yes',
-        'No'
+      // Only prompt if the setting is still 'ask'
+      if (autoStartSetting === 'ask') {
+        const response = await vscode.window.showInformationMessage(
+          'Do you want to automatically start the translator whenever you open this workspace?',
+          'Yes',
+          'No'
+        )
+
+        if (response === 'Yes' || response === 'No') {
+          const autoStart = response === 'Yes' ? 'true' : 'false'
+          await vscode.workspace
+            .getConfiguration('translator')
+            .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
+        }
+      }
+    },
+    async (error: unknown) => {
+      const action = 'Configure API Keys'
+      const selection = await vscode.window.showErrorMessage(
+        `Error starting translator: ${error instanceof Error ? error.message : String(error)}`,
+        action
       )
 
-      if (response === 'Yes' || response === 'No') {
-        const autoStart = response === 'Yes' ? 'true' : 'false'
-        await vscode.workspace
-          .getConfiguration('translator')
-          .update('autoStart', autoStart, vscode.ConfigurationTarget.Workspace)
+      if (selection === action) {
+        openTranslatorEnvFile()
       }
     }
-
-  } catch (error: any) {
-    if (error instanceof MissingEnvironmentValueError) {
-      const action = 'Set in translator.env'
-      vscode.window
-        .showErrorMessage(
-          `Missing environment value "${error.variableName}". Set this variable in translator.env or your environment.`,
-          action
-        )
-        .then((selection) => {
-          if (
-            selection === action &&
-            vscode.workspace.workspaceFolders &&
-            vscode.workspace.workspaceFolders.length > 0
-          ) {
-            const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, TRANSLATOR_ENV)
-            if (fs.existsSync(envFile)) {
-              vscode.workspace.openTextDocument(envFile).then((doc) => {
-                vscode.window.showTextDocument(doc)
-              })
-            }
-          }
-        })
-      return
-    }
-
-    // Show error and offer to open env file
-    vscode.window
-      .showErrorMessage(`Error starting translator: ${error?.message || String(error)}`, 'Configure API Keys')
-      .then((selection) => {
-        if (
-          selection === 'Configure API Keys' &&
-          vscode.workspace.workspaceFolders &&
-          vscode.workspace.workspaceFolders.length > 0
-        ) {
-          const envFile = path.join(vscode.workspace.workspaceFolders[0].uri.fsPath, TRANSLATOR_ENV)
-          if (fs.existsSync(envFile)) {
-            vscode.workspace.openTextDocument(envFile).then((doc) => {
-              vscode.window.showTextDocument(doc)
-            })
-          }
-        }
-      })
-  }
+  )
 }
 
 /**
@@ -334,7 +361,12 @@ export async function pushToMateCat(): Promise<void> {
   // Use existing adapter or get the singleton (this will be the same instance created during activation)
   const adapter = getCurrentVSCodeAdapter()
   if (adapter) {
-    await adapter.pushToMateCat()
+    await executeWithMissingEnvironmentPrompt(
+      () => adapter.pushToMateCat(),
+      async (error: unknown) => {
+        await vscode.window.showErrorMessage(`MateCat push failed: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    )
   } else {
     vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
   }
@@ -347,9 +379,47 @@ export async function pullFromMateCat(): Promise<void> {
   // Use existing adapter or get the singleton (this will be the same instance created during activation)
   const adapter = getCurrentVSCodeAdapter()
   if (adapter) {
-    await adapter.pullFromMateCat()
+    await executeWithMissingEnvironmentPrompt(
+      () => adapter.pullFromMateCat(),
+      async (error: unknown) => {
+        await vscode.window.showErrorMessage(`MateCat pull failed: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    )
   } else {
     vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
+  }
+}
+
+/**
+ * Check pending MateCat project status
+ */
+export async function checkMateCatStatus(): Promise<void> {
+  const adapter = getCurrentVSCodeAdapter()
+  if (!adapter) {
+    vscode.window.showWarningMessage('Translator extension not activated. Please reload the window.')
+    return
+  }
+
+  const statuses = await executeWithMissingEnvironmentPrompt<ReviewProjectStatus[]>(
+    () => adapter.getMateCatReviewStatus(),
+    async (error: unknown) => {
+      await vscode.window.showErrorMessage(`MateCat status check failed: ${error instanceof Error ? error.message : String(error)}`)
+    }
+  )
+
+  if (!statuses) {
+    return
+  }
+
+  const channel = getOutputChannel()
+  if (statuses.length === 0) {
+    channel.appendLine('MateCat status: no pending projects')
+    return
+  }
+
+  channel.appendLine('MateCat project status:')
+  for (const status of statuses) {
+    channel.appendLine(`- ${status.projectId}: ${status.status}`)
   }
 }
 
@@ -365,8 +435,9 @@ export function onShowOutput(): void {
   channel.appendLine('- Translator: Start (starts file watching and auto-translation)')
   channel.appendLine('- Translator: Stop (stops file watching)')
   channel.appendLine('- Translator: Restart (restart watching)')
-  // channel.appendLine('- Translator: Push to MateCat (works without starting)')
-  // channel.appendLine('- Translator: Pull from MateCat (works without starting)')
+  channel.appendLine('- Translator: Push to MateCat (works without starting)')
+  channel.appendLine('- Translator: Pull from MateCat (works without starting)')
+  channel.appendLine('- Translator: MateCat Review Status (works without starting)')
   // channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
   channel.appendLine('- Translator: Show Output (this command)')
   channel.appendLine('')
@@ -611,16 +682,21 @@ export async function showContextMenu(context: vscode.ExtensionContext): Promise
 
   // Always available commands
   items.push(
-    // {
-    //   label: '$(cloud-upload) Push to MateCat',
-    //   description: 'Upload source files to MateCat for professional translation',
-    //   command: 'translator.push'
-    // },
-    // {
-    //   label: '$(cloud-download) Pull from MateCat',
-    //   description: 'Download completed translations from MateCat',
-    //   command: 'translator.pull'
-    // },
+    {
+      label: '$(cloud-upload) Push to MateCat',
+      description: 'Upload source files to MateCat for professional translation',
+      command: 'translator.push'
+    },
+    {
+      label: '$(cloud-download) Pull from MateCat',
+      description: 'Download completed translations from MateCat',
+      command: 'translator.pull'
+    },
+    {
+      label: '$(pulse) MateCat Review Status',
+      description: 'Check status of pending MateCat projects',
+      command: 'translator.status'
+    },
     {
       label: '$(arrow-circle-right) Export Translation Memory to CSV',
       description: 'Export TM database to CSV file',
@@ -707,8 +783,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     vscode.commands.registerCommand('translator.start', async () => onStartTranslator(context)),
     vscode.commands.registerCommand('translator.stop', () => stopTranslator()),
     vscode.commands.registerCommand('translator.restart', () => restartTranslator(context)),
-    // vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
-    // vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
+    vscode.commands.registerCommand('translator.push', async () => pushToMateCat()),
+    vscode.commands.registerCommand('translator.pull', async () => pullFromMateCat()),
+    vscode.commands.registerCommand('translator.status', async () => checkMateCatStatus()),
     vscode.commands.registerCommand('translator.showOutput', () => onShowOutput()),
     vscode.commands.registerCommand('translator.showContextMenu', async () => showContextMenu(context)),
     vscode.commands.registerCommand('translator.exportCache', async () => exportCache()),

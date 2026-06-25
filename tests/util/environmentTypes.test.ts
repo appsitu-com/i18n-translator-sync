@@ -1,5 +1,5 @@
 import { it, expect, describe, beforeEach, afterEach, vi } from 'vitest';
-import { resolveEnvString, resolveEnvDeep, MissingEnvVarError, getEnv, initTranslatorEnv, resetEnvInitialization } from '../../src/core/util/environmentSetup';
+import { resolveEnvString, resolveEnvDeep, MissingEnvironmentValueError, getEnv, initTranslatorEnv, resetEnvInitialization } from '../../src/core/util/environmentSetup';
 import { createMockFileSystem } from '../mocks/filesystem';
 import { TRANSLATOR_ENV } from '../../src/core/constants';
 
@@ -13,10 +13,10 @@ const mockLogger = {
   show: vi.fn()
 };
 
-describe('MissingEnvVarError', () => {
-  it('creates MissingEnvVarError with correct message', () => {
-    const err = new MissingEnvVarError('MY_VAR');
-    expect(err).toBeInstanceOf(MissingEnvVarError);
+describe('MissingEnvironmentValueError', () => {
+  it('creates MissingEnvironmentValueError with correct message', () => {
+    const err = new MissingEnvironmentValueError('MY_VAR');
+    expect(err).toBeInstanceOf(MissingEnvironmentValueError);
     expect(err.message).toMatch(/MY_VAR/);
   });
 });
@@ -32,9 +32,9 @@ describe('getEnv', () => {
     expect(getEnv('TEST_VAR', mockLogger)).toBe('test-value');
   });
 
-  it('throws MissingEnvVarError when environment variable is not set', () => {
+  it('throws MissingEnvironmentValueError when environment variable is not set', () => {
     delete process.env.NONEXISTENT_VAR;
-    expect(() => getEnv('NONEXISTENT_VAR', mockLogger)).toThrow(MissingEnvVarError);
+    expect(() => getEnv('NONEXISTENT_VAR', mockLogger)).toThrow(MissingEnvironmentValueError);
     expect(mockLogger.error).toHaveBeenCalled();
   });
 });
@@ -53,9 +53,9 @@ describe('resolveEnvString', () => {
     expect(resolveEnvString('env:TEST_ENV', mockLogger)).toBe('abc');
   });
 
-  it('throws MissingEnvVarError when unset', () => {
+  it('throws MissingEnvironmentValueError when unset', () => {
     delete process.env.NO_VAR;
-    expect(() => resolveEnvString('env:NO_VAR', mockLogger)).toThrow(MissingEnvVarError);
+    expect(() => resolveEnvString('env:NO_VAR', mockLogger)).toThrow(MissingEnvironmentValueError);
   });
 
   it('resolves ${VAR} in strings', () => {

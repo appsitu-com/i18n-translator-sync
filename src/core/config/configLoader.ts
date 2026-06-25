@@ -20,6 +20,7 @@ import { ILogger } from '../util/baseLogger'
 import { formatZodError } from '../util/formatZodError'
 import { isEncrypted, tryDecryptKey } from '../secrets/keyEncryption'
 import { ALLOWED_DOMAINS, validateEngineEndpoint } from '../util/endpointValidator'
+import { createEnvValueAccessor, type EnvValueAccessor } from '../util/environmentSetup'
 import { createEngineOverrides } from '../util/engines'
 import { pickEngine } from '../../translators/registry'
 import type { EngineConfig, ResolvedTranslatorEngine } from '../../translators/types'
@@ -27,24 +28,11 @@ import type { EngineConfig, ResolvedTranslatorEngine } from '../../translators/t
 /** Function that returns a passphrase for decrypting encrypted env values. */
 export type GetPassphrase = () => string | undefined
 
-export class MissingEnvironmentValueError extends Error {
-  constructor(public readonly variableName: string) {
-    super(
-      `Missing required environment value "${variableName}". Set it in process.env, translator.env, or directly in translator.json.`
-    )
-    this.name = 'MissingEnvironmentValueError'
-  }
-}
-
 export class InvalidTranslatorConfigError extends Error {
   constructor(public readonly errors: string[]) {
     super(`Invalid ${TRANSLATOR_JSON}:\n${errors.join('\n')}`)
     this.name = 'InvalidTranslatorConfigError'
   }
-}
-
-interface EnvValueAccessor {
-  get(name: string): string
 }
 
 // ---------------------------------------------------------------------------
@@ -356,21 +344,6 @@ function resolveValue(
   }
 
   return value
-}
-
-function createEnvValueAccessor(envVars: IEnvVars): EnvValueAccessor {
-  return {
-    get(name: string): string {
-      const typed = (envVars as Record<string, string | undefined>)[name]
-      const resolved = typed ?? process.env[name]
-
-      if (resolved === undefined || resolved === '') {
-        throw new MissingEnvironmentValueError(name)
-      }
-
-      return resolved
-    }
-  }
 }
 
 /**

@@ -13,13 +13,15 @@ import { initTranslatorEnv } from '../util/environmentSetup';
 import { registerAllTranslators } from '../../translators/translatorRegistry';
 import { IPassphraseManager } from '../secrets/passphraseManager';
 import { loadTranslatorConfig, type GetPassphrase, type ITranslatorEngines, type ITranslatorConfig } from '../config';
+import type { ReviewProjectStatus } from '../review/reviewService';
 
 export interface ITranslatorManager {
   setTranslatorEngines(engines: ITranslatorEngines | undefined): void
   startWatching(config: TranslateProjectConfig): Promise<void>
   stopWatching(): Promise<void>
-  pushToMateCat(): Promise<void>
-  pullFromMateCat(): Promise<void>
+  pushReviewProject(): Promise<void>
+  pullReviewedProjects(): Promise<void>
+  getPendingReviewStatus(): Promise<ReviewProjectStatus[]>
   translateSingleFile(fileUri: IUri, config: TranslateProjectConfig, force?: boolean): Promise<void>
   bulkTranslate(
     config: TranslateProjectConfig,
@@ -440,11 +442,12 @@ export abstract class TranslatorAdapter {
     if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before pushToMateCat()');
 
     try {
-      // Use the TranslatorManager's MateCat integration
-      await this.translatorManager.pushToMateCat();
+      // Use the TranslatorManager's review-service integration
+      await this.translatorManager.pushReviewProject();
       this.logger.info('Successfully pushed translations to MateCat');
     } catch (e: any) {
       this.logger.error(`MateCat push failed: ${e.message}`);
+      throw e;
     }
   }
 
@@ -455,11 +458,30 @@ export abstract class TranslatorAdapter {
     if (!this.translatorManager) throw new Error('Translator manager not initialized. Call initialize() before pullFromMateCat()');
 
     try {
-      // Use the TranslatorManager's MateCat integration
-      await this.translatorManager.pullFromMateCat();
+      // Use the TranslatorManager's review-service integration
+      await this.translatorManager.pullReviewedProjects();
       this.logger.info('Successfully pulled translations from MateCat');
     } catch (e: any) {
       this.logger.error(`MateCat pull failed: ${e.message}`);
+      throw e;
+    }
+  }
+
+  /**
+   * Check pending MateCat review project status
+   */
+  async getMateCatReviewStatus(): Promise<ReviewProjectStatus[]> {
+    if (!this.translatorManager) {
+      throw new Error('Translator manager not initialized. Call initialize() before getMateCatReviewStatus()')
+    }
+
+    try {
+      const statuses = await this.translatorManager.getPendingReviewStatus()
+      this.logger.info(`Retrieved MateCat status for ${statuses.length} pending project(s)`)
+      return statuses
+    } catch (e: any) {
+      this.logger.error(`MateCat status check failed: ${e.message}`)
+      throw e
     }
   }
 

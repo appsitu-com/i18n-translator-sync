@@ -9,6 +9,7 @@ import { EncryptedKeyAccessError } from '../core/util/environmentSetup'
 import { ILogger } from '../core/util/baseLogger'
 import { loadProjectConfig } from '../core/coreConfig'
 import { ITranslationMemory } from '../core/tm/ITranslationMemory'
+import { MissingEnvironmentValueError } from '../core/config'
 
 /**
  * VSCode adapter for the TranslatorManager
@@ -257,6 +258,9 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
       await super.pushToMateCat()
       vscode.window.showInformationMessage('Successfully pushed translations to MateCat')
     } catch (e: any) {
+      if (e instanceof MissingEnvironmentValueError) {
+        throw e
+      }
       vscode.window.showErrorMessage(`MateCat push failed: ${e.message}`)
     }
   }
@@ -278,7 +282,40 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
       await super.pullFromMateCat()
       vscode.window.showInformationMessage('Successfully pulled translations from MateCat')
     } catch (e: any) {
+      if (e instanceof MissingEnvironmentValueError) {
+        throw e
+      }
       vscode.window.showErrorMessage(`MateCat pull failed: ${e.message}`)
+    }
+  }
+
+  /**
+   * Check pending MateCat review project status with VSCode-specific messaging
+   */
+  async getMateCatReviewStatus() {
+    await this.initializeOnActivation()
+    await this.ensureRuntimeInitialized()
+
+    if (!this.translatorManager) {
+      vscode.window.showErrorMessage('Translator not initialized properly')
+      return []
+    }
+
+    try {
+      const statuses = await super.getMateCatReviewStatus()
+      if (statuses.length === 0) {
+        vscode.window.showInformationMessage('No pending MateCat review projects found')
+        return statuses
+      }
+
+      vscode.window.showInformationMessage(`Retrieved MateCat status for ${statuses.length} pending project(s)`)
+      return statuses
+    } catch (e: any) {
+      if (e instanceof MissingEnvironmentValueError) {
+        throw e
+      }
+      vscode.window.showErrorMessage(`MateCat status check failed: ${e.message}`)
+      return []
     }
   }
 

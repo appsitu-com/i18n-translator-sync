@@ -118,7 +118,13 @@ export function toProjectConfig(
     copyOnlyFiles: config.copyOnlyFiles ?? defaultConfig.copyOnlyFiles,
     csvExportPath: config.csvExportPath ?? defaultConfig.csvExportPath,
     autoExport: config.autoExport ?? defaultConfig.autoExport,
-    autoImport: config.autoImport ?? defaultConfig.autoImport
+    autoImport: config.autoImport ?? defaultConfig.autoImport,
+    reviewService:
+      config.reviewService ||
+      configProvider.get<'matecat'>(
+        'translator.reviewService',
+        defaultConfig.reviewService
+      )
   }
 }
 

@@ -75,10 +75,9 @@ The `reviewer.targetLocales.include` and `reviewer.targetLocales.exclude` rules 
 
 ### MateCAT APIs
 
-| Endpoint          | Purpose                                                 |
-| ----------------- | ------------------------------------------------------- |
-| `POST /api/v1/new`   | Creates a new project with attached XLIFF and TMX files |
-| `GET /api/status` | Check project status                                    |
-| `GET /api/stats`  | Check translation progress                              |
-| `GET /api/url`    | Get download links                                      |
-| returned URL      | Download XLIFF                                          |
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/v1/new` | Create a review project and upload XLIFF/TMX files |
+| `GET /api/v3/projects/{id_project}/{password}/analysis/status` | Check project analysis/review status |
+| `GET /api/v3/projects/{id_project}/{password}/urls` | Retrieve project file download URLs |
+| `GET {xliff_download_url}` | Download reviewed XLIFF files |

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { IMateCatHttpClient, MateCatService, MateCatSettings, loadMateCatSettings } from '../../src/core/MateCatService'
+import { IMateCatHttpClient, MateCatService, MateCatSettings, loadMateCatSettings } from '../../src/core/review/MateCatService'
 import { ConsoleLogger } from '../../src/core/util/baseLogger'
 import type { ILogger } from '../../src/core/util/baseLogger'
 import * as fs from 'fs'
@@ -21,11 +21,6 @@ vi.mock('fs', () => ({
 vi.mock('os', () => ({
   tmpdir: () => '/tmp'
 }))
-
-class FakeCache {
-  exportCSV = vi.fn(async (p: string) => {})
-  importCSV = vi.fn(async (_p: string) => 2)
-}
 
 describe('MateCatService', () => {
   const originalFetch = globalThis.fetch as any
@@ -85,24 +80,37 @@ describe('MateCatService', () => {
     expect(warn).toHaveBeenCalledTimes(2)
   })
 
-  it('pushTmToMateCat posts multipart to fixed /api/v1/new and reports success', async () => {
-    const cache = new FakeCache()
+  it('createReviewProject posts multipart to fixed /api/v1/new and reports success', async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       statusText: 'OK',
       async text() {
-        return 'ok'
+        return '{"id":"p1"}'
       }
     })
 
     await expect(
-      mateCatService.pushTmToMateCat(
-        cache as any,
+      mateCatService.createReviewProject(
         settings,
-        { source_lang: 'en-US', target_lang: 'fr-FR' }
+        {
+          fields: {
+            project_name: 'Demo',
+            source_lang: 'en-US',
+            target_lang: 'fr-FR',
+            'instructions[]': ['one', 'two']
+          },
+          uploads: [
+            {
+              fieldName: 'files[]',
+              fileName: 'review.xliff',
+              content: Buffer.from('test,data\nrow1,value1'),
+              contentType: 'application/xliff+xml'
+            }
+          ]
+        }
       )
-    ).resolves.toBeUndefined()
+    ).resolves.toEqual(expect.objectContaining({ projectId: expect.any(String) }))
     expect(fetch).toHaveBeenCalledOnce()
     expect(vi.mocked(fetch).mock.calls[0]?.[0]).toBe('https://www.matecat.com/api/v1/new')
 
@@ -118,29 +126,73 @@ describe('MateCatService', () => {
     expect(requestText).toContain('two')
   })
 
-  it('throws if required new-project fields are missing', async () => {
-    const cache = new FakeCache()
-    const invalidSettings: MateCatSettings = {
-      apiKey: 'key-secret',
-      newProjectDefaults: {
-        project_name: 'Demo'
-      }
+  it('pullReviewedTranslations fetches download URLs and files for project IDs', async () => {
+    const send = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => JSON.stringify({ urls: ['https://files.example.com/review-1.xliff'] })
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => '<xliff version="1.2"></xliff>'
+      })
+
+    const httpClient: IMateCatHttpClient = {
+      send
     }
 
-    await expect(mateCatService.pushTmToMateCat(cache as any, invalidSettings)).rejects.toThrow(
-      'MateCat push requires a non-empty "source_lang"'
-    )
+    const service = new MateCatService(logger, httpClient)
+    const result = await service.pullReviewedTranslations(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
+
+    expect(result).toEqual([
+      {
+        projectId: 'p1',
+        fileName: 'review-1.xliff',
+        content: '<xliff version="1.2"></xliff>'
+      }
+    ])
+    expect(send).toHaveBeenCalledTimes(2)
   })
 
-  it('pullReviewedFromMateCat is currently not implemented', async () => {
-    const cache = new FakeCache()
-    await expect(mateCatService.pullReviewedFromMateCat(cache as any, settings)).rejects.toThrow(
-      'MateCat review pull workflow is not implemented yet'
-    )
+  it('checkReviewProjectStatus reads status for project IDs', async () => {
+    const send = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => JSON.stringify({ status: 'completed' })
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        text: async () => JSON.stringify({ status: 'in_progress' })
+      })
+
+    const httpClient: IMateCatHttpClient = {
+      send
+    }
+
+    const service = new MateCatService(logger, httpClient)
+    const result = await service.checkReviewProjectStatus(settings, [
+      { projectId: 'p1', projectPass: 'pass-1' },
+      { projectId: 'p2', projectPass: 'pass-2' }
+    ])
+
+    expect(result).toEqual([
+      { projectId: 'p1', status: 'completed' },
+      { projectId: 'p2', status: 'in_progress' }
+    ])
+    expect(send).toHaveBeenCalledTimes(2)
   })
 
   it('supports interface-only HTTP client injection', async () => {
-    const cache = new FakeCache()
     const send = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -152,9 +204,20 @@ describe('MateCatService', () => {
     }
 
     const service = new MateCatService(logger, httpClient)
-    await service.pushTmToMateCat(cache as any, settings, {
-      source_lang: 'en-US',
-      target_lang: 'fr-FR'
+    await service.createReviewProject(settings, {
+      fields: {
+        project_name: 'Demo',
+        source_lang: 'en-US',
+        target_lang: 'fr-FR'
+      },
+      uploads: [
+        {
+          fieldName: 'files[]',
+          fileName: 'review.tmx',
+          content: Buffer.from('test,data\nrow1,value1'),
+          contentType: 'application/tmx+xml'
+        }
+      ]
     })
 
     expect(send).toHaveBeenCalledOnce()

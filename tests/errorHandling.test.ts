@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import vscode from './mocks/vscode'
 import * as extension from '../src/extension'
-import { MateCatService } from '../src/core/MateCatService'
+import { MateCatService } from '../src/core/review/MateCatService'
 
 /**
  * Error Handling Tests
@@ -16,10 +16,10 @@ import { MateCatService } from '../src/core/MateCatService'
  */
 
 // Mock MateCatService module
-vi.mock('../src/core/MateCatService', () => ({
+vi.mock('../src/core/review/MateCatService', () => ({
   MateCatService: vi.fn().mockImplementation(() => ({
-    pushTmToMateCat: vi.fn(),
-    pullReviewedFromMateCat: vi.fn()
+    createReviewProject: vi.fn(),
+    pullReviewedTranslations: vi.fn()
   }))
 }));
 
@@ -74,11 +74,11 @@ describe('Error Handling', () => {
     // Create a MateCatService instance with mocked methods
     const mateCatService = new MateCatService({} as any)
     // Add the method and then spy on it
-    mateCatService.pushTmToMateCat = vi.fn().mockRejectedValueOnce(expectedError)
+    mateCatService.createReviewProject = vi.fn().mockRejectedValueOnce(expectedError)
 
     // Directly simulate the error handling in pushToMateCat
     try {
-      await mateCatService.pushTmToMateCat({} as any, {} as any)
+      await mateCatService.createReviewProject({} as any, {} as any)
     } catch (err) {
       vscode.window.showErrorMessage(`MateCat push failed: ${(err as Error).message}`)
     }
@@ -94,11 +94,11 @@ describe('Error Handling', () => {
     // Create a MateCatService instance with mocked methods
     const mateCatService = new MateCatService({} as any)
     // Add the method and then spy on it
-    mateCatService.pullReviewedFromMateCat = vi.fn().mockRejectedValueOnce(expectedError)
+    mateCatService.pullReviewedTranslations = vi.fn().mockRejectedValueOnce(expectedError)
 
     // Directly simulate the error handling in pullFromMateCat
     try {
-      await mateCatService.pullReviewedFromMateCat({} as any, {} as any)
+      await mateCatService.pullReviewedTranslations({} as any, [] as any)
     } catch (err) {
       vscode.window.showErrorMessage(`MateCat pull failed: ${(err as Error).message}`)
     }

@@ -30,7 +30,11 @@ export {
   loadTranslatorConfig,
   resolveAndValidateEngineConfig,
   logConfiguredEnginePlan,
-  MissingEnvironmentValueError,
   InvalidTranslatorConfigError,
   type GetPassphrase
 } from './configLoader'
+
+export {
+  getRequiredEnvironmentValue,
+  MissingEnvironmentValueError
+} from '../util/environmentSetup'

@@ -6,6 +6,7 @@ import { ILogger } from '../../src/core/util/baseLogger';
 import { IFileWatcher, IWorkspaceWatcher } from '../../src/core/util/watcher';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
 import * as path from 'path';
+import * as fs from 'fs';
 
 // Mock dependencies
 const createMockFileSystem = () => ({
@@ -57,7 +58,10 @@ const createMockCache = () => ({
   close: vi.fn(),
   deleteForFile: vi.fn(),
   getAllForLocale: vi.fn(),
-  exportCSV: vi.fn(),
+  exportCSV: vi.fn(async (filePath: string) => {
+    fs.mkdirSync(path.dirname(filePath), { recursive: true })
+    fs.writeFileSync(filePath, 'source_text,target_text\nHello,Bonjour\n', 'utf8')
+  }),
   importCSV: vi.fn(),
   getStats: vi.fn()
 });
@@ -199,59 +203,30 @@ describe('TranslatorManager', () => {
     });
   });
 
-  describe('MateCat integration', () => {
-    beforeEach(() => {
-      if (!translatorManager) {
-        translatorManager = new TranslatorManager(
-          fileSystem,
-          logger,
-          cache,
-          '/workspace',
-          workspaceWatcher,
-          configProvider,
-          undefined,
-          undefined
-        )
+  describe('Review integration', () => {
+    const mockReviewArtifactFiles = () => {
+      vi.mocked(fileSystem.readDirectory).mockImplementation(async (uri) => {
+        if (uri.fsPath === '/workspace') {
+          return [
+            { name: 'review.tmx', isDirectory: false },
+            { name: 'notes.txt', isDirectory: false }
+          ]
+        }
+
+        return []
+      })
+    }
+
+    it('should push translations via review service', async () => {
+      mockReviewArtifactFiles()
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
-      // Mock the MateCat service with functions that don't throw errors
-      (translatorManager as any).mateCatService = {
-        pushTmToMateCat: vi.fn().mockResolvedValue(undefined),
-        pullReviewedFromMateCat: vi.fn().mockResolvedValue(5)
-      };
-
-      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
-        if (section === 'translator.sourceLocale') return 'en-US'
-        if (section === 'translator.targetLocales') return ['fr-FR']
-        return defaultValue
-      })
-
-      // Mock the getMateCatSettings method to return valid settings
-      vi.spyOn(TranslatorManager.prototype as any, 'getMateCatSettings').mockReturnValue({
-        apiKey: 'test-key',
-        newProjectDefaults: {
-          project_name: 'Demo'
-        }
-      })
-    });
-
-    it('should push translations to MateCat', async () => {
-      await translatorManager.pushToMateCat();
-      expect((translatorManager as any).mateCatService.pushTmToMateCat).toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith('Successfully pushed translations to MateCat');
-    });
-
-    it('should pull translations from MateCat', async () => {
-      await translatorManager.pullFromMateCat();
-      expect((translatorManager as any).mateCatService.pullReviewedFromMateCat).toHaveBeenCalled();
-      expect(logger.info).toHaveBeenCalledWith('Successfully pulled translations from MateCat');
-    });
-
-    it('supports interface-only MateCat dependency injection', async () => {
-      const pushTmToMateCat = vi.fn().mockResolvedValue(undefined)
-      const pullReviewedFromMateCat = vi.fn().mockResolvedValue(0)
-
-      const injectedManager = new TranslatorManager(
+      const manager = new TranslatorManager(
         fileSystem,
         logger,
         cache,
@@ -263,21 +238,110 @@ describe('TranslatorManager', () => {
         undefined,
         undefined,
         {
-          createMateCatService: () => ({
-            pushTmToMateCat,
-            pullReviewedFromMateCat
-          })
+          createReviewService: () => mockReviewService
         }
       )
 
-      await injectedManager.pushToMateCat()
+      await manager.pushReviewProject()
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(1)
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
+        artifacts: [
+          {
+            filePath: '/workspace/review.tmx',
+            fileName: 'review.tmx',
+            contentType: 'application/tmx+xml'
+          }
+        ]
+      })
+      expect(logger.info).toHaveBeenCalledWith('Successfully pushed translations to review service')
+    })
 
-      expect(pushTmToMateCat).toHaveBeenCalledWith(
+    it('should pull translations via review service', async () => {
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
         cache,
-        expect.objectContaining({ apiKey: 'test-key' }),
-        { source_lang: 'en-US', target_lang: 'fr-FR' },
-        expect.any(Function)
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
       )
+
+      await manager.pullReviewedProjects()
+      expect(mockReviewService.pullReviewedProjects).toHaveBeenCalledTimes(1)
+      expect(logger.info).toHaveBeenCalledWith('Successfully pulled reviewed translations from review service')
+    })
+
+    it('should return review statuses via review service', async () => {
+      const expectedStatuses = [{ projectId: 'mc-1', status: 'in_progress' }]
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue(expectedStatuses)
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      const statuses = await manager.getPendingReviewStatus()
+      expect(statuses).toEqual(expectedStatuses)
+    })
+
+    it('reuses a single review service instance across operations', async () => {
+      mockReviewArtifactFiles()
+
+      const createReviewService = vi.fn(() => ({
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }))
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService
+        }
+      )
+
+      await manager.pushReviewProject()
+      await manager.pullReviewedProjects()
+      await manager.getPendingReviewStatus()
+
+      expect(createReviewService).toHaveBeenCalledTimes(1)
     })
   });
 
