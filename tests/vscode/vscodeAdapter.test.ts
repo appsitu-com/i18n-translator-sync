@@ -337,6 +337,50 @@ describe('VSCodeTranslatorAdapter', () => {
       expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('MateCat push canceled')
     })
 
+    it('shows no-ready message and skips pull when no projects are completed', async () => {
+      ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)
+
+      const pullReviewedProjects = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorManager = {
+        getPendingReviewStatus: vi.fn().mockResolvedValue([{ projectId: 'mc-1', status: 'in_progress' }]),
+        pullReviewedProjects
+      }
+
+      await adapter.pullFromMateCat()
+
+      expect(pullReviewedProjects).not.toHaveBeenCalled()
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('No completed MateCat review projects are ready to pull')
+    })
+
+    it('asks for confirmation and skips pull when user cancels', async () => {
+      ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)
+
+      const pullReviewedProjects = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorManager = {
+        getPendingReviewStatus: vi.fn().mockResolvedValue([{ projectId: 'mc-1', status: 'completed' }]),
+        pullReviewedProjects
+      }
+
+      vi.mocked(vscode.window.showInformationMessage).mockImplementation(async (message: string) => {
+        if (message === 'Pull reviewed translations from 1 completed MateCat project(s)?') {
+          return undefined as any
+        }
+        return undefined as any
+      })
+
+      await adapter.pullFromMateCat()
+
+      expect(pullReviewedProjects).not.toHaveBeenCalled()
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        'Pull reviewed translations from 1 completed MateCat project(s)?',
+        { modal: true },
+        'Pull'
+      )
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('MateCat pull canceled')
+    })
+
   });
 
   it('should handle translateFile method', async () => {

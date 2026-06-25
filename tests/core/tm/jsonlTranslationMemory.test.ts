@@ -689,6 +689,74 @@ describe('JsonlTranslationMemory', () => {
     expect(rows[0].updated_at).toBe('12345')
   })
 
+  it('normalizes all supported unit translation statuses during CSV import', async () => {
+    const scenarios = [
+      { inputStatus: 'initial', expectedStatus: 'initial' },
+      { inputStatus: 'translated', expectedStatus: 'translated' },
+      { inputStatus: 'reviewed', expectedStatus: 'reviewed' },
+      { inputStatus: 'final', expectedStatus: 'final' },
+      { inputStatus: 'ai_draft', expectedStatus: 'initial' },
+      { inputStatus: '', expectedStatus: 'initial' },
+      { inputStatus: '   ', expectedStatus: 'initial' }
+    ]
+
+    for (const scenario of scenarios) {
+      const cache = new JsonlTranslationMemory(cachePath, dir)
+      const csvPath = join(dir, `status-${scenario.inputStatus || 'empty'}.csv`)
+
+      writeFileSync(
+        csvPath,
+        `source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at\nfile.md,0,test,en,fr,Hello,,Bonjour,${scenario.inputStatus},human,12345\n`,
+        'utf8'
+      )
+
+      const imported = await cache.importCSV(csvPath)
+      expect(imported).toBe(1)
+
+      const exportedPath = join(dir, `status-${scenario.inputStatus || 'empty'}-export.csv`)
+      await cache.exportCSV(exportedPath)
+
+      const rows = parse(readFileSync(exportedPath, 'utf8'), {
+        columns: true,
+        skip_empty_lines: true
+      }) as Array<{ status: string }>
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0].status).toBe(scenario.expectedStatus)
+    }
+  })
+
+  it('applies sequential unit status changes across imports', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+    const transitions = ['initial', 'translated', 'reviewed', 'final']
+
+    for (let i = 0; i < transitions.length; i++) {
+      const status = transitions[i]
+      const csvPath = join(dir, `transition-${i}.csv`)
+
+      writeFileSync(
+        csvPath,
+        `source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at\nfile.md,0,test,en,fr,Hello,,Bonjour-${status},${status},human,${12345 + i}\n`,
+        'utf8'
+      )
+
+      const imported = await cache.importCSV(csvPath)
+      expect(imported).toBe(1)
+
+      const exportedPath = join(dir, `transition-${i}-export.csv`)
+      await cache.exportCSV(exportedPath)
+
+      const rows = parse(readFileSync(exportedPath, 'utf8'), {
+        columns: true,
+        skip_empty_lines: true
+      }) as Array<{ status: string; target_text: string }>
+
+      expect(rows).toHaveLength(1)
+      expect(rows[0].status).toBe(status)
+      expect(rows[0].target_text).toBe(`Bonjour-${status}`)
+    }
+  })
+
   it('preserves string path text_pos through CSV import and export', async () => {
     const cache = new JsonlTranslationMemory(cachePath, dir)
     const csvPath = join(dir, 'path-text-pos.csv')

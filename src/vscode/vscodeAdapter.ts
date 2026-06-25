@@ -284,6 +284,11 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
     }
   }
 
+  private isCompletedReviewStatus(status: string): boolean {
+    const normalized = status.toLowerCase()
+    return normalized === 'done' || normalized === 'completed' || normalized === 'complete'
+  }
+
   /**
    * Override the pullFromMateCat method to add VSCode-specific messaging
    */
@@ -298,6 +303,25 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
     }
 
     try {
+      const statuses = await this.translatorManager.getPendingReviewStatus()
+      const completedCount = statuses.filter((status) => this.isCompletedReviewStatus(status.status)).length
+
+      if (completedCount === 0) {
+        vscode.window.showInformationMessage('No completed MateCat review projects are ready to pull')
+        return
+      }
+
+      const action = await vscode.window.showInformationMessage(
+        `Pull reviewed translations from ${completedCount} completed MateCat project(s)?`,
+        { modal: true },
+        'Pull'
+      )
+
+      if (action !== 'Pull') {
+        vscode.window.showInformationMessage('MateCat pull canceled')
+        return
+      }
+
       await super.pullFromMateCat()
       vscode.window.showInformationMessage('Successfully pulled translations from MateCat')
     } catch (e: any) {
