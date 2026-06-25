@@ -225,7 +225,7 @@ describe('bulkTranslateWithEngine()', () => {
     ])
   })
 
-  it('skips whitespace-only strings and keeps them unchanged', async () => {
+  it('treats whitespace-only strings as ordinary inputs in bulkTranslate core', async () => {
     chunkedTranslator.calls.length = 0
 
     const cache = {
@@ -241,22 +241,22 @@ describe('bulkTranslateWithEngine()', () => {
       cache as unknown as ITranslationMemory
     )
 
-    expect(out.translations).toEqual(['   ', '[A]', '\n\t'])
+    expect(out.translations).toEqual(['[   ]', '[A]', '[\n\t]'])
     expect(out.stats).toEqual({
-      apiCalls: 1,
+      apiCalls: 3,
       cacheHits: 0,
-      total: 1
+      total: 3
     })
-    expect(chunkedTranslator.calls).toEqual([1])
+    expect(chunkedTranslator.calls).toEqual([2, 1])
     expect(cache.getMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        texts: ['A'],
-        contexts: ['']
+        texts: ['   ', 'A', '\n\t'],
+        contexts: ['', '', '']
       })
     )
   })
 
-  it('translates trimmed core text and restores original prefix/suffix whitespace', async () => {
+  it('does not alter edge whitespace in bulkTranslate core inputs', async () => {
     const cache = {
       getMany: vi.fn(async () => new Map()),
       putMany: vi.fn(async () => {})
@@ -270,16 +270,16 @@ describe('bulkTranslateWithEngine()', () => {
       cache as unknown as ITranslationMemory
     )
 
-    expect(out.translations).toEqual(['  [A]  ', '\t[B]\n', '[C]'])
+    expect(out.translations).toEqual(['[  A  ]', '[\tB\n]', '[C]'])
     expect(cache.getMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        texts: ['A', 'B', 'C'],
+        texts: ['  A  ', '\tB\n', 'C'],
         contexts: ['', '', '']
       })
     )
   })
 
-  it('dedupes by trimmed core text while preserving each input whitespace', async () => {
+  it('dedupes by exact text and context in bulkTranslate core', async () => {
     const cache = {
       getMany: vi.fn(async () => new Map()),
       putMany: vi.fn(async () => {})
@@ -293,16 +293,16 @@ describe('bulkTranslateWithEngine()', () => {
       cache as unknown as ITranslationMemory
     )
 
-    expect(out.translations).toEqual(['  [A]  ', '[A]'])
+    expect(out.translations).toEqual(['[  A  ]', '[A]'])
     expect(out.stats).toEqual({
-      apiCalls: 1,
+      apiCalls: 2,
       cacheHits: 0,
-      total: 1
+      total: 2
     })
     expect(cache.getMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        texts: ['A'],
-        contexts: ['']
+        texts: ['  A  ', 'A'],
+        contexts: ['', '']
       })
     )
   })

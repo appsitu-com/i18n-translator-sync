@@ -15,6 +15,12 @@ interface CachedEngineConfigEntry {
   config: EngineConfig
 }
 
+type EdgeWhitespaceParts = {
+  leading: string
+  core: string
+  trailing: string
+}
+
 /**
  * Default implementation that actually performs translations and writes files
  */
@@ -32,7 +38,30 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     private getPassphrase?: GetPassphrase
   ) {}
 
-    /**
+  private splitEdgeWhitespace(text: string): EdgeWhitespaceParts {
+    const match = /^(\s*)([\s\S]*?)(\s*)$/.exec(text)
+    if (!match) {
+      return { leading: '', core: text, trailing: '' }
+    }
+
+    return {
+      leading: match[1],
+      core: match[2],
+      trailing: match[3]
+    }
+  }
+
+  private restoreEdgeWhitespace(
+    originalParts: EdgeWhitespaceParts[],
+    translatedCoreSegments: string[]
+  ): string[] {
+    return originalParts.map((parts, index) => {
+      const translatedCore = translatedCoreSegments[index] ?? parts.core
+      return `${parts.leading}${translatedCore}${parts.trailing}`
+    })
+  }
+
+  /**
    * Translate segments using actual translation service
    */
   async translateSegments(
@@ -46,10 +75,35 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
     _isBackTranslation: boolean,
     segmentPositions?: (number | string)[],
   ): Promise<{ translations: string[]; stats: ITranslationStats }> {
-    // If using copy engine, just return original segments
-    if (engineName === 'copy') {
+    const partsBySegment = segments.map((segment) => this.splitEdgeWhitespace(segment))
+    const trimmedSegments = partsBySegment.map((parts) => parts.core)
+
+    const nonEmptyIndexes = trimmedSegments
+      .map((segment, index) => (segment.length > 0 ? index : -1))
+      .filter((index) => index >= 0)
+
+    if (nonEmptyIndexes.length === 0) {
       return {
         translations: segments.slice(),
+        stats: {
+          apiCalls: 0,
+          cacheHits: 0,
+          total: 0
+        }
+      }
+    }
+
+    const trimmedNonEmptySegments = nonEmptyIndexes.map((index) => trimmedSegments[index])
+    const contextsForTranslation = nonEmptyIndexes.map((index) => contexts[index] ?? null)
+    const positionsForTranslation = segmentPositions
+      ? nonEmptyIndexes.map((index) => segmentPositions[index])
+      : undefined
+
+    // If using copy engine, just return original segments
+    if (engineName === 'copy') {
+      const restoredCopySegments = this.restoreEdgeWhitespace(partsBySegment, trimmedSegments)
+      return {
+        translations: restoredCopySegments,
         stats: {
           apiCalls: 0,
           cacheHits: 0,
@@ -67,10 +121,10 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       engineConfig
     )
 
-    // Perform actual translation
-    return await bulkTranslateWithEngine(
-      segments,
-      contexts,
+    // Perform actual translation on trimmed, non-empty cores only.
+    const translatedResult = await bulkTranslateWithEngine(
+      trimmedNonEmptySegments,
+      contextsForTranslation,
       engineName,
       {
         source: sourceLocale,
@@ -80,8 +134,18 @@ export class DefaultTranslationExecutor implements ITranslationExecutor {
       },
       this.tm,
       sourceFile,
-      segmentPositions
+      positionsForTranslation
     )
+
+    const translatedCores = trimmedSegments.slice()
+    nonEmptyIndexes.forEach((segmentIndex, translatedIndex) => {
+      translatedCores[segmentIndex] = translatedResult.translations[translatedIndex] ?? trimmedSegments[segmentIndex]
+    })
+
+    return {
+      translations: this.restoreEdgeWhitespace(partsBySegment, translatedCores),
+      stats: translatedResult.stats
+    }
   }
 
   /**
