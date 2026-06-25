@@ -292,6 +292,51 @@ describe('VSCodeTranslatorAdapter', () => {
       // Verify the method was called
       expect(adapter.pushToMateCat).toHaveBeenCalled();
     });
+
+    it('shows no-translations message and skips push when review count is zero', async () => {
+      ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)
+
+      const pushReviewProject = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorManager = {
+        getReviewPushPreview: vi.fn().mockResolvedValue({ translationCount: 0, artifactCount: 1 }),
+        pushReviewProject
+      }
+
+      await adapter.pushToMateCat()
+
+      expect(pushReviewProject).not.toHaveBeenCalled()
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('No translations requiring review were found')
+    })
+
+    it('asks for confirmation and skips push when user cancels', async () => {
+      ;(adapter as any).initializeOnActivation = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).ensureRuntimeInitialized = vi.fn().mockResolvedValue(undefined)
+
+      const pushReviewProject = vi.fn().mockResolvedValue(undefined)
+      ;(adapter as any).translatorManager = {
+        getReviewPushPreview: vi.fn().mockResolvedValue({ translationCount: 5, artifactCount: 2 }),
+        pushReviewProject
+      }
+
+      vi.mocked(vscode.window.showInformationMessage).mockImplementation(async (message: string) => {
+        if (message === 'Push 5 translation(s) for review to MateCat?') {
+          return undefined as any
+        }
+        return undefined as any
+      })
+
+      await adapter.pushToMateCat()
+
+      expect(pushReviewProject).not.toHaveBeenCalled()
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+        'Push 5 translation(s) for review to MateCat?',
+        { modal: true },
+        'Push'
+      )
+      expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('MateCat push canceled')
+    })
+
   });
 
   it('should handle translateFile method', async () => {

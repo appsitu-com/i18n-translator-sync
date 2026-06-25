@@ -20,6 +20,7 @@ export interface ITranslatorManager {
   startWatching(config: TranslateProjectConfig): Promise<void>
   stopWatching(): Promise<void>
   pushReviewProject(): Promise<void>
+  getReviewPushPreview?(): Promise<{ translationCount: number; artifactCount: number }>
   pullReviewedProjects(): Promise<void>
   getPendingReviewStatus(): Promise<ReviewProjectStatus[]>
   translateSingleFile(fileUri: IUri, config: TranslateProjectConfig, force?: boolean): Promise<void>

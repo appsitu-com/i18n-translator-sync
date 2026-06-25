@@ -51,6 +51,7 @@ export type TranslatorManagerDependencies = {
  */
 export class TranslatorManager {
   private static readonly REVIEW_ARTIFACT_EXTENSIONS = ['.tmx', '.xlf', '.xliff']
+  private static readonly XLIFF_UNIT_PATTERN = /<(?:unit|trans-unit)\b/gi
 
   private watchers: IFileWatcher[] = [];
   private pipeline: ITranslatorPipeline;
@@ -563,6 +564,10 @@ export class TranslatorManager {
     this.logger.info('Pull completed');
   }
 
+  /**
+   * Get the current status of all pending projects in the review service.
+   * @returns Pending review project statuses, if any
+   */
   async getPendingReviewStatus(): Promise<ReviewProjectStatus[]> {
     this.logger.info('Checking review project status')
     const statuses = await this.getReviewService().getPendingReviewStatus()
@@ -654,6 +659,8 @@ export class TranslatorManager {
 
   /**
    * Recursively find all files in a directory
+    * @param dirUri Directory URI to scan
+    * @returns Flattened list of files discovered under the directory tree
    */
   private async findAllFilesInDir(dirUri: IUri): Promise<IUri[]> {
     const result: IUri[] = [];
@@ -688,26 +695,64 @@ export class TranslatorManager {
   async pushReviewProject(): Promise<void> {
     this.logger.info('Pushing translations to review service');
 
-    const request = await this.prepareReviewPushRequest()
+    const { request } = await this.prepareReviewPushRequest()
 
     await this.getReviewService().pushReviewProject(request)
 
     this.logger.info('Successfully pushed translations to review service');
   }
 
+  /**
+   * Build a lightweight preview for the review push flow.
+   * @returns Translation unit count from XLIFF artifacts and total artifact count
+   */
+  async getReviewPushPreview(): Promise<{ translationCount: number; artifactCount: number }> {
+    const { request, translationCount } = await this.prepareReviewPushRequest()
+    return {
+      translationCount,
+      artifactCount: request.artifacts.length
+    }
+  }
+
+  /**
+   * Check whether a file path can be uploaded to the configured review service.
+   * @param filePath Absolute file path
+   * @returns True when the file has a supported review artifact extension
+   */
   private isReviewArtifactFile(filePath: string): boolean {
     const normalizedPath = filePath.toLowerCase()
     return TranslatorManager.REVIEW_ARTIFACT_EXTENSIONS.some((extension) => normalizedPath.endsWith(extension))
   }
 
+  /**
+   * Resolve the HTTP content type for a review artifact.
+   * @param filePath Absolute file path
+   * @returns Artifact content type expected by upload endpoints
+   */
   private getReviewArtifactContentType(filePath: string): string {
     return filePath.toLowerCase().endsWith('.tmx') ? 'application/tmx+xml' : 'application/xliff+xml'
   }
 
-  private async prepareReviewPushRequest(): Promise<ReviewPushRequest> {
+  /**
+   * Count translation units in XLIFF content for preflight reporting.
+   * @param xliffContent Raw XLIFF file content
+   * @returns Number of matched <unit> or <trans-unit> tags
+   */
+  private countXliffUnits(xliffContent: string): number {
+    const matches = xliffContent.match(TranslatorManager.XLIFF_UNIT_PATTERN)
+    return matches?.length ?? 0
+  }
+
+  /**
+   * Discover review artifacts in the workspace and prepare an upload request.
+   * Computes a translation unit count from XLIFF files for push confirmation UX.
+   * @returns Prepared review request and translation unit count preview
+   */
+  private async prepareReviewPushRequest(): Promise<{ request: ReviewPushRequest; translationCount: number }> {
     const workspaceUri = this.fileSystem.createUri(this.workspacePath)
     const allFiles = await this.findAllFilesInDir(workspaceUri)
-    const reviewArtifacts: ReviewArtifact[] = allFiles
+    const reviewArtifactUris = allFiles.filter((fileUri) => this.isReviewArtifactFile(fileUri.fsPath))
+    const reviewArtifacts: ReviewArtifact[] = reviewArtifactUris
       .filter((fileUri) => this.isReviewArtifactFile(fileUri.fsPath))
       .map((fileUri) => ({
         filePath: fileUri.fsPath,
@@ -719,8 +764,22 @@ export class TranslatorManager {
       throw new Error('Review push requires at least one .tmx, .xlf, or .xliff file in the workspace')
     }
 
+    const xliffArtifactUris = reviewArtifactUris.filter((fileUri) => {
+      const lowerPath = fileUri.fsPath.toLowerCase()
+      return lowerPath.endsWith('.xlf') || lowerPath.endsWith('.xliff')
+    })
+
+    let translationCount = 0
+    for (const xliffUri of xliffArtifactUris) {
+      const xliffContent = await this.fileSystem.readFile(xliffUri)
+      translationCount += this.countXliffUnits(xliffContent)
+    }
+
     return {
-      artifacts: reviewArtifacts
+      request: {
+        artifacts: reviewArtifacts
+      },
+      translationCount
     }
   }
 

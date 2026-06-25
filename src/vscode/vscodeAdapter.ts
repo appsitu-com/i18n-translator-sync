@@ -255,6 +255,25 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
     }
 
     try {
+      if (this.translatorManager.getReviewPushPreview) {
+        const preview = await this.translatorManager.getReviewPushPreview()
+        if (preview.translationCount === 0) {
+          vscode.window.showInformationMessage('No translations requiring review were found')
+          return
+        }
+
+        const action = await vscode.window.showInformationMessage(
+          `Push ${preview.translationCount} translation(s) for review to MateCat?`,
+          { modal: true },
+          'Push'
+        )
+
+        if (action !== 'Push') {
+          vscode.window.showInformationMessage('MateCat push canceled')
+          return
+        }
+      }
+
       await super.pushToMateCat()
       vscode.window.showInformationMessage('Successfully pushed translations to MateCat')
     } catch (e: any) {
@@ -282,7 +301,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
       await super.pullFromMateCat()
       vscode.window.showInformationMessage('Successfully pulled translations from MateCat')
     } catch (e: any) {
-      if (e instanceof MissingEnvironmentValueError) {
+      if (typeof MissingEnvironmentValueError === 'function' && e instanceof MissingEnvironmentValueError) {
         throw e
       }
       vscode.window.showErrorMessage(`MateCat pull failed: ${e.message}`)
@@ -311,7 +330,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
       vscode.window.showInformationMessage(`Retrieved MateCat status for ${statuses.length} pending project(s)`)
       return statuses
     } catch (e: any) {
-      if (e instanceof MissingEnvironmentValueError) {
+      if (typeof MissingEnvironmentValueError === 'function' && e instanceof MissingEnvironmentValueError) {
         throw e
       }
       vscode.window.showErrorMessage(`MateCat status check failed: ${e.message}`)

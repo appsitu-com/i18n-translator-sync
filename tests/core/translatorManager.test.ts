@@ -312,6 +312,40 @@ describe('TranslatorManager', () => {
       expect(statuses).toEqual(expectedStatuses)
     })
 
+    it('returns review push preview with XLIFF translation unit count', async () => {
+      vi.mocked(fileSystem.readDirectory).mockImplementation(async (uri) => {
+        if (uri.fsPath === '/workspace') {
+          return [
+            { name: 'a.xliff', isDirectory: false },
+            { name: 'b.xlf', isDirectory: false },
+            { name: 'glossary.tmx', isDirectory: false }
+          ]
+        }
+
+        return []
+      })
+
+      vi.mocked(fileSystem.readFile).mockImplementation(async (uri) => {
+        if (uri.fsPath.endsWith('a.xliff')) {
+          return '<xliff><file><unit id="1"/><unit id="2"/></file></xliff>'
+        }
+        if (uri.fsPath.endsWith('b.xlf')) {
+          return '<xliff><file><trans-unit id="3"/></file></xliff>'
+        }
+        return ''
+      })
+
+      const preview = await translatorManager.getReviewPushPreview()
+      expect(preview).toEqual({ translationCount: 3, artifactCount: 3 })
+    })
+
+    it('returns zero translation count when only TMX artifacts exist', async () => {
+      mockReviewArtifactFiles()
+
+      const preview = await translatorManager.getReviewPushPreview()
+      expect(preview).toEqual({ translationCount: 0, artifactCount: 1 })
+    })
+
     it('reuses a single review service instance across operations', async () => {
       mockReviewArtifactFiles()
 
