@@ -66,6 +66,20 @@ const REVIEW_SERVICES = ['matecat'] as const
 export const TranslatorEngineSchema = z.enum(ENGINES)
 export const ReviewServiceSchema = z.enum(REVIEW_SERVICES)
 
+const ReviewerTargetLocalesSchema = z
+  .object({
+    include: z.array(z.string()).optional().default([]),
+    exclude: z.array(z.string()).optional().default([])
+  })
+  .optional()
+  .default({ include: [], exclude: [] })
+
+const ReviewerConfigSchema = z
+  .object({
+    targetLocales: ReviewerTargetLocalesSchema
+  })
+  .optional()
+
 // ---------------------------------------------------------------------------
 // Top-level translator.json schema
 // ---------------------------------------------------------------------------
@@ -152,6 +166,9 @@ export const TranslatorConfigSchema = z.object({
   reviewService: ReviewServiceSchema.optional()
     .default('matecat')
     .describe('Review service provider for push/pull/status workflows'),
+
+  // Review-target filtering for CAT workflows
+  reviewer: ReviewerConfigSchema,
 
   // Nested engine configurations
   translator: TranslatorEnginesSchema.optional()

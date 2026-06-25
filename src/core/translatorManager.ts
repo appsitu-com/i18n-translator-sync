@@ -2,7 +2,7 @@ import { IFileSystem, IUri } from './util/fs';
 import { ILogger } from './util/baseLogger';
 import { ITranslationMemory } from './tm/ITranslationMemory';
 import { IDisposable, IFileRenameEvent, IFileWatcher, IWorkspaceWatcher } from './util/watcher';
-import { TranslateProjectConfig, IConfigProvider } from './coreConfig';
+import { TranslateProjectConfig, IConfigProvider, loadProjectConfig } from './coreConfig';
 import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './TranslatorPipeline';
 import { ITranslationExecutor } from './translationExecutor';
@@ -52,6 +52,7 @@ export type TranslatorManagerDependencies = {
 export class TranslatorManager {
   private static readonly REVIEW_ARTIFACT_EXTENSIONS = ['.tmx', '.xlf', '.xliff']
   private static readonly XLIFF_UNIT_PATTERN = /<(?:unit|trans-unit)\b/gi
+  private static readonly REVIEW_LOCALE_PATH_PATTERN = /[\\/]\.translator[\\/]review[\\/]([^\\/]+)[\\/]/i
 
   private watchers: IFileWatcher[] = [];
   private pipeline: ITranslatorPipeline;
@@ -725,6 +726,65 @@ export class TranslatorManager {
   }
 
   /**
+   * Normalize locale values for case-insensitive matching.
+   * @param locale Locale string from config or file paths
+   * @returns Normalized locale key for comparisons
+   */
+  private normalizeLocale(locale: string): string {
+    return locale.trim().toLowerCase()
+  }
+
+  /**
+   * Resolve include/exclude review locale filters from configuration.
+   * @returns Locale filter sets for review artifact selection
+   */
+  private getReviewLocaleFilters(): { include: Set<string>; exclude: Set<string> } {
+    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const includeLocales = projectConfig.reviewer?.targetLocales?.include ?? []
+    const excludeLocales = projectConfig.reviewer?.targetLocales?.exclude ?? []
+
+    return {
+      include: new Set((Array.isArray(includeLocales) ? includeLocales : []).map((locale) => this.normalizeLocale(locale))),
+      exclude: new Set((Array.isArray(excludeLocales) ? excludeLocales : []).map((locale) => this.normalizeLocale(locale)))
+    }
+  }
+
+  /**
+   * Extract the review target locale from a review artifact path.
+   * Expected pattern: .translator/review/{locale}/...
+   * @param filePath Absolute artifact path
+   * @returns Locale key when available in path conventions
+   */
+  private extractReviewArtifactLocale(filePath: string): string | undefined {
+    const match = filePath.match(TranslatorManager.REVIEW_LOCALE_PATH_PATTERN)
+    if (!match?.[1]) {
+      return undefined
+    }
+
+    return this.normalizeLocale(match[1])
+  }
+
+  /**
+   * Check whether a review artifact should be included under locale filters.
+   * @param filePath Absolute artifact path
+   * @param include Included locales (empty means all)
+   * @param exclude Excluded locales
+   * @returns True when artifact passes locale filtering
+   */
+  private shouldIncludeReviewArtifact(filePath: string, include: Set<string>, exclude: Set<string>): boolean {
+    const artifactLocale = this.extractReviewArtifactLocale(filePath)
+    if (!artifactLocale) {
+      return true
+    }
+
+    if (include.size > 0 && !include.has(artifactLocale)) {
+      return false
+    }
+
+    return !exclude.has(artifactLocale)
+  }
+
+  /**
    * Resolve the HTTP content type for a review artifact.
    * @param filePath Absolute file path
    * @returns Artifact content type expected by upload endpoints
@@ -751,7 +811,11 @@ export class TranslatorManager {
   private async prepareReviewPushRequest(): Promise<{ request: ReviewPushRequest; translationCount: number }> {
     const workspaceUri = this.fileSystem.createUri(this.workspacePath)
     const allFiles = await this.findAllFilesInDir(workspaceUri)
-    const reviewArtifactUris = allFiles.filter((fileUri) => this.isReviewArtifactFile(fileUri.fsPath))
+    const localeFilters = this.getReviewLocaleFilters()
+    const reviewArtifactUris = allFiles.filter((fileUri) =>
+      this.isReviewArtifactFile(fileUri.fsPath) &&
+      this.shouldIncludeReviewArtifact(fileUri.fsPath, localeFilters.include, localeFilters.exclude)
+    )
     const reviewArtifacts: ReviewArtifact[] = reviewArtifactUris
       .filter((fileUri) => this.isReviewArtifactFile(fileUri.fsPath))
       .map((fileUri) => ({

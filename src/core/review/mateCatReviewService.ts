@@ -1,5 +1,5 @@
 import * as path from 'path'
-import type { IConfigProvider } from '../coreConfig'
+import { loadProjectConfig, type IConfigProvider } from '../coreConfig'
 import type { IFileSystem } from '../util/fs'
 import type { ILogger } from '../util/baseLogger'
 import type { IReviewService, ReviewPushRequest } from './reviewService'
@@ -51,9 +51,33 @@ export class MateCatReviewService implements IReviewService {
     return settingsLoader(this.workspacePath, this.logger)
   }
 
+  private normalizeLocale(locale: string): string {
+    return locale.trim().toLowerCase()
+  }
+
+  private resolveReviewTargetLocales(): string[] {
+    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const configuredTargetLocales = projectConfig.targetLocales
+    const includeLocales = projectConfig.reviewer?.targetLocales?.include ?? []
+    const excludeLocales = projectConfig.reviewer?.targetLocales?.exclude ?? []
+
+    const targetLocales = Array.isArray(configuredTargetLocales) ? configuredTargetLocales : []
+    const includeSet = new Set((Array.isArray(includeLocales) ? includeLocales : []).map((locale) => this.normalizeLocale(locale)))
+    const excludeSet = new Set((Array.isArray(excludeLocales) ? excludeLocales : []).map((locale) => this.normalizeLocale(locale)))
+
+    return targetLocales.filter((locale) => {
+      const normalizedLocale = this.normalizeLocale(locale)
+      if (includeSet.size > 0 && !includeSet.has(normalizedLocale)) {
+        return false
+      }
+      return !excludeSet.has(normalizedLocale)
+    })
+  }
+
   private buildMateCatProjectFields(settings: MateCatSettings): MateCatNewProjectDefaults {
-    const sourceLocale = this.configProvider.get<string>('translator.sourceLocale', 'en')
-    const targetLocales = this.configProvider.get<string[]>('translator.targetLocales', [])
+    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const sourceLocale = projectConfig.sourceLocale
+    const targetLocales = this.resolveReviewTargetLocales()
 
     if (!Array.isArray(targetLocales) || targetLocales.length === 0) {
       throw new Error('At least one target locale is required for MateCat push')

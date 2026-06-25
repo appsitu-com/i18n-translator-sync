@@ -124,7 +124,23 @@ export function toProjectConfig(
       configProvider.get<'matecat'>(
         'translator.reviewService',
         defaultConfig.reviewService
-      )
+      ),
+    reviewer: {
+      targetLocales: {
+        include:
+          config.reviewer?.targetLocales?.include ??
+          configProvider.get<string[]>(
+            'translator.reviewer.targetLocales.include',
+            defaultConfig.reviewer?.targetLocales?.include ?? []
+          ),
+        exclude:
+          config.reviewer?.targetLocales?.exclude ??
+          configProvider.get<string[]>(
+            'translator.reviewer.targetLocales.exclude',
+            defaultConfig.reviewer?.targetLocales?.exclude ?? []
+          )
+      }
+    }
   }
 }
 

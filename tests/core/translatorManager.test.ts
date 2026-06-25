@@ -217,6 +217,43 @@ describe('TranslatorManager', () => {
       })
     }
 
+    const mockLocalizedReviewArtifactFiles = () => {
+      vi.mocked(fileSystem.readDirectory).mockImplementation(async (uri) => {
+        if (uri.fsPath === '/workspace') {
+          return [{ name: '.translator', isDirectory: true }]
+        }
+
+        if (uri.fsPath === '/workspace/.translator') {
+          return [{ name: 'review', isDirectory: true }]
+        }
+
+        if (uri.fsPath === '/workspace/.translator/review') {
+          return [
+            { name: 'fr', isDirectory: true },
+            { name: 'es', isDirectory: true }
+          ]
+        }
+
+        if (uri.fsPath === '/workspace/.translator/review/fr') {
+          return [{ name: 'upload', isDirectory: true }]
+        }
+
+        if (uri.fsPath === '/workspace/.translator/review/es') {
+          return [{ name: 'upload', isDirectory: true }]
+        }
+
+        if (uri.fsPath === '/workspace/.translator/review/fr/upload') {
+          return [{ name: 'fr.xliff', isDirectory: false }]
+        }
+
+        if (uri.fsPath === '/workspace/.translator/review/es/upload') {
+          return [{ name: 'es.xliff', isDirectory: false }]
+        }
+
+        return []
+      })
+    }
+
     it('should push translations via review service', async () => {
       mockReviewArtifactFiles()
 
@@ -344,6 +381,54 @@ describe('TranslatorManager', () => {
 
       const preview = await translatorManager.getReviewPushPreview()
       expect(preview).toEqual({ translationCount: 0, artifactCount: 1 })
+    })
+
+    it('filters review artifacts by reviewer.targetLocales.include', async () => {
+      mockLocalizedReviewArtifactFiles()
+
+      vi.mocked(fileSystem.readFile).mockImplementation(async (uri) => {
+        if (uri.fsPath.endsWith('fr.xliff')) {
+          return '<xliff><file><unit id="1"/></file></xliff>'
+        }
+        if (uri.fsPath.endsWith('es.xliff')) {
+          return '<xliff><file><unit id="2"/></file></xliff>'
+        }
+        return ''
+      })
+
+      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.reviewer.targetLocales.include') {
+          return ['fr']
+        }
+        return defaultValue
+      })
+
+      const preview = await translatorManager.getReviewPushPreview()
+      expect(preview).toEqual({ translationCount: 1, artifactCount: 1 })
+    })
+
+    it('filters review artifacts by reviewer.targetLocales.exclude', async () => {
+      mockLocalizedReviewArtifactFiles()
+
+      vi.mocked(fileSystem.readFile).mockImplementation(async (uri) => {
+        if (uri.fsPath.endsWith('fr.xliff')) {
+          return '<xliff><file><unit id="1"/></file></xliff>'
+        }
+        if (uri.fsPath.endsWith('es.xliff')) {
+          return '<xliff><file><unit id="2"/></file></xliff>'
+        }
+        return ''
+      })
+
+      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.reviewer.targetLocales.exclude') {
+          return ['es']
+        }
+        return defaultValue
+      })
+
+      const preview = await translatorManager.getReviewPushPreview()
+      expect(preview).toEqual({ translationCount: 1, artifactCount: 1 })
     })
 
     it('reuses a single review service instance across operations', async () => {

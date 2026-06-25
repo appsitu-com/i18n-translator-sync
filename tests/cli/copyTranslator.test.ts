@@ -11,6 +11,7 @@ import type { ICopyConfig } from '../../src/translators/copy';
 import { registerTranslator, deregisterTranslator } from '../../src/translators/registry';
 import { TranslatorPipeline } from '../../src/core/TranslatorPipeline';
 import { JsonlTranslationMemory } from '../../src/core/tm/ITranslationMemory';
+import { loadTranslatorConfig } from '../../src/core/config';
 
 // Helper function to create temp config file
 async function createTempConfigFile(translator?: { copy: any }) {
@@ -161,7 +162,7 @@ describe('CLI Copy Translator Tests', () => {
     expect(result).toEqual(['hello']);
   });
 
-  it('should resolve translator.copy section via dot-path navigation', async () => {
+  it('should resolve translator.copy section via centralized config loader', async () => {
     // Create a config with translator.copy section
     try {
       await fs.rm(tempDir, { recursive: true, force: true });
@@ -176,8 +177,9 @@ describe('CLI Copy Translator Tests', () => {
     configProvider = new CliConfigProvider(fileSystem, logger, configPath);
     await configProvider.load();
 
-    // With the new config system, engine configs are under 'translator.copy'
-    const engineConfig = configProvider.get('translator.copy');
+    // Engine configs are resolved through the centralized parser/validator.
+    const loadedConfig = loadTranslatorConfig(tempDir, logger, undefined, configPath)
+    const engineConfig = loadedConfig.translator?.copy
     expect(engineConfig).toBeDefined();
   });
 });

@@ -2,6 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import JSON5 from 'json5'
 import { MATECAT_JSON } from '../constants'
+import { MateCatDefaultsSchema, type MateCatFormValue } from '../config/mateCatConfigSchema'
 import { MissingEnvironmentValueError, getRequiredEnvironmentValue } from '../config'
 import { ILogger, NO_OP_LOGGER } from '../util/baseLogger'
 
@@ -57,7 +58,6 @@ const ALLOWED_MATECAT_DEFAULT_FIELDS = new Set([
 ])
 
 type MateCatFormScalar = string | number | boolean
-type MateCatFormValue = MateCatFormScalar | MateCatFormScalar[]
 
 export type MateCatNewProjectDefaults = Record<string, MateCatFormValue>
 
@@ -151,17 +151,6 @@ export type MateCatRuntimeNewProjectFields = Partial<
   Pick<Record<string, MateCatFormScalar>, 'source_lang' | 'target_lang' | 'project_name'>
 >
 
-function isFormValue(value: unknown): value is MateCatFormValue {
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
-    return true
-  }
-
-  return (
-    Array.isArray(value) &&
-    value.every((item) => typeof item === 'string' || typeof item === 'number' || typeof item === 'boolean')
-  )
-}
-
 function parseMateCatDefaults(content: string, logger: ILogger): MateCatNewProjectDefaults {
   const parsed = JSON5.parse(content) as unknown
 
@@ -175,11 +164,16 @@ function parseMateCatDefaults(content: string, logger: ILogger): MateCatNewProje
       ? (root.newProjectDefaults as Record<string, unknown>)
       : root
 
+  const parsedDefaults = MateCatDefaultsSchema.safeParse(defaultsCandidate)
+  if (!parsedDefaults.success) {
+    const firstIssue = parsedDefaults.error.issues[0]
+    const issuePath = firstIssue?.path?.join('.')
+    const fieldHint = issuePath ? ` at "${issuePath}"` : ''
+    throw new Error(`matecat.json defaults validation failed${fieldHint}: ${firstIssue?.message ?? 'invalid value'}`)
+  }
+
   const defaults: MateCatNewProjectDefaults = {}
-  for (const [key, value] of Object.entries(defaultsCandidate)) {
-    if (!isFormValue(value)) {
-      throw new Error(`matecat.json field "${key}" must be a scalar or scalar-array value`)
-    }
+  for (const [key, value] of Object.entries(parsedDefaults.data)) {
 
     if (COMPUTED_MATECAT_FIELDS.has(key)) {
       logger.warn(`Ignoring matecat.json field "${key}" because it is computed at runtime`)

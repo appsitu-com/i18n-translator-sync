@@ -80,6 +80,14 @@ describe('MateCatService', () => {
     expect(warn).toHaveBeenCalledTimes(2)
   })
 
+  it('throws when matecat.json contains non-scalar default values', () => {
+    vi.mocked(fs.readFileSync).mockReturnValueOnce(
+      '{"newProjectDefaults":{"project_name":"Demo","subject":{"domain":"general"}}}' as any
+    )
+
+    expect(() => loadMateCatSettings('/workspace')).toThrow(/defaults validation failed/)
+  })
+
   it('createReviewProject posts multipart to fixed /api/v1/new and reports success', async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,

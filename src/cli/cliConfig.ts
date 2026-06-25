@@ -1,10 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import JSON5 from 'json5';
 import { IConfigProvider } from '../core/coreConfig';
 import { IFileSystem } from '../core/util/fs';
 import { ILogger } from '../core/util/baseLogger';
-import { substituteEnvVarsInObject } from '../core/util/envSubstitution';
 
 /**
  * CLI configuration provider
@@ -26,29 +24,10 @@ export class CliConfigProvider implements IConfigProvider {
   ) {}
 
   /**
-   * Load configuration from the project's translator.json file
+   * No-op load: translator.json is parsed and validated centrally by core config loader.
    */
   async load(): Promise<void> {
-    try {
-      if (await this.fs.fileExists(this.fs.createUri(this.configPath))) {
-        const content = await this.fs.readFile(this.fs.createUri(this.configPath));
-        const rawConfig = JSON5.parse(content);
-
-        // Substitute environment variables in the translator section
-        if (rawConfig.translator) {
-          this.logger.debug(`Substituting environment variables in translator config`);
-          rawConfig.translator = substituteEnvVarsInObject(rawConfig.translator);
-        }
-
-        this.config = rawConfig;
-        this.logger.debug(`Loaded project configuration from ${this.configPath}`);
-      } else {
-        this.logger.warn(`Project configuration file not found: ${this.configPath}`);
-        this.logger.warn(`Please create a translator.json file in your project directory.`);
-      }
-    } catch (error) {
-      this.logger.error(`Error loading project configuration from ${this.configPath}: ${error}`);
-    }
+    return;
   }
 
   /**

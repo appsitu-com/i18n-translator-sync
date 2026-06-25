@@ -37,7 +37,7 @@ describe('CliConfigProvider', () => {
   });
 
   describe('Loading configuration', () => {
-    it('should load configuration from a file', async () => {
+    it('load is a no-op when centralized parser handles translator.json', async () => {
       const config = {
         translator: {
           sourceLocale: 'en',
@@ -50,25 +50,24 @@ describe('CliConfigProvider', () => {
 
       await configProvider.load();
 
-      expect(configProvider.get('translator.sourceLocale')).toBe('en');
-      expect(configProvider.get('translator.targetLocales')).toEqual(['fr', 'es']);
-      expect(configProvider.get('translator.defaultMarkdownEngine')).toBe('azure');
+      expect(configProvider.get('translator.sourceLocale')).toBeUndefined();
+      expect(configProvider.get('translator.targetLocales')).toBeUndefined();
+      expect(configProvider.get('translator.defaultMarkdownEngine')).toBeUndefined();
     });
 
-    it('should handle missing configuration file gracefully', async () => {
-      // File does not exist
+    it('does not warn when configuration file is missing', async () => {
       await configProvider.load();
 
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Project configuration file not found'));
+      expect(logger.warn).not.toHaveBeenCalled();
       expect(configProvider.get('nonexistent.key', 'default')).toBe('default');
     });
 
-    it('should handle invalid JSON gracefully', async () => {
+    it('does not attempt to parse invalid JSON', async () => {
       writeFileSync(configPath, 'invalid { json');
 
       await configProvider.load();
 
-      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Error loading project configuration'));
+      expect(logger.error).not.toHaveBeenCalled();
       expect(configProvider.get('some.key', 'default')).toBe('default');
     });
   });
@@ -83,7 +82,7 @@ describe('CliConfigProvider', () => {
       expect(configProvider.get('translator.nonExistentKey', 'default')).toBe('default');
     });
 
-    it('should navigate nested objects', async () => {
+    it('does not expose nested values from translator.json directly', async () => {
       const config = {
         translator: {
           nested: {
@@ -95,7 +94,7 @@ describe('CliConfigProvider', () => {
 
       await configProvider.load();
 
-      expect(configProvider.get('translator.nested.deepKey')).toBe('deepValue');
+      expect(configProvider.get('translator.nested.deepKey')).toBeUndefined();
     });
   });
 
