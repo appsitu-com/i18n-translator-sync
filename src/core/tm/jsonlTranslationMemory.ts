@@ -672,7 +672,12 @@ export class JsonlTranslationMemory implements ITranslationMemory {
       }
 
       const originComparison = this.compareOriginPriority(candidate.origin) - this.compareOriginPriority(latest.origin)
-      if (originComparison > 0 || (originComparison === 0 && candidate.updatedAt > latest.updatedAt)) {
+      const statusComparison = this.compareStatusPriority(candidate.status) - this.compareStatusPriority(latest.status)
+      if (
+        originComparison > 0 ||
+        (originComparison === 0 && statusComparison > 0) ||
+        (originComparison === 0 && statusComparison === 0 && candidate.updatedAt > latest.updatedAt)
+      ) {
         latest = candidate
       }
     }
@@ -826,6 +831,28 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     }
 
     if (origin === 'ai') {
+      return 1
+    }
+
+    return 0
+  }
+
+  private compareStatusPriority(status: string): number {
+    const normalized = status.trim().toLowerCase()
+
+    if (normalized === 'final') {
+      return 4
+    }
+
+    if (normalized === 'reviewed') {
+      return 3
+    }
+
+    if (normalized === 'translated') {
+      return 2
+    }
+
+    if (normalized === 'initial' || normalized === 'ai_draft') {
       return 1
     }
 

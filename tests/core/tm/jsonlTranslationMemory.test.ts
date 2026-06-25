@@ -84,6 +84,93 @@ describe('JsonlTranslationMemory', () => {
     expect(result.get('Save::menu')?.translation).toBe('Sauvegarder')
   })
 
+  it('prefers human origin over AI in fallback ranking', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+    const csvPath = join(dir, 'fallback-origin-priority.csv')
+
+    writeFileSync(
+      csvPath,
+      [
+        'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at',
+        'src/a.md,0,test,en,fr,Save,button,AI-Final,final,ai,200',
+        'src/b.md,1,test,en,fr,Save,button,Human-Translated,translated,human,100'
+      ].join('\n') + '\n',
+      'utf8'
+    )
+
+    await cache.importCSV(csvPath)
+
+    const result = await cache.getMany({
+      engine: 'test',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Save'],
+      contexts: ['button'],
+      sourcePath: 'src/new.md',
+      positions: [5]
+    })
+
+    expect(result.get('Save::button')?.translation).toBe('Human-Translated')
+  })
+
+  it('prefers higher status when origin is equal in fallback ranking', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+    const csvPath = join(dir, 'fallback-status-priority.csv')
+
+    writeFileSync(
+      csvPath,
+      [
+        'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at',
+        'src/a.md,0,test,en,fr,Save,button,Human-Reviewed,reviewed,human,300',
+        'src/b.md,1,test,en,fr,Save,button,Human-Final,final,human,100'
+      ].join('\n') + '\n',
+      'utf8'
+    )
+
+    await cache.importCSV(csvPath)
+
+    const result = await cache.getMany({
+      engine: 'test',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Save'],
+      contexts: ['button'],
+      sourcePath: 'src/new.md',
+      positions: [6]
+    })
+
+    expect(result.get('Save::button')?.translation).toBe('Human-Final')
+  })
+
+  it('prefers newer timestamp when origin and status are equal in fallback ranking', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+    const csvPath = join(dir, 'fallback-updated-at-priority.csv')
+
+    writeFileSync(
+      csvPath,
+      [
+        'source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at',
+        'src/a.md,0,test,en,fr,Save,button,Older,reviewed,human,100',
+        'src/b.md,1,test,en,fr,Save,button,Newer,reviewed,human,200'
+      ].join('\n') + '\n',
+      'utf8'
+    )
+
+    await cache.importCSV(csvPath)
+
+    const result = await cache.getMany({
+      engine: 'test',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      texts: ['Save'],
+      contexts: ['button'],
+      sourcePath: 'src/new.md',
+      positions: [7]
+    })
+
+    expect(result.get('Save::button')?.translation).toBe('Newer')
+  })
+
   it('stores structured path positions as cache keys', async () => {
     const cache = new JsonlTranslationMemory(cachePath, dir)
 
