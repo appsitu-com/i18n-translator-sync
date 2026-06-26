@@ -290,67 +290,39 @@ export class MateCatService implements IMateCatService {
     return undefined
   }
 
-  private tryExtractUrls(responseBody: string): string[] {
-    try {
-      const parsed = JSON.parse(responseBody) as unknown
+  private extractDownloadUrlsFromProject(projectPayload: Record<string, unknown>): string[] {
+    const urls: string[] = []
 
-      if (parsed && typeof parsed === 'object') {
-        const parsedRecord = parsed as Record<string, unknown>
-        const filesCandidate = parsedRecord.files
-        if (Array.isArray(filesCandidate)) {
-          const urlsFromFiles = filesCandidate
-            .flatMap((fileItem) => {
-              if (!fileItem || typeof fileItem !== 'object') {
-                return []
-              }
+    // Extract xliff_download_url from each job in the ExtendedJob array
+    const jobsCandidate = projectPayload.jobs
+    if (Array.isArray(jobsCandidate)) {
+      for (const job of jobsCandidate) {
+        if (!job || typeof job !== 'object') {
+          continue
+        }
 
-              const fileRecord = fileItem as Record<string, unknown>
-              const xliffUrl = fileRecord.xliff_download_url
-              if (typeof xliffUrl === 'string' && xliffUrl.trim().length > 0) {
-                return [xliffUrl.trim()]
-              }
-
-              return []
-            })
-
-          if (urlsFromFiles.length > 0) {
-            return Array.from(new Set(urlsFromFiles))
+        const jobRecord = job as Record<string, unknown>
+        
+        // Check for xliff_download_url in urls object (primary location in v3 API)
+        const urlsObj = jobRecord.urls
+        if (urlsObj && typeof urlsObj === 'object') {
+          const urlsRecord = urlsObj as Record<string, unknown>
+          const xliffUrl = urlsRecord.xliff_download_url
+          if (typeof xliffUrl === 'string' && xliffUrl.trim().length > 0) {
+            urls.push(xliffUrl.trim())
+            continue
           }
+        }
+        
+        // Fallback: check for direct xliff_download_url property
+        const xliffUrl = jobRecord.xliff_download_url
+        if (typeof xliffUrl === 'string' && xliffUrl.trim().length > 0) {
+          urls.push(xliffUrl.trim())
         }
       }
-
-      const urls: string[] = []
-
-      const collectUrls = (value: unknown): void => {
-        if (typeof value === 'string') {
-          if (value.startsWith('http://') || value.startsWith('https://')) {
-            urls.push(value)
-          }
-          return
-        }
-
-        if (Array.isArray(value)) {
-          for (const item of value) {
-            collectUrls(item)
-          }
-          return
-        }
-
-        if (value && typeof value === 'object') {
-          for (const entry of Object.values(value as Record<string, unknown>)) {
-            collectUrls(entry)
-          }
-        }
-      }
-
-      collectUrls(parsed)
-      return Array.from(new Set(urls))
-    } catch {
-      return responseBody
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .filter((line) => line.startsWith('http://') || line.startsWith('https://'))
     }
+
+    return urls
   }
 
   private deriveFileName(downloadUrl: string, projectId: string, index: number): string {
@@ -449,38 +421,84 @@ export class MateCatService implements IMateCatService {
     let totalSegments = 0
     let completedSegments = 0
 
-    for (const chunkRecord of this.getChunks(parsed)) {
-      const stats = chunkRecord.stats
-      if (!stats || typeof stats !== 'object') {
-        continue
+    // First, try to extract from job-level stats (primary source in v3 API)
+    const jobs = parsed.jobs
+    if (Array.isArray(jobs)) {
+      for (const job of jobs) {
+        if (!job || typeof job !== 'object') {
+          continue
+        }
+
+        const jobRecord = job as Record<string, unknown>
+        const stats = jobRecord.stats
+        if (!stats || typeof stats !== 'object') {
+          continue
+        }
+
+        const statsRecord = stats as Record<string, unknown>
+        const rawCandidate = statsRecord.raw
+        const equivalentCandidate = statsRecord.equivalent
+
+        const selectedStats =
+          rawCandidate && typeof rawCandidate === 'object'
+            ? (rawCandidate as Record<string, unknown>)
+            : equivalentCandidate && typeof equivalentCandidate === 'object'
+              ? (equivalentCandidate as Record<string, unknown>)
+              : undefined
+
+        if (!selectedStats) {
+          continue
+        }
+
+        const total = this.asFiniteNumber(selectedStats.total)
+        if (!total || total <= 0) {
+          continue
+        }
+
+        const translated = this.asFiniteNumber(selectedStats.translated) ?? 0
+        const approved = this.asFiniteNumber(selectedStats.approved) ?? 0
+        const approved2 = this.asFiniteNumber(selectedStats.approved2) ?? 0
+
+        totalSegments += total
+        completedSegments += translated + approved + approved2
       }
+    }
 
-      const statsRecord = stats as Record<string, unknown>
-      const rawCandidate = statsRecord.raw
-      const equivalentCandidate = statsRecord.equivalent
+    // If no job-level stats found, try chunk-level stats (legacy/fallback)
+    if (totalSegments === 0) {
+      for (const chunkRecord of this.getChunks(parsed)) {
+        const stats = chunkRecord.stats
+        if (!stats || typeof stats !== 'object') {
+          continue
+        }
 
-      const selectedStats =
-        rawCandidate && typeof rawCandidate === 'object'
-          ? (rawCandidate as Record<string, unknown>)
-          : equivalentCandidate && typeof equivalentCandidate === 'object'
-            ? (equivalentCandidate as Record<string, unknown>)
-            : undefined
+        const statsRecord = stats as Record<string, unknown>
+        const rawCandidate = statsRecord.raw
+        const equivalentCandidate = statsRecord.equivalent
 
-      if (!selectedStats) {
-        continue
+        const selectedStats =
+          rawCandidate && typeof rawCandidate === 'object'
+            ? (rawCandidate as Record<string, unknown>)
+            : equivalentCandidate && typeof equivalentCandidate === 'object'
+              ? (equivalentCandidate as Record<string, unknown>)
+              : undefined
+
+        if (!selectedStats) {
+          continue
+        }
+
+        const total = this.asFiniteNumber(selectedStats.total)
+        if (!total || total <= 0) {
+          continue
+        }
+
+        const translated = this.asFiniteNumber(selectedStats.translated) ?? 0
+        const approved = this.asFiniteNumber(selectedStats.approved) ?? 0
+        const approved2 = this.asFiniteNumber(selectedStats.approved2) ?? 0
+
+        totalSegments += total
+        completedSegments += translated + approved + approved2
       }
-
-      const total = this.asFiniteNumber(selectedStats.total)
-      if (!total || total <= 0) {
-        continue
-      }
-
-      const translated = this.asFiniteNumber(selectedStats.translated) ?? 0
-      const approved = this.asFiniteNumber(selectedStats.approved) ?? 0
-      const approved2 = this.asFiniteNumber(selectedStats.approved2) ?? 0
-
-      totalSegments += total
-      completedSegments += translated + approved + approved2
     }
 
     if (totalSegments <= 0) {
@@ -698,20 +716,30 @@ export class MateCatService implements IMateCatService {
     const pulledFiles: IMateCatPulledFile[] = []
 
     for (const project of projects) {
-      const urlEndpoint = `${MATECAT_BASE_URL}/api/v3/projects/${encodeURIComponent(project.projectId)}/${encodeURIComponent(project.projectPass)}/urls`
-      const urlResponse = await this.httpClient.send(urlEndpoint, {
+      // Use direct project endpoint to get all job data with download URLs in one call
+      const projectEndpoint =
+        `${MATECAT_BASE_URL}/api/v3/projects/${encodeURIComponent(project.projectId)}` +
+        `/${encodeURIComponent(project.projectPass)}`
+      const projectResponse = await this.httpClient.send(projectEndpoint, {
         method: 'GET',
         headers: {
           [MATECAT_HEADER_KEY]: settings.apiKey
         }
       })
 
-      const urlBody = await urlResponse.text()
-      if (!urlResponse.ok) {
-        throw new Error(`MateCat URL fetch failed for project ${project.projectId}: ${urlResponse.status} ${urlResponse.statusText} ${urlBody}`)
+      const projectBody = await projectResponse.text()
+      if (!projectResponse.ok) {
+        throw new Error(
+          `MateCat project fetch failed for pull-reviewed for project ${project.projectId}: ` +
+            `${projectResponse.status} ${projectResponse.statusText} ${projectBody}`
+        )
       }
 
-      const downloadUrls = this.tryExtractUrls(urlBody)
+      // Extract download URLs from jobs array in project response
+      const responseData = this.parseJsonObject(projectBody) ?? {}
+      const projectPayload = (responseData.project ?? responseData) as Record<string, unknown>
+      const downloadUrls = this.extractDownloadUrlsFromProject(projectPayload)
+
       for (const [index, downloadUrl] of downloadUrls.entries()) {
         const fileResponse = await this.httpClient.send(downloadUrl, {
           method: 'GET',
@@ -784,14 +812,16 @@ export class MateCatService implements IMateCatService {
 
       const chunkStatuses = this.getChunkStatuses(statusPayload)
       const statsPercentDone = this.extractPercentDoneFromChunkStats(statusPayload)
-      if (chunkStatuses.length > 0) {
-        percentDone = statsPercentDone ?? this.calculatePercentDone(chunkStatuses)
+
+      // Prioritize stats-based completion over chunk status strings
+      if (statsPercentDone !== undefined) {
+        percentDone = statsPercentDone
+        status = statsPercentDone >= 100 ? 'completed' : 'in_progress'
+      } else if (chunkStatuses.length > 0) {
+        percentDone = this.calculatePercentDone(chunkStatuses)
         status = this.reduceChunkStatuses(chunkStatuses)
       } else {
-        percentDone = statsPercentDone ?? this.inferPercentDoneFromStatus(status)
-        if (statsPercentDone !== undefined) {
-          status = statsPercentDone >= 100 ? 'completed' : 'in_progress'
-        }
+        percentDone = this.inferPercentDoneFromStatus(status)
       }
 
       statuses.push({

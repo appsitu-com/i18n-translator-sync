@@ -141,7 +141,20 @@ describe('MateCatService', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
-        text: async () => JSON.stringify({ urls: ['https://files.example.com/review-1.xliff'] })
+        text: async () =>
+          JSON.stringify({
+            project: {
+              id: 'p1',
+              password: 'pass-1',
+              jobs: [
+                {
+                  id: 'job-1',
+                  password: 'job-pass-1',
+                  xliff_download_url: 'https://files.example.com/review-1.xliff'
+                }
+              ]
+            }
+          })
       })
       .mockResolvedValueOnce({
         ok: true,
@@ -165,6 +178,11 @@ describe('MateCatService', () => {
       }
     ])
     expect(send).toHaveBeenCalledTimes(2)
+    expect(send).toHaveBeenNthCalledWith(
+      1,
+      'https://www.matecat.com/api/v3/projects/p1/pass-1',
+      expect.objectContaining({ method: 'GET' })
+    )
   })
 
   it('checkReviewProjectStatus reads status for project IDs', async () => {
@@ -267,7 +285,7 @@ describe('MateCatService', () => {
 
     const result = await service.checkReviewProjectStatus(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
 
-    expect(result).toEqual([{ projectId: 'p1', status: 'active', percentDone: 80 }])
+    expect(result).toEqual([{ projectId: 'p1', status: 'in_progress', percentDone: 80 }])
     expect(send).toHaveBeenNthCalledWith(
       1,
       'https://www.matecat.com/api/v3/projects/p1/pass-1',
