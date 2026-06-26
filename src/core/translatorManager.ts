@@ -754,6 +754,7 @@ export class TranslatorManager {
   private resolveReviewPushLocales(): string[] {
     const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
     const configuredTargetLocales = Array.isArray(projectConfig.targetLocales) ? projectConfig.targetLocales : []
+    const normalizedSourceLocale = this.normalizeLocale(projectConfig.sourceLocale)
     const includeLocales = projectConfig.reviewer?.targetLocales?.include ?? []
     const excludeLocales = projectConfig.reviewer?.targetLocales?.exclude ?? []
 
@@ -765,6 +766,11 @@ export class TranslatorManager {
       if (includeSet.size > 0 && !includeSet.has(normalized)) {
         return false
       }
+
+      if (normalized === normalizedSourceLocale && includeSet.size === 0) {
+        return false
+      }
+
       return !excludeSet.has(normalized)
     })
   }

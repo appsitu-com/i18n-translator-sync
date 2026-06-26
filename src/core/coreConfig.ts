@@ -151,7 +151,13 @@ export function toProjectConfig(
             'translator.reviewer.targetLocales.exclude',
             defaultConfig.reviewer?.targetLocales?.exclude ?? []
           )
-      }
+      },
+      langMap:
+        config.reviewer?.langMap ??
+        configProvider.get<Record<string, string>>(
+          'translator.reviewer.langMap',
+          defaultConfig.reviewer?.langMap ?? {}
+        )
     }
   }
 }

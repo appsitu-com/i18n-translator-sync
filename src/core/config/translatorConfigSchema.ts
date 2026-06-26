@@ -80,7 +80,8 @@ const ReviewerConfigSchema = z
   .object({
     targetLocales: ReviewerTargetLocalesSchema,
     push: ReviewPushModeSchema.optional().default('all'),
-    project: z.string().optional().default('')
+    project: z.string().optional().default(''),
+    langMap: z.record(z.string(), z.string()).optional().default({})
   })
   .optional()
 

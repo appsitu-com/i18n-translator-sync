@@ -21,9 +21,9 @@ export async function runCli(): Promise<void> {
     .description('I18n Translator CLI for translating JSON and Markdown files')
     .argument('[workspace]', 'Path to workspace directory containing translator.json', process.cwd())
     .option('--config <path>', 'Path to custom configuration file (defaults to <workspace>/translator.json)')
-    .option('--push-matecat', 'Push translations to MateCat')
-    .option('--pull-matecat', 'Pull translations from MateCat')
-    .option('--status-matecat', 'Check status of pending MateCat review projects')
+    .option('--review-push', 'Push translations for human translator review')
+    .option('--review-pull', 'Pull translations from human translator review')
+    .option('--review-status', 'Check status of pending human translator review projects')
     .option('--export-cache [path]', 'Export translation cache to CSV file')
     .option('--import-cache <path>', 'Import translation cache from CSV file')
     .option('--purge-cache', 'Purge unused translations from cache (creates backup when CSV exists)')
@@ -75,24 +75,25 @@ export async function runCli(): Promise<void> {
       console.log(`Backup saved to: ${result.backupPath}`)
     }
     process.exit(0)
-  } else if (options.pushMatecat) {
+  } else if (options.reviewPush) {
     await adapter.pushToMateCat()
-    console.log('MateCat push operation completed. Exiting.')
+    console.log('Human translator review push operation completed. Exiting.')
     process.exit(0)
-  } else if (options.pullMatecat) {
+  } else if (options.reviewPull) {
     await adapter.pullFromMateCat()
-    console.log('MateCat pull operation completed. Exiting.')
+    console.log('Human translator review pull operation completed. Exiting.')
     process.exit(0)
-  } else if (options.statusMatecat) {
+  } else if (options.reviewStatus) {
     const statuses = await adapter.getMateCatReviewStatus()
     if (statuses.length === 0) {
-      console.log('No pending MateCat review projects found.')
+      console.log('No pending human translator review projects found.')
     } else {
       for (const status of statuses) {
-        console.log(`- ${status.projectId}: ${status.status}`)
+        const percentDone = status.percentDone ?? 0
+        console.log(`- ${status.projectId}: ${percentDone}% done (${status.status})`)
       }
     }
-    console.log('MateCat status operation completed. Exiting.')
+    console.log('Human translator review status operation completed. Exiting.')
     process.exit(0)
   } else if (options.bulkTranslate) {
     await adapter.bulkTranslate(options.force)

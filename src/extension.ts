@@ -419,7 +419,8 @@ export async function checkMateCatStatus(): Promise<void> {
 
   channel.appendLine('MateCat project status:')
   for (const status of statuses) {
-    channel.appendLine(`- ${status.projectId}: ${status.status}`)
+    const percentDone = status.percentDone ?? 0
+    channel.appendLine(`- ${status.projectId}: ${percentDone}% done (${status.status})`)
   }
 }
 

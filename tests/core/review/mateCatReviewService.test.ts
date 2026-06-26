@@ -43,6 +43,123 @@ function createTranslationMemoryMock(): ITranslationMemory {
 }
 
 describe('MateCatReviewService', () => {
+  it('uses reviewer.langMap to override locale mapping sent to MateCat', async () => {
+    const workspacePath = '/workspace'
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/package.json`]: JSON.stringify({ name: '@appsitu-com/i18n-translator-sync' }),
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const configProvider: IConfigProvider = {
+      get: vi.fn((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.sourceLocale') return 'en'
+        if (section === 'translator.targetLocales') return ['zh-Hans']
+        if (section === 'translator.reviewer.langMap') {
+          return {
+            en: 'en-GB',
+            'zh-Hans': 'zh-SG'
+          }
+        }
+        return defaultValue
+      }),
+      update: vi.fn()
+    }
+
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-langmap', projectPass: 'pass-langmap' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: {}
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'zh-Hans',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    expect(mateCatService.createReviewProject).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        fields: expect.objectContaining({
+          source_lang: 'en-GB',
+          target_lang: 'zh-SG'
+        })
+      })
+    )
+  })
+
+  it('maps target locales to MateCat-compatible canonical forms', async () => {
+    const workspacePath = '/workspace'
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/package.json`]: JSON.stringify({ name: '@appsitu-com/i18n-translator-sync' }),
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const configProvider: IConfigProvider = {
+      get: vi.fn((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.targetLocales') return ['zh-cn']
+        return defaultValue
+      }),
+      update: vi.fn()
+    }
+
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-locale', projectPass: 'pass-locale' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: {}
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'zh-cn',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    expect(mateCatService.createReviewProject).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        fields: expect.objectContaining({
+          source_lang: 'en-US',
+          target_lang: 'zh-CN'
+        })
+      })
+    )
+  })
+
   it('builds fallback project_name from package.json name and target locales when missing', async () => {
     const workspacePath = '/workspace'
     const fileSystem = createMockFileSystem({
@@ -91,8 +208,8 @@ describe('MateCatReviewService', () => {
       expect.anything(),
       expect.objectContaining({
         fields: expect.objectContaining({
-          source_lang: 'en',
-          target_lang: 'fr',
+          source_lang: 'en-US',
+          target_lang: 'fr-FR',
           project_name: 'appsitu-com-i18n-translator-sync-fr'
         })
       })
@@ -148,7 +265,7 @@ describe('MateCatReviewService', () => {
       expect.objectContaining({
         fields: expect.objectContaining({
           project_name: 'ExplicitName',
-          target_lang: 'de'
+          target_lang: 'de-DE'
         })
       })
     )
@@ -259,11 +376,102 @@ describe('MateCatReviewService', () => {
       expect.anything(),
       expect.objectContaining({
         fields: expect.objectContaining({
-          target_lang: 'fr',
+          target_lang: 'fr-FR',
           project_name: 'i18n-translator-sync-fr'
         })
       })
     )
+  })
+
+  it('persists projectPass in pending review projects after create', async () => {
+    const workspacePath = '/workspace'
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/package.json`]: JSON.stringify({ name: 'i18n-translator-sync' }),
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-credentials', projectPass: 'pass-credentials' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: {}
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'fr',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    const pendingWriteCall = vi
+      .mocked(fileSystem.writeFile)
+      .mock.calls.find(([uri]) => uri.path === `${workspacePath}/.translator/review/pending-projects.json`)
+
+    expect(pendingWriteCall).toBeDefined()
+    const pendingJson = JSON.parse(pendingWriteCall?.[1] ?? '[]') as Array<Record<string, unknown>>
+    expect(pendingJson).toContainEqual(
+      expect.objectContaining({
+        projectId: 'mc-credentials',
+        projectPass: 'pass-credentials'
+      })
+    )
+  })
+
+  it('does not fetch project jobs during push; status and pull commands handle delayed job creation', async () => {
+    const workspacePath = '/workspace'
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/package.json`]: JSON.stringify({ name: 'i18n-translator-sync' }),
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-delay', projectPass: 'pass-delay' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: {}
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'fr',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    expect(mateCatService.createReviewProject).toHaveBeenCalledTimes(1)
+    expect(mateCatService.checkReviewProjectStatus).not.toHaveBeenCalled()
+    expect(mateCatService.pullReviewedTranslations).not.toHaveBeenCalled()
   })
 
   it('imports reviewed XLIFF into translation memory during pull', async () => {
@@ -524,5 +732,119 @@ describe('MateCatReviewService', () => {
       expect.objectContaining({ path: `${workspacePath}/.translator/review/pending-projects.json` }),
       expect.any(String)
     )
+  })
+
+  it('status command removes pending project when MateCat reports project not found', async () => {
+    const workspacePath = '/workspace'
+    const pendingProjects = [
+      {
+        projectId: 'mc-1',
+        projectPass: 'pass-1',
+        createdAt: '2026-06-25T00:00:00.000Z'
+      },
+      {
+        projectId: 'mc-2',
+        projectPass: 'pass-2',
+        createdAt: '2026-06-25T00:00:01.000Z'
+      }
+    ]
+
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn(),
+      checkReviewProjectStatus: vi.fn().mockImplementation(async (_settings: unknown, projects: Array<{ projectId: string }>) => {
+        if (projects[0]?.projectId === 'mc-1') {
+          throw new Error('MateCat status check failed for project mc-1: 404 Not Found')
+        }
+
+        return [{ projectId: 'mc-2', status: 'in_progress', percentDone: 50 }]
+      }),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: { project_name: 'Demo' }
+      }),
+      translationMemory
+    })
+
+    const statuses = await service.getPendingReviewStatus()
+
+    expect(statuses).toEqual([{ projectId: 'mc-2', status: 'in_progress', percentDone: 50 }])
+    const pendingWriteCall = vi
+      .mocked(fileSystem.writeFile)
+      .mock.calls.find(([uri]) => uri.path === `${workspacePath}/.translator/review/pending-projects.json`)
+
+    expect(pendingWriteCall).toBeDefined()
+    expect(pendingWriteCall?.[1]).toContain('mc-2')
+    expect(pendingWriteCall?.[1]).not.toContain('mc-1')
+  })
+
+  it('pull command removes pending project when reviewed files cannot be pulled because project was deleted', async () => {
+    const workspacePath = '/workspace'
+    const pendingProjects = [
+      {
+        projectId: 'mc-1',
+        projectPass: 'pass-1',
+        createdAt: '2026-06-25T00:00:00.000Z'
+      },
+      {
+        projectId: 'mc-2',
+        projectPass: 'pass-2',
+        createdAt: '2026-06-25T00:00:01.000Z'
+      }
+    ]
+
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn(),
+      checkReviewProjectStatus: vi.fn().mockImplementation(async (_settings: unknown, projects: Array<{ projectId: string }>) => {
+        if (projects[0]?.projectId === 'mc-1') {
+          return [{ projectId: 'mc-1', status: 'completed' }]
+        }
+
+        return [{ projectId: 'mc-2', status: 'in_progress' }]
+      }),
+      pullReviewedTranslations: vi.fn().mockImplementation(async (_settings: unknown, projects: Array<{ projectId: string }>) => {
+        if (projects[0]?.projectId === 'mc-1') {
+          throw new Error('MateCat URL fetch failed for project mc-1: 410 Gone')
+        }
+
+        return []
+      })
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: { project_name: 'Demo' }
+      }),
+      translationMemory
+    })
+
+    await service.pullReviewedProjects()
+
+    const pendingWriteCalls = vi
+      .mocked(fileSystem.writeFile)
+      .mock.calls.filter(([uri]) => uri.path === `${workspacePath}/.translator/review/pending-projects.json`)
+
+    expect(pendingWriteCalls.length).toBeGreaterThan(0)
+    const lastPendingWrite = pendingWriteCalls[pendingWriteCalls.length - 1]
+    expect(lastPendingWrite?.[1]).toContain('mc-2')
+    expect(lastPendingWrite?.[1]).not.toContain('mc-1')
   })
 })

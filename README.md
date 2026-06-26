@@ -15,8 +15,9 @@ Translate Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files instantly 
 <!-- TODO: Add demo GIF here showing translation in action -->
 
 **Quick Features Overview:**
-- ✅ **Instant translation** - Translates Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files on save
+- ✅ **Instant AI translation** - Translates Markdown, MDX, JSON, YAML, TypeScript, and JavaScript files on save
 - ✅ **Multiple AI engines** - Supports Azure, Google, DeepL, Gemini, `auto` routing, and copy-only mode.
+- ✅ **Human translation review** - Review & revise AI translation with professional translators or your volunteer translation team using MateCAT.com
 - ✅ **Smart folder syncing** - Automatically mirrors file changes (create, rename, delete) to all target language folders
 - ✅ **Translation memory** - JSONL-based translation memory reduces costs and prevents translation drift
 - ✅ **Back translations** - Translate target languages back to source to verify quality
@@ -188,6 +189,27 @@ The i18n Translator stores translations in a local **translation memory database
 - These updates will then be synced back into your local "translation memory" database.
 
 <!-- TODO: Add diagram showing translation memory workflow -->
+
+## Human translation Review via MateCAT.com
+
+**Setup:**
+- Create your account at MateCAT.com
+- Apply for an API key. Tell them its for using [i18n-translator-sync](https://marketplace.visualstudio.com/items?itemName=AppSitu.i18n-translator-sync).
+  - Instructions to obtain an API key: https://guides.MateCAT.com/obtaining-api-credentials
+
+**Workflow:**
+
+- Run `Translator: Start` to auto translate all source files to AI translations for each configured locale.
+  - The translator builds a local Translation memory (TM) that's a bit like a cache but translations are ranked higher when they match a Human approved translation.
+- Run `Translator: Human Review -> Push` command => Creates a review a MateCAT project + job per locale based on local TM database.
+  - Actually we also upload your local TM database as a private TM on MateCat that to assist your translators.
+- Sign into MateCAT.com and assign each job to a person in your translator team OR you can elect to pay MateCAT to translate it.
+- Run `Translator: Human Review <- Pull` that will:
+  - Download Human translations from completed translation jobs
+  - Update your local TM database with the new Human approved or revised translations
+  - Rerun the Translator to apply the new Human approved translations to your translated files
+
+You can also check the status of your translation jobs without signing in to MateCAT using the `Translator: Human Review Status` command.
 
 ## Exclude Translation
 

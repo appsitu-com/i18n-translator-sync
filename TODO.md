@@ -155,3 +155,9 @@ Status: implemented and validated.
 - [x] TM purge preserves review-imported human rows
 
 Remember: "Code must be built for reuse, not just to make it work" - prioritize modular, testable, and maintainable solutions.
+
+## Matecat bugs
+
+- [ ] maps hi => Hindi (Fiji) - should be hi-IN
+- [ ] zh-CN => XLIFF file not exported or uploaded
+- [ ] en-US => generated XLIFF for back translations.  source language should have been excluded by default

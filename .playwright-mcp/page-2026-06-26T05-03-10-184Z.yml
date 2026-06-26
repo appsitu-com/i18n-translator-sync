@@ -1,0 +1,991 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - link [ref=e5] [cursor=pointer]:
+      - /url: /
+  - generic [ref=e6]:
+    - generic [ref=e7]:
+      - link:
+        - /url: "#top"
+      - heading "API" [level=1] [ref=e8]
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "Project" [ref=e11] [cursor=pointer]:
+            - /url: "#Project"
+        - listitem [ref=e12]:
+          - link "Job" [ref=e13] [cursor=pointer]:
+            - /url: "#Job"
+        - listitem [ref=e14]:
+          - link "Quality Report" [ref=e15] [cursor=pointer]:
+            - /url: "#Quality_Report"
+        - listitem [ref=e16]:
+          - link "Teams" [ref=e17] [cursor=pointer]:
+            - /url: "#Teams"
+        - listitem [ref=e18]:
+          - link "Translation Issues" [ref=e19] [cursor=pointer]:
+            - /url: "#Translation_Issues"
+        - listitem [ref=e20]:
+          - link "Translation Versions" [ref=e21] [cursor=pointer]:
+            - /url: "#Translation_Versions"
+        - listitem [ref=e22]:
+          - link "Files" [ref=e23] [cursor=pointer]:
+            - /url: "#Files"
+        - listitem [ref=e24]:
+          - link "Glossary" [ref=e25] [cursor=pointer]:
+            - /url: "#Glossary"
+        - listitem [ref=e26]:
+          - link "Engines" [ref=e27] [cursor=pointer]:
+            - /url: "#Engines"
+        - listitem [ref=e28]:
+          - link "TM keys" [ref=e29] [cursor=pointer]:
+            - /url: "#TM_keys"
+        - listitem [ref=e30]:
+          - link "Languages" [ref=e31] [cursor=pointer]:
+            - /url: "#Languages"
+        - listitem [ref=e32]:
+          - link "Project templates" [ref=e33] [cursor=pointer]:
+            - /url: "#Project_templates"
+        - listitem [ref=e34]:
+          - link "Billing models" [ref=e35] [cursor=pointer]:
+            - /url: "#Billing_models"
+        - listitem [ref=e36]:
+          - link "Quality models" [ref=e37] [cursor=pointer]:
+            - /url: "#Quality_models"
+        - listitem [ref=e38]:
+          - link "Extraction parameter_configuration" [ref=e39] [cursor=pointer]:
+            - /url: "#Extraction_parameter_configuration"
+        - listitem [ref=e40]:
+          - link "Xliff import_configuration" [ref=e41] [cursor=pointer]:
+            - /url: "#Xliff_import_configuration"
+        - listitem [ref=e42]:
+          - link "DeepL" [ref=e43] [cursor=pointer]:
+            - /url: "#DeepL"
+        - listitem [ref=e44]:
+          - link "Modern MT" [ref=e45] [cursor=pointer]:
+            - /url: "#Modern_MT"
+        - listitem [ref=e46]:
+          - link "Word count" [ref=e47] [cursor=pointer]:
+            - /url: "#Word_count"
+        - listitem [ref=e48]:
+          - link "Supported file format" [ref=e49] [cursor=pointer]:
+            - /url: "#file-format"
+        - listitem [ref=e50]:
+          - link "Supported languages" [ref=e51] [cursor=pointer]:
+            - /url: "#languages"
+        - listitem [ref=e52]:
+          - link "Supported subjects" [ref=e53] [cursor=pointer]:
+            - /url: "#subjects"
+        - listitem [ref=e54]:
+          - link "Supported segmentation rules" [ref=e55] [cursor=pointer]:
+            - /url: "#seg-rules"
+    - generic [ref=e56]:
+      - generic [ref=e57]:
+        - generic [ref=e60]:
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - heading "Matecat API 3.0.0" [level=2] [ref=e65]:
+                - text: Matecat API
+                - generic [ref=e67]: 3.0.0
+              - generic [ref=e68]: "[ Base URL: www.matecat.com ]"
+            - generic [ref=e70]:
+              - paragraph [ref=e71]: We developed a set of Rest API to let you integrate Matecat in your translation management system or in any other application. Use our API to create projects and check their status.
+              - heading "How to authenticate" [level=2] [ref=e72]
+              - generic [ref=e74] [cursor=pointer]:
+                - text: "In order to authenticate, add the x-matecat-key header to the API call and populate it with your complete API credentials in this format:"
+                - code [ref=e75]: "{APIkey}-{APIsecret}"
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - generic [ref=e79]: Schemes
+              - combobox [ref=e80]:
+                - option "https" [selected]
+            - button "Authorize" [ref=e82] [cursor=pointer]:
+              - generic [ref=e83]: Authorize
+              - img [ref=e84]
+          - generic [ref=e88]:
+            - heading "Project Expand operation" [level=4] [ref=e90] [cursor=pointer]:
+              - link "Project" [ref=e91]:
+                - /url: "#/Project"
+              - button "Expand operation" [ref=e92]:
+                - img [ref=e93]
+            - heading "Job Expand operation" [level=4] [ref=e96] [cursor=pointer]:
+              - link "Job" [ref=e97]:
+                - /url: "#/Job"
+              - button "Expand operation" [ref=e98]:
+                - img [ref=e99]
+            - heading "Quality Report Expand operation" [level=4] [ref=e102] [cursor=pointer]:
+              - link "Quality Report" [ref=e103]:
+                - /url: "#/Quality Report"
+              - button "Expand operation" [ref=e104]:
+                - img [ref=e105]
+            - heading "Teams Expand operation" [level=4] [ref=e108] [cursor=pointer]:
+              - link "Teams" [ref=e109]:
+                - /url: "#/Teams"
+              - button "Expand operation" [ref=e110]:
+                - img [ref=e111]
+            - heading "Translation Issues Expand operation" [level=4] [ref=e114] [cursor=pointer]:
+              - link "Translation Issues" [ref=e115]:
+                - /url: "#/Translation Issues"
+              - button "Expand operation" [ref=e116]:
+                - img [ref=e117]
+            - heading "Translation Versions Expand operation" [level=4] [ref=e120] [cursor=pointer]:
+              - link "Translation Versions" [ref=e121]:
+                - /url: "#/Translation Versions"
+              - button "Expand operation" [ref=e122]:
+                - img [ref=e123]
+            - heading "Files Expand operation" [level=4] [ref=e126] [cursor=pointer]:
+              - link "Files" [ref=e127]:
+                - /url: "#/Files"
+              - button "Expand operation" [ref=e128]:
+                - img [ref=e129]
+            - heading "Glossary Expand operation" [level=4] [ref=e132] [cursor=pointer]:
+              - link "Glossary" [ref=e133]:
+                - /url: "#/Glossary"
+              - button "Expand operation" [ref=e134]:
+                - img [ref=e135]
+            - heading "Engines Expand operation" [level=4] [ref=e138] [cursor=pointer]:
+              - link "Engines" [ref=e139]:
+                - /url: "#/Engines"
+              - button "Expand operation" [ref=e140]:
+                - img [ref=e141]
+            - heading "TM keys Expand operation" [level=4] [ref=e144] [cursor=pointer]:
+              - link "TM keys" [ref=e145]:
+                - /url: "#/TM keys"
+              - button "Expand operation" [ref=e146]:
+                - img [ref=e147]
+            - heading "Languages Expand operation" [level=4] [ref=e150] [cursor=pointer]:
+              - link "Languages" [ref=e151]:
+                - /url: "#/Languages"
+              - button "Expand operation" [ref=e152]:
+                - img [ref=e153]
+            - heading "Project templates Expand operation" [level=4] [ref=e156] [cursor=pointer]:
+              - link "Project templates" [ref=e157]:
+                - /url: "#/Project templates"
+              - button "Expand operation" [ref=e158]:
+                - img [ref=e159]
+            - heading "Billing models Expand operation" [level=4] [ref=e162] [cursor=pointer]:
+              - link "Billing models" [ref=e163]:
+                - /url: "#/Billing models"
+              - button "Expand operation" [ref=e164]:
+                - img [ref=e165]
+            - heading "Quality models Expand operation" [level=4] [ref=e168] [cursor=pointer]:
+              - link "Quality models" [ref=e169]:
+                - /url: "#/Quality models"
+              - button "Expand operation" [ref=e170]:
+                - img [ref=e171]
+            - heading "Extraction parameter configuration Expand operation" [level=4] [ref=e174] [cursor=pointer]:
+              - link "Extraction parameter configuration" [ref=e175]:
+                - /url: "#/Extraction parameter configuration"
+              - button "Expand operation" [ref=e176]:
+                - img [ref=e177]
+            - heading "Xliff import configuration Expand operation" [level=4] [ref=e180] [cursor=pointer]:
+              - link "Xliff import configuration" [ref=e181]:
+                - /url: "#/Xliff import configuration"
+              - button "Expand operation" [ref=e182]:
+                - img [ref=e183]
+            - heading "DeepL Expand operation" [level=4] [ref=e186] [cursor=pointer]:
+              - link "DeepL" [ref=e187]:
+                - /url: "#/DeepL"
+              - button "Expand operation" [ref=e188]:
+                - img [ref=e189]
+            - heading "Modern MT Expand operation" [level=4] [ref=e192] [cursor=pointer]:
+              - link "Modern MT" [ref=e193]:
+                - /url: "#/Modern MT"
+              - button "Expand operation" [ref=e194]:
+                - img [ref=e195]
+            - heading "Word count Expand operation" [level=4] [ref=e198] [cursor=pointer]:
+              - link "Word count" [ref=e199]:
+                - /url: "#/Word count"
+              - button "Expand operation" [ref=e200]:
+                - img [ref=e201]
+          - heading "Models" [level=4] [ref=e206] [cursor=pointer]:
+            - generic [ref=e207]: Models
+            - img [ref=e208]
+        - link "Go to top" [ref=e210] [cursor=pointer]:
+          - /url: "#top"
+      - generic [ref=e211]:
+        - heading "Supported file formats" [level=3] [ref=e212]
+        - table [ref=e213]:
+          - rowgroup [ref=e214]:
+            - row "Office Web Scanned Files Interchange Formats Desktop Publishing Localization" [ref=e215]:
+              - columnheader "Office" [ref=e216]
+              - columnheader "Web" [ref=e217]
+              - columnheader "Scanned Files" [ref=e218]
+              - columnheader "Interchange Formats" [ref=e219]
+              - columnheader "Desktop Publishing" [ref=e220]
+              - columnheader "Localization" [ref=e221]
+          - rowgroup [ref=e222]:
+            - row "doc pages dot docx dotx docm dotm rtf odt ott pdf numbers txt xls xlt xlsm xlsx xltx xltm ods ots tsv key ppt pps pot pptx pptm ppsx ppsm potx potm odp otp xml zip htm html xhtml xml dtd json jsont jsont2 yaml yml md pdf bmp png gif jpeg jpg jfif tiff xliff sdlxliff tmx ttx itd xlf mif idml icml xml dita properties resx xml sxml txml dita Android xml strings sbv srt vtt wix po g QT linguist ts" [ref=e223]:
+              - cell "doc pages dot docx dotx docm dotm rtf odt ott pdf numbers txt xls xlt xlsm xlsx xltx xltm ods ots tsv key ppt pps pot pptx pptm ppsx ppsm potx potm odp otp xml zip" [ref=e224]:
+                - list [ref=e225]:
+                  - listitem:
+                    - generic [ref=e226]: doc
+                  - listitem:
+                    - generic [ref=e227]: pages
+                  - listitem:
+                    - generic [ref=e228]: dot
+                  - listitem:
+                    - generic [ref=e229]: docx
+                  - listitem:
+                    - generic [ref=e230]: dotx
+                  - listitem:
+                    - generic [ref=e231]: docm
+                  - listitem:
+                    - generic [ref=e232]: dotm
+                  - listitem:
+                    - generic [ref=e233]: rtf
+                  - listitem:
+                    - generic [ref=e234]: odt
+                  - listitem:
+                    - generic [ref=e235]: ott
+                  - listitem:
+                    - generic [ref=e236]: pdf
+                  - listitem:
+                    - generic [ref=e237]: numbers
+                  - listitem:
+                    - generic [ref=e238]: txt
+                  - listitem:
+                    - generic [ref=e239]: xls
+                  - listitem:
+                    - generic [ref=e240]: xlt
+                  - listitem:
+                    - generic [ref=e241]: xlsm
+                  - listitem:
+                    - generic [ref=e242]: xlsx
+                  - listitem:
+                    - generic [ref=e243]: xltx
+                  - listitem:
+                    - generic [ref=e244]: xltm
+                  - listitem:
+                    - generic [ref=e245]: ods
+                  - listitem:
+                    - generic [ref=e246]: ots
+                  - listitem:
+                    - generic [ref=e247]: tsv
+                  - listitem:
+                    - generic [ref=e248]: key
+                  - listitem:
+                    - generic [ref=e249]: ppt
+                  - listitem:
+                    - generic [ref=e250]: pps
+                  - listitem:
+                    - generic [ref=e251]: pot
+                  - listitem:
+                    - generic [ref=e252]: pptx
+                  - listitem:
+                    - generic [ref=e253]: pptm
+                  - listitem:
+                    - generic [ref=e254]: ppsx
+                  - listitem:
+                    - generic [ref=e255]: ppsm
+                  - listitem:
+                    - generic [ref=e256]: potx
+                  - listitem:
+                    - generic [ref=e257]: potm
+                  - listitem:
+                    - generic [ref=e258]: odp
+                  - listitem:
+                    - generic [ref=e259]: otp
+                  - listitem:
+                    - generic [ref=e260]: xml
+                  - listitem:
+                    - generic [ref=e261]: zip
+              - cell "htm html xhtml xml dtd json jsont jsont2 yaml yml md" [ref=e262]:
+                - list:
+                  - listitem:
+                    - generic [ref=e263]: htm
+                  - listitem:
+                    - generic [ref=e264]: html
+                  - listitem:
+                    - generic [ref=e265]: xhtml
+                  - listitem:
+                    - generic [ref=e266]: xml
+                  - listitem:
+                    - generic [ref=e267]: dtd
+                  - listitem:
+                    - generic [ref=e268]: json
+                  - listitem:
+                    - generic [ref=e269]: jsont
+                  - listitem:
+                    - generic [ref=e270]: jsont2
+                  - listitem:
+                    - generic [ref=e271]: yaml
+                  - listitem:
+                    - generic [ref=e272]: yml
+                  - listitem:
+                    - generic [ref=e273]: md
+              - cell "pdf bmp png gif jpeg jpg jfif tiff" [ref=e274]:
+                - list:
+                  - listitem:
+                    - generic [ref=e275]: pdf
+                  - listitem:
+                    - generic [ref=e276]: bmp
+                  - listitem:
+                    - generic [ref=e277]: png
+                  - listitem:
+                    - generic [ref=e278]: gif
+                  - listitem:
+                    - generic [ref=e279]: jpeg
+                  - listitem:
+                    - generic [ref=e280]: jpg
+                  - listitem:
+                    - generic [ref=e281]: jfif
+                  - listitem:
+                    - generic [ref=e282]: tiff
+              - cell "xliff sdlxliff tmx ttx itd xlf" [ref=e283]:
+                - list:
+                  - listitem:
+                    - generic [ref=e284]: xliff
+                  - listitem:
+                    - generic [ref=e285]: sdlxliff
+                  - listitem:
+                    - generic [ref=e286]: tmx
+                  - listitem:
+                    - generic [ref=e287]: ttx
+                  - listitem:
+                    - generic [ref=e288]: itd
+                  - listitem:
+                    - generic [ref=e289]: xlf
+              - cell "mif idml icml xml dita" [ref=e290]:
+                - list:
+                  - listitem:
+                    - generic [ref=e291]: mif
+                  - listitem:
+                    - generic [ref=e292]: idml
+                  - listitem:
+                    - generic [ref=e293]: icml
+                  - listitem:
+                    - generic [ref=e294]: xml
+                  - listitem:
+                    - generic [ref=e295]: dita
+              - cell "properties resx xml sxml txml dita Android xml strings sbv srt vtt wix po g QT linguist ts" [ref=e296]:
+                - list:
+                  - listitem:
+                    - generic [ref=e297]: properties
+                  - listitem:
+                    - generic [ref=e298]: resx
+                  - listitem:
+                    - generic [ref=e299]: xml
+                  - listitem:
+                    - generic [ref=e300]: sxml
+                  - listitem:
+                    - generic [ref=e301]: txml
+                  - listitem:
+                    - generic [ref=e302]: dita
+                  - listitem:
+                    - generic [ref=e303]: Android xml
+                  - listitem:
+                    - generic [ref=e304]: strings
+                  - listitem:
+                    - generic [ref=e305]: sbv
+                  - listitem:
+                    - generic [ref=e306]: srt
+                  - listitem:
+                    - generic [ref=e307]: vtt
+                  - listitem:
+                    - generic [ref=e308]: wix
+                  - listitem:
+                    - generic [ref=e309]: po
+                  - listitem:
+                    - generic [ref=e310]: g
+                  - listitem:
+                    - generic [ref=e311]: QT linguist ts
+        - link "Go to top" [ref=e312] [cursor=pointer]:
+          - /url: "#top"
+      - generic [ref=e313]:
+        - heading "Supported languages" [level=3] [ref=e314]
+        - table [ref=e315]:
+          - rowgroup [ref=e316]:
+            - row "Language ( Code )" [ref=e317]:
+              - columnheader "Language ( Code )" [ref=e318]
+          - rowgroup [ref=e319]:
+            - row [ref=e320]:
+              - cell [ref=e321]:
+                - list [ref=e322]:
+                  - listitem [ref=e323]: Acehnese (ace-ID)
+                  - listitem [ref=e324]: Afar (aa-ET)
+                  - listitem [ref=e325]: Afrikaans (af-ZA)
+                  - listitem [ref=e326]: Akan (ak-GH)
+                  - listitem [ref=e327]: Albanian (sq-AL)
+                  - listitem [ref=e328]: Alemannic (gsw-CH)
+                  - listitem [ref=e329]: Amharic (am-ET)
+                  - listitem [ref=e330]: Anii (blo-BJ)
+                  - listitem [ref=e331]: Antigua and Barbuda Creole English (aig-AG)
+                  - listitem [ref=e332]: Arabic (ar-SA)
+                  - listitem [ref=e333]: Arabic (Egypt) (ar-EG)
+                  - listitem [ref=e334]: Arabic (Jordan) (ar-JO)
+                  - listitem [ref=e335]: Arabic (Morocco) (ar-MA)
+                  - listitem [ref=e336]: Arabic (Tunisia) (ar-TN)
+                  - listitem [ref=e337]: Arabic (United Arab Emirates) (ar-AE)
+                  - listitem [ref=e338]: Aragonese (an-ES)
+                  - listitem [ref=e339]: Armenian (hy-AM)
+                  - listitem [ref=e340]: Assamese (as-IN)
+                  - listitem [ref=e341]: Asturian (ast-ES)
+                  - listitem [ref=e342]: Asu (asa-TZ)
+                  - listitem [ref=e343]: Awadhi (awa-IN)
+                  - listitem [ref=e344]: Ayacucho Quechua (quy-PE)
+                  - listitem [ref=e345]: Azerbaijani (az-AZ)
+                  - listitem [ref=e346]: Bahamas Creole English (bah-BS)
+                  - listitem [ref=e347]: Bajan (bjs-BB)
+                  - listitem [ref=e348]: Balinese (ban-ID)
+                  - listitem [ref=e349]: Balkan Romani (rmn-BG)
+                  - listitem [ref=e350]: Baluchi (Pakistan) (bal-PK)
+                  - listitem [ref=e351]: Bambara (bm-ML)
+                  - listitem [ref=e352]: Banjar (bjn-ID)
+                  - listitem [ref=e353]: Bashkir (ba-RU)
+                  - listitem [ref=e354]: Basque (eu-ES)
+                  - listitem [ref=e355]: Belarusian (be-BY)
+                  - listitem [ref=e356]: Bemba (bem-ZM)
+                  - listitem [ref=e357]: Bena (bez-TZ)
+                  - listitem [ref=e358]: Bengali (Bangladesh) (bn-BD)
+                  - listitem [ref=e359]: Bengali (India) (bn-IN)
+                  - listitem [ref=e360]: Bhojpuri (bho-IN)
+                  - listitem [ref=e361]: Bihari (bh-IN)
+                  - listitem [ref=e362]: Bislama (bi-VU)
+                  - listitem [ref=e363]: Bodo (India) (brx-IN)
+                  - listitem [ref=e364]: Borana (gax-KE)
+                  - listitem [ref=e365]: Bosnian (Cyrillic script) (bs-Cyrl-BA)
+                  - listitem [ref=e366]: Bosnian (Latin script) (bs-BA)
+                  - listitem [ref=e367]: Breton (br-FR)
+                  - listitem [ref=e368]: Buginese (bug-ID)
+                  - listitem [ref=e369]: Bulgarian (bg-BG)
+                  - listitem [ref=e370]: Burmese (my-MM)
+                  - listitem [ref=e371]: Cantonese (yue-HK)
+                  - listitem [ref=e372]: Catalan (Catalonia) (ca-ES)
+                  - listitem [ref=e373]: Catalan (Valencia) (cav-ES)
+                  - listitem [ref=e374]: Cebuano (ceb-PH)
+                  - listitem [ref=e375]: Central Atlas Tamazight (tzm-MA)
+                  - listitem [ref=e376]: Central Aymara (ayr-BO)
+                  - listitem [ref=e377]: Central Kanuri (Latin script) (knc-NG)
+                  - listitem [ref=e378]: Chadian Arabic (shu-TD)
+                  - listitem [ref=e379]: Chamorro (ch-GU)
+                  - listitem [ref=e380]: Chechen (Russia) (ce-RU)
+                  - listitem [ref=e381]: Cherokee (chr-US)
+                  - listitem [ref=e382]: Chhattisgarhi (hne-IN)
+                  - listitem [ref=e383]: Chiga (cgg-UG)
+                  - listitem [ref=e384]: Chinese (Simplified, Laos) (zh-LA)
+                  - listitem [ref=e385]: Chinese (Simplified, Malaysia) (zh-MY)
+                  - listitem [ref=e386]: Chinese (Simplified, Singapore) (zh-SG)
+                  - listitem [ref=e387]: Chinese (Simplified, mainland China) (zh-CN)
+                  - listitem [ref=e388]: Chinese (Traditional, Hong Kong) (zh-HK)
+                  - listitem [ref=e389]: Chinese (Traditional, Macao) (zh-MO)
+                  - listitem [ref=e390]: Chinese (Traditional, Taiwan) (zh-TW)
+                  - listitem [ref=e391]: Chittagonian (ctg-BD)
+                  - listitem [ref=e392]: Chokwe (cjk-AO)
+                  - listitem [ref=e393]: Chuj (cac-GT)
+                  - listitem [ref=e394]: Chuukese (Micronesia) (chk-FM)
+                  - listitem [ref=e395]: Classical Greek (grc-GR)
+                  - listitem [ref=e396]: Colognian (ksh-DE)
+                  - listitem [ref=e397]: Comorian Ngazidja (zdj-KM)
+                  - listitem [ref=e398]: Coptic (cop-EG)
+                  - listitem [ref=e399]: Cornish (kw-GB)
+                  - listitem [ref=e400]: Crimean Tatar (crh-RU)
+                  - listitem [ref=e401]: Crioulo Upper Guinea (pov-GW)
+                  - listitem [ref=e402]: Croatian (hr-HR)
+                  - listitem [ref=e403]: Czech (cs-CZ)
+                  - listitem [ref=e404]: Danish (da-DK)
+                  - listitem [ref=e405]: Dari (prs-AF)
+                  - listitem [ref=e406]: Dimli (diq-TR)
+                  - listitem [ref=e407]: Dogri (India) (doi-IN)
+                  - listitem [ref=e408]: Dutch (Belgium) (nl-BE)
+                  - listitem [ref=e409]: Dutch (Netherlands) (nl-NL)
+                  - listitem [ref=e410]: Dyula (dyu-CI)
+                  - listitem [ref=e411]: Dzongkha (dz-BT)
+                  - listitem [ref=e412]: Eastern Yiddish (ydd-US)
+                  - listitem [ref=e413]: Emakhuwa (vmw-MZ)
+                  - listitem [ref=e414]: English (Australia) (en-AU)
+                  - listitem [ref=e415]: English (Austria) (en-AT)
+                  - listitem [ref=e416]: English (Bangladesh) (en-BD)
+                  - listitem [ref=e417]: English (Cambodia) (en-KH)
+                  - listitem [ref=e418]: English (Canada) (en-CA)
+                  - listitem [ref=e419]: English (Czech Republic) (en-CZ)
+                  - listitem [ref=e420]: English (Finland) (en-FI)
+                  - listitem [ref=e421]: English (Germany) (en-DE)
+                  - listitem [ref=e422]: English (Hong Kong) (en-HK)
+                  - listitem [ref=e423]: English (Hungary) (en-HU)
+                  - listitem [ref=e424]: English (India) (en-IN)
+                  - listitem [ref=e425]: English (Ireland) (en-IE)
+                  - listitem [ref=e426]: English (Jamaica) (en-JM)
+                  - listitem [ref=e427]: English (Laos) (en-LA)
+                  - listitem [ref=e428]: English (Malaysia) (en-MY)
+                  - listitem [ref=e429]: English (Myanmar) (en-MM)
+                  - listitem [ref=e430]: English (New Zealand) (en-NZ)
+                  - listitem [ref=e431]: English (Norway) (en-NO)
+                  - listitem [ref=e432]: English (Pakistan) (en-PK)
+                  - listitem [ref=e433]: English (Philippines) (en-PH)
+                  - listitem [ref=e434]: English (Singapore) (en-SG)
+                  - listitem [ref=e435]: English (South Africa) (en-ZA)
+                  - listitem [ref=e436]: English (Sweden) (en-SE)
+                  - listitem [ref=e437]: English (Taiwan) (en-TW)
+                  - listitem [ref=e438]: English (Turkey) (en-TR)
+                  - listitem [ref=e439]: English (USA) (en-US)
+                  - listitem [ref=e440]: English (United Kingdom) (en-GB)
+                  - listitem [ref=e441]: Esperanto (eo-EU)
+                  - listitem [ref=e442]: Estonian (et-EE)
+                  - listitem [ref=e443]: Ewe (ee-GH)
+                  - listitem [ref=e444]: Fanagalo (fn-FNG)
+                  - listitem [ref=e445]: Faroese (fo-FO)
+                  - listitem [ref=e446]: Fijian (fj-FJ)
+                  - listitem [ref=e447]: Filipino (fil-PH)
+                  - listitem [ref=e448]: Finnish (fi-FI)
+                  - listitem [ref=e449]: Fon (fon-BJ)
+                  - listitem [ref=e450]: French (Belgium) (fr-BE)
+                  - listitem [ref=e451]: French (Canada) (fr-CA)
+                  - listitem [ref=e452]: French (France) (fr-FR)
+                  - listitem [ref=e453]: French (Luxembourg) (fr-LU)
+                  - listitem [ref=e454]: French (Morocco) (fr-MA)
+                  - listitem [ref=e455]: French (Switzerland) (fr-CH)
+                  - listitem [ref=e456]: Friulian (fur-IT)
+                  - listitem [ref=e457]: Fula (ff-FUL)
+                  - listitem [ref=e458]: Fula (Guinea) (ff-GN)
+                  - listitem [ref=e459]: Galician (gl-ES)
+                  - listitem [ref=e460]: Garo (grt-IN)
+                  - listitem [ref=e461]: Georgian (ka-GE)
+                  - listitem [ref=e462]: German (Austria) (de-AT)
+                  - listitem [ref=e463]: German (Germany) (de-DE)
+                  - listitem [ref=e464]: German (Switzerland) (de-CH)
+                  - listitem [ref=e465]: Gilbertese (gil-KI)
+                  - listitem [ref=e466]: Glavda (glw-NG)
+                  - listitem [ref=e467]: Greek (el-GR)
+                  - listitem [ref=e468]: Grenadian Creole English (gcl-GD)
+                  - listitem [ref=e469]: Guarani (gn-PY)
+                  - listitem [ref=e470]: Gujarati (gu-IN)
+                  - listitem [ref=e471]: Guyanese Creole English (gyn-GY)
+                  - listitem [ref=e472]: Haitian Creole French (ht-HT)
+                  - listitem [ref=e473]: Halh Mongolian (khk-MN)
+                  - listitem [ref=e474]: Hausa (ha-NE)
+                  - listitem [ref=e475]: Hawaiian (haw-US)
+                  - listitem [ref=e476]: Hebrew (he-IL)
+                  - listitem [ref=e477]: Higi (hig-NG)
+                  - listitem [ref=e478]: Hiligaynon (hil-PH)
+                  - listitem [ref=e479]: Hill Mari (mrj-RU)
+                  - listitem [ref=e480]: Hindi (hi-IN)
+                  - listitem [ref=e481]: Hindi (Fiji) (hi-FJ)
+                  - listitem [ref=e482]: Hmong (hmn-CN)
+                  - listitem [ref=e483]: Hmong Njua (hnj-LA)
+                  - listitem [ref=e484]: Ho (hoc-IN)
+                  - listitem [ref=e485]: Hungarian (hu-HU)
+                  - listitem [ref=e486]: Icelandic (is-IS)
+                  - listitem [ref=e487]: Ido (io-001)
+                  - listitem [ref=e488]: Igbo (ig-NG)
+                  - listitem [ref=e489]: Ilocano (ilo-PH)
+                  - listitem [ref=e490]: Inari Sami (smn-FI)
+                  - listitem [ref=e491]: Indonesian (id-ID)
+                  - listitem [ref=e492]: Interlingua (ia-001)
+                  - listitem [ref=e493]: Inuktitut (iu-CA)
+                  - listitem [ref=e494]: Irish Gaelic (ga-IE)
+                  - listitem [ref=e495]: Italian (Italy) (it-IT)
+                  - listitem [ref=e496]: Italian (Switzerland) (it-CH)
+                  - listitem [ref=e497]: Jamaican Creole English (jam-JM)
+                  - listitem [ref=e498]: Japanese (ja-JP)
+                  - listitem [ref=e499]: Javanese (jv-ID)
+                  - listitem [ref=e500]: Jingpho (kac-MM)
+                  - listitem [ref=e501]: Jju (kaj-NG)
+                  - listitem [ref=e502]: K'iche' (quc-GT)
+                  - listitem [ref=e503]: Kabiyè (kbp-TG)
+                  - listitem [ref=e504]: Kabuverdianu (kea-CV)
+                  - listitem [ref=e505]: Kabylian (kab-DZ)
+                  - listitem [ref=e506]: Kako (kkj-CM)
+                  - listitem [ref=e507]: Kalaallisut (Greenland) (kl-GL)
+                  - listitem [ref=e508]: Kalenjin (kln-KE)
+                  - listitem [ref=e509]: Kamba (kam-KE)
+                  - listitem [ref=e510]: Kanjobal (kjb-GT)
+                  - listitem [ref=e511]: Kannada (kn-IN)
+                  - listitem [ref=e512]: Kanuri (kr-KAU)
+                  - listitem [ref=e513]: Karen (kar-MM)
+                  - listitem [ref=e514]: Kashmiri (Arabic script) (kas-IN)
+                  - listitem [ref=e515]: Kashmiri (Devanagari script) (ks-IN)
+                  - listitem [ref=e516]: Kazakh (kk-KZ)
+                  - listitem [ref=e517]: Khasi (kha-IN)
+                  - listitem [ref=e518]: Khmer (km-KH)
+                  - listitem [ref=e519]: Kikuyu (ki-KE)
+                  - listitem [ref=e520]: Kimbundu (kmb-AO)
+                  - listitem [ref=e521]: Kinyarwanda (rw-RW)
+                  - listitem [ref=e522]: Kirundi (rn-BI)
+                  - listitem [ref=e523]: Kisii (guz-KE)
+                  - listitem [ref=e524]: Kongo (kg-CG)
+                  - listitem [ref=e525]: Konkani (kok-IN)
+                  - listitem [ref=e526]: Korean (ko-KR)
+                  - listitem [ref=e527]: Koyraboro Senni (ses-ML)
+                  - listitem [ref=e528]: Kurdish Sorani (ckb-IQ)
+                  - listitem [ref=e529]: Kyrgyz (ky-KG)
+                  - listitem [ref=e530]: Ladin (lld-IT)
+                  - listitem [ref=e531]: Lakota (lkt-US)
+                  - listitem [ref=e532]: Langi (lag-TZ)
+                  - listitem [ref=e533]: Lao (lo-LA)
+                  - listitem [ref=e534]: Latgalian (ltg-LV)
+                  - listitem [ref=e535]: Latin (la-VA)
+                  - listitem [ref=e536]: Latvian (lv-LV)
+                  - listitem [ref=e537]: Ligurian (lij-IT)
+                  - listitem [ref=e538]: Limburgish (li-NL)
+                  - listitem [ref=e539]: Lingala (ln-CD)
+                  - listitem [ref=e540]: Lithuanian (lt-LT)
+                  - listitem [ref=e541]: Lojban (jbo-001)
+                  - listitem [ref=e542]: Lombard (lmo-IT)
+                  - listitem [ref=e543]: Lower Sorbian (dsb-DE)
+                  - listitem [ref=e544]: Luba-Kasai (lua-CD)
+                  - listitem [ref=e545]: Luganda (lg-UG)
+                  - listitem [ref=e546]: Luhya (luy-KE)
+                  - listitem [ref=e547]: Lule Sami (smj-SE)
+                  - listitem [ref=e548]: Luo (luo-KE)
+                  - listitem [ref=e549]: Luxembourgish (lb-LU)
+                  - listitem [ref=e550]: Maa (mas-KE)
+                  - listitem [ref=e551]: Maay Maay (ymm-SO)
+                  - listitem [ref=e552]: Macedonian (mk-MK)
+                  - listitem [ref=e553]: Machame (jmc-TZ)
+                  - listitem [ref=e554]: Magahi (mag-IN)
+                  - listitem [ref=e555]: Maithili (mai-IN)
+                  - listitem [ref=e556]: Makonde (kde-TZ)
+                  - listitem [ref=e557]: Malagasy (mg-MG)
+                  - listitem [ref=e558]: Malay (ms-MY)
+                  - listitem [ref=e559]: Malayalam (ml-IN)
+                  - listitem [ref=e560]: Maldivian (dv-MV)
+                  - listitem [ref=e561]: Malgwa (mfi-NG)
+                  - listitem [ref=e562]: Maltese (mt-MT)
+                  - listitem [ref=e563]: Mam (mam-GT)
+                  - listitem [ref=e564]: Mandinka (Gambia) (mnk-GM)
+                  - listitem [ref=e565]: Mandjak (Senegal) (mfv-SN)
+                  - listitem [ref=e566]: Manipuri (mni-IN)
+                  - listitem [ref=e567]: Manx Gaelic (gv-IM)
+                  - listitem [ref=e568]: Maori (mi-NZ)
+                  - listitem [ref=e569]: Marathi (mr-IN)
+                  - listitem [ref=e570]: Margi (mrt-NG)
+                  - listitem [ref=e571]: Mari (mhr-RU)
+                  - listitem [ref=e572]: Marshallese (mh-MH)
+                  - listitem [ref=e573]: Mende (men-SL)
+                  - listitem [ref=e574]: Meru (mer-KE)
+                  - listitem [ref=e575]: Metaʼ (mgo-CM)
+                  - listitem [ref=e576]: Mijikenda (nyf-KE)
+                  - listitem [ref=e577]: Minangkabau (min-ID)
+                  - listitem [ref=e578]: Mizo (lus-IN)
+                  - listitem [ref=e579]: Moldavian (mo-MD)
+                  - listitem [ref=e580]: Mongolian (mn-MN)
+                  - listitem [ref=e581]: Montenegrin (Cyrillic script) (sr-Cyrl-ME)
+                  - listitem [ref=e582]: Montenegrin (Latin script) (sr-ME)
+                  - listitem [ref=e583]: Morisyen (mfe-MU)
+                  - listitem [ref=e584]: Mossi (mos-BF)
+                  - listitem [ref=e585]: N'Ko (nqo-GN)
+                  - listitem [ref=e586]: Nama (naq-NA)
+                  - listitem [ref=e587]: Ndau (ndc-MZ)
+                  - listitem [ref=e588]: Nepali (ne-NP)
+                  - listitem [ref=e589]: Ngiemboon (nnh-CM)
+                  - listitem [ref=e590]: Ngomba (jgo-CM)
+                  - listitem [ref=e591]: Nigerian Fulfulde (fuv-NG)
+                  - listitem [ref=e592]: Nigerian Pidgin (pcm-NG)
+                  - listitem [ref=e593]: Niuean (niu-NU)
+                  - listitem [ref=e594]: North Azerbaijani (azj-AZ)
+                  - listitem [ref=e595]: Northern Kurdish (kmr-TR)
+                  - listitem [ref=e596]: Northern Ndebele (nd-ZW)
+                  - listitem [ref=e597]: Northern Sami (se-NO)
+                  - listitem [ref=e598]: Northern Uzbek (uzn-UZ)
+                  - listitem [ref=e599]: Norwegian Bokmål (nb-NO)
+                  - listitem [ref=e600]: Norwegian Nynorsk (nn-NO)
+                  - listitem [ref=e601]: Nuer (nus-SS)
+                  - listitem [ref=e602]: Nupe (nup-NG)
+                  - listitem [ref=e603]: Nyanja (ny-MW)
+                  - listitem [ref=e604]: Nyankole (nyn-UG)
+                  - listitem [ref=e605]: Occitan (Aran) (oc-ES)
+                  - listitem [ref=e606]: Occitan (France) (oc-FR)
+                  - listitem [ref=e607]: Odia (or-IN)
+                  - listitem [ref=e608]: Oriya (ory-IN)
+                  - listitem [ref=e609]: Oromo (Ethiopia) (om-ET)
+                  - listitem [ref=e610]: Osage (osa-US)
+                  - listitem [ref=e611]: Ossetic (os-GE)
+                  - listitem [ref=e612]: Palauan (pau-PW)
+                  - listitem [ref=e613]: Pali (pi-IN)
+                  - listitem [ref=e614]: Pangasinan (pag-PH)
+                  - listitem [ref=e615]: Papiamentu (pap-CW)
+                  - listitem [ref=e616]: Pashto (ps-PK)
+                  - listitem [ref=e617]: Persian (fa-IR)
+                  - listitem [ref=e618]: Pijin (pis-SB)
+                  - listitem [ref=e619]: Plateau Malagasy (plt-MG)
+                  - listitem [ref=e620]: Pohnpeian (Micronesia) (pon-FM)
+                  - listitem [ref=e621]: Polish (pl-PL)
+                  - listitem [ref=e622]: Portuguese (Brazil) (pt-BR)
+                  - listitem [ref=e623]: Portuguese (Portugal) (pt-PT)
+                  - listitem [ref=e624]: Potawatomi (pot-US)
+                  - listitem [ref=e625]: Prussian (prg-001)
+                  - listitem [ref=e626]: Pulaar (Senegal) (fuc-SN)
+                  - listitem [ref=e627]: Punjabi (India) (pa-IN)
+                  - listitem [ref=e628]: Punjabi (Pakistan) (pa-PK)
+                  - listitem [ref=e629]: Pökoot (Kenya) (pko-KE)
+                  - listitem [ref=e630]: Pökoot (Uganda) (pko-UG)
+                  - listitem [ref=e631]: Quechua (qu-PE)
+                  - listitem [ref=e632]: Rohingya (rhg-MM)
+                  - listitem [ref=e633]: Rohingyalish (rhl-MM)
+                  - listitem [ref=e634]: Romanian (ro-RO)
+                  - listitem [ref=e635]: Romansh (roh-CH)
+                  - listitem [ref=e636]: Rombo (rof-TZ)
+                  - listitem [ref=e637]: Rundi (run-BI)
+                  - listitem [ref=e638]: Russian (ru-RU)
+                  - listitem [ref=e639]: Rwa (rwk-TZ)
+                  - listitem [ref=e640]: S'gaw Karen (Myanmar) (ksw-MM)
+                  - listitem [ref=e641]: Saho (Eritrea) (ssy-ER)
+                  - listitem [ref=e642]: Saint Lucian Creole French (acf-LC)
+                  - listitem [ref=e643]: Samburu (saq-KE)
+                  - listitem [ref=e644]: Samoan (sm-WS)
+                  - listitem [ref=e645]: Sango (sg-CF)
+                  - listitem [ref=e646]: Sanskrit (sa-IN)
+                  - listitem [ref=e647]: Santali (sat-IN)
+                  - listitem [ref=e648]: Sardinian (sc-IT)
+                  - listitem [ref=e649]: Scots Gaelic (gd-GB)
+                  - listitem [ref=e650]: Sena (seh-ZW)
+                  - listitem [ref=e651]: Serbian (Cyrillic script) (sr-Cyrl-RS)
+                  - listitem [ref=e652]: Serbian (Latin script) (sr-Latn-RS)
+                  - listitem [ref=e653]: Serbo-Croatian (Croatia) (sh-HR)
+                  - listitem [ref=e654]: Seselwa Creole French (crs-SC)
+                  - listitem [ref=e655]: Sesotho (nso-ZA)
+                  - listitem [ref=e656]: Shambala (ksb-TZ)
+                  - listitem [ref=e657]: Shan (shn-MM)
+                  - listitem [ref=e658]: Shona (sn-ZW)
+                  - listitem [ref=e659]: Sichuan Yi (ii-CN)
+                  - listitem [ref=e660]: Sicilian (scn-IT)
+                  - listitem [ref=e661]: Silesian (szl-PL)
+                  - listitem [ref=e662]: Sindhi (sd-PK)
+                  - listitem [ref=e663]: Sinhala (si-LK)
+                  - listitem [ref=e664]: Sinte Romani (Netherlands) (rmo-NL)
+                  - listitem [ref=e665]: Skolt Sami (sms-FI)
+                  - listitem [ref=e666]: Slovak (sk-SK)
+                  - listitem [ref=e667]: Slovenian (sl-SI)
+                  - listitem [ref=e668]: Soga (xog-UG)
+                  - listitem [ref=e669]: Somali (so-SO)
+                  - listitem [ref=e670]: Soninke (Mali) (snk-ML)
+                  - listitem [ref=e671]: Sotho Southern (st-LS)
+                  - listitem [ref=e672]: South Azerbaijani (azb-AZ)
+                  - listitem [ref=e673]: Southern Kurdish (sdh-IR)
+                  - listitem [ref=e674]: Southern Ndebele (nr-ZA)
+                  - listitem [ref=e675]: Southern Pashto (pbt-PK)
+                  - listitem [ref=e676]: Southern Sami (sma-SE)
+                  - listitem [ref=e677]: Southwestern Dinka (dik-SS)
+                  - listitem [ref=e678]: Spanish (Argentina) (es-AR)
+                  - listitem [ref=e679]: Spanish (Colombia) (es-CO)
+                  - listitem [ref=e680]: Spanish (Dominican Republic) (es-DO)
+                  - listitem [ref=e681]: Spanish (Honduras) (es-HN)
+                  - listitem [ref=e682]: Spanish (Latin America) (es-419)
+                  - listitem [ref=e683]: Spanish (Mexico) (es-MX)
+                  - listitem [ref=e684]: Spanish (Panama) (es-PA)
+                  - listitem [ref=e685]: Spanish (Perù) (es-PE)
+                  - listitem [ref=e686]: Spanish (Puerto Rico) (es-PR)
+                  - listitem [ref=e687]: Spanish (Spain) (es-ES)
+                  - listitem [ref=e688]: Spanish (USA) (es-US)
+                  - listitem [ref=e689]: Spanish (Uruguay) (es-UY)
+                  - listitem [ref=e690]: Spanish (Venezuela) (es-VE)
+                  - listitem [ref=e691]: Sranan Tongo (srn-SR)
+                  - listitem [ref=e692]: Standard Latvian (lvs-LV)
+                  - listitem [ref=e693]: Standard Malay (zsm-MY)
+                  - listitem [ref=e694]: Sundanese (su-ID)
+                  - listitem [ref=e695]: Susu (Guinea) (sus-GN)
+                  - listitem [ref=e696]: Swahili (sw-KE)
+                  - listitem [ref=e697]: Swampy Cree (csw-CA)
+                  - listitem [ref=e698]: Swati (ss-SZ)
+                  - listitem [ref=e699]: Swedish (sv-SE)
+                  - listitem [ref=e700]: Syriac (syr-SY)
+                  - listitem [ref=e701]: Syriac (Aramaic) (syc-TR)
+                  - listitem [ref=e702]: Tachelhit (shi-MA)
+                  - listitem [ref=e703]: Tagalog (tl-PH)
+                  - listitem [ref=e704]: Tahitian (ty-PF)
+                  - listitem [ref=e705]: Tajik (tg-TJ)
+                  - listitem [ref=e706]: Tamashek (Tuareg) (tmh-DZ)
+                  - listitem [ref=e707]: Tamasheq (taq-ML)
+                  - listitem [ref=e708]: Tamil (India) (ta-IN)
+                  - listitem [ref=e709]: Tamil (Sri Lanka) (ta-LK)
+                  - listitem [ref=e710]: Taroko (trv-TW)
+                  - listitem [ref=e711]: Tatar (tt-RU)
+                  - listitem [ref=e712]: Telugu (te-IN)
+                  - listitem [ref=e713]: Teso (teo-UG)
+                  - listitem [ref=e714]: Tetum (tet-TL)
+                  - listitem [ref=e715]: Thai (th-TH)
+                  - listitem [ref=e716]: Tibetan (bo-CN)
+                  - listitem [ref=e717]: Tigre (tig-ER)
+                  - listitem [ref=e718]: Tigrinya (ti-ET)
+                  - listitem [ref=e719]: Tiv (tiv-NG)
+                  - listitem [ref=e720]: Tok Pisin (tpi-PG)
+                  - listitem [ref=e721]: Tokelauan (tkl-TK)
+                  - listitem [ref=e722]: Tongan (to-TO)
+                  - listitem [ref=e723]: Tosk Albanian (als-AL)
+                  - listitem [ref=e724]: Tsonga (ts-ZA)
+                  - listitem [ref=e725]: Tswa (tsc-MZ)
+                  - listitem [ref=e726]: Tswana (Botswana) (tn-BW)
+                  - listitem [ref=e727]: Tswana (South Africa) (tn-ZA)
+                  - listitem [ref=e728]: Tumbuka (tum-MW)
+                  - listitem [ref=e729]: Turkish (tr-TR)
+                  - listitem [ref=e730]: Turkmen (tk-TM)
+                  - listitem [ref=e731]: Tuvaluan (tvl-TV)
+                  - listitem [ref=e732]: Twi (tw-GH)
+                  - listitem [ref=e733]: Tyap (kcg-NG)
+                  - listitem [ref=e734]: Udmurt (udm-RU)
+                  - listitem [ref=e735]: Ukrainian (uk-UA)
+                  - listitem [ref=e736]: Uma (ppk-ID)
+                  - listitem [ref=e737]: Umbundu (umb-AO)
+                  - listitem [ref=e738]: Upper Sorbian (hsb-DE)
+                  - listitem [ref=e739]: Urdu (Latin script) (ur-Latn-PK)
+                  - listitem [ref=e740]: Urdu (Perso-arabic script) (ur-PK)
+                  - listitem [ref=e741]: Uyghur (ug-CN)
+                  - listitem [ref=e742]: Uzbek (uz-UZ)
+                  - listitem [ref=e743]: Venda (ve-ZA)
+                  - listitem [ref=e744]: Venetian (vec-IT)
+                  - listitem [ref=e745]: Vietnamese (vi-VN)
+                  - listitem [ref=e746]: Vincentian Creole English (svc-VC)
+                  - listitem [ref=e747]: Virgin Islands Creole English (vic-US)
+                  - listitem [ref=e748]: Volapük (vo-001)
+                  - listitem [ref=e749]: Vunjo (vun-TZ)
+                  - listitem [ref=e750]: Wallisian (wls-WF)
+                  - listitem [ref=e751]: Walloon (wa-BE)
+                  - listitem [ref=e752]: Walser (wae-CH)
+                  - listitem [ref=e753]: Wandala (mfi-CM)
+                  - listitem [ref=e754]: Waray (war-PH)
+                  - listitem [ref=e755]: Welsh (cy-GB)
+                  - listitem [ref=e756]: West Central Oromo (gaz-ET)
+                  - listitem [ref=e757]: West Flemish (vls-BE)
+                  - listitem [ref=e758]: Western Frisian (fy-NL)
+                  - listitem [ref=e759]: Wolof (wo-SN)
+                  - listitem [ref=e760]: Xhosa (xh-ZA)
+                  - listitem [ref=e761]: Yakut (sah-RU)
+                  - listitem [ref=e762]: Yiddish (yi-YD)
+                  - listitem [ref=e763]: Yoruba (yo-NG)
+                  - listitem [ref=e764]: Zulu (zu-ZA)
+        - link "Go to top" [ref=e765] [cursor=pointer]:
+          - /url: "#top"
+      - generic [ref=e766]:
+        - heading "Supported subjects" [level=3] [ref=e767]
+        - table [ref=e768]:
+          - rowgroup [ref=e769]:
+            - row "Subject name Code" [ref=e770]:
+              - columnheader "Subject name" [ref=e771]
+              - columnheader "Code" [ref=e772]
+          - rowgroup [ref=e773]:
+            - row "General general" [ref=e774]:
+              - cell "General" [ref=e775]
+              - cell "general" [ref=e776]
+            - row "Accounting & Finance accounting_finance" [ref=e777]:
+              - cell "Accounting & Finance" [ref=e778]
+              - cell "accounting_finance" [ref=e779]
+            - row "Adwords adwords" [ref=e780]:
+              - cell "Adwords" [ref=e781]
+              - cell "adwords" [ref=e782]
+            - row "Aerospace / Defence aerospace_defence" [ref=e783]:
+              - cell "Aerospace / Defence" [ref=e784]
+              - cell "aerospace_defence" [ref=e785]
+            - row "Architecture architecture" [ref=e786]:
+              - cell "Architecture" [ref=e787]
+              - cell "architecture" [ref=e788]
+            - row "Art art" [ref=e789]:
+              - cell "Art" [ref=e790]
+              - cell "art" [ref=e791]
+            - row "Automotive automotive" [ref=e792]:
+              - cell "Automotive" [ref=e793]
+              - cell "automotive" [ref=e794]
+            - row "Certificates, diplomas, licences , cv's, etc certificates_diplomas_licences_cv_etc" [ref=e795]:
+              - cell "Certificates, diplomas, licences , cv's, etc" [ref=e796]
+              - cell "certificates_diplomas_licences_cv_etc" [ref=e797]
+            - row "Chemical chemical" [ref=e798]:
+              - cell "Chemical" [ref=e799]
+              - cell "chemical" [ref=e800]
+            - row "Civil Engineering / Construction civil_engineering_construction" [ref=e801]:
+              - cell "Civil Engineering / Construction" [ref=e802]
+              - cell "civil_engineering_construction" [ref=e803]
+            - row "Corporate Social Responsibility corporate_social_responsibility" [ref=e804]:
+              - cell "Corporate Social Responsibility" [ref=e805]
+              - cell "corporate_social_responsibility" [ref=e806]
+            - row "Cosmetics cosmetics" [ref=e807]:
+              - cell "Cosmetics" [ref=e808]
+              - cell "cosmetics" [ref=e809]
+            - row "Culinary culinary" [ref=e810]:
+              - cell "Culinary" [ref=e811]
+              - cell "culinary" [ref=e812]
+            - row "Electronics / Electrical Engineering electronics_electrical_engineering" [ref=e813]:
+              - cell "Electronics / Electrical Engineering" [ref=e814]
+              - cell "electronics_electrical_engineering" [ref=e815]
+            - row "Energy / Power generation / Oil & Gas energy_power_generation_oil_gas" [ref=e816]:
+              - cell "Energy / Power generation / Oil & Gas" [ref=e817]
+              - cell "energy_power_generation_oil_gas" [ref=e818]
+            - row "Environment environment" [ref=e819]:
+              - cell "Environment" [ref=e820]
+              - cell "environment" [ref=e821]
+            - row "European Governmental Politics european_governmental_politics" [ref=e822]:
+              - cell "European Governmental Politics" [ref=e823]
+              - cell "european_governmental_politics" [ref=e824]
+            - row "Fashion fashion" [ref=e825]:
+              - cell "Fashion" [ref=e826]
+              - cell "fashion" [ref=e827]
+            - row "Games / Video Games / Casino games_viseogames_casino" [ref=e828]:
+              - cell "Games / Video Games / Casino" [ref=e829]
+              - cell "games_viseogames_casino" [ref=e830]
+            - row "General Business / Commerce general_business_commerce" [ref=e831]:
+              - cell "General Business / Commerce" [ref=e832]
+              - cell "general_business_commerce" [ref=e833]
+            - row "History / Archaeology history_archaeology" [ref=e834]:
+              - cell "History / Archaeology" [ref=e835]
+              - cell "history_archaeology" [ref=e836]
+            - row "Information Technology information_technology" [ref=e837]:
+              - cell "Information Technology" [ref=e838]
+              - cell "information_technology" [ref=e839]
+            - row "Insurance insurance" [ref=e840]:
+              - cell "Insurance" [ref=e841]
+              - cell "insurance" [ref=e842]
+            - row "Internet, e-commerce internet_e-commerce" [ref=e843]:
+              - cell "Internet, e-commerce" [ref=e844]
+              - cell "internet_e-commerce" [ref=e845]
+            - row "Legal documents / Contracts legal_documents_contracts" [ref=e846]:
+              - cell "Legal documents / Contracts" [ref=e847]
+              - cell "legal_documents_contracts" [ref=e848]
+            - row "Literary Translations literary_translations" [ref=e849]:
+              - cell "Literary Translations" [ref=e850]
+              - cell "literary_translations" [ref=e851]
+            - row "Marketing & Advertising material / Public Relations marketing_advertising_material_public_relations" [ref=e852]:
+              - cell "Marketing & Advertising material / Public Relations" [ref=e853]
+              - cell "marketing_advertising_material_public_relations" [ref=e854]
+            - row "Mathematics and Physics matematics_and_physics" [ref=e855]:
+              - cell "Mathematics and Physics" [ref=e856]
+              - cell "matematics_and_physics" [ref=e857]
+            - row "Mechanical / Manufacturing mechanical_manufacturing" [ref=e858]:
+              - cell "Mechanical / Manufacturing" [ref=e859]
+              - cell "mechanical_manufacturing" [ref=e860]
+            - row "Media / Journalism / Publishing media_journalism_publishing" [ref=e861]:
+              - cell "Media / Journalism / Publishing" [ref=e862]
+              - cell "media_journalism_publishing" [ref=e863]
+            - row "Medical / Pharmaceutical medical_pharmaceutical" [ref=e864]:
+              - cell "Medical / Pharmaceutical" [ref=e865]
+              - cell "medical_pharmaceutical" [ref=e866]
+            - row "Music music" [ref=e867]:
+              - cell "Music" [ref=e868]
+              - cell "music" [ref=e869]
+            - row "Private Correspondence, Letters private_correspondence_letters" [ref=e870]:
+              - cell "Private Correspondence, Letters" [ref=e871]
+              - cell "private_correspondence_letters" [ref=e872]
+            - row "Religion religion" [ref=e873]:
+              - cell "Religion" [ref=e874]
+              - cell "religion" [ref=e875]
+            - row "Science science" [ref=e876]:
+              - cell "Science" [ref=e877]
+              - cell "science" [ref=e878]
+            - row "Shipping / Sailing / Maritime shipping_sailing_maritime" [ref=e879]:
+              - cell "Shipping / Sailing / Maritime" [ref=e880]
+              - cell "shipping_sailing_maritime" [ref=e881]
+            - row "Social Science social_science" [ref=e882]:
+              - cell "Social Science" [ref=e883]
+              - cell "social_science" [ref=e884]
+            - row "Telecommunications telecommunications" [ref=e885]:
+              - cell "Telecommunications" [ref=e886]
+              - cell "telecommunications" [ref=e887]
+            - row "Travel & Tourism travel_tourism" [ref=e888]:
+              - cell "Travel & Tourism" [ref=e889]
+              - cell "travel_tourism" [ref=e890]
+        - link "Go to top" [ref=e891] [cursor=pointer]:
+          - /url: "#top"
+      - generic [ref=e892]:
+        - heading "Supported segmentation rules" [level=3] [ref=e893]
+        - table [ref=e894]:
+          - rowgroup [ref=e895]:
+            - row "Segmentation rule name Code" [ref=e896]:
+              - columnheader "Segmentation rule name" [ref=e897]
+              - columnheader "Code" [ref=e898]
+          - rowgroup [ref=e899]:
+            - row "General empty" [ref=e900]:
+              - cell "General" [ref=e901]
+              - cell "empty" [ref=e902]:
+                - code [ref=e903]: empty
+            - row "Patent patent" [ref=e904]:
+              - cell "Patent" [ref=e905]
+              - cell "patent" [ref=e906]
+        - link "Go to top" [ref=e907] [cursor=pointer]:
+          - /url: "#top"
+  - img

@@ -5,6 +5,7 @@ import type { ILogger } from '../util/baseLogger'
 import type { ITranslationMemory } from '../tm/ITranslationMemory'
 import type { IReviewService, ReviewPushRequest } from './reviewService'
 import { mergeReviewedXliffFilesIntoTranslationMemory } from './xliffReviewImporter'
+import { resolveMateCatLocale } from './mateCatLocaleResolver'
 import {
   type IMateCatCreatedProject,
   type IMateCatProjectRef,
@@ -54,10 +55,6 @@ export class MateCatReviewService implements IReviewService {
     return settingsLoader(this.workspacePath, this.logger)
   }
 
-  private normalizeLocale(locale: string): string {
-    return locale.trim().toLowerCase()
-  }
-
   private async resolveFallbackProjectName(projectPrefix: string | undefined, targetLocale: string): Promise<string> {
     const packageJsonPath = path.join(this.workspacePath, 'package.json')
     const packageJsonUri = this.fileSystem.createUri(packageJsonPath)
@@ -94,7 +91,9 @@ export class MateCatReviewService implements IReviewService {
 
   private async buildMateCatProjectFields(settings: MateCatSettings, targetLocale: string): Promise<MateCatNewProjectDefaults> {
     const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
-    const sourceLocale = projectConfig.sourceLocale
+    const localeOverrideMap = projectConfig.reviewer?.langMap ?? {}
+    const sourceLocale = resolveMateCatLocale(projectConfig.sourceLocale, localeOverrideMap)
+    const resolvedTargetLocale = resolveMateCatLocale(targetLocale, localeOverrideMap)
     const reviewerProjectPrefix = projectConfig.reviewer?.project
 
     const configuredProjectName = settings.newProjectDefaults.project_name
@@ -105,7 +104,7 @@ export class MateCatReviewService implements IReviewService {
 
     const runtimeFields: MateCatRuntimeNewProjectFields = {
       source_lang: sourceLocale,
-      target_lang: targetLocale,
+      target_lang: resolvedTargetLocale,
       project_name: resolvedProjectName
     }
 
@@ -251,7 +250,50 @@ export class MateCatReviewService implements IReviewService {
 
   private isCompletedMateCatStatus(status: string): boolean {
     const normalized = status.toLowerCase()
-    return normalized === 'done' || normalized === 'completed' || normalized === 'complete'
+    return normalized === 'completed' || normalized === 'complete' || normalized === 'final' || normalized === 'finalized'
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error)
+  }
+
+  private getHttpStatusCodeFromError(error: unknown): number | undefined {
+    const message = this.getErrorMessage(error)
+    const statusMatch = message.match(/\b(\d{3})\b/)
+    if (!statusMatch?.[1]) {
+      return undefined
+    }
+
+    const parsedStatus = Number(statusMatch[1])
+    return Number.isInteger(parsedStatus) ? parsedStatus : undefined
+  }
+
+  private isDeletedProjectError(error: unknown, projectId: string): boolean {
+    const statusCode = this.getHttpStatusCodeFromError(error)
+    if (statusCode !== 404 && statusCode !== 410) {
+      return false
+    }
+
+    const message = this.getErrorMessage(error)
+    return message.includes(`project ${projectId}`)
+  }
+
+  private async removePendingProjects(projectIds: Set<string>, reason: string): Promise<void> {
+    if (projectIds.size === 0) {
+      return
+    }
+
+    const pendingProjects = await this.loadPendingReviewProjects()
+    const remainingProjects = pendingProjects.filter((project) => !projectIds.has(project.projectId))
+
+    if (remainingProjects.length === pendingProjects.length) {
+      return
+    }
+
+    await this.savePendingReviewProjects(remainingProjects)
+    this.logger.warn(
+      `MateCat: removed ${pendingProjects.length - remainingProjects.length} pending project(s) because ${reason}`
+    )
   }
 
   private toMateCatProjectRefs(projects: PendingReviewProject[]): IMateCatProjectRef[] {
@@ -288,10 +330,34 @@ export class MateCatReviewService implements IReviewService {
       return
     }
 
-    const statuses = await this.mateCatService.checkReviewProjectStatus(
-      settings,
-      this.toMateCatProjectRefs(pendingProjects)
-    )
+    const deletedProjectIds = new Set<string>()
+    const statuses: IMateCatProjectStatus[] = []
+
+    for (const project of pendingProjects) {
+      try {
+        const projectStatuses = await this.mateCatService.checkReviewProjectStatus(
+          settings,
+          this.toMateCatProjectRefs([project])
+        )
+        statuses.push(...projectStatuses)
+      } catch (error) {
+        if (this.isDeletedProjectError(error, project.projectId)) {
+          deletedProjectIds.add(project.projectId)
+          this.logger.warn(`MateCat: project ${project.projectId} no longer exists remotely; removing local pending tracking`)
+          continue
+        }
+
+        throw error
+      }
+    }
+
+    await this.removePendingProjects(deletedProjectIds, 'project no longer exists in MateCat')
+
+    const activePendingProjects = pendingProjects.filter((project) => !deletedProjectIds.has(project.projectId))
+    if (activePendingProjects.length === 0) {
+      this.logger.info('No pending MateCat projects remain after cleanup')
+      return
+    }
 
     const completedProjectIds = new Set(
       statuses.filter((project) => this.isCompletedMateCatStatus(project.status)).map((project) => project.projectId)
@@ -302,11 +368,23 @@ export class MateCatReviewService implements IReviewService {
       return
     }
 
-    const completedProjects = pendingProjects.filter((project) => completedProjectIds.has(project.projectId))
+    const completedProjects = activePendingProjects.filter((project) => completedProjectIds.has(project.projectId))
     const successfullyMergedProjects = new Set<string>()
 
     for (const project of completedProjects) {
-      const pulledFiles = await this.mateCatService.pullReviewedTranslations(settings, this.toMateCatProjectRefs([project]))
+      let pulledFiles: IMateCatPulledFile[]
+      try {
+        pulledFiles = await this.mateCatService.pullReviewedTranslations(settings, this.toMateCatProjectRefs([project]))
+      } catch (error) {
+        if (this.isDeletedProjectError(error, project.projectId)) {
+          deletedProjectIds.add(project.projectId)
+          this.logger.warn(`MateCat: project ${project.projectId} was deleted before reviewed files could be pulled`)
+          continue
+        }
+
+        throw error
+      }
+
       const savedCount = await this.persistPulledReviewFiles(pulledFiles)
       this.logger.info(`MateCat: downloaded ${savedCount} reviewed file(s) for project ${project.projectId}`)
 
@@ -321,7 +399,11 @@ export class MateCatReviewService implements IReviewService {
       successfullyMergedProjects.add(project.projectId)
     }
 
-    const remainingProjects = pendingProjects.filter((project) => !successfullyMergedProjects.has(project.projectId))
+    await this.removePendingProjects(deletedProjectIds, 'project was deleted during pull')
+
+    const remainingProjects = activePendingProjects.filter(
+      (project) => !successfullyMergedProjects.has(project.projectId) && !deletedProjectIds.has(project.projectId)
+    )
     await this.savePendingReviewProjects(remainingProjects)
     this.logger.info(`MateCat: closed ${successfullyMergedProjects.size} pending project(s) after successful pull merge`)
   }
@@ -333,6 +415,28 @@ export class MateCatReviewService implements IReviewService {
     }
 
     const settings = this.getMateCatSettings()
-    return this.mateCatService.checkReviewProjectStatus(settings, this.toMateCatProjectRefs(pendingProjects))
+    const deletedProjectIds = new Set<string>()
+    const statuses: IMateCatProjectStatus[] = []
+
+    for (const project of pendingProjects) {
+      try {
+        const projectStatuses = await this.mateCatService.checkReviewProjectStatus(
+          settings,
+          this.toMateCatProjectRefs([project])
+        )
+        statuses.push(...projectStatuses)
+      } catch (error) {
+        if (this.isDeletedProjectError(error, project.projectId)) {
+          deletedProjectIds.add(project.projectId)
+          this.logger.warn(`MateCat: project ${project.projectId} no longer exists remotely; removing local pending tracking`)
+          continue
+        }
+
+        throw error
+      }
+    }
+
+    await this.removePendingProjects(deletedProjectIds, 'project no longer exists in MateCat')
+    return statuses
   }
 }

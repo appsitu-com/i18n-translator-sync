@@ -1070,4 +1070,27 @@ describe('JsonlTranslationMemory', () => {
     expect(aiResult.size).toBe(0)
   })
 
+  it('exports XLIFF rows when target locale filter differs only by case', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'test',
+      sourceLocale: 'en-US',
+      targetLocale: 'zh-cn',
+      pairs: [{ src: 'Hello', dst: '你好', pos: 1 }],
+      sourcePath: 'i18n/en-US/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    const xliffPath = join(dir, 'review-zh.xliff')
+    const exported = await cache.exportXLIFF(xliffPath, { targetLocale: 'zh-CN' })
+
+    expect(exported).toBe(1)
+    const xliff = readFileSync(xliffPath, 'utf8')
+    expect(xliff).toContain('target-language="zh-cn"')
+    expect(xliff).toContain('<source>Hello</source>')
+    expect(xliff).toContain('<target>你好</target>')
+  })
+
 })

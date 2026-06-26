@@ -1,0 +1,472 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Matecat API",
+    "version": "3.0.0",
+    "description": "Matecat REST API for project management, translation jobs, and status monitoring",
+    "contact": {
+      "name": "Matecat Support",
+      "url": "https://www.matecat.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://www.matecat.com",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyHeader": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-matecat-key",
+        "description": "API credentials in format: {APIkey}-{APIsecret}"
+      }
+    },
+    "schemas": {
+      "ProjectCreationResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "OK",
+            "description": "Response status indicator"
+          },
+          "id_project": {
+            "type": "string",
+            "example": "12345",
+            "description": "Unique project identifier"
+          },
+          "project_pass": {
+            "type": "string",
+            "example": "abc123def456",
+            "description": "Project password/token for authenticated API calls"
+          },
+          "new_keys": {
+            "type": "string",
+            "example": "1",
+            "description": "Number of new translation memory keys created"
+          }
+        },
+        "required": ["id_project", "project_pass"]
+      },
+      "JobStats": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "description": "Total number of segments"
+          },
+          "new": {
+            "type": "integer",
+            "description": "Number of new segments"
+          },
+          "draft": {
+            "type": "integer",
+            "description": "Number of draft translations"
+          },
+          "translated": {
+            "type": "integer",
+            "description": "Number of translated segments"
+          },
+          "approved": {
+            "type": "integer",
+            "description": "Number of approved segments (first pass)"
+          },
+          "approved2": {
+            "type": "integer",
+            "description": "Number of approved segments (second pass)"
+          }
+        }
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "raw": {
+            "$ref": "#/components/schemas/JobStats"
+          },
+          "equivalent": {
+            "$ref": "#/components/schemas/JobStats"
+          }
+        },
+        "description": "Job statistics with optional raw and equivalent word counts"
+      },
+      "Chunk": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Chunk identifier"
+          },
+          "id_job": {
+            "type": "string",
+            "description": "Associated job ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["new", "draft", "translated", "approved", "complete", "completed", "done", "closed", "archived", "final", "finalized", "active"],
+            "description": "Current translation status of the chunk"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/Stats"
+          },
+          "xliff_download_url": {
+            "type": "string",
+            "description": "URL to download XLIFF file with translations"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Job identifier"
+          },
+          "id_job": {
+            "type": "string",
+            "description": "Job ID (alternative field)"
+          },
+          "chunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chunk"
+            }
+          },
+          "status": {
+            "type": "string",
+            "description": "Job status"
+          }
+        }
+      },
+      "ProjectStatusResponse": {
+        "type": "object",
+        "properties": {
+          "id_project": {
+            "type": "string",
+            "description": "Project identifier"
+          },
+          "status": {
+            "type": "string",
+            "description": "Project analysis status (DONE, pending, etc.)"
+          },
+          "jobs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Job"
+            },
+            "description": "Array of jobs in the project"
+          },
+          "chunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Chunk"
+            },
+            "description": "Flattened array of all chunks (when fetched directly)"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id_job": {
+                  "type": "string"
+                },
+                "xliff_download_url": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "ProjectDeleteResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "OK"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/new": {
+      "post": {
+        "summary": "Create a new translation project",
+        "description": "Create a new MateCat project with files for translation review",
+        "operationId": "createProject",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "project_name": {
+                    "type": "string",
+                    "description": "Name of the project"
+                  },
+                  "source_lang": {
+                    "type": "string",
+                    "description": "Source language code (e.g., en-US, en)",
+                    "example": "en-US"
+                  },
+                  "target_lang": {
+                    "type": "string",
+                    "description": "Target language code (e.g., fr-FR, fr)",
+                    "example": "fr-FR"
+                  },
+                  "subject": {
+                    "type": "string",
+                    "description": "Subject domain (e.g., general, medical_pharmaceutical)",
+                    "example": "general"
+                  },
+                  "files[]": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    },
+                    "description": "XLIFF, TMX, or other supported translation files"
+                  },
+                  "instructions[]": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Translation instructions"
+                  }
+                },
+                "required": ["project_name", "source_lang", "target_lang"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectCreationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "401": {
+            "description": "Authentication failed"
+          }
+        }
+      }
+    },
+    "/api/v3/projects/{id_project}/{password}": {
+      "get": {
+        "summary": "Get project jobs and status",
+        "description": "Retrieve all jobs and their status for a project. Returns job information including chunks and their current status.",
+        "operationId": "getProjectJobs",
+        "parameters": [
+          {
+            "name": "id_project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project ID"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project password"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "401": {
+            "description": "Invalid project password"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a project",
+        "description": "Delete a project and all associated jobs and data",
+        "operationId": "deleteProject",
+        "parameters": [
+          {
+            "name": "id_project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project ID"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project password"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectDeleteResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "401": {
+            "description": "Invalid project password"
+          }
+        }
+      }
+    },
+    "/api/v3/projects/{id_project}/{password}/urls": {
+      "get": {
+        "summary": "Get project download URLs",
+        "description": "Retrieve download URLs for XLIFF files and other project assets",
+        "operationId": "getProjectUrls",
+        "parameters": [
+          {
+            "name": "id_project",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project ID"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project password"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project URLs retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jobs": {
+                      "type": "array",
+                      "description": "Array of job IDs or job objects"
+                    },
+                    "files": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id_job": {
+                            "type": "string"
+                          },
+                          "xliff_download_url": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "401": {
+            "description": "Invalid project password"
+          }
+        }
+      }
+    },
+    "/api/v3/jobs/{id_job}/{password}": {
+      "get": {
+        "summary": "Get job details and status",
+        "description": "Retrieve detailed information for a specific job including chunks and statistics",
+        "operationId": "getJobStatus",
+        "parameters": [
+          {
+            "name": "id_job",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Job ID"
+          },
+          {
+            "name": "password",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Project password"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job status retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Job"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Job not found"
+          },
+          "401": {
+            "description": "Invalid password"
+          }
+        }
+      }
+    }
+  }
+}

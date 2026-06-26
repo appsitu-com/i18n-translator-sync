@@ -88,13 +88,13 @@ describe('MateCatService', () => {
     expect(() => loadMateCatSettings('/workspace')).toThrow(/defaults validation failed/)
   })
 
-  it('createReviewProject posts multipart to fixed /api/v1/new and reports success', async () => {
+  it('createReviewProject posts multipart to fixed /api/v1/new and returns project credentials', async () => {
     global.fetch = vi.fn().mockResolvedValue({
       ok: true,
       status: 200,
       statusText: 'OK',
       async text() {
-        return '{"id":"p1"}'
+        return '{"status":"OK","id_project":"p1","project_pass":"pass-1","new_keys":"1"}'
       }
     })
 
@@ -118,7 +118,7 @@ describe('MateCatService', () => {
           ]
         }
       )
-    ).resolves.toEqual(expect.objectContaining({ projectId: expect.any(String) }))
+    ).resolves.toEqual({ projectId: 'p1', projectPass: 'pass-1' })
     expect(fetch).toHaveBeenCalledOnce()
     expect(vi.mocked(fetch).mock.calls[0]?.[0]).toBe('https://www.matecat.com/api/v1/new')
 
@@ -174,13 +174,29 @@ describe('MateCatService', () => {
         ok: true,
         status: 200,
         statusText: 'OK',
-        text: async () => JSON.stringify({ status: 'completed' })
+        text: async () =>
+          JSON.stringify({
+            project: {
+              id: 'p1',
+              password: 'pass-1',
+              status: 'completed',
+              jobs: []
+            }
+          })
       })
       .mockResolvedValueOnce({
         ok: true,
         status: 200,
         statusText: 'OK',
-        text: async () => JSON.stringify({ status: 'in_progress' })
+        text: async () =>
+          JSON.stringify({
+            project: {
+              id: 'p2',
+              password: 'pass-2',
+              status: 'in_progress',
+              jobs: []
+            }
+          })
       })
 
     const httpClient: IMateCatHttpClient = {
@@ -194,10 +210,145 @@ describe('MateCatService', () => {
     ])
 
     expect(result).toEqual([
-      { projectId: 'p1', status: 'completed' },
-      { projectId: 'p2', status: 'in_progress' }
+      { projectId: 'p1', status: 'completed', percentDone: 100 },
+      { projectId: 'p2', status: 'in_progress', percentDone: 0 }
     ])
     expect(send).toHaveBeenCalledTimes(2)
+    expect(send).toHaveBeenNthCalledWith(
+      1,
+      'https://www.matecat.com/api/v3/projects/p1/pass-1',
+      expect.objectContaining({ method: 'GET' })
+    )
+    expect(send).toHaveBeenNthCalledWith(
+      2,
+      'https://www.matecat.com/api/v3/projects/p2/pass-2',
+      expect.objectContaining({ method: 'GET' })
+    )
+  })
+
+  it('checkReviewProjectStatus uses job chunk stats to compute percent done', async () => {
+    const send = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () =>
+        JSON.stringify({
+          project: {
+            id: 'p1',
+            password: 'pass-1',
+            jobs: [
+              {
+                id: 'job-1',
+                password: 'pass-1',
+                status: 'active',
+                chunks: [
+                  {
+                    status: 'active',
+                    stats: {
+                      raw: {
+                        new: 10,
+                        draft: 10,
+                        translated: 40,
+                        approved: 20,
+                        approved2: 20,
+                        total: 100
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    const result = await service.checkReviewProjectStatus(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
+
+    expect(result).toEqual([{ projectId: 'p1', status: 'active', percentDone: 80 }])
+    expect(send).toHaveBeenNthCalledWith(
+      1,
+      'https://www.matecat.com/api/v3/projects/p1/pass-1',
+      expect.objectContaining({ method: 'GET' })
+    )
+  })
+
+  it('checkReviewProjectStatus prefers chunk status over top-level analysis DONE', async () => {
+    const send = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({
+        status: 'DONE',
+        jobs: [
+          {
+            chunks: [
+              { status: 'active' }
+            ]
+          }
+        ]
+      })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    const result = await service.checkReviewProjectStatus(settings, [
+      { projectId: 'p1', projectPass: 'pass-1' }
+    ])
+
+    expect(result).toEqual([
+      { projectId: 'p1', status: 'active', percentDone: 0 }
+    ])
+  })
+
+  it('checkReviewProjectStatus maps top-level DONE to analysis_done when chunk statuses are missing', async () => {
+    const send = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({ status: 'DONE' })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    const result = await service.checkReviewProjectStatus(settings, [
+      { projectId: 'p1', projectPass: 'pass-1' }
+    ])
+
+    expect(result).toEqual([
+      { projectId: 'p1', status: 'analysis_done', percentDone: 0 }
+    ])
+  })
+
+  it('checkReviewProjectStatus computes partial percent from mixed chunk states', async () => {
+    const send = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({
+        status: 'DONE',
+        jobs: [
+          {
+            chunks: [{ status: 'done' }, { status: 'active' }]
+          }
+        ]
+      })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    const result = await service.checkReviewProjectStatus(settings, [
+      { projectId: 'p1', projectPass: 'pass-1' }
+    ])
+
+    expect(result).toEqual([
+      { projectId: 'p1', status: 'in_progress', percentDone: 50 }
+    ])
   })
 
   it('supports interface-only HTTP client injection', async () => {
@@ -231,6 +382,26 @@ describe('MateCatService', () => {
     expect(send).toHaveBeenCalledOnce()
     expect(send).toHaveBeenCalledWith(
       'https://www.matecat.com/api/v1/new',
+      expect.objectContaining({ method: 'POST' })
+    )
+  })
+
+  it('deleteReviewProject sends POST to v3 projects delete endpoint', async () => {
+    const send = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () => JSON.stringify({ status: 'OK' })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    await service.deleteReviewProject(settings, { projectId: 'p-delete', projectPass: 'pass-delete' })
+
+    expect(send).toHaveBeenCalledTimes(1)
+    expect(send).toHaveBeenCalledWith(
+      'https://www.matecat.com/api/v3/projects/p-delete/pass-delete/delete',
       expect.objectContaining({ method: 'POST' })
     )
   })

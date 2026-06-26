@@ -1002,15 +1002,25 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     )
   }
 
+  private normalizeLocaleForComparison(locale: string): string {
+    return locale.trim().toLowerCase()
+  }
+
   private selectEntriesForReviewExport(originFilter?: string, targetLocaleFilter?: string): TmEntry[] {
     const selected = new Map<string, TmEntry>()
+    const normalizedTargetLocaleFilter = targetLocaleFilter
+      ? this.normalizeLocaleForComparison(targetLocaleFilter)
+      : undefined
 
     for (const entry of this.strictData.values()) {
       if (originFilter && entry.origin !== originFilter) {
         continue
       }
 
-      if (targetLocaleFilter && entry.target !== targetLocaleFilter) {
+      if (
+        normalizedTargetLocaleFilter &&
+        this.normalizeLocaleForComparison(entry.target) !== normalizedTargetLocaleFilter
+      ) {
         continue
       }
 
