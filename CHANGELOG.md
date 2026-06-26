@@ -30,6 +30,13 @@ MateCat.com API integration - Human translation and review workflow
 - Centralized translation whitespace handling.
 - Refactored review service abstraction and orchestration.
 - Standardized interface and file naming conventions.
+- Fixed MateCAT status API to use direct project endpoint instead of sequential job polling.
+- Fixed deleted project status detection to handle API 200 response with "unknown" status.
+
+### Performance
+
+- Optimized MateCAT review status checks: reduced from 1+N API calls to single call per project.
+- Integration test execution time reduced from indefinite to ~17.7 seconds with optimized API pattern.
 
 ### Documentation
 
