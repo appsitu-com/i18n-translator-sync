@@ -95,6 +95,7 @@ export type IMateCatProjectStatus = {
   projectId: string
   status: string
   percentDone?: number
+  projectName?: string
 }
 
 export type IMateCatPulledFile = {
@@ -782,13 +783,13 @@ export class MateCatService implements IMateCatService {
       })
 
       const projectBody = await v3ProjectResponse.text()
-      let formattedProjectBody = projectBody
-      try {
-        formattedProjectBody = JSON.stringify(JSON.parse(projectBody), null, 2)
-      } catch {
-        // Keep raw response when projectBody is not JSON.
-      }
-      this.logger.debug(`MateCat project response for project ${project.projectId}: ${formattedProjectBody}`)
+      // let formattedProjectBody = projectBody
+      // try {
+      //   formattedProjectBody = JSON.stringify(JSON.parse(projectBody), null, 2)
+      // } catch {
+      //   // Keep raw response when projectBody is not JSON.
+      // }
+      // this.logger.debug(`MateCat project response for project ${project.projectId}: ${formattedProjectBody}`)
       if (!v3ProjectResponse.ok) {
         throw new Error(
           `MateCat status check failed for project ${project.projectId}: ` +
@@ -827,7 +828,8 @@ export class MateCatService implements IMateCatService {
       statuses.push({
         projectId: project.projectId,
         status,
-        percentDone
+        percentDone,
+        projectName: typeof projectPayload.name === 'string' ? projectPayload.name : undefined
       })
     }
 

@@ -2,6 +2,7 @@ export type ReviewProjectStatus = {
   projectId: string
   status: string
   percentDone?: number
+  projectName?: string
 }
 
 export type ReviewArtifact = {

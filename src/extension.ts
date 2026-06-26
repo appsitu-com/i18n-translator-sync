@@ -414,14 +414,24 @@ export async function checkMateCatStatus(): Promise<void> {
   const channel = getOutputChannel()
   if (statuses.length === 0) {
     channel.appendLine('MateCat status: no pending projects')
+    vscode.window.showInformationMessage('No pending MateCat review projects.')
     return
   }
 
-  channel.appendLine('MateCat project status:')
-  for (const status of statuses) {
+  // Build the summary for the pop-up and output channel
+  const summaryLines = statuses.map((status) => {
     const percentDone = status.percentDone ?? 0
-    channel.appendLine(`- ${status.projectId}: ${percentDone}% done (${status.status})`)
-  }
+    const projectDisplay = status.projectName ? `${status.projectName} (${status.projectId})` : status.projectId
+    return `${projectDisplay}: ${percentDone}% done (${status.status})`
+  })
+
+  // Show pop-up with summary
+  const summary = summaryLines.join('\n')
+  vscode.window.showInformationMessage(`MateCat Review Status:\n\n${summary}`)
+
+  // Also log to output channel
+  channel.appendLine('MateCat project status:')
+  summaryLines.forEach((line) => channel.appendLine(`- ${line}`))
 }
 
 /**
