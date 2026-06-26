@@ -302,7 +302,7 @@ export class MateCatService implements IMateCatService {
         }
 
         const jobRecord = job as Record<string, unknown>
-        
+
         // Check for xliff_download_url in urls object (primary location in v3 API)
         const urlsObj = jobRecord.urls
         if (urlsObj && typeof urlsObj === 'object') {
@@ -313,7 +313,7 @@ export class MateCatService implements IMateCatService {
             continue
           }
         }
-        
+
         // Fallback: check for direct xliff_download_url property
         const xliffUrl = jobRecord.xliff_download_url
         if (typeof xliffUrl === 'string' && xliffUrl.trim().length > 0) {

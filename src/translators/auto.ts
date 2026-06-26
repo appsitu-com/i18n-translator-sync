@@ -33,7 +33,7 @@ function toLanguageCode(locale: string): string {
   return locale.toLowerCase().split(/[-_]/)[0]
 }
 
-function isNllbSupportedTarget(locale: string): boolean {
+function _isNllbSupportedTarget(locale: string): boolean {
   const normalizedLocale = locale.toLowerCase().replace(/-/g, '_')
   if (NLLB_SUPPORTED_SCRIPT_LOCALE_CODES.has(normalizedLocale)) {
     return true

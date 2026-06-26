@@ -77,7 +77,7 @@ export class MateCatReviewService implements IReviewService {
         const rawPackageJson = await this.fileSystem.readFile(packageJsonUri)
         const parsed = JSON.parse(rawPackageJson) as { name?: unknown }
         if (typeof parsed.name === 'string' && parsed.name.trim().length > 0) {
-          baseName = parsed.name.trim().replace(/^@/, '').replace(/[\/]/g, '-')
+          baseName = parsed.name.trim().replace(/^@/, '').replace(/[/]/g, '-')
         }
       }
     } catch (error) {

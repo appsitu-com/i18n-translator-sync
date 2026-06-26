@@ -7,6 +7,7 @@ import { normalizeLocaleWithMap } from '../util/localeNorm'
 import { readFileSync } from 'node:fs'
 import { toAbsPath } from '../core/util/pathShared'
 import { createSign } from 'node:crypto'
+import { URLSearchParams } from 'node:url'
 
 /** Default endpoint for Google Cloud Translation API */
 export const GOOGLE_DEFAULT_ENDPOINT = 'https://translation.googleapis.com'

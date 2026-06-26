@@ -49,7 +49,7 @@ export class V1ToV2JsonlTmMigration implements IJsonlTmMigration {
         continue
       }
 
-      const { extractedPaths, extractedSegments } = extraction
+      const { extractedPaths, extractedSegments: _extractedSegments } = extraction
       for (const entry of sourceEntries) {
         if (typeof entry.textPos !== 'number') {
           migratedEntries.push(entry)

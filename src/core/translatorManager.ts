@@ -1,7 +1,7 @@
 import { IFileSystem, IUri } from './util/fs';
 import { ILogger } from './util/baseLogger';
 import { ITranslationMemory } from './tm/ITranslationMemory';
-import { IDisposable, IFileRenameEvent, IFileWatcher, IWorkspaceWatcher } from './util/watcher';
+import { IFileRenameEvent, IFileWatcher, IWorkspaceWatcher } from './util/watcher';
 import { TranslateProjectConfig, IConfigProvider, loadProjectConfig } from './coreConfig';
 import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './TranslatorPipeline';

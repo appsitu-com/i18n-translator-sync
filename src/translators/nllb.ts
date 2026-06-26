@@ -116,8 +116,8 @@ export const NllbTranslator: ITranslator<INllbConfig> = {
     const temperature = cfg.temperature
     const maxTokens = cfg.maxOutputTokens
     const separator = cfg.separator
-    const timeout = cfg.timeoutMs
-    const retry = cfg.retry
+    const _timeout = cfg.timeoutMs
+    const _retry = cfg.retry
     const langMap = cfg.langMap
 
     if (!apiKey) {
