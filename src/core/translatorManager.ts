@@ -12,8 +12,8 @@ import * as fs from 'fs';
 import { toAbsPath } from './util/pathShared';
 import type { GetPassphrase } from './config';
 import type { IReviewService, ReviewArtifact, ReviewProjectStatus, ReviewPushRequest } from './review/reviewService';
-import type { IMateCatPulledFile } from './review/MateCatService';
 import { mergeReviewedXliffFilesIntoTranslationMemory } from './review/xliffReviewImporter';
+import { XliffReviewExporter } from './review/xliffReviewExporter';
 import {
   createReviewServiceFromConfig,
   type ReviewServiceDependencies,
@@ -68,6 +68,7 @@ export class TranslatorManager {
   private onConfigChanged?: () => Promise<void>;
   private translatorEngines?: ITranslatorEngines;
   private readonly dependencies: TranslatorManagerDependencies;
+  private xliffReviewExporter?: XliffReviewExporter;
 
   constructor(
     private fileSystem: IFileSystem,
@@ -129,6 +130,17 @@ export class TranslatorManager {
       })
 
     return this.reviewService
+  }
+
+  /**
+   * Get or create the XLIFF review exporter instance
+   * @private
+   */
+  private getXliffReviewExporter(): XliffReviewExporter {
+    if (!this.xliffReviewExporter) {
+      this.xliffReviewExporter = new XliffReviewExporter(this.tm, this.logger)
+    }
+    return this.xliffReviewExporter
   }
 
   /**
@@ -931,7 +943,9 @@ export class TranslatorManager {
       TranslatorManager.GENERATED_REVIEW_XLIFF_BUNDLE_NAME
     )
     fs.mkdirSync(path.dirname(generatedXliffPath), { recursive: true })
-    const exportedCount = await this.tm.exportXLIFF(
+
+    const exporter = this.getXliffReviewExporter()
+    const exportedCount = await exporter.exportXliff(
       generatedXliffPath,
       {
         ...(originFilter ? { origin: originFilter } : {}),
