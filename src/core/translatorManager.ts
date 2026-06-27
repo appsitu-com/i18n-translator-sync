@@ -12,6 +12,8 @@ import * as fs from 'fs';
 import { toAbsPath } from './util/pathShared';
 import type { GetPassphrase } from './config';
 import type { IReviewService, ReviewArtifact, ReviewProjectStatus, ReviewPushRequest } from './review/reviewService';
+import type { IMateCatPulledFile } from './review/MateCatService';
+import { mergeReviewedXliffFilesIntoTranslationMemory } from './review/xliffReviewImporter';
 import {
   createReviewServiceFromConfig,
   type ReviewServiceDependencies,
@@ -710,6 +712,10 @@ export class TranslatorManager {
    * Push translations to configured review service
    */
   async pushReviewProject(pushMode: 'all' | 'changes' = 'all'): Promise<void> {
+    if (!this.tm) {
+      throw new Error('Translation memory must be initialized before pushing translations to review service')
+    }
+
     this.logger.info('Pushing translations to review service');
 
     const { requests } = await this.prepareReviewPushRequests(pushMode)
@@ -725,6 +731,10 @@ export class TranslatorManager {
    * @returns Translation unit count from XLIFF artifacts and total artifact count
    */
   async getReviewPushPreview(pushMode: 'all' | 'changes' = 'all'): Promise<{ translationCount: number; artifactCount: number }> {
+    if (!this.tm) {
+      throw new Error('Translation memory must be initialized before previewing review push')
+    }
+
     const { requests, translationCount } = await this.prepareReviewPushRequests(pushMode)
     return {
       translationCount,
@@ -749,6 +759,21 @@ export class TranslatorManager {
    */
   private normalizeLocale(locale: string): string {
     return locale.trim().toLowerCase()
+  }
+
+  /**
+   * Check if a locale is a back-translation target.
+   * Back-translation targets follow the pattern: {targetLocale}_{sourceLocale}
+   * Example: "fr_en" when source is "en"
+   * @param locale Locale to check
+   * @param sourceLocale Source locale for comparison
+   * @returns True if locale is a back-translation target
+   */
+  private isBackTranslationTarget(locale: string, sourceLocale: string): boolean {
+    const normalizedSourceLocale = this.normalizeLocale(sourceLocale)
+    const normalizedLocale = this.normalizeLocale(locale)
+    // Back-translation target format: {target}_{source}
+    return normalizedLocale.includes(`_${normalizedSourceLocale}`)
   }
 
   private resolveReviewPushLocales(): string[] {
@@ -788,6 +813,31 @@ export class TranslatorManager {
       include: new Set((Array.isArray(includeLocales) ? includeLocales : []).map((locale) => this.normalizeLocale(locale))),
       exclude: new Set((Array.isArray(excludeLocales) ? excludeLocales : []).map((locale) => this.normalizeLocale(locale)))
     }
+  }
+
+  /**
+   * Determine the mapped locale for a given target locale based on engine langMaps.
+   * This is used to query the translation memory which stores entries with mapped locales.
+   * @param targetLocale The unmapped target locale from config
+   * @returns The mapped locale if a mapping exists in any engine config, otherwise the original locale
+   */
+  private resolveMappedLocaleForReview(targetLocale: string): string {
+    // Check all configured engines for langMap entries that match this locale
+    if (this.translatorEngines) {
+      for (const engineName of Object.keys(this.translatorEngines)) {
+        const engineConfig = (this.translatorEngines as Record<string, unknown>)[engineName]
+        if (engineConfig && typeof engineConfig === 'object' && 'langMap' in engineConfig) {
+          const langMap = engineConfig.langMap as Record<string, string> | undefined
+          if (langMap && targetLocale in langMap) {
+            // Found a mapping for this locale
+            return langMap[targetLocale]
+          }
+        }
+      }
+    }
+
+    // No mapping found, return the original locale
+    return targetLocale
   }
 
   /**
@@ -836,9 +886,11 @@ export class TranslatorManager {
 
   /**
    * Export local human-reviewed TM rows into a TMX file for CAT upload.
+   * @param targetLocale The unmapped target locale (for folder naming)
+   * @param mappedLocale The mapped target locale (for TM queries)
    * @returns Upload artifact metadata when TMX rows were exported
    */
-  private async createGeneratedTmReviewArtifact(targetLocale: string): Promise<ReviewArtifact | undefined> {
+  private async createGeneratedTmReviewArtifact(targetLocale: string, mappedLocale: string): Promise<ReviewArtifact | undefined> {
     const generatedTmxPath = path.join(
       this.workspacePath,
       '.translator',
@@ -848,7 +900,7 @@ export class TranslatorManager {
       TranslatorManager.GENERATED_TM_TMX_NAME
     )
     fs.mkdirSync(path.dirname(generatedTmxPath), { recursive: true })
-    const exportedCount = await this.tm.exportTMX(generatedTmxPath, { origin: 'human', targetLocale })
+    const exportedCount = await this.tm.exportTMX(generatedTmxPath, { origin: 'human', targetLocale: mappedLocale })
 
     if (exportedCount === 0) {
       return undefined
@@ -865,8 +917,11 @@ export class TranslatorManager {
    * Export generated XLIFF for review uploads.
    * - `originFilter = 'ai'`: include only AI-origin units (changes mode)
    * - `originFilter = undefined`: include all origins; prior human units provide whole-file context for reviewers
+   * @param targetLocale The unmapped target locale (for folder naming)
+   * @param mappedLocale The mapped target locale (for TM queries)
+   * @param originFilter Optional origin filter for entry selection
    */
-  private async createGeneratedAggregateXliffReviewArtifact(targetLocale: string, originFilter?: 'ai'): Promise<ReviewArtifact | undefined> {
+  private async createGeneratedAggregateXliffReviewArtifact(targetLocale: string, mappedLocale: string, originFilter?: 'ai'): Promise<ReviewArtifact | undefined> {
     const generatedXliffPath = path.join(
       this.workspacePath,
       '.translator',
@@ -880,7 +935,7 @@ export class TranslatorManager {
       generatedXliffPath,
       {
         ...(originFilter ? { origin: originFilter } : {}),
-        targetLocale
+        targetLocale: mappedLocale
       }
     )
 
@@ -924,12 +979,18 @@ export class TranslatorManager {
     const localeFilters = this.getReviewLocaleFilters()
     let targetLocales = this.resolveReviewPushLocales()
     if (targetLocales.length === 0) {
+      const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+      const sourceLocale = projectConfig.sourceLocale
       const inferredLocales = Array.from(
         new Set(
           reviewArtifacts
             .map((artifact) => this.extractReviewArtifactLocale(artifact.filePath))
             .filter((locale): locale is string => {
               if (!locale) {
+                return false
+              }
+              // Filter #1: Exclude back-translation targets (e.g., "fr_en" when source is "en")
+              if (this.isBackTranslationTarget(locale, sourceLocale)) {
                 return false
               }
               if (localeFilters.include.size > 0 && !localeFilters.include.has(locale)) {
@@ -952,6 +1013,7 @@ export class TranslatorManager {
 
     for (const targetLocale of targetLocales) {
       const normalizedTargetLocale = this.normalizeLocale(targetLocale)
+      const mappedLocale = this.resolveMappedLocaleForReview(targetLocale)
       const localeArtifacts = reviewArtifacts.filter((artifact) => {
         const artifactLocale = this.extractReviewArtifactLocale(artifact.filePath)
         if (!artifactLocale) {
@@ -960,12 +1022,12 @@ export class TranslatorManager {
         return artifactLocale === normalizedTargetLocale
       })
 
-      const generatedTmArtifact = await this.createGeneratedTmReviewArtifact(targetLocale)
+      const generatedTmArtifact = await this.createGeneratedTmReviewArtifact(targetLocale, mappedLocale)
       if (generatedTmArtifact && !localeArtifacts.some((artifact) => artifact.filePath === generatedTmArtifact.filePath)) {
         localeArtifacts.push(generatedTmArtifact)
       }
 
-      const generatedXliffArtifact = await this.createGeneratedAggregateXliffReviewArtifact(targetLocale, originFilter)
+      const generatedXliffArtifact = await this.createGeneratedAggregateXliffReviewArtifact(targetLocale, mappedLocale, originFilter)
       if (generatedXliffArtifact && !localeArtifacts.some((artifact) => artifact.filePath === generatedXliffArtifact.filePath)) {
         localeArtifacts.push(generatedXliffArtifact)
       }
@@ -988,6 +1050,7 @@ export class TranslatorManager {
 
       requests.push({
         targetLocale,
+        mappedLocale,
         artifacts: localeArtifacts
       })
     }
@@ -1006,9 +1069,23 @@ export class TranslatorManager {
    * Pull reviewed translations from configured review service
    */
   async pullReviewedProjects(): Promise<void> {
+    if (!this.tm) {
+      throw new Error('Translation memory must be initialized before pulling reviewed translations')
+    }
+
     this.logger.info('Pulling reviewed translations from review service');
 
-    await this.getReviewService().pullReviewedProjects()
+    const reviewService = this.getReviewService()
+    const pulledFiles = await reviewService.pullReviewedFiles()
+
+    if (pulledFiles.length > 0) {
+      const mergedCount = await mergeReviewedXliffFilesIntoTranslationMemory(
+        pulledFiles,
+        this.tm,
+        this.logger
+      )
+      this.logger.info(`Merged ${mergedCount} reviewed translation(s) into translation memory from ${pulledFiles.length} file(s)`)
+    }
 
     this.logger.info('Successfully pulled reviewed translations from review service');
   }

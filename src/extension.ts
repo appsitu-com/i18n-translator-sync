@@ -420,9 +420,10 @@ export async function checkMateCatStatus(): Promise<void> {
 
   // Build the summary for the pop-up and output channel
   const summaryLines = statuses.map((status) => {
-    const percentDone = status.percentDone ?? 0
     const projectDisplay = status.projectName ? `${status.projectName} (${status.projectId})` : status.projectId
-    return `${projectDisplay}: ${percentDone}% done (${status.status})`
+    const percentDone = status.totalTexts > 0 ? Math.round((status.translatedTexts / status.totalTexts) * 100) : 0
+    const countInfo = `${status.translatedTexts}/${status.totalTexts}`
+    return `${projectDisplay}: ${countInfo} (${percentDone}% done, ${status.status})`
   })
 
   // Show pop-up with summary

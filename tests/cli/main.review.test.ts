@@ -104,8 +104,8 @@ describe('cli/main review options', () => {
       pushToMateCat: vi.fn(),
       pullFromMateCat: vi.fn(),
       getMateCatReviewStatus: vi.fn().mockResolvedValue([
-        { projectId: 'project-a', status: 'in_progress', percentDone: 42 },
-        { projectId: 'project-b', status: 'completed' }
+        { projectId: 'project-a', status: 'in_progress', projectName: '', totalTexts: 100, translatedTexts: 42 },
+        { projectId: 'project-b', status: 'completed', projectName: '', totalTexts: 0, translatedTexts: 0 }
       ]),
       exportCache: vi.fn(),
       importCache: vi.fn(),
@@ -130,8 +130,8 @@ describe('cli/main review options', () => {
 
     expect(mockAdapter.initialize).toHaveBeenCalledTimes(1)
     expect(mockAdapter.getMateCatReviewStatus).toHaveBeenCalledTimes(1)
-    expect(logSpy).toHaveBeenCalledWith('- project-a: 42% done (in_progress)')
-    expect(logSpy).toHaveBeenCalledWith('- project-b: 0% done (completed)')
+    expect(logSpy).toHaveBeenCalledWith('- project-a: 42/100 (42% done, in_progress)')
+    expect(logSpy).toHaveBeenCalledWith('- project-b: 0/0 (0% done, completed)')
     expect(logSpy).toHaveBeenCalledWith('Human translator review status operation completed. Exiting.')
     expect(exitSpy).toHaveBeenCalledWith(0)
   })

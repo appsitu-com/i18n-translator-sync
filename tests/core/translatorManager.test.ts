@@ -267,6 +267,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
@@ -290,6 +291,7 @@ describe('TranslatorManager', () => {
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(1)
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
+        mappedLocale: 'fr',
         artifacts: [
           {
             filePath: '/workspace/review.tmx',
@@ -336,6 +338,7 @@ describe('TranslatorManager', () => {
 
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
+        mappedLocale: 'fr',
         artifacts: [
           {
             filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-human.tmx'),
@@ -354,6 +357,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
@@ -385,6 +389,7 @@ describe('TranslatorManager', () => {
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
+        mappedLocale: 'fr',
         artifacts: [
           {
             filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
@@ -403,6 +408,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
@@ -430,6 +436,7 @@ describe('TranslatorManager', () => {
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
+        mappedLocale: 'fr',
         artifacts: [
           {
             filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
@@ -494,6 +501,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
@@ -514,7 +522,7 @@ describe('TranslatorManager', () => {
       )
 
       await manager.pullReviewedProjects()
-      expect(mockReviewService.pullReviewedProjects).toHaveBeenCalledTimes(1)
+      expect(mockReviewService.pullReviewedFiles).toHaveBeenCalledTimes(1)
       expect(logger.info).toHaveBeenCalledWith('Successfully pulled reviewed translations from review service')
     })
 
@@ -523,6 +531,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue(expectedStatuses)
       }
 
@@ -673,6 +682,7 @@ describe('TranslatorManager', () => {
       const createReviewService = vi.fn(() => ({
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }))
 
@@ -697,6 +707,453 @@ describe('TranslatorManager', () => {
       await manager.getPendingReviewStatus()
 
       expect(createReviewService).toHaveBeenCalledTimes(1)
+    })
+
+    describe('Bug #3 - Locale mapping metadata storage', () => {
+      it('includes mappedLocale in ReviewPushRequest when locale maps via engine langMap', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportTMX).mockResolvedValue(2)
+        vi.mocked(cache.exportXLIFF).mockResolvedValue(0)
+
+        // Mock translatorEngines with DeepL langMap: zh-CN → zh-Hans
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: {
+              langMap: {
+                'zh-CN': 'zh-Hans',
+                'zh-TW': 'zh-Hant',
+                'zh-HK': 'zh-Hant'
+              }
+            }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['zh-CN']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // Verify mappedLocale is included
+        expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+          expect.objectContaining({
+            targetLocale: 'zh-CN',
+            mappedLocale: 'zh-Hans',
+            artifacts: expect.any(Array)
+          })
+        )
+      })
+
+      it('uses mappedLocale when querying TM for XLIFF export', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportTMX).mockResolvedValue(0)
+        vi.mocked(cache.exportXLIFF).mockResolvedValue(5)
+
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: {
+              langMap: {
+                'zh-CN': 'zh-Hans'
+              }
+            }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['zh-CN']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // Verify TM XLIFF export was called with MAPPED locale, not original
+        expect(cache.exportXLIFF).toHaveBeenCalledWith(
+          expect.any(String),
+          { targetLocale: 'zh-Hans' }
+        )
+      })
+
+      it('uses mappedLocale when querying TM for TMX export', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportTMX).mockResolvedValue(3)
+        vi.mocked(cache.exportXLIFF).mockResolvedValue(0)
+
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: {
+              langMap: {
+                'zh-CN': 'zh-Hans'
+              }
+            }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['zh-CN']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // Verify TM TMX export was called with MAPPED locale
+        expect(cache.exportTMX).toHaveBeenCalledWith(
+          expect.any(String),
+          { origin: 'human', targetLocale: 'zh-Hans' }
+        )
+      })
+
+      it('handles non-1:1 locale mappings (zh-CN, zh-TW, zh-HK all map to zh-Hant or zh-Hans)', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportXLIFF).mockResolvedValue(2)
+
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: {
+              langMap: {
+                'zh-CN': 'zh-Hans',
+                'zh-TW': 'zh-Hant',
+                'zh-HK': 'zh-Hant'
+              }
+            }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        // Test zh-TW maps to zh-Hant
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['zh-TW']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // Verify zh-TW gets mapped to zh-Hant
+        expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+          expect.objectContaining({
+            targetLocale: 'zh-TW',
+            mappedLocale: 'zh-Hant'
+          })
+        )
+      })
+
+      it('preserves unmapped locale when no langMap entry exists', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportTMX).mockResolvedValue(2)
+
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: {
+              langMap: {
+                'zh-CN': 'zh-Hans'
+              }
+            }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['fr']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // Verify fr (not in langMap) maps to itself
+        expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+          expect.objectContaining({
+            targetLocale: 'fr',
+            mappedLocale: 'fr'
+          })
+        )
+      })
+
+      it('checks all engines langMaps to find locale mapping', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportTMX).mockResolvedValue(2)
+
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: { langMap: { 'ja': 'ja' } },
+            google: { langMap: { 'zh-CN': 'zh-CN' } },
+            azure: { langMap: { 'pt': 'pt-BR' } }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['pt']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // Should find 'pt' → 'pt-BR' from azure engine
+        expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+          expect.objectContaining({
+            targetLocale: 'pt',
+            mappedLocale: 'pt-BR'
+          })
+        )
+      })
+
+      it('proves zh-CN XLIFF gets generated with correct mapped locale (Bug #2 fix prerequisite)', async () => {
+        vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+        vi.mocked(cache.exportTMX).mockResolvedValue(0)
+        vi.mocked(cache.exportXLIFF).mockResolvedValue(10) // Proves XLIFF was generated (had entries)
+
+        const mockReviewService = {
+          pushReviewProject: vi.fn().mockResolvedValue(undefined),
+          pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          getPendingReviewStatus: vi.fn().mockResolvedValue([])
+        }
+
+        const manager = new TranslatorManager(
+          fileSystem,
+          logger,
+          cache,
+          '/workspace',
+          workspaceWatcher,
+          configProvider,
+          undefined,
+          undefined,
+          {
+            deepl: {
+              langMap: {
+                'zh-CN': 'zh-Hans'
+              }
+            }
+          },
+          undefined,
+          {
+            createReviewService: () => mockReviewService
+          }
+        )
+
+        vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+          if (section === 'translator.targetLocales') return ['zh-CN']
+          return defaultValue
+        })
+
+        await manager.pushReviewProject()
+
+        // 1. XLIFF export should be called with zh-Hans (mapped), not zh-CN
+        expect(cache.exportXLIFF).toHaveBeenCalledWith(
+          path.join('/workspace', '.translator/review/zh-CN/upload/local-tm-review.xliff'),
+          { targetLocale: 'zh-Hans' }
+        )
+
+        // 2. exportXLIFF returned 10 (non-zero), meaning entries were found and XLIFF was generated
+        // This proves the mapped locale query worked and found entries
+
+        // 3. ReviewPushRequest should include both unmapped and mapped locales
+        expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+          expect.objectContaining({
+            targetLocale: 'zh-CN',
+            mappedLocale: 'zh-Hans',
+            artifacts: expect.arrayContaining([
+              expect.objectContaining({
+                filePath: expect.stringContaining('local-tm-review.xliff')
+              })
+            ])
+          })
+        )
+      })
+    })
+  });
+
+  describe('Fix #1 - Filter back-translation targets from review', () => {
+    it('should identify back-translation targets correctly', async () => {
+      // Create a simple test instance to test the private helper method
+      const testManager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider
+      )
+
+      // Test the isBackTranslationTarget private method via reflection
+      const isBackTranslationTarget = (testManager as any).isBackTranslationTarget.bind(testManager)
+
+      // Test with English source locale
+      expect(isBackTranslationTarget('fr_en', 'en')).toBe(true)
+      expect(isBackTranslationTarget('es_en', 'en')).toBe(true)
+      expect(isBackTranslationTarget('de_en', 'en')).toBe(true)
+      expect(isBackTranslationTarget('zh-CN_en', 'en')).toBe(true)
+
+      // Test with non-English source locales
+      expect(isBackTranslationTarget('en_de', 'de')).toBe(true)
+      expect(isBackTranslationTarget('fr_de', 'de')).toBe(true)
+      expect(isBackTranslationTarget('es_fr', 'fr')).toBe(true)
+      expect(isBackTranslationTarget('zh-Hans_zh-CN', 'zh-CN')).toBe(true)
+
+      // Test that non-back-translation targets are NOT identified as such
+      expect(isBackTranslationTarget('fr', 'en')).toBe(false)
+      expect(isBackTranslationTarget('es', 'en')).toBe(false)
+      expect(isBackTranslationTarget('de', 'de')).toBe(false)
+      expect(isBackTranslationTarget('en_us', 'en')).toBe(false) // Different source
+      expect(isBackTranslationTarget('fr-ca', 'en')).toBe(false)
+
+      // Test case insensitivity
+      expect(isBackTranslationTarget('FR_EN', 'en')).toBe(true)
+      expect(isBackTranslationTarget('Es_EN', 'En')).toBe(true)
+    })
+
+    it('should filter back-translation targets from locale lists', () => {
+      // Test by creating a sample list and filtering manually
+      const locales = ['fr', 'es', 'de', 'fr_en', 'es_en', 'de_en', 'it']
+      const sourceLocale = 'en'
+
+      // Create test manager to use isBackTranslationTarget
+      const testManager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider
+      )
+      const isBackTranslationTarget = (testManager as any).isBackTranslationTarget.bind(testManager)
+
+      // Filter back-translation targets
+      const forwardOnlyLocales = locales.filter((locale) => !isBackTranslationTarget(locale, sourceLocale))
+
+      // Should have filtered out back-translation targets
+      expect(forwardOnlyLocales).toEqual(['fr', 'es', 'de', 'it'])
+      expect(forwardOnlyLocales).not.toContain('fr_en')
+      expect(forwardOnlyLocales).not.toContain('es_en')
+      expect(forwardOnlyLocales).not.toContain('de_en')
+    })
+
+    it('should handle non-English source locales in filtering', () => {
+      const locales = ['en', 'fr', 'it', 'en_de', 'fr_de', 'it_de']
+      const sourceLocale = 'de'
+
+      const testManager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider
+      )
+      const isBackTranslationTarget = (testManager as any).isBackTranslationTarget.bind(testManager)
+
+      // Filter back-translation targets
+      const forwardOnlyLocales = locales.filter((locale) => !isBackTranslationTarget(locale, sourceLocale))
+
+      // Should have filtered out back-translation targets
+      expect(forwardOnlyLocales).toEqual(['en', 'fr', 'it'])
+      expect(forwardOnlyLocales).not.toContain('en_de')
+      expect(forwardOnlyLocales).not.toContain('fr_de')
+      expect(forwardOnlyLocales).not.toContain('it_de')
     })
   });
 

@@ -228,8 +228,8 @@ describe('MateCatService', () => {
     ])
 
     expect(result).toEqual([
-      { projectId: 'p1', status: 'completed', percentDone: 100 },
-      { projectId: 'p2', status: 'in_progress', percentDone: 0 }
+      { projectId: 'p1', status: 'completed', projectName: '', totalTexts: 0, translatedTexts: 0 },
+      { projectId: 'p2', status: 'in_progress', projectName: '', totalTexts: 0, translatedTexts: 0 }
     ])
     expect(send).toHaveBeenCalledTimes(2)
     expect(send).toHaveBeenNthCalledWith(
@@ -285,7 +285,7 @@ describe('MateCatService', () => {
 
     const result = await service.checkReviewProjectStatus(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
 
-    expect(result).toEqual([{ projectId: 'p1', status: 'in_progress', percentDone: 80 }])
+    expect(result).toEqual([{ projectId: 'p1', status: 'in_progress', projectName: '', totalTexts: 100, translatedTexts: 80 }])
     expect(send).toHaveBeenNthCalledWith(
       1,
       'https://www.matecat.com/api/v3/projects/p1/pass-1',
@@ -318,7 +318,7 @@ describe('MateCatService', () => {
     ])
 
     expect(result).toEqual([
-      { projectId: 'p1', status: 'active', percentDone: 0 }
+      { projectId: 'p1', status: 'active', projectName: '', totalTexts: 0, translatedTexts: 0 }
     ])
   })
 
@@ -338,7 +338,7 @@ describe('MateCatService', () => {
     ])
 
     expect(result).toEqual([
-      { projectId: 'p1', status: 'analysis_done', percentDone: 0 }
+      { projectId: 'p1', status: 'analysis_done', projectName: '', totalTexts: 0, translatedTexts: 0 }
     ])
   })
 
@@ -365,7 +365,7 @@ describe('MateCatService', () => {
     ])
 
     expect(result).toEqual([
-      { projectId: 'p1', status: 'in_progress', percentDone: 50 }
+      { projectId: 'p1', status: 'in_progress', projectName: '', totalTexts: 0, translatedTexts: 0 }
     ])
   })
 

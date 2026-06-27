@@ -94,8 +94,9 @@ export type IMateCatProjectRef = {
 export type IMateCatProjectStatus = {
   projectId: string
   status: string
-  percentDone?: number
-  projectName?: string
+  projectName: string
+  totalTexts: number
+  translatedTexts: number
 }
 
 export type IMateCatPulledFile = {
@@ -418,7 +419,7 @@ export class MateCatService implements IMateCatService {
     return undefined
   }
 
-  private extractPercentDoneFromChunkStats(parsed: Record<string, unknown>): number | undefined {
+  private extractSegmentStats(parsed: Record<string, unknown>): { percentDone: number; totalSegments: number; completedSegments: number } | undefined {
     let totalSegments = 0
     let completedSegments = 0
 
@@ -506,7 +507,11 @@ export class MateCatService implements IMateCatService {
       return undefined
     }
 
-    return Math.max(0, Math.min(100, Math.round((completedSegments / totalSegments) * 100)))
+    return {
+      percentDone: Math.max(0, Math.min(100, Math.round((completedSegments / totalSegments) * 100))),
+      totalSegments,
+      completedSegments
+    }
   }
 
   private reduceChunkStatuses(chunkStatuses: string[]): string {
@@ -808,28 +813,28 @@ export class MateCatService implements IMateCatService {
       // Build combined payload with jobs array for compatibility with existing stat extraction
       const statusPayload = this.combineProjectAndJobPayloads(projectPayload, jobPayloads)
 
-      let percentDone: number | undefined
+      let totalTexts = 0
+      let translatedTexts = 0
       let status = this.deriveStatusFromPayload(statusPayload)
 
       const chunkStatuses = this.getChunkStatuses(statusPayload)
-      const statsPercentDone = this.extractPercentDoneFromChunkStats(statusPayload)
+      const segmentStats = this.extractSegmentStats(statusPayload)
 
       // Prioritize stats-based completion over chunk status strings
-      if (statsPercentDone !== undefined) {
-        percentDone = statsPercentDone
-        status = statsPercentDone >= 100 ? 'completed' : 'in_progress'
+      if (segmentStats !== undefined) {
+        totalTexts = segmentStats.totalSegments
+        translatedTexts = segmentStats.completedSegments
+        status = segmentStats.percentDone >= 100 ? 'completed' : 'in_progress'
       } else if (chunkStatuses.length > 0) {
-        percentDone = this.calculatePercentDone(chunkStatuses)
         status = this.reduceChunkStatuses(chunkStatuses)
-      } else {
-        percentDone = this.inferPercentDoneFromStatus(status)
       }
 
       statuses.push({
         projectId: project.projectId,
         status,
-        percentDone,
-        projectName: typeof projectPayload.name === 'string' ? projectPayload.name : undefined
+        projectName: typeof projectPayload.name === 'string' ? projectPayload.name : '',
+        totalTexts,
+        translatedTexts
       })
     }
 

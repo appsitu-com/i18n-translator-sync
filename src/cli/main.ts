@@ -89,8 +89,10 @@ export async function runCli(): Promise<void> {
       console.log('No pending human translator review projects found.')
     } else {
       for (const status of statuses) {
-        const percentDone = status.percentDone ?? 0
-        console.log(`- ${status.projectId}: ${percentDone}% done (${status.status})`)
+        const percentDone = status.totalTexts > 0 ? Math.round((status.translatedTexts / status.totalTexts) * 100) : 0
+        const displayName = status.projectName ? `${status.projectName} (${status.projectId})` : status.projectId
+        const countInfo = `${status.translatedTexts}/${status.totalTexts}`
+        console.log(`- ${displayName}: ${countInfo} (${percentDone}% done, ${status.status})`)
       }
     }
     console.log('Human translator review status operation completed. Exiting.')

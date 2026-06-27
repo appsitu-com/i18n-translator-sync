@@ -24,6 +24,8 @@ type PendingReviewProject = {
   projectId: string
   projectPass: string
   createdAt: string
+  targetLocale?: string
+  mappedLocale?: string
 }
 
 export type MateCatReviewServiceDependencies = {
@@ -202,7 +204,7 @@ export class MateCatReviewService implements IReviewService {
     await this.fileSystem.writeFile(pendingUri, JSON.stringify(projects, null, 2))
   }
 
-  private async trackPendingReviewProject(createdProject: IMateCatCreatedProject): Promise<void> {
+  private async trackPendingReviewProject(createdProject: IMateCatCreatedProject, targetLocale?: string, mappedLocale?: string): Promise<void> {
     if (!createdProject.projectId || !createdProject.projectPass) {
       this.logger.warn('MateCat project created but project credentials were not returned; pending tracking skipped')
       return
@@ -213,14 +215,24 @@ export class MateCatReviewService implements IReviewService {
       return
     }
 
-    current.push({
+    const project: PendingReviewProject = {
       projectId: createdProject.projectId,
       projectPass: createdProject.projectPass,
       createdAt: new Date().toISOString()
-    })
+    }
+
+    if (targetLocale) {
+      project.targetLocale = targetLocale
+    }
+
+    if (mappedLocale) {
+      project.mappedLocale = mappedLocale
+    }
+
+    current.push(project)
 
     await this.savePendingReviewProjects(current)
-    this.logger.info(`MateCat: tracked pending project ${createdProject.projectId}`)
+    this.logger.info(`MateCat: tracked pending project ${createdProject.projectId}${targetLocale ? ` (${targetLocale})` : ''}`)
   }
 
   private getReviewDownloadDirectoryPath(projectId: string): string {
@@ -310,6 +322,8 @@ export class MateCatReviewService implements IReviewService {
       throw new Error('MateCat push requires a target locale per request')
     }
 
+    const mappedLocale = request.mappedLocale?.trim() || targetLocale
+
     const fields = await this.buildMateCatProjectFields(settings, targetLocale)
     const uploads = await this.buildMateCatReviewUploads(request)
 
@@ -318,20 +332,20 @@ export class MateCatReviewService implements IReviewService {
       uploads
     })
 
-    await this.trackPendingReviewProject(createdProject)
+    await this.trackPendingReviewProject(createdProject, targetLocale, mappedLocale)
     this.logger.info(`MateCat: new project created for locale ${targetLocale} with uploaded review file(s).`)
   }
 
-  async pullReviewedProjects(): Promise<void> {
+  async pullReviewedFiles(): Promise<IMateCatPulledFile[]> {
     const settings = this.getMateCatSettings()
     const pendingProjects = await this.loadPendingReviewProjects()
     if (pendingProjects.length === 0) {
-      this.logger.info('No pending MateCat projects to pull')
-      return
+      return []
     }
 
     const deletedProjectIds = new Set<string>()
     const statuses: IMateCatProjectStatus[] = []
+    const allPulledFiles: IMateCatPulledFile[] = []
 
     for (const project of pendingProjects) {
       try {
@@ -356,7 +370,7 @@ export class MateCatReviewService implements IReviewService {
     const activePendingProjects = pendingProjects.filter((project) => !deletedProjectIds.has(project.projectId))
     if (activePendingProjects.length === 0) {
       this.logger.info('No pending MateCat projects remain after cleanup')
-      return
+      return []
     }
 
     const completedProjectIds = new Set(
@@ -365,7 +379,7 @@ export class MateCatReviewService implements IReviewService {
 
     if (completedProjectIds.size === 0) {
       this.logger.info('No completed MateCat projects are ready for pull')
-      return
+      return []
     }
 
     const completedProjects = activePendingProjects.filter((project) => completedProjectIds.has(project.projectId))
@@ -388,14 +402,7 @@ export class MateCatReviewService implements IReviewService {
       const savedCount = await this.persistPulledReviewFiles(pulledFiles)
       this.logger.info(`MateCat: downloaded ${savedCount} reviewed file(s) for project ${project.projectId}`)
 
-      if (this.dependencies.translationMemory) {
-        await mergeReviewedXliffFilesIntoTranslationMemory(
-          pulledFiles,
-          this.dependencies.translationMemory,
-          this.logger
-        )
-      }
-
+      allPulledFiles.push(...pulledFiles)
       successfullyMergedProjects.add(project.projectId)
     }
 
@@ -406,6 +413,21 @@ export class MateCatReviewService implements IReviewService {
     )
     await this.savePendingReviewProjects(remainingProjects)
     this.logger.info(`MateCat: closed ${successfullyMergedProjects.size} pending project(s) after successful pull merge`)
+
+    return allPulledFiles
+  }
+
+  async pullReviewedProjects(): Promise<void> {
+    const pulledFiles = await this.pullReviewedFiles()
+
+    if (this.dependencies.translationMemory && pulledFiles.length > 0) {
+      const mergedCount = await mergeReviewedXliffFilesIntoTranslationMemory(
+        pulledFiles,
+        this.dependencies.translationMemory,
+        this.logger
+      )
+      this.logger.info(`MateCat: merged ${mergedCount} reviewed translation(s) into TM from ${pulledFiles.length} file(s)`)
+    }
   }
 
   async getPendingReviewStatus(): Promise<IMateCatProjectStatus[]> {

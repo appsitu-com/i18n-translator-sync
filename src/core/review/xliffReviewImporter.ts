@@ -113,23 +113,38 @@ export async function mergeReviewedXliffFilesIntoTranslationMemory(
   translationMemory: ITranslationMemory,
   logger: ILogger
 ): Promise<number> {
+  if (!translationMemory) {
+    logger.warn('Skipping merge: translation memory is not initialized')
+    return 0
+  }
+
   let importedUnits = 0
 
+  logger.info(`Starting merge of ${pulledFiles.length} pulled file(s) into translation memory`)
+
   for (const pulledFile of pulledFiles) {
+    logger.debug(`Processing pulled file: ${pulledFile.fileName}`)
+
     if (!pulledFile.fileName.toLowerCase().endsWith('.xlf') && !pulledFile.fileName.toLowerCase().endsWith('.xliff')) {
+      logger.debug(`Skipping non-XLIFF file: ${pulledFile.fileName}`)
       continue
     }
 
     const files = parseReviewedXliff(pulledFile.content, pulledFile.fileName)
+    logger.debug(`Parsed ${files.length} file(s) from ${pulledFile.fileName}`)
+
     for (const file of files) {
       if (!file.sourceLocale || !file.targetLocale) {
-        logger.warn(`Skipping reviewed XLIFF without source/target language metadata: ${pulledFile.fileName}`)
+        logger.warn(`Skipping reviewed XLIFF without source/target language metadata: ${pulledFile.fileName} (source: ${file.sourceLocale}, target: ${file.targetLocale})`)
         continue
       }
 
       if (file.units.length === 0) {
+        logger.debug(`Skipping file with no units: ${pulledFile.fileName}`)
         continue
       }
+
+      logger.debug(`Processing ${file.units.length} unit(s) for ${file.sourceLocale} → ${file.targetLocale}`)
 
       const unitPairs: Pair[] = file.units.map((unit, index) => ({
         src: unit.sourceText,
@@ -154,7 +169,10 @@ export async function mergeReviewedXliffFilesIntoTranslationMemory(
         return existing === undefined || existing !== pair.dst
       })
 
+      logger.debug(`Found ${changedPairs.length} changed/new pair(s) out of ${unitPairs.length} total`)
+
       if (changedPairs.length === 0) {
+        logger.debug(`No changes to merge for ${file.sourceLocale} → ${file.targetLocale}`)
         continue
       }
 
@@ -168,12 +186,15 @@ export async function mergeReviewedXliffFilesIntoTranslationMemory(
         origin: 'human'
       })
 
+      logger.info(`Merged ${changedPairs.length} reviewed translation(s) for ${file.sourceLocale} → ${file.targetLocale} from ${pulledFile.fileName}`)
       importedUnits += changedPairs.length
     }
   }
 
   if (importedUnits > 0) {
     logger.info(`Imported ${importedUnits} reviewed translation unit(s) into translation memory`)
+  } else {
+    logger.warn(`No reviewed translations were imported (check if files had language metadata or if all units already existed in TM)`)
   }
 
   return importedUnits

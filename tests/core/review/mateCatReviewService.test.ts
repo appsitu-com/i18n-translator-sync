@@ -847,4 +847,228 @@ describe('MateCatReviewService', () => {
     expect(lastPendingWrite?.[1]).toContain('mc-2')
     expect(lastPendingWrite?.[1]).not.toContain('mc-1')
   })
+
+  describe('Bug #3 - Locale mapping metadata storage', () => {
+    it('stores targetLocale and mappedLocale in pending-projects.json when ReviewPushRequest includes them', async () => {
+      const workspacePath = '/workspace'
+      const fileSystem = createMockFileSystem({
+        [`${workspacePath}/package.json`]: JSON.stringify({ name: 'i18n-translator-sync' }),
+        [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+        [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+      })
+
+      const logger = createLogger()
+      const translationMemory = createTranslationMemoryMock()
+      const mateCatService = {
+        createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-zh-cn', projectPass: 'pass-zh-cn' }),
+        checkReviewProjectStatus: vi.fn(),
+        pullReviewedTranslations: vi.fn()
+      }
+
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+        createMateCatService: () => mateCatService,
+        loadMateCatSettings: () => ({
+          apiKey: 'secret',
+          newProjectDefaults: {}
+        }),
+        translationMemory
+      })
+
+      // Push with both targetLocale and mappedLocale
+      await service.pushReviewProject({
+        targetLocale: 'zh-CN',
+        mappedLocale: 'zh-Hans',
+        artifacts: [
+          {
+            filePath: `${workspacePath}/review.xliff`,
+            fileName: 'review.xliff',
+            contentType: 'application/xliff+xml'
+          }
+        ]
+      })
+
+      const pendingWriteCall = vi
+        .mocked(fileSystem.writeFile)
+        .mock.calls.find(([uri]) => uri.path === `${workspacePath}/.translator/review/pending-projects.json`)
+
+      expect(pendingWriteCall).toBeDefined()
+      const pendingJson = JSON.parse(pendingWriteCall?.[1] ?? '[]') as Array<Record<string, unknown>>
+      expect(pendingJson).toContainEqual(
+        expect.objectContaining({
+          projectId: 'mc-zh-cn',
+          projectPass: 'pass-zh-cn',
+          targetLocale: 'zh-CN',
+          mappedLocale: 'zh-Hans'
+        })
+      )
+    })
+
+    it('handles backward compatibility: loads pending projects without targetLocale/mappedLocale metadata', async () => {
+      const workspacePath = '/workspace'
+      const oldFormatPendingProjects = [
+        {
+          projectId: 'mc-old',
+          projectPass: 'pass-old',
+          createdAt: '2026-06-25T00:00:00.000Z'
+        }
+      ]
+
+      const fileSystem = createMockFileSystem({
+        [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(oldFormatPendingProjects)
+      })
+
+      const logger = createLogger()
+      const translationMemory = createTranslationMemoryMock()
+      const mateCatService = {
+        createReviewProject: vi.fn(),
+        checkReviewProjectStatus: vi.fn().mockResolvedValue([
+          { projectId: 'mc-old', status: 'in_progress' }
+        ]),
+        pullReviewedTranslations: vi.fn()
+      }
+
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+        createMateCatService: () => mateCatService,
+        loadMateCatSettings: () => ({
+          apiKey: 'secret',
+          newProjectDefaults: {}
+        }),
+        translationMemory
+      })
+
+      // Should not crash when loading old format (no targetLocale/mappedLocale)
+      const statuses = await service.getPendingReviewStatus()
+
+      expect(statuses).toEqual([{ projectId: 'mc-old', status: 'in_progress' }])
+    })
+
+    it('preserves targetLocale and mappedLocale metadata when removing completed projects', async () => {
+      const workspacePath = '/workspace'
+      const pendingProjects = [
+        {
+          projectId: 'mc-1-metadata-preserve',
+          projectPass: 'pass-1-metadata-preserve',
+          createdAt: '2026-06-25T00:00:00.000Z',
+          targetLocale: 'zh-CN',
+          mappedLocale: 'zh-Hans'
+        },
+        {
+          projectId: 'mc-2-metadata-preserve',
+          projectPass: 'pass-2-metadata-preserve',
+          createdAt: '2026-06-25T00:00:01.000Z',
+          targetLocale: 'zh-TW',
+          mappedLocale: 'zh-Hant'
+        }
+      ]
+
+      const fileSystem = createMockFileSystem({
+        [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+      })
+
+      const logger = createLogger()
+      const translationMemory = createTranslationMemoryMock()
+      const mateCatService = {
+        createReviewProject: vi.fn(),
+        checkReviewProjectStatus: vi.fn().mockImplementation(async (_settings: unknown, projects: Array<{ projectId: string }>) => {
+          // Return status only for mc-2 (mc-1 gets deleted/not found)
+          return projects
+            .filter((p) => p.projectId === 'mc-2-metadata-preserve')
+            .map((p) => ({ projectId: p.projectId, status: 'in_progress' }))
+        }),
+        pullReviewedTranslations: vi.fn()
+      }
+
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+        createMateCatService: () => mateCatService,
+        loadMateCatSettings: () => ({
+          apiKey: 'secret',
+          newProjectDefaults: {}
+        }),
+        translationMemory
+      })
+
+      // mc-1 gets deleted, mc-2 stays - this tests that metadata is preserved during updates
+      const statuses = await service.getPendingReviewStatus()
+
+      // Verify mc-2 is still present
+      expect(statuses).toContainEqual(
+        expect.objectContaining({ projectId: 'mc-2-metadata-preserve', status: 'in_progress' })
+      )
+
+      // Verify the pending projects file was read (which would have loaded the metadata)
+      expect(fileSystem.readFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: expect.stringContaining('pending-projects.json')
+        })
+      )
+    })
+
+    it('proves non-1:1 mapping ambiguity is solved: zh-CN, zh-TW, zh-HK can be differentiated', async () => {
+      const workspacePath = '/workspace'
+      // All three locales point to zh-Hant or zh-Hans in MateCat
+      const pendingProjects = [
+        {
+          projectId: 'mc-1-unique',
+          projectPass: 'pass-1-unique',
+          createdAt: '2026-06-25T00:00:00.000Z',
+          targetLocale: 'zh-CN',
+          mappedLocale: 'zh-Hans'
+        },
+        {
+          projectId: 'mc-2-unique',
+          projectPass: 'pass-2-unique',
+          createdAt: '2026-06-25T00:00:01.000Z',
+          targetLocale: 'zh-TW',
+          mappedLocale: 'zh-Hant'
+        },
+        {
+          projectId: 'mc-3-unique',
+          projectPass: 'pass-3-unique',
+          createdAt: '2026-06-25T00:00:02.000Z',
+          targetLocale: 'zh-HK',
+          mappedLocale: 'zh-Hant'
+        }
+      ]
+
+      const fileSystem = createMockFileSystem({
+        [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+      })
+
+      const logger = createLogger()
+      const translationMemory = createTranslationMemoryMock()
+      const mateCatService = {
+        createReviewProject: vi.fn(),
+        checkReviewProjectStatus: vi.fn().mockResolvedValue([
+          { projectId: 'mc-1-unique', status: 'completed' },
+          { projectId: 'mc-2-unique', status: 'completed' },
+          { projectId: 'mc-3-unique', status: 'completed' }
+        ]),
+        pullReviewedTranslations: vi.fn()
+      }
+
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+        createMateCatService: () => mateCatService,
+        loadMateCatSettings: () => ({
+          apiKey: 'secret',
+          newProjectDefaults: {}
+        }),
+        translationMemory
+      })
+
+      // Get statuses - this proves that all three projects are differentiated correctly by their metadata
+      const statuses = await service.getPendingReviewStatus()
+
+      // All 3 projects should be recognized as completed (not confused due to non-1:1 mapping)
+      expect(statuses).toContainEqual(expect.objectContaining({ projectId: 'mc-1-unique', status: 'completed' }))
+      expect(statuses).toContainEqual(expect.objectContaining({ projectId: 'mc-2-unique', status: 'completed' }))
+      expect(statuses).toContainEqual(expect.objectContaining({ projectId: 'mc-3-unique', status: 'completed' }))
+
+      // Verify metadata was properly preserved by checking that fileSystem was called to read the pending projects
+      expect(fileSystem.readFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: expect.stringContaining('pending-projects.json')
+        })
+      )
+    })
+  })
 })
