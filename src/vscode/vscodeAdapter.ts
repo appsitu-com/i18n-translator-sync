@@ -388,6 +388,15 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
   }
 
   /**
+   * Purge cache without requiring the file-watcher runtime to be started.
+   */
+  override async purge(): Promise<{ deletedCount: number; backupPath?: string }> {
+    await this.initializeOnActivation()
+    await this.ensureRuntimeInitialized()
+    return super.purge()
+  }
+
+  /**
    * Check if the adapter has been initialized (separate from ready/running state)
    */
   isInitialized(): boolean {

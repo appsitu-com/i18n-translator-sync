@@ -447,9 +447,10 @@ export function onShowOutput(): void {
   channel.appendLine('- Translator: Start (starts file watching and auto-translation)')
   channel.appendLine('- Translator: Stop (stops file watching)')
   channel.appendLine('- Translator: Restart (restart watching)')
-  channel.appendLine('- Translator: Human Review -> Push (works without starting)')
-  channel.appendLine('- Translator: Human Review <- Pull (works without starting)')
-  channel.appendLine('- Translator: Human Review Status (works without starting)')
+  channel.appendLine('- Translator: Human Review -> Push (push changes to human review service)')
+  channel.appendLine('- Translator: Human Review <- Pull (pull changes from human review service)')
+  channel.appendLine('- Translator: Human Review Status (show status of pending human review tasks)')
+  channel.appendLine('- Translator: Purge Unused Translations (removes unused translations from translation memory)')
   // channel.appendLine('- Translator: Set Up Encryption (configure API key encryption)')
   channel.appendLine('- Translator: Show Output (this command)')
   channel.appendLine('')
@@ -597,11 +598,7 @@ async function purgeCache(): Promise<void> {
     return
   }
 
-  const adapter = getCurrentVSCodeAdapter()
-  if (!adapter) {
-    vscode.window.showErrorMessage('Translator not initialized. Please start the translator first.')
-    return
-  }
+  const adapter = getVSCodeAdapter()
 
   try {
     const confirmed = await vscode.window.showWarningMessage(
@@ -630,7 +627,7 @@ async function purgeCache(): Promise<void> {
     )
   } catch (error) {
     if (error instanceof Error && error.message.includes('not initialized')) {
-      const msg = 'To perform a Purge, run "Translator: Start" command first'
+      const msg = 'Unable to initialize translator runtime for purge. Check your configuration and try again.'
       channel.appendLine(msg)
       vscode.window.showWarningMessage(msg)
     } else {
