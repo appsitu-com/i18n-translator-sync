@@ -285,7 +285,7 @@ describe('MateCatService', () => {
 
     const result = await service.checkReviewProjectStatus(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
 
-    expect(result).toEqual([{ projectId: 'p1', status: 'in_progress', projectName: '', totalTexts: 100, translatedTexts: 80 }])
+    expect(result).toEqual([{ projectId: 'p1', status: 'in_progress', projectName: '', totalTexts: 100, translatedTexts: 40 }])
     expect(send).toHaveBeenNthCalledWith(
       1,
       'https://www.matecat.com/api/v3/projects/p1/pass-1',

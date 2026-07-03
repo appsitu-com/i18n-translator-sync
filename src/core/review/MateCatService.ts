@@ -519,11 +519,11 @@ export class MateCatService implements IMateCatService {
         }
 
         const translated = this.asFiniteNumber(selectedStats.translated) ?? 0
-        const approved = this.asFiniteNumber(selectedStats.approved) ?? 0
-        const approved2 = this.asFiniteNumber(selectedStats.approved2) ?? 0
 
         totalSegments += total
-        completedSegments += translated + approved + approved2
+        // For review progress, MateCat's "translated" reflects translator activity better than
+        // "approved" counts, which can be prefilled by uploaded XLIFF content.
+        completedSegments += translated
       }
     }
 
@@ -556,11 +556,9 @@ export class MateCatService implements IMateCatService {
         }
 
         const translated = this.asFiniteNumber(selectedStats.translated) ?? 0
-        const approved = this.asFiniteNumber(selectedStats.approved) ?? 0
-        const approved2 = this.asFiniteNumber(selectedStats.approved2) ?? 0
 
         totalSegments += total
-        completedSegments += translated + approved + approved2
+        completedSegments += translated
       }
     }
 
