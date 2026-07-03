@@ -10,9 +10,9 @@ import {
   loadTranslatorConfig,
   resolveAndValidateEngineConfig,
   logConfiguredEnginePlan,
-  MissingEnvironmentValueError,
   InvalidTranslatorConfigError
 } from '../../../src/core/config/configLoader'
+import { MissingEnvironmentValueError } from '../../../src/core/config'
 import { IEnvVars } from '../../../src/core/config/envVarsSchema'
 import { ILogger } from '../../../src/core/util/baseLogger'
 import type { ITranslatorConfig } from '../../../src/core/config'
@@ -535,6 +535,7 @@ describe('logConfiguredEnginePlan', () => {
         excludeKeys: [],
         excludeKeyPaths: [],
         copyOnlyFiles: [],
+        reviewService: 'matecat',
         csvExportPath: 'translator.csv',
         autoExport: true,
         autoImport: false,

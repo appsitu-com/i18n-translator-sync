@@ -60,7 +60,10 @@ class FakeRoundTripMateCatService implements IMateCatService {
   ): Promise<IMateCatProjectStatus[]> {
     return projects.map((project) => ({
       projectId: project.projectId,
-      status: this.projects.get(project.projectId)?.status ?? 'unknown'
+      status: this.projects.get(project.projectId)?.status ?? 'unknown',
+      projectName: '',
+      totalTexts: 0,
+      translatedTexts: 0
     }))
   }
 
@@ -131,7 +134,7 @@ function createNoOpWorkspaceWatcher(): IWorkspaceWatcher {
 
 function createConfigProvider(): IConfigProvider {
   return {
-    get: vi.fn((section: string, defaultValue?: unknown) => {
+    get: ((section: string, defaultValue?: unknown) => {
       if (section === 'translator.sourceLocale') {
         return 'en'
       }
@@ -141,7 +144,7 @@ function createConfigProvider(): IConfigProvider {
       }
 
       return defaultValue
-    }),
+    }) as IConfigProvider['get'],
     update: vi.fn()
   }
 }
@@ -180,7 +183,7 @@ function createTranslationMemory(workspacePath: string, logger: ILogger): JsonlT
 
 function createReviewService(
   workspacePath: string,
-  fileSystem: ReturnType<typeof nodeFileSystem.constructor>,
+  fileSystem: typeof nodeFileSystem,
   logger: ILogger,
   configProvider: IConfigProvider,
   translationMemory: JsonlTranslationMemory,
@@ -291,7 +294,9 @@ describe('Review round-trip (real XLIFF export/import flow)', () => {
     fakeMateCatService.setProjectStatus(projectId, 'completed')
 
     const pending = await manager.getPendingReviewStatus()
-    expect(pending).toEqual([{ projectId, status: 'completed' }])
+    expect(pending).toEqual([
+      expect.objectContaining({ projectId, status: 'completed' })
+    ])
 
     await manager.pullReviewedProjects()
 

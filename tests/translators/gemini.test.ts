@@ -17,6 +17,12 @@ vi.mock('../../src/util/retry', () => ({
 import { postJson } from '../../src/util/http'
 import { withRetry } from '../../src/util/retry'
 
+type GeminiRequestBody = {
+  contents: Array<{
+    parts: Array<{ text: string }>
+  }>
+}
+
 describe('GeminiTranslator stub', () => {
   beforeEach(() => {
     vi.resetAllMocks()
@@ -66,7 +72,7 @@ describe('GeminiTranslator stub', () => {
     expect(callArgs[0]).toContain(`https://test-endpoint/models/${TEST_MODEL}:generateContent`)
     expect(callArgs[0]).toContain('key=test-api-key')
 
-    const body = callArgs[1]
+    const body = callArgs[1] as GeminiRequestBody
     expect(body.contents[0].parts[0].text).toContain('Translate each text from en to es')
     expect(body.contents[0].parts[0].text).toContain('Hello world')
   })
@@ -107,7 +113,7 @@ describe('GeminiTranslator stub', () => {
     expect(result).toEqual(['Abrir archivo'])
     expect(postJson).toHaveBeenCalledTimes(1)
 
-    const body = vi.mocked(postJson).mock.calls[0][1]
+    const body = vi.mocked(postJson).mock.calls[0][1] as GeminiRequestBody
     expect(body.contents[0].parts[0].text).toContain('Button label for opening a file')
   })
 

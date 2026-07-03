@@ -18,7 +18,7 @@ function createLogger(): ILogger {
 
 function createConfigProvider(): IConfigProvider {
   return {
-    get: vi.fn((_: string, defaultValue?: unknown) => defaultValue),
+    get: ((_: string, defaultValue?: unknown) => defaultValue) as IConfigProvider['get'],
     update: vi.fn()
   }
 }
@@ -54,7 +54,7 @@ describe('MateCatReviewService', () => {
     const logger = createLogger()
     const translationMemory = createTranslationMemoryMock()
     const configProvider: IConfigProvider = {
-      get: vi.fn((section: string, defaultValue?: unknown) => {
+      get: ((section: string, defaultValue?: unknown) => {
         if (section === 'translator.sourceLocale') return 'en'
         if (section === 'translator.targetLocales') return ['zh-Hans']
         if (section === 'translator.reviewer.langMap') {
@@ -64,7 +64,7 @@ describe('MateCatReviewService', () => {
           }
         }
         return defaultValue
-      }),
+      }) as IConfigProvider['get'],
       update: vi.fn()
     }
 
@@ -116,10 +116,10 @@ describe('MateCatReviewService', () => {
     const logger = createLogger()
     const translationMemory = createTranslationMemoryMock()
     const configProvider: IConfigProvider = {
-      get: vi.fn((section: string, defaultValue?: unknown) => {
+      get: ((section: string, defaultValue?: unknown) => {
         if (section === 'translator.targetLocales') return ['zh-cn']
         return defaultValue
-      }),
+      }) as IConfigProvider['get'],
       update: vi.fn()
     }
 
@@ -171,10 +171,10 @@ describe('MateCatReviewService', () => {
     const logger = createLogger()
     const translationMemory = createTranslationMemoryMock()
     const configProvider: IConfigProvider = {
-      get: vi.fn((section: string, defaultValue?: unknown) => {
+      get: ((section: string, defaultValue?: unknown) => {
         if (section === 'translator.targetLocales') return ['fr']
         return defaultValue
-      }),
+      }) as IConfigProvider['get'],
       update: vi.fn()
     }
 
@@ -227,10 +227,10 @@ describe('MateCatReviewService', () => {
     const logger = createLogger()
     const translationMemory = createTranslationMemoryMock()
     const configProvider: IConfigProvider = {
-      get: vi.fn((section: string, defaultValue?: unknown) => {
+      get: ((section: string, defaultValue?: unknown) => {
         if (section === 'translator.targetLocales') return ['de']
         return defaultValue
-      }),
+      }) as IConfigProvider['get'],
       update: vi.fn()
     }
 
@@ -282,11 +282,11 @@ describe('MateCatReviewService', () => {
     const logger = createLogger()
     const translationMemory = createTranslationMemoryMock()
     const configProvider: IConfigProvider = {
-      get: vi.fn((section: string, defaultValue?: unknown) => {
+      get: ((section: string, defaultValue?: unknown) => {
         if (section === 'translator.targetLocales') return ['fr']
         if (section === 'translator.reviewer.project') return 'team-release'
         return defaultValue
-      }),
+      }) as IConfigProvider['get'],
       update: vi.fn()
     }
 
@@ -338,10 +338,10 @@ describe('MateCatReviewService', () => {
     const logger = createLogger()
     const translationMemory = createTranslationMemoryMock()
     const configProvider: IConfigProvider = {
-      get: vi.fn((section: string, defaultValue?: unknown) => {
+      get: ((section: string, defaultValue?: unknown) => {
         if (section === 'translator.targetLocales') return ['fr', 'de']
         return defaultValue
-      }),
+      }) as IConfigProvider['get'],
       update: vi.fn()
     }
 

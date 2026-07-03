@@ -21,6 +21,7 @@ describe('Watcher', () => {
       // Create a minimal implementation of IFileWatcher to verify interface
       const mockFileWatcher: IFileWatcher = {
         watch: vi.fn(() => ({ dispose: vi.fn() })),
+        waitUntilReady: vi.fn().mockResolvedValue(undefined),
         dispose: vi.fn()
       };
 

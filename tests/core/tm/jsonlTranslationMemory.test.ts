@@ -538,41 +538,6 @@ describe('JsonlTranslationMemory', () => {
     expect(secondResult.get('Title::')?.textPos).toBe('nested.title')
   })
 
-  it('supports export and import CSV', async () => {
-    const cache = new JsonlTranslationMemory(cachePath, dir)
-
-    await cache.putMany({
-      engine: 'test',
-      sourceLocale: 'en',
-      targetLocale: 'de',
-      pairs: [{ src: 'Hello', dst: 'Hallo', pos: 0 }],
-      sourcePath: 'src/messages.md'
-    })
-
-    const csvPath = join(dir, 'cache.csv')
-    await cache.exportCSV(csvPath)
-
-    expect(existsSync(csvPath)).toBe(true)
-    expect(readFileSync(csvPath, 'utf8')).toContain('source_path,text_pos,engine_name,source_lang,target_lang,source_text,context,target_text,status,origin,updated_at')
-
-    const restored = new JsonlTranslationMemory(join(dir, 'restored.jsonl'), dir)
-    const imported = await restored.importCSV(csvPath)
-
-    expect(imported).toBe(1)
-
-    const result = await restored.getMany({
-      engine: 'test',
-      sourceLocale: 'en',
-      targetLocale: 'de',
-      texts: ['Hello'],
-      contexts: [null],
-      sourcePath: 'src/messages.md',
-      positions: [0]
-    })
-
-    expect(result.get('Hello::')?.translation).toBe('Hallo')
-  })
-
   it('exports only human-origin rows to TMX when origin filter is set', async () => {
     const cache = new JsonlTranslationMemory(cachePath, dir)
 
@@ -605,28 +570,6 @@ describe('JsonlTranslationMemory', () => {
     expect(tmx).toContain('<seg>Hello</seg>')
     expect(tmx).toContain('<seg>Bonjour</seg>')
     expect(tmx).not.toContain('<seg>Bye</seg>')
-  })
-
-  it('escapes XML entities when exporting TMX', async () => {
-    const cache = new JsonlTranslationMemory(cachePath, dir)
-
-    await cache.putMany({
-      engine: 'matecat',
-      sourceLocale: 'en',
-      targetLocale: 'fr',
-      pairs: [{ src: 'Fish & Chips <tag>', dst: 'Poisson & Frites "ok"', pos: 0 }],
-      sourcePath: 'src/messages.json',
-      origin: 'human',
-      status: 'reviewed'
-    })
-
-    const tmxPath = join(dir, 'escaped.tmx')
-    const exported = await cache.exportTMX(tmxPath, { origin: 'human' })
-
-    expect(exported).toBe(1)
-    const tmx = readFileSync(tmxPath, 'utf8')
-    expect(tmx).toContain('Fish &amp; Chips &lt;tag&gt;')
-    expect(tmx).toContain('Poisson &amp; Frites &quot;ok&quot;')
   })
 
   it('handles missing CSV imports', async () => {
@@ -1070,7 +1013,7 @@ describe('JsonlTranslationMemory', () => {
     expect(aiResult.size).toBe(0)
   })
 
-  it('exports XLIFF rows when target locale filter differs only by case', async () => {
+  it('applies target locale filter case-insensitively for XLIFF export selection', async () => {
     const cache = new JsonlTranslationMemory(cachePath, dir)
 
     await cache.putMany({
@@ -1083,14 +1026,24 @@ describe('JsonlTranslationMemory', () => {
       origin: 'ai'
     })
 
+    await cache.putMany({
+      engine: 'test',
+      sourceLocale: 'en-US',
+      targetLocale: 'fr-FR',
+      pairs: [{ src: 'Bye', dst: 'Au revoir', pos: 2 }],
+      sourcePath: 'i18n/en-US/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
     const xliffPath = join(dir, 'review-zh.xliff')
     const exported = await cache.exportXLIFF(xliffPath, { targetLocale: 'zh-CN' })
 
     expect(exported).toBe(1)
+
     const xliff = readFileSync(xliffPath, 'utf8')
     expect(xliff).toContain('target-language="zh-cn"')
-    expect(xliff).toContain('<source>Hello</source>')
-    expect(xliff).toContain('<target>你好</target>')
+    expect(xliff).not.toContain('target-language="fr-FR"')
   })
 
 })

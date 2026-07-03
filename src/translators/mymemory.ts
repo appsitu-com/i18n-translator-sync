@@ -25,11 +25,22 @@ export const MyMemoryConfigSchema = z.object({
 /** Inferred MyMemory config type */
 export type IMyMemoryConfig = z.infer<typeof MyMemoryConfigSchema>
 
+type MyMemoryMatch = {
+  translation?: string
+}
+
+type MyMemoryResponse = {
+  responseData?: {
+    translatedText?: string
+  }
+  matches?: MyMemoryMatch[]
+}
+
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const ctrl = new AbortController()
   const t = setTimeout(() => ctrl.abort(), timeoutMs)
   try {
-    return await fetch(url, { signal: ctrl.signal as any })
+    return await fetch(url, { signal: ctrl.signal })
   } finally {
     clearTimeout(t)
   }
@@ -106,7 +117,7 @@ export class MyMemoryTranslator implements ITranslator<IMyMemoryConfig> {
         await new Promise((r) => setTimeout(r, delayMs))
       }
 
-      out[i] = await withRetry(
+      const translated = await withRetry<string>(
         retry,
         async () => {
           const url = new URL(endpoint)
@@ -119,9 +130,9 @@ export class MyMemoryTranslator implements ITranslator<IMyMemoryConfig> {
           const txt = await res.text()
           if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}: ${txt}`)
 
-          let json: any
+          let json: MyMemoryResponse
           try {
-            json = JSON.parse(txt)
+            json = JSON.parse(txt) as MyMemoryResponse
           } catch {
             json = {}
           }
@@ -129,12 +140,16 @@ export class MyMemoryTranslator implements ITranslator<IMyMemoryConfig> {
           const primary = json?.responseData?.translatedText
           if (primary) return primary
           if (Array.isArray(json?.matches)) {
-            const match = json.matches.find((m: any) => m?.translation)
-            if (match) return match.translation
+            const matchTranslation = json.matches
+              .map((m) => m?.translation)
+              .find((translation): translation is string => typeof translation === 'string' && translation.length > 0)
+            if (matchTranslation) return matchTranslation
           }
           return q
         }
       )
+
+      out[i] = translated
     }
 
     return out

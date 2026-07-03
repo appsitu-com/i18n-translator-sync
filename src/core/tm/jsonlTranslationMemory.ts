@@ -1,7 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { parse } from 'csv-parse/sync'
-import { stringify } from 'csv-stringify/sync'
 import { TRANSLATOR_DIR } from '../constants'
 import { IFileSystem } from '../util/fs'
 import { ILogger, NO_OP_LOGGER } from '../util/baseLogger'
@@ -11,6 +10,7 @@ import { type TmEntry, type JsonlTmLine, TM_ORIGIN_DEFAULT, TM_STATUS_DEFAULT } 
 import { JsonlTmMigrator, IJsonlTmMigrator } from './migrations/JsonlTmMigrator'
 import { V1ToV2JsonlTmMigration } from './migrations/V1ToV2JsonlTmMigration'
 import { V2ToV3JsonlTmMigration } from './migrations/V2ToV3JsonlTmMigration'
+import { CsvExporter, TmxExporter, XliffExporter } from './export'
 
 const LOOKUP_SEPARATOR = '::'
 const KEY_SEPARATOR = '\u0000'
@@ -248,54 +248,17 @@ export class JsonlTranslationMemory implements ITranslationMemory {
   }
 
   async exportCSV(filePath: string): Promise<void> {
-    const rows = Array.from(this.strictData.values())
-      .sort((a, b) => {
-        if (a.sourcePath !== b.sourcePath) {
-          return a.sourcePath.localeCompare(b.sourcePath)
-        }
-        if (a.textPos !== b.textPos) {
-          return this.compareTextPos(a.textPos, b.textPos)
-        }
-        return a.target.localeCompare(b.target)
-      })
-      .map((entry) => ({
-        source_path: entry.sourcePath,
-        text_pos: entry.textPos,
-        engine_name: entry.engine,
-        source_lang: entry.source,
-        target_lang: entry.target,
-        source_text: entry.sourceText,
-        context: entry.context,
-        target_text: entry.targetText,
-        status: entry.status,
-        origin: entry.origin,
-        updated_at: entry.updatedAt
-      }))
-
-    const csvContent = stringify(rows, {
-      header: true,
-      columns: [
-        'source_path',
-        'text_pos',
-        'engine_name',
-        'source_lang',
-        'target_lang',
-        'source_text',
-        'context',
-        'target_text',
-        'status',
-        'origin',
-        'updated_at'
-      ]
-    })
-
-    fs.writeFileSync(filePath, csvContent, 'utf8')
-    this.logger.info(`Exported ${rows.length} translations to ${filePath}`)
+    // CSV export writes a raw snapshot of all strict-cache rows with no deduplication or filters.
+    const entries = Array.from(this.strictData.values())
+    const exporter = new CsvExporter(this.logger)
+    exporter.export(filePath, entries)
   }
 
   async exportTMX(filePath: string, options: { origin?: string; targetLocale?: string } = {}): Promise<number> {
     const originFilter = options.origin?.trim()
     const targetLocaleFilter = options.targetLocale?.trim()
+    // TMX export starts from all strict-cache rows, then applies optional exact-match filters
+    // for origin and target locale before handing the list to the TMX serializer.
     const entries = Array.from(this.strictData.values())
       .filter((entry) => {
         if (originFilter && entry.origin !== originFilter) {
@@ -306,117 +269,18 @@ export class JsonlTranslationMemory implements ITranslationMemory {
         }
         return true
       })
-      .sort((a, b) => {
-        if (a.source !== b.source) {
-          return a.source.localeCompare(b.source)
-        }
-        if (a.target !== b.target) {
-          return a.target.localeCompare(b.target)
-        }
-        if (a.sourcePath !== b.sourcePath) {
-          return a.sourcePath.localeCompare(b.sourcePath)
-        }
-        return this.compareTextPos(a.textPos, b.textPos)
-      })
 
-    if (entries.length === 0) {
-      this.logger.info(`Skipped TMX export to ${filePath} (no matching translations)`)
-      return 0
-    }
-
-    const tuRows = entries.map((entry) => {
-      const sourceLang = this.escapeXml(entry.source)
-      const targetLang = this.escapeXml(entry.target)
-      const sourceText = this.escapeXml(entry.sourceText)
-      const targetText = this.escapeXml(entry.targetText)
-
-      return [
-        '    <tu>',
-        `      <tuv xml:lang="${sourceLang}"><seg>${sourceText}</seg></tuv>`,
-        `      <tuv xml:lang="${targetLang}"><seg>${targetText}</seg></tuv>`,
-        '    </tu>'
-      ].join('\n')
-    })
-
-    const firstSourceLang = this.escapeXml(entries[0].source)
-    const tmxContent = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<tmx version="1.4">',
-      `  <header creationtool="i18n-translator-sync" creationtoolversion="0.12.0" segtype="sentence" adminlang="en" srclang="${firstSourceLang}" datatype="PlainText"/>`,
-      '  <body>',
-      tuRows.join('\n'),
-      '  </body>',
-      '</tmx>',
-      ''
-    ].join('\n')
-
-    fs.writeFileSync(filePath, tmxContent, 'utf8')
-    this.logger.info(`Exported ${entries.length} translations to ${filePath} (TMX)`)
-    return entries.length
+    const exporter = new TmxExporter(this.logger)
+    return exporter.export(filePath, entries)
   }
 
   async exportXLIFF(filePath: string, options: { origin?: string; targetLocale?: string } = {}): Promise<number> {
+    // XLIFF export computes a review-oriented set: optional filters plus de-duplication by
+    // source/target/path/position/text/context, keeping the preferred candidate per key.
     const entries = this.selectEntriesForReviewExport(options.origin?.trim(), options.targetLocale?.trim())
 
-    if (entries.length === 0) {
-      this.logger.info(`Skipped XLIFF export to ${filePath} (no matching translations)`)
-      return 0
-    }
-
-    const groupedByFile = new Map<string, TmEntry[]>()
-
-    for (const entry of entries) {
-      const fileKey = `${entry.source}\u0000${entry.target}\u0000${entry.sourcePath || 'translation-memory'}`
-      const group = groupedByFile.get(fileKey)
-      if (group) {
-        group.push(entry)
-      } else {
-        groupedByFile.set(fileKey, [entry])
-      }
-    }
-
-    const fileBlocks = Array.from(groupedByFile.entries())
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([fileKey, fileEntries]) => {
-        const [sourceLocale, targetLocale, sourcePath] = fileKey.split('\u0000')
-
-        fileEntries.sort((left, right) => this.compareTextPos(left.textPos, right.textPos))
-
-        const transUnits = fileEntries
-          .map((entry, index) => {
-            const unitId = this.escapeXml((entry.context || String(entry.textPos || index + 1)).trim() || String(index + 1))
-            const sourceText = this.escapeXml(entry.sourceText)
-            const targetText = this.escapeXml(entry.targetText)
-
-            return [
-              `      <trans-unit id="${unitId}">`,
-              `        <source>${sourceText}</source>`,
-              `        <target>${targetText}</target>`,
-              '      </trans-unit>'
-            ].join('\n')
-          })
-          .join('\n')
-
-        return [
-          `  <file source-language="${this.escapeXml(sourceLocale)}" target-language="${this.escapeXml(targetLocale)}" original="${this.escapeXml(sourcePath)}">`,
-          '    <body>',
-          transUnits,
-          '    </body>',
-          '  </file>'
-        ].join('\n')
-      })
-
-    const xliffContent = [
-      '<?xml version="1.0" encoding="UTF-8"?>',
-      '<xliff version="1.2">',
-      fileBlocks.join('\n'),
-      '</xliff>',
-      ''
-    ].join('\n')
-
-    fs.writeFileSync(filePath, xliffContent, 'utf8')
-    this.logger.info(`Exported ${entries.length} translations to ${filePath} (XLIFF)`)
-    return entries.length
+    const exporter = new XliffExporter(this.logger)
+    return exporter.export(filePath, entries)
   }
 
   async importCSV(filePath: string): Promise<number> {
@@ -927,14 +791,6 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     return flag === '1' || flag === 'true' || flag === 'yes' || flag === 'on'
   }
 
-  private compareTextPos(left: number | string, right: number | string): number {
-    if (typeof left === 'number' && typeof right === 'number') {
-      return left - right
-    }
-
-    return String(left).localeCompare(String(right))
-  }
-
   private normalizeImportedStatus(status: string | undefined): string {
     if (typeof status !== 'string' || status.trim().length === 0) {
       return TM_STATUS_DEFAULT
@@ -1054,15 +910,6 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     }
 
     return candidate.updatedAt > current.updatedAt
-  }
-
-  private escapeXml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;')
   }
 
 }

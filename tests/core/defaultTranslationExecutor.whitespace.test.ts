@@ -50,6 +50,13 @@ describe('DefaultTranslationExecutor whitespace handling', () => {
       exportTMX: vi.fn(),
       exportXLIFF: vi.fn(),
       importCSV: vi.fn(),
+      hasSourcePath: vi.fn(),
+      hasPendingPurge: vi.fn(),
+      purge: vi.fn(),
+      completePurge: vi.fn(),
+      isNew: vi.fn(),
+      didMigrateFromV1: vi.fn(),
+      clearMigrationFlag: vi.fn(),
       close: vi.fn()
     }
 

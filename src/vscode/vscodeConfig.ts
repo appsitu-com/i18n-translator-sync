@@ -33,7 +33,7 @@ export class VsCodeConfigProvider implements IConfigProvider {
   /**
    * Update configuration for a specific section
    */
-  async update(section: string, value: any): Promise<void> {
+  async update(section: string, value: unknown): Promise<void> {
     const parts = section.split('.');
 
     // Handle special case for translator settings

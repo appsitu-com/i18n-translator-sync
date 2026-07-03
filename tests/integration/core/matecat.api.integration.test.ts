@@ -401,6 +401,12 @@ describe.runIf(hasMateCatCredentials)('integration: matecat api', () => {
       const createElapsed = Date.now() - createStartTime
       log(`STEP 1 COMPLETE: Project created (${createElapsed}ms) - ID: ${createdProjectRef.projectId}`)
 
+      if (!createdProjectRef) {
+        throw new Error('Expected createdProjectRef after project creation')
+      }
+
+      const activeProjectRef = createdProjectRef
+
       log(`STEP 2: Waiting ${initialDelayMs}ms for Matecat to provision jobs...`)
       await sleep(initialDelayMs)
       log(`STEP 2 COMPLETE: Initial delay done`)
@@ -408,8 +414,8 @@ describe.runIf(hasMateCatCredentials)('integration: matecat api', () => {
       log(`STEP 3: Polling for job discovery (timeout: ${jobsTimeoutMs}ms)...`)
       const discoveredStatus = await pollUntil(
         async () => {
-          const statuses = await service.checkReviewProjectStatus(settings, [createdProjectRef])
-          const payload = await fetchProjectJobsPayload(settings, createdProjectRef.projectId, createdProjectRef.projectPass)
+          const statuses = await service.checkReviewProjectStatus(settings, [activeProjectRef])
+          const payload = await fetchProjectJobsPayload(settings, activeProjectRef.projectId, activeProjectRef.projectPass)
           return {
             summary: statuses[0],
             payload
@@ -433,16 +439,16 @@ describe.runIf(hasMateCatCredentials)('integration: matecat api', () => {
       expect(discoveredStatus.summary).toBeDefined()
 
       log(`STEP 4: Verifying stats are readable (no alignment wait - requires human translation)...`)
-      const statusWithStats = await service.checkReviewProjectStatus(settings, [createdProjectRef])
+      const statusWithStats = await service.checkReviewProjectStatus(settings, [activeProjectRef])
       expect(statusWithStats[0]).toBeDefined()
-      const payload = await fetchProjectJobsPayload(settings, createdProjectRef.projectId, createdProjectRef.projectPass)
+      const payload = await fetchProjectJobsPayload(settings, activeProjectRef.projectId, activeProjectRef.projectPass)
       const chunks = getChunks(payload)
       expect(chunks.length).toBeGreaterThan(0)
       log(`STEP 4 COMPLETE: Stats verified - ${chunks.length} chunk(s) readable`)
 
       log(`STEP 5: Pulling reviewed translations...`)
       const pullStartTime = Date.now()
-      const pulledFiles = await service.pullReviewedTranslations(settings, [createdProjectRef])
+      const pulledFiles = await service.pullReviewedTranslations(settings, [activeProjectRef])
       const pullElapsed = Date.now() - pullStartTime
       log(`STEP 5 COMPLETE: Files pulled (${pullElapsed}ms) - ${pulledFiles.length} file(s)`)
       expect(pulledFiles.length).toBeGreaterThan(0)
@@ -450,12 +456,12 @@ describe.runIf(hasMateCatCredentials)('integration: matecat api', () => {
 
       log(`STEP 6: Deleting project (skipping completion wait - requires human translation)...`)
       const deleteStartTime = Date.now()
-      await service.deleteReviewProject(settings, createdProjectRef)
+      await service.deleteReviewProject(settings, activeProjectRef)
       const deleteElapsed = Date.now() - deleteStartTime
       log(`STEP 6 COMPLETE: Project deleted (${deleteElapsed}ms)`)
 
       log(`STEP 7: Verifying deletion (expecting 'unknown' status)...`)
-      const deletedProjectStatus = await service.checkReviewProjectStatus(settings, [createdProjectRef])
+      const deletedProjectStatus = await service.checkReviewProjectStatus(settings, [activeProjectRef])
       expect(deletedProjectStatus).toEqual([expect.objectContaining({ status: 'unknown' })])
       log(`STEP 7 COMPLETE: Deletion verified - got 'unknown' status as expected`)
       createdProjectRef = undefined

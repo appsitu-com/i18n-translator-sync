@@ -1,8 +1,8 @@
 import { withRetry, type RetryOptions } from './retry';
 
-export async function postJson<T = any>(
+export async function postJson<T = unknown>(
   url: string,
-  body: any,
+  body: unknown,
   headers: Record<string, string> = {},
   timeoutMs = 30000,
   retry?: RetryOptions
@@ -15,11 +15,11 @@ export async function postJson<T = any>(
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify(body),
-        signal: ctrl.signal as any
+        signal: ctrl.signal
       });
       const txt = await res.text();
       if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}: ${txt}`);
-      return txt ? JSON.parse(txt) : ({} as any);
+      return txt ? (JSON.parse(txt) as T) : ({} as T);
     } finally {
       clearTimeout(to);
     }

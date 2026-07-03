@@ -11,6 +11,10 @@ import { loadProjectConfig } from '../core/coreConfig'
 import { ITranslationMemory } from '../core/tm/ITranslationMemory'
 import { MissingEnvironmentValueError } from '../core/config'
 
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 /**
  * VSCode adapter for the TranslatorManager
  */
@@ -144,8 +148,8 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
 
       this.initialized = true
       this.logger.info('Translator activation initialized (runtime not started)')
-    } catch (error: any) {
-      this.logger.error(`Error initializing translator: ${error.message || String(error)}`)
+    } catch (error: unknown) {
+      this.logger.error(`Error initializing translator: ${getErrorMessage(error)}`)
       throw error
     }
   }
@@ -215,8 +219,8 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
 
       // Show VSCode-specific success message
       vscode.window.showInformationMessage('Translator started')
-    } catch (error: any) {
-      vscode.window.showErrorMessage(`Error starting translator: ${error.message || String(error)}`)
+    } catch (error: unknown) {
+      vscode.window.showErrorMessage(`Error starting translator: ${getErrorMessage(error)}`)
       throw error
     }
   }
@@ -297,11 +301,11 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
 
       await this.translatorManager.pushReviewProject(pushMode)
       vscode.window.showInformationMessage('Successfully pushed translations to MateCat')
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (typeof MissingEnvironmentValueError === 'function' && e instanceof MissingEnvironmentValueError) {
         throw e
       }
-      vscode.window.showErrorMessage(`MateCat push failed: ${e.message}`)
+      vscode.window.showErrorMessage(`MateCat push failed: ${getErrorMessage(e)}`)
     }
   }
 
@@ -345,11 +349,11 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
 
       await super.pullFromMateCat()
       vscode.window.showInformationMessage('Successfully pulled translations from MateCat')
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (typeof MissingEnvironmentValueError === 'function' && e instanceof MissingEnvironmentValueError) {
         throw e
       }
-      vscode.window.showErrorMessage(`MateCat pull failed: ${e.message}`)
+      vscode.window.showErrorMessage(`MateCat pull failed: ${getErrorMessage(e)}`)
     }
   }
 
@@ -374,11 +378,11 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
 
       vscode.window.showInformationMessage(`Retrieved MateCat status for ${statuses.length} pending project(s)`)
       return statuses
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (typeof MissingEnvironmentValueError === 'function' && e instanceof MissingEnvironmentValueError) {
         throw e
       }
-      vscode.window.showErrorMessage(`MateCat status check failed: ${e.message}`)
+      vscode.window.showErrorMessage(`MateCat status check failed: ${getErrorMessage(e)}`)
       return []
     }
   }

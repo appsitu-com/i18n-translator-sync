@@ -7,6 +7,7 @@ import type { ITranslatorEngines } from './config';
 import { TranslatorPipeline } from './TranslatorPipeline';
 import { ITranslationExecutor } from './translationExecutor';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from './constants';
+import { FileWatcherService } from './FileWatcherService';
 import * as path from 'path';
 import * as fs from 'fs';
 import { toAbsPath } from './util/pathShared';
@@ -60,10 +61,9 @@ export class TranslatorManager {
   // Aggregated XLIFF exported from TM for a locale; contains one <file> block per source file.
   private static readonly GENERATED_REVIEW_XLIFF_BUNDLE_NAME = 'local-tm-review.xliff'
 
-  private watchers: IFileWatcher[] = [];
+  private fileWatcherService: FileWatcherService;
   private pipeline: ITranslatorPipeline;
   private tm: ITranslationMemory;
-  private isWatching: boolean = false;
   private reviewService: IReviewService | null = null;
   private onConfigChanged?: () => Promise<void>;
   private translatorEngines?: ITranslatorEngines;
@@ -88,6 +88,7 @@ export class TranslatorManager {
     this.pipeline =
       this.dependencies.createPipeline?.(fileSystem, logger, cache, workspacePath, executor, getPassphrase) ??
       new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
+    this.fileWatcherService = new FileWatcherService(logger, workspaceWatcher);
     this.onConfigChanged = onConfigChanged;
     this.translatorEngines = translatorEngines;
   }
@@ -156,143 +157,26 @@ export class TranslatorManager {
    * @param config The project configuration
    */
   async startWatching(config: TranslateProjectConfig): Promise<void> {
-    if (this.isWatching) {
-      this.logger.warn('Already watching for file changes');
-      return;
-    }
-
-    this.logger.info('Starting to watch for file changes');
-
     // Process all existing files first
     const filesProcessed = await this.processExistingSourceFiles(config);
     if (filesProcessed > 0 && (config.autoExport ?? true)) {
       await this.exportCache(config);
     }
 
-    // Create file watchers for each source path
-    for (const sourcePath of config.sourcePaths) {
-      // Normalize path for consistency across platforms
-      const normalizedPath = sourcePath.replace(/\\/g, '/');
-
-      // Create the full path to check if it's a file
-      const fullSourcePath = path.join(this.workspacePath, sourcePath);
-      const sourceUri = this.fileSystem.createUri(fullSourcePath);
-
-      // Check if this is a file or directory
-      const isFilePath = await this.isFile(sourceUri);
-
-      // Create appropriate glob pattern for the file watcher
-      let pattern: string;
-
-      if (isFilePath) {
-        // For a file, watch that specific file directly
-        pattern = normalizedPath;
-        this.logger.debug(`Creating file-specific watcher with pattern: ${pattern}`);
-      } else {
-        // For a directory, watch all files in that directory recursively
-        pattern = `${normalizedPath}/**`;
-        this.logger.debug(`Creating directory watcher with pattern: ${pattern}`);
-      }
-
-      // Create file watcher
-      const watcher = this.workspaceWatcher.createFileSystemWatcher();
-
-      // Set up event handlers using the new watch method
-      watcher.watch(pattern, {
-        onDidCreate: uri => this.onAddOrChange(uri, config),
-        onDidChange: uri => this.onAddOrChange(uri, config),
-        onDidDelete: uri => this.onDelete(uri, config)
-      });
-
-      // Add watcher to disposables
-      this.watchers.push(watcher);
-
-      this.logger.info(`Watcher created for ${pattern}`);
-    }
-
-    // Set up rename handler
-    this.workspaceWatcher.onDidRenameFiles(e => this.onRename(e, config));
-
-    // Watch for configuration file changes
-    this.setupConfigFileWatcher();
-
-    // Wait for all chokidar watchers to complete their initial scan before returning.
-    // This ensures callers can immediately write files and expect change events.
-    await Promise.all(this.watchers.map(w => w.waitUntilReady()));
-
-    this.isWatching = true;
-    this.logger.info('Started watching for file changes');
+    // Delegate file watching to FileWatcherService
+    await this.fileWatcherService.startWatching(config, {
+      onAddOrChange: (uri, cfg) => this.onAddOrChange(uri, cfg),
+      onDelete: (uri, cfg) => this.onDelete(uri, cfg),
+      onRename: (e, cfg) => this.onRename(e, cfg),
+      onConfigChanged: this.onConfigChanged
+    });
   }
 
   /**
    * Stop watching for file changes
    */
   async stopWatching(): Promise<void> {
-    if (!this.isWatching) {
-      this.logger.warn('Not watching for file changes');
-      return;
-    }
-
-    // Dispose all watchers
-    for (const watcher of this.watchers) {
-      watcher.dispose();
-    }
-
-    this.watchers = [];
-    this.isWatching = false;
-
-    this.logger.info('Stopped watching for file changes');
-  }
-
-  /**
-   * Set up watchers for configuration files (translator.json and translator.env)
-   * When either config file changes, notify the adapter to reload and restart
-   * @private
-   */
-  private setupConfigFileWatcher(): void {
-    // Watch for translator.json changes
-    const jsonWatcher = this.workspaceWatcher.createFileSystemWatcher();
-    jsonWatcher.watch(TRANSLATOR_JSON, {
-      onDidCreate: () => this.handleConfigFileChange(TRANSLATOR_JSON),
-      onDidChange: () => this.handleConfigFileChange(TRANSLATOR_JSON),
-      onDidDelete: () => this.handleConfigFileChange(TRANSLATOR_JSON)
-    });
-    this.watchers.push(jsonWatcher);
-    this.logger.info(`Watcher created for configuration file: ${TRANSLATOR_JSON}`);
-
-    // Watch for translator.env changes
-    const envWatcher = this.workspaceWatcher.createFileSystemWatcher();
-    envWatcher.watch(TRANSLATOR_ENV, {
-      onDidCreate: () => this.handleConfigFileChange(TRANSLATOR_ENV),
-      onDidChange: () => this.handleConfigFileChange(TRANSLATOR_ENV),
-      onDidDelete: () => this.handleConfigFileChange(TRANSLATOR_ENV)
-    });
-    this.watchers.push(envWatcher);
-    this.logger.info(`Watcher created for environment file: ${TRANSLATOR_ENV}`);
-  }
-
-  /**
-   * Handle changes to configuration files (translator.json or translator.env)
-   * Triggers a callback to reload configuration and restart watching
-   * @param filename The name of the file that changed
-   * @private
-   */
-  private async handleConfigFileChange(filename: string): Promise<void> {
-    try {
-      this.logger.info(`Configuration file changed (${filename}), reloading configuration...`);
-
-      // Call the callback if provided
-      if (this.onConfigChanged) {
-        await this.onConfigChanged();
-      } else {
-        this.logger.warn('Configuration changed but no handler is registered. Please restart the translator.');
-      }
-    } catch (error) {
-      this.logger.error(`Error handling configuration file change: ${error instanceof Error ? error.message : String(error)}`);
-      if (error instanceof Error && error.stack) {
-        this.logger.debug(error.stack);
-      }
-    }
+    await this.fileWatcherService.stopWatching();
   }
 
   /**

@@ -6,6 +6,7 @@ import { IConfigProvider } from '../../../src/core/coreConfig';
 import { IWorkspaceWatcher } from '../../../src/core/util/watcher';
 import { TranslatorManager } from '../../../src/core/TranslatorManager';
 import { JsonlTranslationMemory, ITranslationMemory } from '../../../src/core/tm/ITranslationMemory';
+import type { ITranslatorManager } from '../../../src/core/adapters/TranslatorAdapter';
 import * as path from 'path';
 import * as coreConfig from '../../../src/core/coreConfig';
 
@@ -73,9 +74,8 @@ class TestTranslatorAdapter extends TranslatorAdapter {
   protected createWatcher(): IWorkspaceWatcher {
     return {
       createFileSystemWatcher: vi.fn().mockReturnValue({
-        onDidCreate: vi.fn(),
-        onDidChange: vi.fn(),
-        onDidDelete: vi.fn(),
+        watch: vi.fn().mockReturnValue({ dispose: vi.fn() }),
+        waitUntilReady: vi.fn().mockResolvedValue(undefined),
         dispose: vi.fn()
       }),
       onDidRenameFiles: vi.fn(),
@@ -115,7 +115,7 @@ class TestTranslatorAdapter extends TranslatorAdapter {
     return this.running;
   }
 
-  public getTranslatorManager(): TranslatorManager | undefined {
+  public getTranslatorManager(): ITranslatorManager | undefined {
     return this.translatorManager;
   }
 }
@@ -374,6 +374,7 @@ describe('TranslatorAdapter', () => {
         excludeKeys: [],
         excludeKeyPaths: [],
         copyOnlyFiles: [],
+        reviewService: 'matecat',
         csvExportPath: 'translator.csv',
         autoExport: true,
         autoImport: false
@@ -446,6 +447,7 @@ describe('TranslatorAdapter', () => {
         excludeKeys: [],
         excludeKeyPaths: [],
         copyOnlyFiles: [],
+        reviewService: 'matecat',
         csvExportPath: 'translator.csv',
         autoExport: true,
         autoImport: true
@@ -484,6 +486,7 @@ describe('TranslatorAdapter', () => {
         excludeKeys: [],
         excludeKeyPaths: [],
         copyOnlyFiles: [],
+        reviewService: 'matecat',
         csvExportPath: 'translator.csv',
         autoExport: true,
         autoImport: true
@@ -524,6 +527,7 @@ describe('TranslatorAdapter', () => {
         excludeKeys: [],
         excludeKeyPaths: [],
         copyOnlyFiles: [],
+        reviewService: 'matecat',
         csvExportPath: 'translator.csv',
         autoExport: true,
         autoImport: false

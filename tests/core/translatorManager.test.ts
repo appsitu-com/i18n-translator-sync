@@ -4,6 +4,8 @@ import { TranslateProjectConfig, defaultConfig } from '../../src/core/coreConfig
 import { IFileSystem } from '../../src/core/util/fs';
 import { ILogger } from '../../src/core/util/baseLogger';
 import { IFileWatcher, IWorkspaceWatcher } from '../../src/core/util/watcher';
+import { IConfigProvider } from '../../src/core/coreConfig';
+import type { ITranslationMemory } from '../../src/core/tm/ITranslationMemory';
 import { TRANSLATOR_JSON, TRANSLATOR_ENV } from '../../src/core/constants';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -52,24 +54,28 @@ const createMockWorkspaceWatcher = () => ({
   dispose: vi.fn()
 });
 
-const createMockCache = () => ({
+const createMockCache = (): ITranslationMemory => ({
   putMany: vi.fn(),
   getMany: vi.fn(),
+  hasSourcePath: vi.fn(),
+  hasPendingPurge: vi.fn(),
+  purge: vi.fn(),
+  completePurge: vi.fn(),
+  isNew: vi.fn().mockReturnValue(false),
+  didMigrateFromV1: vi.fn().mockReturnValue(false),
+  clearMigrationFlag: vi.fn(),
   close: vi.fn(),
-  deleteForFile: vi.fn(),
-  getAllForLocale: vi.fn(),
   exportCSV: vi.fn(async (filePath: string) => {
     fs.mkdirSync(path.dirname(filePath), { recursive: true })
     fs.writeFileSync(filePath, 'source_text,target_text\nHello,Bonjour\n', 'utf8')
   }),
   exportTMX: vi.fn(async () => 0),
   exportXLIFF: vi.fn(async () => 0),
-  importCSV: vi.fn(),
-  getStats: vi.fn()
+  importCSV: vi.fn(async () => 0)
 });
 
-const createMockConfigProvider = () => ({
-  get: vi.fn(),
+const createMockConfigProvider = (): IConfigProvider => ({
+  get: vi.fn(<T>(_: string, defaultValue?: T) => defaultValue as T) as IConfigProvider['get'],
   update: vi.fn()
 });
 
@@ -90,11 +96,11 @@ const defaultProjectConfig: TranslateProjectConfig = {
 describe('TranslatorManager', () => {
   let fileSystem: IFileSystem;
   let logger: ILogger;
-  let cache: any;
+  let cache: ITranslationMemory;
   let workspaceWatcher: IWorkspaceWatcher;
-  let configProvider: any;
+  let configProvider: IConfigProvider;
   let translatorManager: TranslatorManager;
-  let mockFileWatcher: any;
+  let mockFileWatcher: IFileWatcher;
 
   beforeEach(() => {
     fileSystem = createMockFileSystem();
@@ -310,6 +316,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
@@ -465,6 +472,7 @@ describe('TranslatorManager', () => {
       const mockReviewService = {
         pushReviewProject: vi.fn().mockResolvedValue(undefined),
         pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
         getPendingReviewStatus: vi.fn().mockResolvedValue([])
       }
 
@@ -719,6 +727,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -732,7 +741,10 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
+            copy: {},
             deepl: {
+              endpoint: 'https://api-free.deepl.com',
+              timeoutMs: 30000,
               langMap: {
                 'zh-CN': 'zh-Hans',
                 'zh-TW': 'zh-Hant',
@@ -771,6 +783,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -784,7 +797,10 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
+            copy: {},
             deepl: {
+              endpoint: 'https://api-free.deepl.com',
+              timeoutMs: 30000,
               langMap: {
                 'zh-CN': 'zh-Hans'
               }
@@ -818,6 +834,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -831,7 +848,10 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
+            copy: {},
             deepl: {
+              endpoint: 'https://api-free.deepl.com',
+              timeoutMs: 30000,
               langMap: {
                 'zh-CN': 'zh-Hans'
               }
@@ -864,6 +884,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -877,7 +898,10 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
+            copy: {},
             deepl: {
+              endpoint: 'https://api-free.deepl.com',
+              timeoutMs: 30000,
               langMap: {
                 'zh-CN': 'zh-Hans',
                 'zh-TW': 'zh-Hant',
@@ -915,6 +939,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -928,7 +953,10 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
+            copy: {},
             deepl: {
+              endpoint: 'https://api-free.deepl.com',
+              timeoutMs: 30000,
               langMap: {
                 'zh-CN': 'zh-Hans'
               }
@@ -963,6 +991,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -976,9 +1005,15 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
-            deepl: { langMap: { 'ja': 'ja' } },
-            google: { langMap: { 'zh-CN': 'zh-CN' } },
-            azure: { langMap: { 'pt': 'pt-BR' } }
+            copy: {},
+            deepl: { endpoint: 'https://api-free.deepl.com', timeoutMs: 30000, langMap: { 'ja': 'ja' } },
+            google: {
+              endpoint: 'https://translation.googleapis.com',
+              googleLocation: 'global',
+              timeoutMs: 30000,
+              langMap: { 'zh-CN': 'zh-CN' }
+            },
+            azure: { endpoint: 'https://api.cognitive.microsofttranslator.com', timeoutMs: 30000, langMap: { 'pt': 'pt-BR' } }
           },
           undefined,
           {
@@ -1010,6 +1045,7 @@ describe('TranslatorManager', () => {
         const mockReviewService = {
           pushReviewProject: vi.fn().mockResolvedValue(undefined),
           pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+          pullReviewedFiles: vi.fn().mockResolvedValue([]),
           getPendingReviewStatus: vi.fn().mockResolvedValue([])
         }
 
@@ -1023,7 +1059,10 @@ describe('TranslatorManager', () => {
           undefined,
           undefined,
           {
+            copy: {},
             deepl: {
+              endpoint: 'https://api-free.deepl.com',
+              timeoutMs: 30000,
               langMap: {
                 'zh-CN': 'zh-Hans'
               }
@@ -1231,7 +1270,7 @@ describe('TranslatorManager', () => {
       const listeners = watchCall[1];
 
       // Create a test URI for a .git temporary file
-      const excludedUri = { fsPath: '/workspace/i18n/en/messages.json.git', scheme: 'file' };
+      const excludedUri = { fsPath: '/workspace/i18n/en/messages.json.git', path: '/workspace/i18n/en/messages.json.git', scheme: 'file' };
 
       // Reset the mock to clear previous calls
       vi.mocked(mockPipeline.processFile).mockClear();
@@ -1258,7 +1297,7 @@ describe('TranslatorManager', () => {
       const listeners = watchCall[1];
 
       // Create a test URI for a Vim swap file
-      const excludedUri = { fsPath: '/workspace/i18n/en/.messages.json.swp', scheme: 'file' };
+      const excludedUri = { fsPath: '/workspace/i18n/en/.messages.json.swp', path: '/workspace/i18n/en/.messages.json.swp', scheme: 'file' };
 
       // Reset the mock
       vi.mocked(mockPipeline.processFile).mockClear();
@@ -1367,7 +1406,7 @@ describe('TranslatorManager', () => {
 
         // Trigger the change handler
         if (listeners.onDidChange) {
-          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_JSON}`, scheme: 'file' });
+          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_JSON}`, path: `/workspace/${TRANSLATOR_JSON}`, scheme: 'file' });
         }
 
         // Should call the config change callback
@@ -1393,7 +1432,7 @@ describe('TranslatorManager', () => {
 
         // Trigger the change handler
         if (listeners.onDidChange) {
-          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_ENV}`, scheme: 'file' });
+          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_ENV}`, path: `/workspace/${TRANSLATOR_ENV}`, scheme: 'file' });
         }
 
         // Should call the config change callback
@@ -1428,7 +1467,7 @@ describe('TranslatorManager', () => {
         const listeners = jsonWatchCall[1];
 
         if (listeners.onDidChange) {
-          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_JSON}`, scheme: 'file' });
+          await listeners.onDidChange({ fsPath: `/workspace/${TRANSLATOR_JSON}`, path: `/workspace/${TRANSLATOR_JSON}`, scheme: 'file' });
         }
 
         // Should warn that no handler is configured

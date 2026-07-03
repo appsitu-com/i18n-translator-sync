@@ -32,6 +32,24 @@ export const OpenRouterConfigSchema = z.object({
 /** Inferred OpenRouter config type */
 export type IOpenRouterConfig = z.infer<typeof OpenRouterConfigSchema>
 
+type OpenRouterChoice = {
+  message?: {
+    content?: string
+  }
+}
+
+type OpenRouterApiResponse = {
+  choices?: OpenRouterChoice[]
+}
+
+type OpenRouterTranslationsResponse = {
+  translations?: string[]
+}
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
+}
+
 // JSON Schema for enforcing structured output
 const TRANSLATION_SCHEMA = {
   type: 'object',
@@ -145,7 +163,7 @@ Respond with a JSON object containing a "translations" array with the translated
       }
 
       const text = await response.text()
-      const json = text ? JSON.parse(text) : {}
+      const json: OpenRouterApiResponse = text ? (JSON.parse(text) as OpenRouterApiResponse) : {}
 
       // Parse the response
       const responseContent = json?.choices?.[0]?.message?.content
@@ -154,17 +172,17 @@ Respond with a JSON object containing a "translations" array with the translated
         return texts // Return original texts on error
       }
 
-      let parsedResponse: any
+      let parsedResponse: OpenRouterTranslationsResponse
       try {
         // Try to parse the response content directly first
-        parsedResponse = JSON.parse(responseContent)
+        parsedResponse = JSON.parse(responseContent) as OpenRouterTranslationsResponse
       } catch (parseError) {
         // If direct parsing fails, try to extract JSON from the response
         // OpenRouter sometimes returns extra text around the JSON
         const jsonMatch = responseContent.match(/\{[\s\S]*\}/)
         if (jsonMatch) {
           try {
-            parsedResponse = JSON.parse(jsonMatch[0])
+            parsedResponse = JSON.parse(jsonMatch[0]) as OpenRouterTranslationsResponse
           } catch (secondParseError) {
             console.error('OpenRouter translation error: Failed to parse extracted JSON response', secondParseError)
             return texts
@@ -187,7 +205,7 @@ Respond with a JSON object containing a "translations" array with the translated
         return texts
       }
 
-      return translations.map((translation: any, idx: number) => {
+      return translations.map((translation, idx: number) => {
         // Ensure translation is a string and fallback to original if not
         if (typeof translation !== 'string') {
           console.warn(`OpenRouter translation warning: Translation ${idx} is not a string, using original`)
@@ -195,8 +213,8 @@ Respond with a JSON object containing a "translations" array with the translated
         }
         return translation.trim()
       })
-    } catch (error: any) {
-      console.error(`OpenRouter translation error: ${error.message}`, error)
+    } catch (error: unknown) {
+      console.error(`OpenRouter translation error: ${getErrorMessage(error)}`, error)
       return texts // Return original texts on error
     }
   }
