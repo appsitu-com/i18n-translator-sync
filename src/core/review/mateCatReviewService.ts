@@ -286,6 +286,63 @@ export class MateCatReviewService implements IReviewService {
     )
   }
 
+  private parseTimestampPrefixedProjectName(projectName: string | undefined): { runPrefix: number; stableName: string } | undefined {
+    if (typeof projectName !== 'string') {
+      return undefined
+    }
+
+    const trimmedName = projectName.trim()
+    if (!trimmedName) {
+      return undefined
+    }
+
+    const match = /^(\d{10,})-(.+)$/.exec(trimmedName)
+    if (!match?.[1] || !match[2]) {
+      return undefined
+    }
+
+    const runPrefix = Number(match[1])
+    if (!Number.isFinite(runPrefix)) {
+      return undefined
+    }
+
+    return {
+      runPrefix,
+      stableName: match[2]
+    }
+  }
+
+  private collectSupersededRunProjectIds(statuses: IMateCatProjectStatus[]): Set<string> {
+    const latestRunByStableName = new Map<string, number>()
+
+    for (const status of statuses) {
+      const parsedName = this.parseTimestampPrefixedProjectName(status.projectName)
+      if (!parsedName) {
+        continue
+      }
+
+      const currentLatest = latestRunByStableName.get(parsedName.stableName)
+      if (currentLatest === undefined || parsedName.runPrefix > currentLatest) {
+        latestRunByStableName.set(parsedName.stableName, parsedName.runPrefix)
+      }
+    }
+
+    const supersededProjectIds = new Set<string>()
+    for (const status of statuses) {
+      const parsedName = this.parseTimestampPrefixedProjectName(status.projectName)
+      if (!parsedName) {
+        continue
+      }
+
+      const latestRun = latestRunByStableName.get(parsedName.stableName)
+      if (latestRun !== undefined && parsedName.runPrefix < latestRun) {
+        supersededProjectIds.add(status.projectId)
+      }
+    }
+
+    return supersededProjectIds
+  }
+
   private getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error)
   }
@@ -508,6 +565,9 @@ export class MateCatReviewService implements IReviewService {
         throw error
       }
     }
+
+    const supersededProjectIds = this.collectSupersededRunProjectIds(statuses)
+    await this.removePendingProjects(supersededProjectIds, 'project run is superseded by a newer timestamp-prefixed project')
 
     await this.removePendingProjects(deletedProjectIds, 'project no longer exists in MateCat')
     await this.removePendingProjects(inactiveProjectIds, 'project is inactive in MateCat')

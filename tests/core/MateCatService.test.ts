@@ -369,6 +369,84 @@ describe('MateCatService', () => {
     ])
   })
 
+  it('checkReviewProjectStatus preserves terminal top-level status over segment-based in_progress', async () => {
+    const send = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () =>
+        JSON.stringify({
+          project: {
+            id: 'p1',
+            password: 'pass-1',
+            status: 'archived',
+            jobs: [
+              {
+                id: 'job-1',
+                status: 'active',
+                stats: {
+                  raw: {
+                    total: 100,
+                    translated: 80,
+                    approved: 0,
+                    approved2: 0
+                  }
+                }
+              }
+            ]
+          }
+        })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    const result = await service.checkReviewProjectStatus(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
+
+    expect(result).toEqual([
+      { projectId: 'p1', status: 'archived', projectName: '', totalTexts: 100, translatedTexts: 80 }
+    ])
+  })
+
+  it('checkReviewProjectStatus maps is_cancelled project flag to canceled even with active job stats', async () => {
+    const send = vi.fn().mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      text: async () =>
+        JSON.stringify({
+          project: {
+            id: 'p1',
+            password: 'pass-1',
+            is_cancelled: true,
+            jobs: [
+              {
+                id: 'job-1',
+                status: 'active',
+                stats: {
+                  raw: {
+                    total: 100,
+                    translated: 80,
+                    approved: 0,
+                    approved2: 0
+                  }
+                }
+              }
+            ]
+          }
+        })
+    })
+
+    const httpClient: IMateCatHttpClient = { send }
+    const service = new MateCatService(logger, httpClient)
+
+    const result = await service.checkReviewProjectStatus(settings, [{ projectId: 'p1', projectPass: 'pass-1' }])
+
+    expect(result).toEqual([
+      { projectId: 'p1', status: 'canceled', projectName: '', totalTexts: 100, translatedTexts: 80 }
+    ])
+  })
+
   it('supports interface-only HTTP client injection', async () => {
     const send = vi.fn().mockResolvedValue({
       ok: true,

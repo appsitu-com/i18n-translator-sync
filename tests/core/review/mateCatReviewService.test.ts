@@ -1034,6 +1034,82 @@ describe('MateCatReviewService', () => {
     expect(updatedPending).not.toContainEqual(expect.objectContaining({ projectId: 'mc-inactive' }))
   })
 
+  it('status command prunes older timestamp-prefixed project runs for the same stable project name', async () => {
+    const workspacePath = '/workspace'
+    const pendingProjects = [
+      {
+        projectId: '12950403',
+        projectPass: 'pass-old',
+        createdAt: '2026-07-03T05:40:24.890Z',
+        targetLocale: 'es',
+        mappedLocale: 'es'
+      },
+      {
+        projectId: '12950439',
+        projectPass: 'pass-new',
+        createdAt: '2026-07-03T06:02:23.832Z',
+        targetLocale: 'es',
+        mappedLocale: 'es'
+      }
+    ]
+
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn(),
+      checkReviewProjectStatus: vi.fn().mockImplementation(async (_settings: unknown, projects: Array<{ projectId: string }>) => {
+        if (projects[0]?.projectId === '12950403') {
+          return [
+            {
+              projectId: '12950403',
+              status: 'in_progress',
+              projectName: '1783057220848-i18n-test-project-es',
+              totalTexts: 388,
+              translatedTexts: 383
+            }
+          ]
+        }
+
+        return [
+          {
+            projectId: '12950439',
+            status: 'in_progress',
+            projectName: '1783058540005-i18n-test-project-es',
+            totalTexts: 388,
+            translatedTexts: 383
+          }
+        ]
+      }),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: { project_name: 'Demo' }
+      }),
+      translationMemory
+    })
+
+    const statuses = await service.getPendingReviewStatus()
+    expect(statuses).toHaveLength(2)
+
+    const updatedPendingRaw = await fileSystem.readFile(
+      fileSystem.createUri(`${workspacePath}/.translator/review/pending-projects.json`)
+    )
+    const updatedPending = JSON.parse(updatedPendingRaw) as Array<Record<string, unknown>>
+
+    expect(updatedPending).toHaveLength(1)
+    expect(updatedPending).toContainEqual(expect.objectContaining({ projectId: '12950439' }))
+    expect(updatedPending).not.toContainEqual(expect.objectContaining({ projectId: '12950403' }))
+  })
+
   it('pull command removes pending project when reviewed files cannot be pulled because project was deleted', async () => {
     const workspacePath = '/workspace'
     const pendingProjects = [

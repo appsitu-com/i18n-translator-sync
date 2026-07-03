@@ -345,6 +345,67 @@ export class MateCatService implements IMateCatService {
     return status.trim().toLowerCase()
   }
 
+  private isTerminalProjectStatus(status: string): boolean {
+    const normalized = this.normalizeStatus(status)
+    return (
+      normalized === 'complete' ||
+      normalized === 'completed' ||
+      normalized === 'final' ||
+      normalized === 'finalized' ||
+      normalized === 'closed' ||
+      normalized === 'archived' ||
+      normalized === 'cancelled' ||
+      normalized === 'canceled' ||
+      normalized === 'deleted' ||
+      normalized === 'failed' ||
+      normalized === 'error'
+    )
+  }
+
+  private extractTopLevelProjectStatus(payload: Record<string, unknown>): string | undefined {
+    const candidate = payload.project_status ?? payload.status ?? payload.STATUS
+    if (typeof candidate !== 'string' || candidate.trim().length === 0) {
+      return undefined
+    }
+
+    const normalized = this.normalizeStatus(candidate)
+    return normalized === 'done' ? 'analysis_done' : normalized
+  }
+
+  private isEnabledFlag(value: unknown): boolean {
+    if (value === true) {
+      return true
+    }
+
+    if (typeof value === 'number') {
+      return value !== 0
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase()
+      return normalized === '1' || normalized === 'true' || normalized === 'yes'
+    }
+
+    return false
+  }
+
+  private extractLifecycleStatusFromFlags(payload: Record<string, unknown>): string | undefined {
+    if (this.isEnabledFlag(payload.is_cancelled ?? payload.is_canceled)) {
+      return 'canceled'
+    }
+
+    if (this.isEnabledFlag(payload.is_archived)) {
+      return 'archived'
+    }
+
+    const topLevelStatus = this.extractTopLevelProjectStatus(payload)
+    if (topLevelStatus && this.isTerminalProjectStatus(topLevelStatus)) {
+      return topLevelStatus
+    }
+
+    return undefined
+  }
+
   private isCompletedChunkStatus(status: string): boolean {
     const normalized = this.normalizeStatus(status)
     return (
@@ -652,6 +713,11 @@ export class MateCatService implements IMateCatService {
   }
 
   private deriveStatusFromPayload(payload: Record<string, unknown>): string {
+    const lifecycleStatus = this.extractLifecycleStatusFromFlags(payload)
+    if (lifecycleStatus) {
+      return lifecycleStatus
+    }
+
     const chunkStatuses = this.getChunkStatuses(payload)
     if (chunkStatuses.length > 0) {
       return this.reduceChunkStatuses(chunkStatuses)
@@ -812,6 +878,7 @@ export class MateCatService implements IMateCatService {
 
       // Build combined payload with jobs array for compatibility with existing stat extraction
       const statusPayload = this.combineProjectAndJobPayloads(projectPayload, jobPayloads)
+      const topLevelProjectStatus = this.extractTopLevelProjectStatus(projectPayload)
 
       let totalTexts = 0
       let translatedTexts = 0
@@ -824,9 +891,15 @@ export class MateCatService implements IMateCatService {
       if (segmentStats !== undefined) {
         totalTexts = segmentStats.totalSegments
         translatedTexts = segmentStats.completedSegments
-        status = segmentStats.percentDone >= 100 ? 'completed' : 'in_progress'
+        if (!this.isTerminalProjectStatus(status)) {
+          status = segmentStats.percentDone >= 100 ? 'completed' : 'in_progress'
+        }
       } else if (chunkStatuses.length > 0) {
         status = this.reduceChunkStatuses(chunkStatuses)
+      }
+
+      if (topLevelProjectStatus && this.isTerminalProjectStatus(topLevelProjectStatus)) {
+        status = topLevelProjectStatus
       }
 
       statuses.push({
