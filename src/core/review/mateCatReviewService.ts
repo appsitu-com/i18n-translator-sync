@@ -274,6 +274,18 @@ export class MateCatReviewService implements IReviewService {
     return normalized === 'completed' || normalized === 'complete' || normalized === 'final' || normalized === 'finalized'
   }
 
+  private isInactiveMateCatStatus(status: string): boolean {
+    const normalized = status.toLowerCase()
+    return (
+      normalized === 'cancelled' ||
+      normalized === 'canceled' ||
+      normalized === 'archived' ||
+      normalized === 'deleted' ||
+      normalized === 'failed' ||
+      normalized === 'error'
+    )
+  }
+
   private getErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : String(error)
   }
@@ -362,6 +374,18 @@ export class MateCatReviewService implements IReviewService {
           settings,
           this.toMateCatProjectRefs([project])
         )
+
+        const hasStatusForRequestedProject = projectStatuses.some(
+          (status) => status.projectId === project.projectId
+        )
+        if (!hasStatusForRequestedProject) {
+          deletedProjectIds.add(project.projectId)
+          this.logger.warn(
+            `MateCat: project ${project.projectId} no longer exists remotely; removing local pending tracking`
+          )
+          continue
+        }
+
         statuses.push(...projectStatuses)
       } catch (error) {
         if (this.isDeletedProjectError(error, project.projectId)) {
@@ -447,6 +471,7 @@ export class MateCatReviewService implements IReviewService {
 
     const settings = this.getMateCatSettings()
     const deletedProjectIds = new Set<string>()
+    const inactiveProjectIds = new Set<string>()
     const statuses: IMateCatProjectStatus[] = []
 
     for (const project of pendingProjects) {
@@ -455,7 +480,24 @@ export class MateCatReviewService implements IReviewService {
           settings,
           this.toMateCatProjectRefs([project])
         )
+
+        const hasStatusForRequestedProject = projectStatuses.some(
+          (status) => status.projectId === project.projectId
+        )
+        if (!hasStatusForRequestedProject) {
+          deletedProjectIds.add(project.projectId)
+          this.logger.warn(
+            `MateCat: project ${project.projectId} no longer exists remotely; removing local pending tracking`
+          )
+          continue
+        }
+
         statuses.push(...projectStatuses)
+
+        const requestedProjectStatus = projectStatuses.find((status) => status.projectId === project.projectId)
+        if (requestedProjectStatus && this.isInactiveMateCatStatus(requestedProjectStatus.status)) {
+          inactiveProjectIds.add(project.projectId)
+        }
       } catch (error) {
         if (this.isDeletedProjectError(error, project.projectId)) {
           deletedProjectIds.add(project.projectId)
@@ -468,6 +510,7 @@ export class MateCatReviewService implements IReviewService {
     }
 
     await this.removePendingProjects(deletedProjectIds, 'project no longer exists in MateCat')
+    await this.removePendingProjects(inactiveProjectIds, 'project is inactive in MateCat')
     return statuses
   }
 }

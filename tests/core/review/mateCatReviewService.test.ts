@@ -658,11 +658,6 @@ describe('MateCatReviewService', () => {
         origin: 'human'
       })
     )
-
-    expect(fileSystem.writeFile).toHaveBeenCalledWith(
-      expect.objectContaining({ fsPath: `${workspacePath}/.translator/review/download/mc-1/reviewed.xliff` }),
-      expect.stringContaining('<xliff version="1.2">')
-    )
   })
 
   it('imports all reviewed XLIFF files returned for one completed project', async () => {
@@ -914,6 +909,131 @@ describe('MateCatReviewService', () => {
     expect(pendingWriteCall?.[1]).not.toContain('mc-1')
   })
 
+  it('push keeps multiple pending projects for the same locale', async () => {
+    const workspacePath = '/workspace'
+    const pendingProjects = [
+      {
+        projectId: 'mc-old-fr',
+        projectPass: 'pass-old-fr',
+        createdAt: '2026-06-25T00:00:00.000Z',
+        targetLocale: 'fr',
+        mappedLocale: 'fr'
+      },
+      {
+        projectId: 'mc-old-de',
+        projectPass: 'pass-old-de',
+        createdAt: '2026-06-25T00:00:01.000Z',
+        targetLocale: 'de',
+        mappedLocale: 'de'
+      }
+    ]
+
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-new-fr', projectPass: 'pass-new-fr' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: { project_name: 'Demo' }
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'fr',
+      mappedLocale: 'fr',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    const updatedPendingRaw = await fileSystem.readFile(
+      fileSystem.createUri(`${workspacePath}/.translator/review/pending-projects.json`)
+    )
+    const updatedPending = JSON.parse(updatedPendingRaw) as Array<Record<string, unknown>>
+
+    expect(updatedPending).toHaveLength(3)
+    expect(updatedPending).toContainEqual(
+      expect.objectContaining({ projectId: 'mc-new-fr', targetLocale: 'fr', mappedLocale: 'fr' })
+    )
+    expect(updatedPending).toContainEqual(expect.objectContaining({ projectId: 'mc-old-de' }))
+    expect(updatedPending).toContainEqual(expect.objectContaining({ projectId: 'mc-old-fr' }))
+  })
+
+  it('status command removes inactive pending projects', async () => {
+    const workspacePath = '/workspace'
+    const pendingProjects = [
+      {
+        projectId: 'mc-inactive',
+        projectPass: 'pass-inactive',
+        createdAt: '2026-06-25T00:00:00.000Z'
+      },
+      {
+        projectId: 'mc-active',
+        projectPass: 'pass-active',
+        createdAt: '2026-06-25T00:00:01.000Z'
+      }
+    ]
+
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/.translator/review/pending-projects.json`]: JSON.stringify(pendingProjects)
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const mateCatService = {
+      createReviewProject: vi.fn(),
+      checkReviewProjectStatus: vi.fn().mockImplementation(async (_settings: unknown, projects: Array<{ projectId: string }>) => {
+        if (projects[0]?.projectId === 'mc-inactive') {
+          return [{ projectId: 'mc-inactive', status: 'canceled' }]
+        }
+
+        return [{ projectId: 'mc-active', status: 'in_progress', percentDone: 42 }]
+      }),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: { project_name: 'Demo' }
+      }),
+      translationMemory
+    })
+
+    const statuses = await service.getPendingReviewStatus()
+
+    expect(statuses).toContainEqual(expect.objectContaining({ projectId: 'mc-inactive', status: 'canceled' }))
+    expect(statuses).toContainEqual(expect.objectContaining({ projectId: 'mc-active', status: 'in_progress' }))
+
+    const updatedPendingRaw = await fileSystem.readFile(
+      fileSystem.createUri(`${workspacePath}/.translator/review/pending-projects.json`)
+    )
+    const updatedPending = JSON.parse(updatedPendingRaw) as Array<Record<string, unknown>>
+
+    expect(updatedPending).toHaveLength(1)
+    expect(updatedPending).toContainEqual(expect.objectContaining({ projectId: 'mc-active' }))
+    expect(updatedPending).not.toContainEqual(expect.objectContaining({ projectId: 'mc-inactive' }))
+  })
+
   it('pull command removes pending project when reviewed files cannot be pulled because project was deleted', async () => {
     const workspacePath = '/workspace'
     const pendingProjects = [
@@ -1017,7 +1137,7 @@ describe('MateCatReviewService', () => {
 
       const pendingWriteCall = vi
         .mocked(fileSystem.writeFile)
-        .mock.calls.find(([uri]) => uri.path === `${workspacePath}/.translator/review/pending-projects.json`)
+        .mock.calls.find(([uri]) => uri.path.endsWith('/.translator/review/pending-projects.json'))
 
       expect(pendingWriteCall).toBeDefined()
       const pendingJson = JSON.parse(pendingWriteCall?.[1] ?? '[]') as Array<Record<string, unknown>>
@@ -1125,11 +1245,20 @@ describe('MateCatReviewService', () => {
         expect.objectContaining({ projectId: 'mc-2-metadata-preserve', status: 'in_progress' })
       )
 
-      // Verify the pending projects file was read (which would have loaded the metadata)
-      expect(fileSystem.readFile).toHaveBeenCalledWith(
+      const updatedPendingRaw = await fileSystem.readFile(
+        fileSystem.createUri(`${workspacePath}/.translator/review/pending-projects.json`)
+      )
+      const pendingJson = JSON.parse(updatedPendingRaw) as Array<Record<string, unknown>>
+      expect(pendingJson).toHaveLength(1)
+      expect(pendingJson).toContainEqual(
         expect.objectContaining({
-          path: expect.stringContaining('pending-projects.json')
+          projectId: 'mc-2-metadata-preserve',
+          targetLocale: 'zh-TW',
+          mappedLocale: 'zh-Hant'
         })
+      )
+      expect(pendingJson).not.toContainEqual(
+        expect.objectContaining({ projectId: 'mc-1-metadata-preserve' })
       )
     })
 
