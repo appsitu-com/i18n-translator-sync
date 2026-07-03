@@ -1033,7 +1033,11 @@ export class TranslatorManager {
         this.tm,
         this.logger
       )
+      this.logger.info(`Local TM update: ${mergedCount} unit(s) updated from reviewed pull data`)
       this.logger.info(`Merged ${mergedCount} reviewed translation(s) into translation memory from ${pulledFiles.length} file(s)`)
+    } else {
+      this.logger.info('Local TM update: 0 unit(s) updated from reviewed pull data')
+      this.logger.info('No reviewed files were pulled; translation memory was not changed')
     }
 
     this.logger.info('Successfully pulled reviewed translations from review service');

@@ -425,8 +425,11 @@ export class MateCatReviewService implements IReviewService {
     const settings = this.getMateCatSettings()
     const pendingProjects = await this.loadPendingReviewProjects()
     if (pendingProjects.length === 0) {
+      this.logger.info('MateCat pull: no pending projects found in local tracking')
       return []
     }
+
+    this.logger.info(`MateCat pull: checking status for ${pendingProjects.length} pending project(s)`)
 
     const deletedProjectIds = new Set<string>()
     const statuses: IMateCatProjectStatus[] = []
@@ -473,6 +476,8 @@ export class MateCatReviewService implements IReviewService {
     const completedProjectIds = new Set(
       statuses.filter((project) => this.isCompletedMateCatStatus(project.status)).map((project) => project.projectId)
     )
+
+    this.logger.info(`MateCat pull: ${completedProjectIds.size} completed project(s) ready for download`)
 
     if (completedProjectIds.size === 0) {
       this.logger.info('No completed MateCat projects are ready for pull')
@@ -523,7 +528,10 @@ export class MateCatReviewService implements IReviewService {
         this.dependencies.translationMemory,
         this.logger
       )
+      this.logger.info(`Local TM update: ${mergedCount} unit(s) updated from reviewed pull data`)
       this.logger.info(`MateCat: merged ${mergedCount} reviewed translation(s) into TM from ${pulledFiles.length} file(s)`)
+    } else {
+      this.logger.info('Local TM update: 0 unit(s) updated from reviewed pull data')
     }
   }
 

@@ -330,8 +330,12 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
     try {
       const statuses = await this.translatorManager.getPendingReviewStatus()
       const completedCount = statuses.filter((status) => this.isCompletedReviewStatus(status.status)).length
+      this.logger.info(
+        `MateCat pull precheck: ${statuses.length} pending project(s), ${completedCount} completed project(s)`
+      )
 
       if (completedCount === 0) {
+        this.logger.info('MateCat pull skipped: no completed review projects are ready to pull')
         vscode.window.showInformationMessage('No completed MateCat review projects are ready to pull')
         return
       }
@@ -343,6 +347,7 @@ export class VSCodeTranslatorAdapter extends TranslatorAdapter {
       )
 
       if (action !== 'Pull') {
+        this.logger.info('MateCat pull canceled by user at confirmation prompt')
         vscode.window.showInformationMessage('MateCat pull canceled')
         return
       }
