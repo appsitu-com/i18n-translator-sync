@@ -374,6 +374,7 @@ export class MateCatReviewService implements IReviewService {
     }
 
     const pendingProjects = await this.loadPendingReviewProjects()
+    const removedProjects = pendingProjects.filter((project) => projectIds.has(project.projectId))
     const remainingProjects = pendingProjects.filter((project) => !projectIds.has(project.projectId))
 
     if (remainingProjects.length === pendingProjects.length) {
@@ -381,6 +382,12 @@ export class MateCatReviewService implements IReviewService {
     }
 
     await this.savePendingReviewProjects(remainingProjects)
+
+    for (const project of removedProjects) {
+      const localeSuffix = project.targetLocale ? ` (${project.targetLocale})` : ''
+      this.logger.warn(`MateCat: removed pending project ${project.projectId}${localeSuffix} because ${reason}`)
+    }
+
     this.logger.warn(
       `MateCat: removed ${pendingProjects.length - remainingProjects.length} pending project(s) because ${reason}`
     )

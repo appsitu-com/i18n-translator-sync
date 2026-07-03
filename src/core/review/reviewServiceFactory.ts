@@ -1,4 +1,4 @@
-import { loadProjectConfig, type IConfigProvider } from '../coreConfig'
+import { loadProjectConfig, type IConfigProvider, type TranslateProjectConfig } from '../coreConfig'
 import type { IFileSystem } from '../util/fs'
 import type { ILogger } from '../util/baseLogger'
 import type { IReviewService } from './reviewService'
@@ -11,6 +11,7 @@ export type ReviewServiceFactoryOptions = {
   fileSystem: IFileSystem
   logger: ILogger
   configProvider: IConfigProvider
+  projectConfig?: TranslateProjectConfig
   serviceDependencies?: ReviewServiceDependencies
 }
 
@@ -21,7 +22,8 @@ export type ReviewServiceDependencies = {
 export function createReviewServiceFromConfig(options: ReviewServiceFactoryOptions): IReviewService {
   const configuredService = options.configProvider.get<string>('translator.reviewService', 'matecat')
   const reviewService = (configuredService ?? 'matecat').toLowerCase() as ReviewServiceName
-  const projectConfig = loadProjectConfig(options.workspacePath, options.configProvider, options.logger)
+  const projectConfig =
+    options.projectConfig ?? loadProjectConfig(options.workspacePath, options.configProvider, options.logger)
 
   switch (reviewService) {
     case 'matecat':

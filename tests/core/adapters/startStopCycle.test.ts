@@ -18,6 +18,15 @@ vi.mock('../../../src/core/coreConfig', () => ({
     defaultMarkdownEngine: 'copy',
     defaultJsonEngine: 'copy',
     engineOverrides: {}
+  }),
+  toProjectConfig: vi.fn().mockReturnValue({
+    sourcePaths: ['i18n/en'],
+    sourceLocale: 'en',
+    targetLocales: ['fr', 'es'],
+    enableBackTranslation: true,
+    defaultMarkdownEngine: 'copy',
+    defaultJsonEngine: 'copy',
+    engineOverrides: {}
   })
 }))
 

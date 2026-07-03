@@ -48,6 +48,7 @@ export type TranslatorManagerDependencies = {
   createPipeline?: PipelineFactory
   createReviewService?: ReviewServiceFactory
   reviewServiceDependencies?: ReviewServiceDependencies
+  projectConfig?: TranslateProjectConfig
 }
 
 /**
@@ -69,6 +70,7 @@ export class TranslatorManager {
   private translatorEngines?: ITranslatorEngines;
   private readonly dependencies: TranslatorManagerDependencies;
   private xliffReviewExporter?: XliffReviewExporter;
+  private projectConfig?: TranslateProjectConfig;
 
   constructor(
     private fileSystem: IFileSystem,
@@ -85,12 +87,26 @@ export class TranslatorManager {
   ) {
     this.dependencies = dependencies;
     this.tm = cache;
+    this.projectConfig = this.dependencies.projectConfig;
     this.pipeline =
       this.dependencies.createPipeline?.(fileSystem, logger, cache, workspacePath, executor, getPassphrase) ??
       new TranslatorPipeline(fileSystem, logger, cache, workspacePath, executor, getPassphrase);
     this.fileWatcherService = new FileWatcherService(logger, workspaceWatcher);
     this.onConfigChanged = onConfigChanged;
     this.translatorEngines = translatorEngines;
+  }
+
+  setProjectConfig(config: TranslateProjectConfig): void {
+    this.projectConfig = config;
+    this.reviewService = null;
+  }
+
+  private getProjectConfig(): TranslateProjectConfig {
+    if (!this.projectConfig) {
+      this.projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    }
+
+    return this.projectConfig
   }
 
   /**
@@ -102,10 +118,11 @@ export class TranslatorManager {
       return this.reviewService
     }
 
+    const projectConfig = this.getProjectConfig()
     const mateCatDependencies = {
       ...this.dependencies.reviewServiceDependencies?.matecat,
       translationMemory: this.tm,
-      projectConfig: loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+      projectConfig
     }
 
     this.reviewService =
@@ -114,6 +131,7 @@ export class TranslatorManager {
         fileSystem: this.fileSystem,
         logger: this.logger,
         configProvider: this.configProvider,
+        projectConfig,
         serviceDependencies: {
           ...this.dependencies.reviewServiceDependencies,
           matecat: mateCatDependencies
@@ -124,6 +142,7 @@ export class TranslatorManager {
         fileSystem: this.fileSystem,
         logger: this.logger,
         configProvider: this.configProvider,
+        projectConfig,
         serviceDependencies: {
           ...this.dependencies.reviewServiceDependencies,
           matecat: mateCatDependencies
@@ -677,7 +696,7 @@ export class TranslatorManager {
   }
 
   private resolveReviewPushLocales(): string[] {
-    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const projectConfig = this.getProjectConfig()
     const configuredTargetLocales = Array.isArray(projectConfig.targetLocales) ? projectConfig.targetLocales : []
     const normalizedSourceLocale = this.normalizeLocale(projectConfig.sourceLocale)
     const includeLocales = projectConfig.reviewer?.targetLocales?.include ?? []
@@ -709,7 +728,7 @@ export class TranslatorManager {
    * @returns Locale filter sets for review artifact selection
    */
   private getReviewLocaleFilters(): { include: Set<string>; exclude: Set<string> } {
-    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const projectConfig = this.getProjectConfig()
     const includeLocales = projectConfig.reviewer?.targetLocales?.include ?? []
     const excludeLocales = projectConfig.reviewer?.targetLocales?.exclude ?? []
 
@@ -890,7 +909,7 @@ export class TranslatorManager {
    * @returns Prepared review request and translation unit count preview
    */
   private async prepareReviewPushRequests(pushMode: 'all' | 'changes' = 'all'): Promise<{ requests: ReviewPushRequest[]; translationCount: number }> {
-    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const projectConfig = this.getProjectConfig()
     const sourceLocale = projectConfig.sourceLocale
     const workspaceUri = this.fileSystem.createUri(this.workspacePath)
     const allFiles = await this.findAllFilesInDir(workspaceUri)

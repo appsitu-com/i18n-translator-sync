@@ -17,6 +17,7 @@ import type { ReviewProjectStatus } from '../review/reviewService';
 
 export interface ITranslatorManager {
   setTranslatorEngines(engines: ITranslatorEngines | undefined): void
+  setProjectConfig?(config: TranslateProjectConfig): void
   startWatching(config: TranslateProjectConfig): Promise<void>
   stopWatching(): Promise<void>
   pushReviewProject(pushMode?: 'all' | 'changes'): Promise<void>
@@ -41,6 +42,7 @@ type TranslatorManagerFactory = (params: {
   workspacePath: string
   workspaceWatcher: IWorkspaceWatcher
   configProvider: IConfigProvider
+  projectConfig: TranslateProjectConfig
   onConfigChanged: () => Promise<void>
   translatorEngines?: ITranslatorEngines
   getPassphrase?: GetPassphrase
@@ -233,6 +235,7 @@ export abstract class TranslatorAdapter {
 
         // Load new project configuration (reuses already-parsed translatorConfig)
         const projectConfig = toProjectConfig(translatorConfig, this.configProvider);
+        this.translatorManager.setProjectConfig?.(projectConfig);
 
         // Start watching with new configuration
         await this.translatorManager.startWatching(projectConfig);
@@ -280,6 +283,7 @@ export abstract class TranslatorAdapter {
       );
       this.translatorConfig = translatorConfig;
       this.translatorEngines = translatorConfig.translator;
+      const projectConfig = toProjectConfig(translatorConfig, this.configProvider);
 
       // Get cache (using await since it's now async)
       this.tm = await this.getTm();
@@ -309,6 +313,7 @@ export abstract class TranslatorAdapter {
             workspacePath: this.workspacePath,
             workspaceWatcher: watcher,
             configProvider: this.configProvider,
+            projectConfig,
             onConfigChanged,
             translatorEngines: this.translatorEngines,
             getPassphrase
@@ -323,7 +328,10 @@ export abstract class TranslatorAdapter {
             undefined,
             onConfigChanged,
             this.translatorEngines,
-            getPassphrase
+            getPassphrase,
+            {
+              projectConfig
+            }
           );
       }
     } catch (error: any) {
