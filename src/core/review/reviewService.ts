@@ -17,6 +17,7 @@ export type ReviewArtifact = {
 export type ReviewPushRequest = {
   targetLocale: string
   mappedLocale?: string
+  projectNamePrefix?: string
   artifacts: ReviewArtifact[]
 }
 

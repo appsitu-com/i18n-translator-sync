@@ -1,5 +1,5 @@
 import * as path from 'path'
-import { loadProjectConfig, type IConfigProvider } from '../coreConfig'
+import type { TranslateProjectConfig } from '../coreConfig'
 import type { IFileSystem } from '../util/fs'
 import type { ILogger } from '../util/baseLogger'
 import type { ITranslationMemory } from '../tm/ITranslationMemory'
@@ -32,6 +32,7 @@ export type MateCatReviewServiceDependencies = {
   createMateCatService?: (logger: ILogger) => IMateCatService
   loadMateCatSettings?: MateCatSettingsLoader
   translationMemory?: ITranslationMemory
+  projectConfig: TranslateProjectConfig
 }
 
 export class MateCatReviewService implements IReviewService {
@@ -45,8 +46,7 @@ export class MateCatReviewService implements IReviewService {
     private readonly workspacePath: string,
     private readonly fileSystem: IFileSystem,
     private readonly logger: ILogger,
-    private readonly configProvider: IConfigProvider,
-    private readonly dependencies: MateCatReviewServiceDependencies = {}
+    private readonly dependencies: MateCatReviewServiceDependencies
   ) {
     this.mateCatService =
       this.dependencies.createMateCatService?.(this.logger) ?? new MateCatService(this.logger)
@@ -91,8 +91,12 @@ export class MateCatReviewService implements IReviewService {
     return localeSuffix.length > 0 ? `${baseName}-${localeSuffix}` : baseName
   }
 
-  private async buildMateCatProjectFields(settings: MateCatSettings, targetLocale: string): Promise<MateCatNewProjectDefaults> {
-    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+  private async buildMateCatProjectFields(
+    settings: MateCatSettings,
+    targetLocale: string,
+    projectNamePrefix?: string
+  ): Promise<MateCatNewProjectDefaults> {
+    const projectConfig = this.dependencies.projectConfig
     const localeOverrideMap = projectConfig.reviewer?.langMap ?? {}
     const sourceLocale = resolveMateCatLocale(projectConfig.sourceLocale, localeOverrideMap)
     const resolvedTargetLocale = resolveMateCatLocale(targetLocale, localeOverrideMap)
@@ -104,10 +108,15 @@ export class MateCatReviewService implements IReviewService {
         ? configuredProjectName.trim()
         : await this.resolveFallbackProjectName(reviewerProjectPrefix, targetLocale)
 
+    const prefixedProjectName =
+      typeof projectNamePrefix === 'string' && projectNamePrefix.trim().length > 0
+        ? `${projectNamePrefix.trim()}-${resolvedProjectName}`
+        : resolvedProjectName
+
     const runtimeFields: MateCatRuntimeNewProjectFields = {
       source_lang: sourceLocale,
       target_lang: resolvedTargetLocale,
-      project_name: resolvedProjectName
+      project_name: prefixedProjectName
     }
 
     const mergedFields: MateCatNewProjectDefaults = {
@@ -324,7 +333,7 @@ export class MateCatReviewService implements IReviewService {
 
     const mappedLocale = request.mappedLocale?.trim() || targetLocale
 
-    const fields = await this.buildMateCatProjectFields(settings, targetLocale)
+    const fields = await this.buildMateCatProjectFields(settings, targetLocale, request.projectNamePrefix)
     const uploads = await this.buildMateCatReviewUploads(request)
 
     const createdProject = await this.mateCatService.createReviewProject(settings, {

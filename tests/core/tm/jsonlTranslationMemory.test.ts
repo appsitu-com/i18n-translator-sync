@@ -38,6 +38,12 @@ function createMockFileSystem(): IFileSystem {
 
 const V1_CACHE_FIXTURE_PATH = join(process.cwd(), 'test-project', '.translator', 'translation-v1.jsonl')
 const TS_EXAMPLE_SOURCE_PATH = join(process.cwd(), 'test-project', 'i18n', 'en', 'ts-example', 'messages.ts')
+const V1_CACHE_FALLBACK_FIXTURE = [
+  '{"type":"meta","schemaVersion":1}',
+  '{"type":"entry","engine":"azure","source":"es","target":"en","sourcePath":"i18n/en/ts-example/messages.ts","textPos":"farewell","sourceText":"¡Adiós, mundo!","context":"","targetText":"Goodbye, world!","status":"translated","used":true,"updatedAt":1710000000}',
+  '{"type":"entry","engine":"azure","source":"es","target":"en","sourcePath":"i18n/en/ts-example/messages.ts","textPos":"nested.welcome","sourceText":"Bienvenido al sistema de traducción.","context":"","targetText":"Welcome to the translation system.","status":"translated","used":true,"updatedAt":1710000001}',
+  '{"type":"entry","engine":"azure","source":"es","target":"en","sourcePath":"i18n/en/ts-example/messages.ts","textPos":"nested.thanks","sourceText":"Gracias por utilizar nuestro servicio.","context":"","targetText":"Thank you for using our service.","status":"translated","used":true,"updatedAt":1710000002}'
+].join('\n') + '\n'
 
 describe('JsonlTranslationMemory', () => {
   let dir: string
@@ -233,7 +239,10 @@ describe('JsonlTranslationMemory', () => {
     const sourceDir = join(dir, 'i18n', 'en', 'ts-example')
     mkdirSync(sourceDir, { recursive: true })
     writeFileSync(join(sourceDir, 'messages.ts'), readFileSync(TS_EXAMPLE_SOURCE_PATH, 'utf8'), 'utf8')
-    writeFileSync(cachePath, readFileSync(V1_CACHE_FIXTURE_PATH, 'utf8'), 'utf8')
+    const v1FixtureContent = existsSync(V1_CACHE_FIXTURE_PATH)
+      ? readFileSync(V1_CACHE_FIXTURE_PATH, 'utf8')
+      : V1_CACHE_FALLBACK_FIXTURE
+    writeFileSync(cachePath, v1FixtureContent, 'utf8')
 
     const cache = new JsonlTranslationMemory(cachePath, dir)
 
@@ -1044,6 +1053,106 @@ describe('JsonlTranslationMemory', () => {
     const xliff = readFileSync(xliffPath, 'utf8')
     expect(xliff).toContain('target-language="zh-cn"')
     expect(xliff).not.toContain('target-language="fr-FR"')
+  })
+
+  it('applies source locale filter to exclude back-translation rows from XLIFF export', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'test',
+      sourceLocale: 'en',
+      targetLocale: 'en-US',
+      pairs: [{ src: 'Hello', dst: 'Hello', pos: 1 }],
+      sourcePath: 'i18n/en/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    await cache.putMany({
+      engine: 'test',
+      sourceLocale: 'de',
+      targetLocale: 'en-US',
+      pairs: [{ src: 'Hallo', dst: 'Hello', pos: 1 }],
+      sourcePath: 'i18n/en/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    const xliffPath = join(dir, 'review-en-us.xliff')
+    const exported = await cache.exportXLIFF(xliffPath, { targetLocale: 'en-US', sourceLocale: 'en' })
+
+    expect(exported).toBe(1)
+
+    const xliff = readFileSync(xliffPath, 'utf8')
+    expect(xliff).toContain('source-language="en"')
+    expect(xliff).toContain('target-language="en-US"')
+    expect(xliff).not.toContain('source-language="de"')
+  })
+
+  it('matches source locale families so en filter includes en-US forward rows', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'deepl',
+      sourceLocale: 'en-US',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Hello', dst: 'Bonjour', pos: 1 }],
+      sourcePath: 'i18n/en/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    await cache.putMany({
+      engine: 'deepl',
+      sourceLocale: 'de',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Hallo', dst: 'Bonjour', pos: 1 }],
+      sourcePath: 'i18n/en/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    const xliffPath = join(dir, 'review-fr.xliff')
+    const exported = await cache.exportXLIFF(xliffPath, { targetLocale: 'fr', sourceLocale: 'en' })
+
+    expect(exported).toBe(1)
+
+    const xliff = readFileSync(xliffPath, 'utf8')
+    expect(xliff).toContain('source-language="en-US"')
+    expect(xliff).not.toContain('source-language="de"')
+  })
+
+  it('matches non-English source locale families without hard-coded English assumptions', async () => {
+    const cache = new JsonlTranslationMemory(cachePath, dir)
+
+    await cache.putMany({
+      engine: 'deepl',
+      sourceLocale: 'de-DE',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Hallo', dst: 'Bonjour', pos: 1 }],
+      sourcePath: 'i18n/de/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    await cache.putMany({
+      engine: 'deepl',
+      sourceLocale: 'en',
+      targetLocale: 'fr',
+      pairs: [{ src: 'Hello', dst: 'Bonjour', pos: 1 }],
+      sourcePath: 'i18n/de/messages.json',
+      status: 'translated',
+      origin: 'ai'
+    })
+
+    const xliffPath = join(dir, 'review-fr-from-de.xliff')
+    const exported = await cache.exportXLIFF(xliffPath, { targetLocale: 'fr', sourceLocale: 'de' })
+
+    expect(exported).toBe(1)
+
+    const xliff = readFileSync(xliffPath, 'utf8')
+    expect(xliff).toContain('source-language="de-DE"')
+    expect(xliff).not.toContain('source-language="en"')
   })
 
 })

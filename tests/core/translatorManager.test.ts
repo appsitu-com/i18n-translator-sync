@@ -298,6 +298,7 @@ describe('TranslatorManager', () => {
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
         mappedLocale: 'fr',
+        projectNamePrefix: expect.any(String),
         artifacts: [
           {
             filePath: '/workspace/review.tmx',
@@ -307,6 +308,53 @@ describe('TranslatorManager', () => {
         ]
       })
       expect(logger.info).toHaveBeenCalledWith('Successfully pushed translations to review service')
+    })
+
+    it('uses one shared epoch-ms projectNamePrefix for all locales in a single push run', async () => {
+      mockLocalizedReviewArtifactFiles()
+
+      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.targetLocales') {
+          return ['fr', 'es']
+        }
+        return defaultValue
+      })
+
+      const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(1730000000123)
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      await manager.pushReviewProject('all')
+
+      expect(nowSpy).toHaveBeenCalledTimes(1)
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(2)
+
+      const firstRequest = vi.mocked(mockReviewService.pushReviewProject).mock.calls[0]?.[0]
+      const secondRequest = vi.mocked(mockReviewService.pushReviewProject).mock.calls[1]?.[0]
+
+      expect(firstRequest?.projectNamePrefix).toBe('1730000000123')
+      expect(secondRequest?.projectNamePrefix).toBe('1730000000123')
     })
 
     it('generates and pushes local human TMX when no review artifacts exist', async () => {
@@ -346,6 +394,7 @@ describe('TranslatorManager', () => {
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
         mappedLocale: 'fr',
+        projectNamePrefix: expect.any(String),
         artifacts: [
           {
             filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-human.tmx'),
@@ -392,11 +441,12 @@ describe('TranslatorManager', () => {
       )
       expect(cache.exportXLIFF).toHaveBeenCalledWith(
         path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
-        { origin: 'ai', targetLocale: 'fr' }
+        { origin: 'ai', targetLocale: 'fr', sourceLocale: 'en' }
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
         mappedLocale: 'fr',
+        projectNamePrefix: expect.any(String),
         artifacts: [
           {
             filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
@@ -439,11 +489,12 @@ describe('TranslatorManager', () => {
 
       expect(cache.exportXLIFF).toHaveBeenCalledWith(
         path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
-        { targetLocale: 'fr' }
+        { targetLocale: 'fr', sourceLocale: 'en' }
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith({
         targetLocale: 'fr',
         mappedLocale: 'fr',
+        projectNamePrefix: expect.any(String),
         artifacts: [
           {
             filePath: path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
@@ -497,11 +548,140 @@ describe('TranslatorManager', () => {
       expect(cache.exportXLIFF).toHaveBeenCalledTimes(1)
       expect(cache.exportXLIFF).toHaveBeenCalledWith(
         path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
-        { targetLocale: 'fr' }
+        { targetLocale: 'fr', sourceLocale: 'en' }
       )
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(1)
       expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
         expect.objectContaining({ targetLocale: 'fr' })
+      )
+    })
+
+    it('excludes back-translation targets from review push by default', async () => {
+      vi.mocked(fileSystem.readDirectory).mockResolvedValue([])
+      vi.mocked(cache.exportTMX).mockResolvedValue(0)
+      vi.mocked(cache.exportXLIFF).mockResolvedValue(2)
+
+      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.sourceLocale') {
+          return 'en'
+        }
+        if (section === 'translator.targetLocales') {
+          return ['fr', 'fr_en']
+        }
+        return defaultValue
+      })
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      await manager.pushReviewProject('all')
+
+      expect(cache.exportXLIFF).toHaveBeenCalledTimes(1)
+      expect(cache.exportXLIFF).toHaveBeenCalledWith(
+        path.join('/workspace', '.translator/review/fr/upload/local-tm-review.xliff'),
+        { targetLocale: 'fr', sourceLocale: 'en' }
+      )
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(1)
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+        expect.objectContaining({ targetLocale: 'fr' })
+      )
+    })
+
+    it('does not upload stale generated review bundle when fresh export has no entries', async () => {
+      vi.mocked(fileSystem.readDirectory).mockImplementation(async (uri) => {
+        if (uri.fsPath === '/workspace') {
+          return [{ name: '.translator', isDirectory: true }]
+        }
+        if (uri.fsPath === '/workspace/.translator') {
+          return [{ name: 'review', isDirectory: true }]
+        }
+        if (uri.fsPath === '/workspace/.translator/review') {
+          return [
+            { name: 'en-US', isDirectory: true },
+            { name: 'es', isDirectory: true }
+          ]
+        }
+        if (uri.fsPath === '/workspace/.translator/review/en-US') {
+          return [{ name: 'upload', isDirectory: true }]
+        }
+        if (uri.fsPath === '/workspace/.translator/review/es') {
+          return [{ name: 'upload', isDirectory: true }]
+        }
+        if (uri.fsPath === '/workspace/.translator/review/en-US/upload') {
+          return [{ name: 'local-tm-review.xliff', isDirectory: false }]
+        }
+        return []
+      })
+
+      vi.mocked(cache.exportTMX).mockResolvedValue(0)
+      vi.mocked(cache.exportXLIFF).mockImplementation(async (filePath: string) => {
+        if (/[\\/]review[\\/]es[\\/]/.test(filePath)) {
+          return 2
+        }
+        return 0
+      })
+
+      vi.mocked(configProvider.get).mockImplementation((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.sourceLocale') {
+          return 'en'
+        }
+        if (section === 'translator.targetLocales') {
+          return ['en-US', 'es']
+        }
+        return defaultValue
+      })
+
+      const mockReviewService = {
+        pushReviewProject: vi.fn().mockResolvedValue(undefined),
+        pullReviewedProjects: vi.fn().mockResolvedValue(undefined),
+        pullReviewedFiles: vi.fn().mockResolvedValue([]),
+        getPendingReviewStatus: vi.fn().mockResolvedValue([])
+      }
+
+      const manager = new TranslatorManager(
+        fileSystem,
+        logger,
+        cache,
+        '/workspace',
+        workspaceWatcher,
+        configProvider,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          createReviewService: () => mockReviewService
+        }
+      )
+
+      await manager.pushReviewProject('all')
+
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledTimes(1)
+      expect(mockReviewService.pushReviewProject).toHaveBeenCalledWith(
+        expect.objectContaining({ targetLocale: 'es' })
+      )
+      expect(mockReviewService.pushReviewProject).not.toHaveBeenCalledWith(
+        expect.objectContaining({ targetLocale: 'en-US' })
       )
     })
 
@@ -822,7 +1002,7 @@ describe('TranslatorManager', () => {
         // Verify TM XLIFF export was called with MAPPED locale, not original
         expect(cache.exportXLIFF).toHaveBeenCalledWith(
           expect.any(String),
-          { targetLocale: 'zh-Hans' }
+          { targetLocale: 'zh-Hans', sourceLocale: 'en' }
         )
       })
 
@@ -1084,7 +1264,7 @@ describe('TranslatorManager', () => {
         // 1. XLIFF export should be called with zh-Hans (mapped), not zh-CN
         expect(cache.exportXLIFF).toHaveBeenCalledWith(
           path.join('/workspace', '.translator/review/zh-CN/upload/local-tm-review.xliff'),
-          { targetLocale: 'zh-Hans' }
+          { targetLocale: 'zh-Hans', sourceLocale: 'en' }
         )
 
         // 2. exportXLIFF returned 10 (non-zero), meaning entries were found and XLIFF was generated

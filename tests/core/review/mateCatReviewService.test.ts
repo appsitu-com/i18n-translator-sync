@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { createMockFileSystem } from '../../mocks/filesystem'
 import { MateCatReviewService } from '../../../src/core/review/mateCatReviewService'
-import type { IConfigProvider } from '../../../src/core/coreConfig'
+import { loadProjectConfig, type IConfigProvider } from '../../../src/core/coreConfig'
 import type { ILogger } from '../../../src/core/util/baseLogger'
 import type { ITranslationMemory } from '../../../src/core/tm/ITranslationMemory'
 
@@ -74,7 +74,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -129,7 +130,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -184,7 +186,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -216,6 +219,62 @@ describe('MateCatReviewService', () => {
     )
   })
 
+  it('prefixes fallback project_name when projectNamePrefix is provided by abstraction layer', async () => {
+    const workspacePath = '/workspace'
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/package.json`]: JSON.stringify({ name: '@appsitu-com/i18n-translator-sync' }),
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const configProvider: IConfigProvider = {
+      get: ((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.targetLocales') return ['fr']
+        return defaultValue
+      }) as IConfigProvider['get'],
+      update: vi.fn()
+    }
+
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-prefix-fallback', projectPass: 'pass-prefix-fallback' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: {}
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'fr',
+      projectNamePrefix: '1730000000123',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    expect(mateCatService.createReviewProject).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        fields: expect.objectContaining({
+          project_name: '1730000000123-appsitu-com-i18n-translator-sync-fr'
+        })
+      })
+    )
+  })
+
   it('keeps configured project_name from MateCat settings when provided', async () => {
     const workspacePath = '/workspace'
     const fileSystem = createMockFileSystem({
@@ -240,7 +299,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -265,6 +325,63 @@ describe('MateCatReviewService', () => {
       expect.objectContaining({
         fields: expect.objectContaining({
           project_name: 'ExplicitName',
+          target_lang: 'de-DE'
+        })
+      })
+    )
+  })
+
+  it('prefixes configured project_name when projectNamePrefix is provided by abstraction layer', async () => {
+    const workspacePath = '/workspace'
+    const fileSystem = createMockFileSystem({
+      [`${workspacePath}/package.json`]: JSON.stringify({ name: '@appsitu-com/i18n-translator-sync' }),
+      [`${workspacePath}/review.xliff`]: '<xliff version="1.2"></xliff>',
+      [`${workspacePath}/.translator/review/pending-projects.json`]: '[]'
+    })
+
+    const logger = createLogger()
+    const translationMemory = createTranslationMemoryMock()
+    const configProvider: IConfigProvider = {
+      get: ((section: string, defaultValue?: unknown) => {
+        if (section === 'translator.targetLocales') return ['de']
+        return defaultValue
+      }) as IConfigProvider['get'],
+      update: vi.fn()
+    }
+
+    const mateCatService = {
+      createReviewProject: vi.fn().mockResolvedValue({ projectId: 'mc-prefix-explicit', projectPass: 'pass-prefix-explicit' }),
+      checkReviewProjectStatus: vi.fn(),
+      pullReviewedTranslations: vi.fn()
+    }
+
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
+      createMateCatService: () => mateCatService,
+      loadMateCatSettings: () => ({
+        apiKey: 'secret',
+        newProjectDefaults: { project_name: 'ExplicitName' }
+      }),
+      translationMemory
+    })
+
+    await service.pushReviewProject({
+      targetLocale: 'de',
+      projectNamePrefix: '1730000000456',
+      artifacts: [
+        {
+          filePath: `${workspacePath}/review.xliff`,
+          fileName: 'review.xliff',
+          contentType: 'application/xliff+xml'
+        }
+      ]
+    })
+
+    expect(mateCatService.createReviewProject).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        fields: expect.objectContaining({
+          project_name: '1730000000456-ExplicitName',
           target_lang: 'de-DE'
         })
       })
@@ -296,7 +413,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -351,7 +469,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -399,7 +518,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -449,7 +569,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -515,7 +636,8 @@ describe('MateCatReviewService', () => {
       ])
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -598,7 +720,8 @@ describe('MateCatReviewService', () => {
       ])
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -666,7 +789,8 @@ describe('MateCatReviewService', () => {
       ])
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -711,7 +835,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn().mockRejectedValue(new Error('download failed'))
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -767,7 +892,8 @@ describe('MateCatReviewService', () => {
       pullReviewedTranslations: vi.fn()
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -827,7 +953,8 @@ describe('MateCatReviewService', () => {
       })
     }
 
-    const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+    const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
       createMateCatService: () => mateCatService,
       loadMateCatSettings: () => ({
         apiKey: 'secret',
@@ -865,7 +992,8 @@ describe('MateCatReviewService', () => {
         pullReviewedTranslations: vi.fn()
       }
 
-      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
         createMateCatService: () => mateCatService,
         loadMateCatSettings: () => ({
           apiKey: 'secret',
@@ -927,7 +1055,8 @@ describe('MateCatReviewService', () => {
         pullReviewedTranslations: vi.fn()
       }
 
-      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
         createMateCatService: () => mateCatService,
         loadMateCatSettings: () => ({
           apiKey: 'secret',
@@ -978,7 +1107,8 @@ describe('MateCatReviewService', () => {
         pullReviewedTranslations: vi.fn()
       }
 
-      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
         createMateCatService: () => mateCatService,
         loadMateCatSettings: () => ({
           apiKey: 'secret',
@@ -1046,7 +1176,8 @@ describe('MateCatReviewService', () => {
         pullReviewedTranslations: vi.fn()
       }
 
-      const service = new MateCatReviewService(workspacePath, fileSystem, logger, createConfigProvider(), {
+      const service = new MateCatReviewService(workspacePath, fileSystem, logger, {
+      projectConfig: loadProjectConfig(workspacePath, createConfigProvider(), logger),
         createMateCatService: () => mateCatService,
         loadMateCatSettings: () => ({
           apiKey: 'secret',

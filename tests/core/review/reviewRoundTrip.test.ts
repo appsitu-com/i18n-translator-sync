@@ -3,7 +3,7 @@ import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import * as path from 'path'
 import { TranslatorManager } from '../../../src/core/TranslatorManager'
-import type { IConfigProvider } from '../../../src/core/coreConfig'
+import { loadProjectConfig, type IConfigProvider } from '../../../src/core/coreConfig'
 import { JsonlTranslationMemory } from '../../../src/core/tm/JsonlTranslationMemory'
 import { nodeFileSystem } from '../../../src/core/util/fs'
 import type { ILogger } from '../../../src/core/util/baseLogger'
@@ -189,7 +189,8 @@ function createReviewService(
   translationMemory: JsonlTranslationMemory,
   mateCatService: FakeRoundTripMateCatService
 ): IReviewService {
-  return new MateCatReviewService(workspacePath, fileSystem, logger, configProvider, {
+  return new MateCatReviewService(workspacePath, fileSystem, logger, {
+    projectConfig: loadProjectConfig(workspacePath, configProvider, logger),
     createMateCatService: () => mateCatService,
     translationMemory
   })

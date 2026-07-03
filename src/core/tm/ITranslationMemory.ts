@@ -41,7 +41,7 @@ export interface ITranslationMemory {
   /**
    * Export the cache to an XLIFF file
    */
-  exportXLIFF(filePath: string, options?: { origin?: string; targetLocale?: string }): Promise<number>
+  exportXLIFF(filePath: string, options?: { origin?: string; targetLocale?: string; sourceLocale?: string }): Promise<number>
 
   /**
    * Import translations from a CSV file

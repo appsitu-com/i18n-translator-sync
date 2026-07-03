@@ -104,4 +104,35 @@ describe('XliffReviewExporter', () => {
       `Exported 2 translations to ${outputPath} (XLIFF with review enhancements)`
     )
   })
+
+  it('does not duplicate xml:space attributes when already present', async () => {
+    const outputPath = path.join(workspacePath, 'review.xliff')
+
+    const alreadyEnhancedXliff = `<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2">
+  <file source-language="en" target-language="fr" original="i18n/fr/messages.json" xml:space="preserve">
+    <body>
+      <trans-unit id="1">
+        <source xml:space="preserve">Hello</source>
+        <target xml:space="preserve">Bonjour</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>`
+
+    exportXLIFF.mockImplementationOnce(async (filePath: string) => {
+      writeFileSync(filePath, alreadyEnhancedXliff, 'utf8')
+      return 1
+    })
+
+    const exporter = new XliffReviewExporter(tm, logger)
+    const count = await exporter.exportXliff(outputPath, { targetLocale: 'fr' })
+    const enhanced = readFileSync(outputPath, 'utf8')
+
+    expect(count).toBe(1)
+    expect((enhanced.match(/xml:space="preserve"/g) ?? []).length).toBe(3)
+    expect(enhanced).toContain('<file source-language="en" target-language="fr" original="i18n/fr/messages.json" xml:space="preserve">')
+    expect(enhanced).toContain('<source xml:space="preserve">Hello</source>')
+    expect(enhanced).toContain('<target xml:space="preserve">Bonjour</target>')
+  })
 })

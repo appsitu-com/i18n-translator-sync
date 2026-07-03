@@ -143,7 +143,7 @@ export class MockTranslationMemory implements ITranslationMemory {
     return entries.length
   }
 
-  async exportXLIFF(filePath: string, options?: { origin?: string; targetLocale?: string }): Promise<number> {
+  async exportXLIFF(filePath: string, options?: { origin?: string; targetLocale?: string; sourceLocale?: string }): Promise<number> {
     const entries = Array.from(this.translations.entries())
       .filter(() => !options?.origin || options.origin === 'human' || options.origin === 'ai')
 

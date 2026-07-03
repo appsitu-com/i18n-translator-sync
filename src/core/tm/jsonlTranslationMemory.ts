@@ -274,10 +274,14 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     return exporter.export(filePath, entries)
   }
 
-  async exportXLIFF(filePath: string, options: { origin?: string; targetLocale?: string } = {}): Promise<number> {
+  async exportXLIFF(filePath: string, options: { origin?: string; targetLocale?: string; sourceLocale?: string } = {}): Promise<number> {
     // XLIFF export computes a review-oriented set: optional filters plus de-duplication by
     // source/target/path/position/text/context, keeping the preferred candidate per key.
-    const entries = this.selectEntriesForReviewExport(options.origin?.trim(), options.targetLocale?.trim())
+    const entries = this.selectEntriesForReviewExport(
+      options.origin?.trim(),
+      options.targetLocale?.trim(),
+      options.sourceLocale?.trim()
+    )
 
     const exporter = new XliffExporter(this.logger)
     return exporter.export(filePath, entries)
@@ -862,10 +866,18 @@ export class JsonlTranslationMemory implements ITranslationMemory {
     return locale.trim().toLowerCase()
   }
 
-  private selectEntriesForReviewExport(originFilter?: string, targetLocaleFilter?: string): TmEntry[] {
+  private getLocaleFamilyKey(locale: string): string {
+    const normalized = this.normalizeLocaleForComparison(locale)
+    return normalized.split(/[-_]/)[0] ?? normalized
+  }
+
+  private selectEntriesForReviewExport(originFilter?: string, targetLocaleFilter?: string, sourceLocaleFilter?: string): TmEntry[] {
     const selected = new Map<string, TmEntry>()
     const normalizedTargetLocaleFilter = targetLocaleFilter
       ? this.normalizeLocaleForComparison(targetLocaleFilter)
+      : undefined
+    const normalizedSourceLocaleFilter = sourceLocaleFilter
+      ? this.normalizeLocaleForComparison(sourceLocaleFilter)
       : undefined
 
     for (const entry of this.strictData.values()) {
@@ -876,6 +888,13 @@ export class JsonlTranslationMemory implements ITranslationMemory {
       if (
         normalizedTargetLocaleFilter &&
         this.normalizeLocaleForComparison(entry.target) !== normalizedTargetLocaleFilter
+      ) {
+        continue
+      }
+
+      if (
+        normalizedSourceLocaleFilter &&
+        this.getLocaleFamilyKey(entry.source) !== this.getLocaleFamilyKey(normalizedSourceLocaleFilter)
       ) {
         continue
       }

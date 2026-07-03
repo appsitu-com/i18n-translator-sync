@@ -1,4 +1,4 @@
-import type { IConfigProvider } from '../coreConfig'
+import { loadProjectConfig, type IConfigProvider } from '../coreConfig'
 import type { IFileSystem } from '../util/fs'
 import type { ILogger } from '../util/baseLogger'
 import type { IReviewService } from './reviewService'
@@ -21,6 +21,7 @@ export type ReviewServiceDependencies = {
 export function createReviewServiceFromConfig(options: ReviewServiceFactoryOptions): IReviewService {
   const configuredService = options.configProvider.get<string>('translator.reviewService', 'matecat')
   const reviewService = (configuredService ?? 'matecat').toLowerCase() as ReviewServiceName
+  const projectConfig = loadProjectConfig(options.workspacePath, options.configProvider, options.logger)
 
   switch (reviewService) {
     case 'matecat':
@@ -28,8 +29,10 @@ export function createReviewServiceFromConfig(options: ReviewServiceFactoryOptio
         options.workspacePath,
         options.fileSystem,
         options.logger,
-        options.configProvider,
-        options.serviceDependencies?.matecat
+        {
+          ...options.serviceDependencies?.matecat,
+          projectConfig
+        }
       )
     default:
       throw new Error(`Unsupported review service "${configuredService}". Supported services: matecat`)

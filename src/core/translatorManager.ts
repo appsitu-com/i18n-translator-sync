@@ -102,6 +102,12 @@ export class TranslatorManager {
       return this.reviewService
     }
 
+    const mateCatDependencies = {
+      ...this.dependencies.reviewServiceDependencies?.matecat,
+      translationMemory: this.tm,
+      projectConfig: loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    }
+
     this.reviewService =
       this.dependencies.createReviewService?.({
         workspacePath: this.workspacePath,
@@ -110,10 +116,7 @@ export class TranslatorManager {
         configProvider: this.configProvider,
         serviceDependencies: {
           ...this.dependencies.reviewServiceDependencies,
-          matecat: {
-            ...this.dependencies.reviewServiceDependencies?.matecat,
-            translationMemory: this.tm
-          }
+          matecat: mateCatDependencies
         }
       }) ??
       createReviewServiceFromConfig({
@@ -123,10 +126,7 @@ export class TranslatorManager {
         configProvider: this.configProvider,
         serviceDependencies: {
           ...this.dependencies.reviewServiceDependencies,
-          matecat: {
-            ...this.dependencies.reviewServiceDependencies?.matecat,
-            translationMemory: this.tm
-          }
+          matecat: mateCatDependencies
         }
       })
 
@@ -615,8 +615,12 @@ export class TranslatorManager {
     this.logger.info('Pushing translations to review service');
 
     const { requests } = await this.prepareReviewPushRequests(pushMode)
+    const projectNamePrefix = String(Date.now())
     for (const request of requests) {
-      await this.getReviewService().pushReviewProject(request)
+      await this.getReviewService().pushReviewProject({
+        ...request,
+        projectNamePrefix
+      })
     }
 
     this.logger.info('Successfully pushed translations to review service');
@@ -685,6 +689,10 @@ export class TranslatorManager {
     return configuredTargetLocales.filter((locale) => {
       const normalized = this.normalizeLocale(locale)
       if (includeSet.size > 0 && !includeSet.has(normalized)) {
+        return false
+      }
+
+      if (this.isBackTranslationTarget(normalized, normalizedSourceLocale)) {
         return false
       }
 
@@ -781,6 +789,18 @@ export class TranslatorManager {
   }
 
   /**
+   * Ignore stale generated review bundles discovered in workspace scans.
+   * Fresh generated bundles are appended explicitly during request preparation.
+   */
+  private isGeneratedReviewArtifactFile(filePath: string): boolean {
+    const normalizedName = path.basename(filePath).toLowerCase()
+    return (
+      normalizedName === TranslatorManager.GENERATED_TM_TMX_NAME ||
+      normalizedName === TranslatorManager.GENERATED_REVIEW_XLIFF_BUNDLE_NAME
+    )
+  }
+
+  /**
    * Export local human-reviewed TM rows into a TMX file for CAT upload.
    * @param targetLocale The unmapped target locale (for folder naming)
    * @param mappedLocale The mapped target locale (for TM queries)
@@ -817,7 +837,12 @@ export class TranslatorManager {
    * @param mappedLocale The mapped target locale (for TM queries)
    * @param originFilter Optional origin filter for entry selection
    */
-  private async createGeneratedAggregateXliffReviewArtifact(targetLocale: string, mappedLocale: string, originFilter?: 'ai'): Promise<ReviewArtifact | undefined> {
+  private async createGeneratedAggregateXliffReviewArtifact(
+    targetLocale: string,
+    mappedLocale: string,
+    sourceLocale: string,
+    originFilter?: 'ai'
+  ): Promise<ReviewArtifact | undefined> {
     const generatedXliffPath = path.join(
       this.workspacePath,
       '.translator',
@@ -833,7 +858,8 @@ export class TranslatorManager {
       generatedXliffPath,
       {
         ...(originFilter ? { origin: originFilter } : {}),
-        targetLocale: mappedLocale
+        targetLocale: mappedLocale,
+        sourceLocale
       }
     )
 
@@ -864,10 +890,13 @@ export class TranslatorManager {
    * @returns Prepared review request and translation unit count preview
    */
   private async prepareReviewPushRequests(pushMode: 'all' | 'changes' = 'all'): Promise<{ requests: ReviewPushRequest[]; translationCount: number }> {
+    const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
+    const sourceLocale = projectConfig.sourceLocale
     const workspaceUri = this.fileSystem.createUri(this.workspacePath)
     const allFiles = await this.findAllFilesInDir(workspaceUri)
     const reviewArtifacts: ReviewArtifact[] = allFiles
       .filter((fileUri) => this.isReviewArtifactFile(fileUri.fsPath))
+      .filter((fileUri) => !this.isGeneratedReviewArtifactFile(fileUri.fsPath))
       .map((fileUri) => ({
         filePath: fileUri.fsPath,
         fileName: path.basename(fileUri.fsPath),
@@ -877,8 +906,6 @@ export class TranslatorManager {
     const localeFilters = this.getReviewLocaleFilters()
     let targetLocales = this.resolveReviewPushLocales()
     if (targetLocales.length === 0) {
-      const projectConfig = loadProjectConfig(this.workspacePath, this.configProvider, this.logger)
-      const sourceLocale = projectConfig.sourceLocale
       const inferredLocales = Array.from(
         new Set(
           reviewArtifacts
@@ -925,7 +952,12 @@ export class TranslatorManager {
         localeArtifacts.push(generatedTmArtifact)
       }
 
-      const generatedXliffArtifact = await this.createGeneratedAggregateXliffReviewArtifact(targetLocale, mappedLocale, originFilter)
+      const generatedXliffArtifact = await this.createGeneratedAggregateXliffReviewArtifact(
+        targetLocale,
+        mappedLocale,
+        sourceLocale,
+        originFilter
+      )
       if (generatedXliffArtifact && !localeArtifacts.some((artifact) => artifact.filePath === generatedXliffArtifact.filePath)) {
         localeArtifacts.push(generatedXliffArtifact)
       }

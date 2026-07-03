@@ -10,6 +10,7 @@ import { ITranslationMemory } from '../tm/ITranslationMemory'
 export interface XliffExportOptions {
   origin?: string
   targetLocale?: string
+  sourceLocale?: string
 }
 
 /**
@@ -52,17 +53,28 @@ export class XliffReviewExporter {
 
   /**
    * Enhance generated XLIFF with attributes needed for MateCat review
-   * Adds xml:space="preserve" and rename attributes for proper handling
+   * Adds xml:space="preserve" when missing and preserves valid existing markup
    */
   private enhanceXliffForReview(xliffContent: string): string {
-    // Add xml:space="preserve" to file elements to preserve whitespace
-    let enhanced = xliffContent.replace(
-      /(<file\s+[^>]*source-language="[^"]*"\s+target-language="[^"]*"\s+original="[^"]*")/g,
-      '$1 xml:space="preserve"'
-    )
+    let enhanced = xliffContent
 
-    // Add xml:space="preserve" to source and target elements for precise whitespace handling
-    enhanced = enhanced.replace(/<(source|target)>/g, '<$1 xml:space="preserve">')
+    // Keep file elements valid: only add xml:space when the attribute is missing.
+    enhanced = enhanced.replace(/<file\b[^>]*>/g, (fileTag) => {
+      if (/\bxml:space\s*=\s*"preserve"/i.test(fileTag)) {
+        return fileTag
+      }
+
+      return fileTag.replace(/>$/, ' xml:space="preserve">')
+    })
+
+    // Keep source/target elements valid: only add xml:space when missing.
+    enhanced = enhanced.replace(/<(source|target)\b([^>]*)>/g, (_fullTag, tagName: string, rawAttributes: string) => {
+      if (/\bxml:space\s*=\s*"preserve"/i.test(rawAttributes)) {
+        return `<${tagName}${rawAttributes}>`
+      }
+
+      return `<${tagName}${rawAttributes} xml:space="preserve">`
+    })
 
     return enhanced
   }
