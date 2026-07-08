@@ -425,7 +425,7 @@ export class MateCatReviewService implements IReviewService {
     const settings = this.getMateCatSettings()
     const pendingProjects = await this.loadPendingReviewProjects()
     if (pendingProjects.length === 0) {
-      this.logger.info('MateCat pull: no pending projects found in local tracking')
+      this.logger.info('MateCat pull: no pending projects found')
       return []
     }
 
